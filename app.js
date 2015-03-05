@@ -10,7 +10,7 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var phrase = require('./routes/phrase');
 
-var init = require('./lib/init');
+var initPhrases = require('./lib/init');
 
 var app = express();
 
@@ -33,6 +33,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
+app.use('/', initPhrases);
 app.use('/phrase', phrase);
 
 /// catch 404 and forward to error handler
@@ -68,7 +69,5 @@ app.use(function(err, req, res) {
         title: 'error'
     });
 });
-
-init();
 
 module.exports = app;

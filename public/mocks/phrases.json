@@ -1,0 +1,21 @@
+[{
+    "id": "domain:phrase1",
+    "method": "GET",
+    "code": "console.log('domain:phrase1');",
+    "url": "domain:phrase1"
+},{
+    "id": "domain:phrase4",
+    "method": "GET",
+    "code": "console.log('domain:phrase4');",
+    "url": "domain:phrase4"
+},{
+    "id": "domain:phrase4",
+    "method": "GET",
+    "code": "console.log('domain:phrase4');",
+    "url": "domain:phrase4"
+},{
+    "id": "domain:phrase4",
+    "method": "GET",
+    "code": "console.log('domain:phrase4');",
+    "url": "domain:phrase4"
+}]

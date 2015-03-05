@@ -2,7 +2,8 @@
 
 var express = require('express'),
     router = express.Router(),
-    sr = require('sr');
+    //sr = require('sr');
+    sr = {};
 
 var extractDomain = function(Authorization) {
     console.log(Authorization);
