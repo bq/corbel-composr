@@ -17,6 +17,17 @@ module.exports = function (grunt) {
         file: 'bin/www'
       }
     },
+    jshint: {
+        options: {
+            jshintrc: '.jshintrc',
+            reporter: require('jshint-stylish')
+        },
+        all: [
+            '**/*.js',
+            '!node_modules/**/*.js',
+            '!public/components/**/*.js'
+        ]
+    },
     watch: {
       options: {
         nospawn: true,
@@ -73,6 +84,7 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask('default', [
+    'jshint',
     'develop',
     'watch'
   ]);
