@@ -25,7 +25,8 @@ router.put('/phrase', function(req, res) {
 
     phrase.url = extractDomain(req.get('Authorization')) + ':' + phrase.name;
 
-    res.send(sr.resources(process.env.PHRASES_COLLECTION, phrase.url).update(phrase));
+    // res.send(sr.resources(process.env.PHRASES_COLLECTION, phrase.url).update(phrase));
+    res.send('new phrase!');
 });
 
 module.exports = router;

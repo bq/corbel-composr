@@ -10,7 +10,8 @@ var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var phrase = require('./routes/phrase');
 
-var initPhrases = require('./lib/init');
+var bootstrap = require('./lib/init');
+var worker = require('./lib/worker');
 
 var app = express();
 
@@ -27,13 +28,14 @@ app.use(favicon(__dirname + '/public/img/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
-  extended: true
+    extended: true
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/', initPhrases);
+app.use('/', bootstrap);
+app.use('/', worker);
 app.use('/phrase', phrase);
 
 /// catch 404 and forward to error handler
@@ -68,6 +70,11 @@ app.use(function(err, req, res) {
         error: {},
         title: 'error'
     });
+});
+
+
+process.once('SIGINT', function() {
+    process.env.WORKER_CONN.close();
 });
 
 module.exports = app;
