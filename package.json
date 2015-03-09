@@ -16,7 +16,9 @@
     "grunt-contrib-jshint": "^0.11.0",
     "jshint-stylish": "^1.0.1",
     "morgan": "~1.5.0",
-    "serve-favicon": "~2.2.0"
+    "serve-favicon": "~2.2.0",
+    "amqplib": "~0.3.1",
+    "cors": "~2.5.3"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
