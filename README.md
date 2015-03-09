@@ -1,6 +1,6 @@
-# SilkRoad compoSR
+# corbel composer
 
-[![Build Status](https://api.travis-ci.org/bq/silkroad-composr.png?branch=master)](http://travis-ci.org/bq/silkroad-composr)
+[![Build Status](https://api.travis-ci.org/bq/corbel-composer.png?branch=master)](http://travis-ci.org/bq/corbel-composer)
 
-A SilkRoad compoSR is a middleware based in nodeJS with express, to offer developers to make his own specific application API.
+A corbel composer is a middleware based in nodeJS with express, to offer developers to make his own specific application API.
 
