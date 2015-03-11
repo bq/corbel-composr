@@ -1,0 +1,7 @@
+{
+    "rabbitmq.host": "RABBIT_HOST",
+    "rabbitmq.port": "RABBIT_PORT",
+    "rabbitmq.username": "RABBIT_USERNAME",
+    "rabbitmq.password": "RABBIT_PASSWORD",
+    "rabbitmq.reconntimeout": 10000
+}

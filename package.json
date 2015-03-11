@@ -18,7 +18,8 @@
     "morgan": "~1.5.0",
     "serve-favicon": "~2.2.0",
     "amqplib": "~0.3.1",
-    "cors": "~2.5.3"
+    "cors": "~2.5.3",
+    "uuid": "~2.0.1"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
