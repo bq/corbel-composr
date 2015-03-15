@@ -15,7 +15,7 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('./package.json'),
         develop: {
             server: {
-                file: 'bin/www'
+                file: 'bin/composer'
             }
         },
         jshint: {
@@ -24,9 +24,7 @@ module.exports = function(grunt) {
                 reporter: require('jshint-stylish')
             },
             all: [
-                '**/*.js',
-                '!node_modules/**/*.js',
-                '!public/components/**/*.js'
+                'src/**/*.js'
             ]
         },
         watch: {
@@ -36,28 +34,18 @@ module.exports = function(grunt) {
             },
             server: {
                 files: [
-                    'bin/www',
-                    'app.js',
-                    'routes/*.js'
+                    'bin/composer',
+                    'src/**/*.js'
                 ],
                 tasks: ['develop', 'delayed-livereload']
             },
-            js: {
-                files: ['public/js/*.js'],
-                options: {
-                    livereload: reloadPort
-                }
-            },
-            css: {
+            'public': {
                 files: [
-                    'public/css/*.css'
+                    'public/**/*.js',
+                    'public/**/*.css',
+                    'public/**/*.html',
+                    'src/**/*.ejs'
                 ],
-                options: {
-                    livereload: reloadPort
-                }
-            },
-            views: {
-                files: ['views/*.ejs'],
                 options: {
                     livereload: reloadPort
                 }
