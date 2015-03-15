@@ -5,9 +5,10 @@ var phraseManager = require('./phraseManager'),
     router = express.Router(),
     amqp = require('amqplib'),
     uuid = require('uuid'),
-    config = require('../config.json');
+    config = require('../config/config.json');
 
 var worker = function() {
+    // http://172.16.30.227:15672/#/
     var connUrl = 'amqp://' + config['rabbitmq.username'] + ':' + config['rabbitmq.password'] + '@' + config['rabbitmq.host'] + ':' + config['rabbitmq.port'];
 
     amqp.connect(connUrl).then(function(conn) {

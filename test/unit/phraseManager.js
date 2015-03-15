@@ -1,6 +1,6 @@
 'use strict';
 
-var phraseManager = require('../../lib/phraseManager.js'),
+var phraseManager = require('../../src/lib/phraseManager.js'),
     chai = require('chai'),
     expect = chai.expect,
     assert = chai.assert,
