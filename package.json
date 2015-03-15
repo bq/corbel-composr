@@ -36,15 +36,21 @@
     },
     "devDependencies": {
         "grunt": "~0.4.5",
+        "grunt-blanket": "0.0.8",
         "grunt-cli": "^0.1.13",
+        "grunt-contrib-clean": "^0.6.0",
+        "grunt-contrib-copy": "^0.8.0",
         "grunt-contrib-jshint": "^0.11.0",
         "grunt-contrib-watch": "~0.6.1",
+        "grunt-coveralls": "^1.0.0",
         "grunt-develop": "~0.4.0",
         "grunt-mocha-test": "~0.12.7",
         "load-grunt-tasks": "~3.1.0",
         "jshint-stylish": "^1.0.1",
         "mocha": "~2.2.1",
+        "mocha-lcov-reporter": "0.0.2",
         "chai": "^2.1.1",
-        "time-grunt": "~1.1.0"
+        "time-grunt": "~1.1.0",
+        "travis-cov": "^0.2.5"
     }
 }

@@ -12,12 +12,37 @@ module.exports = function(grunt) {
         files;
 
     grunt.initConfig({
+
         pkg: grunt.file.readJSON('./package.json'),
+
+        clean: {
+            all: ['.tmp']
+        },
+
+        copy: {
+            coverage: {
+                expand: true,
+                src: [
+                    'test/**',
+                    'src/**'
+                ],
+                dest: '.tmp/coverage/'
+            }
+        },
+
+        blanket: {
+            coverage: {
+                src: ['.tmp/coverage/src/'],
+                dest: '.tmp/coverage/src/'
+            }
+        },
+
         develop: {
             server: {
                 file: 'bin/composer'
             }
         },
+
         jshint: {
             options: {
                 jshintrc: '.jshintrc',
@@ -27,6 +52,7 @@ module.exports = function(grunt) {
                 'src/**/*.js'
             ]
         },
+
         watch: {
             options: {
                 nospawn: true,
@@ -51,7 +77,36 @@ module.exports = function(grunt) {
                 }
             }
         },
+
         mochaTest: { //test for nodejs app with mocha
+            testCoverage: {
+                options: {
+                    reporter: 'spec',
+                },
+                src: ['.tmp/coverage/test/test-suite.js']
+            },
+            coverage: {
+                options: {
+                    reporter: 'html-cov',
+                    quiet: true,
+                    captureFile: '.tmp/coverage/coverage.html'
+                },
+                src: ['.tmp/coverage/test/test-suite.js']
+            },
+            coveralls: {
+                options: {
+                    reporter: 'mocha-lcov-reporter',
+                    quiet: true,
+                    captureFile: '.tmp/coverage/lcov.info'
+                },
+                src: ['.tmp/coverage/test/test-suite.js']
+            },
+            'travis-cov': {
+                options: {
+                    reporter: 'travis-cov'
+                },
+                src: ['.tmp/coverage/test/test-suite.js']
+            },
             tap: {
                 options: {
                     reporter: 'tap',
@@ -63,7 +118,17 @@ module.exports = function(grunt) {
             ci: {
                 src: ['test/test-suite.js']
             }
+        },
+
+        coveralls: {
+            options: {
+                force: false
+            },
+            'default': {
+                src: '.tmp/coverage/lcov.info'
+            }
         }
+
     });
 
     grunt.config.requires('watch.server.files');
@@ -86,10 +151,23 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('default', [
+        'clean',
         'jshint',
         'test',
         'develop',
         'watch'
+    ]);
+
+    grunt.registerTask('test:coverage', [
+        'clean',
+        'jshint',
+        'copy:coverage',
+        'blanket',
+        'mochaTest:testCoverage',
+        'mochaTest:coverage',
+        'mochaTest:coveralls',
+        'mochaTest:travis-cov',
+        'coveralls'
     ]);
 
     grunt.registerTask('test', [

@@ -2,4 +2,6 @@ language: node_js
 node_js:
   - 0.12
 before_script: npm install
-script: npm test
+script:
+  - grunt test
+  - grunt test:coverage
