@@ -3,5 +3,26 @@
     "rabbitmq.port": "RABBIT_PORT",
     "rabbitmq.username": "RABBIT_USERNAME",
     "rabbitmq.password": "RABBIT_PASSWORD",
-    "rabbitmq.reconntimeout": 10000
+    "rabbitmq.reconntimeout": 10000,
+
+    "composr.corbel.options": {
+        "clientId": "CLIENT_ID",
+        "clientSecret": "CLIENT_SECRET",
+
+        "urlBase": "http://localhost:8080/{{module}}",
+        "resourcesEndpoint": "https://resources.io/v1.0/",
+        "iamEndpoint": "https://iam.io/v1.0/",
+        "evciEndpoint": "https://evci.io/v1.0/",
+        "oauthEndpoint": "https://oauth.io/v1.0/",
+
+        "scopesApp": "composr:comp:base",
+        "scopesUserLogin": "",
+        "scopesUserCreate": "",
+
+        "oauthClientId": "",
+        "oauthSecret": "",
+        "oauthService": "",
+
+        "device_id": ""
+    }
 }
