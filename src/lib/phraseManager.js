@@ -2,7 +2,8 @@
 
 /* jshint evil:true */
 
-var validate = require('./validate');
+var validate = require('./validate'),
+    commonCode = require('./commonCode');
 
 var registerPhrase = function(router, phrase) {
     validate.isValue(router, 'undefined:router');
@@ -12,7 +13,7 @@ var registerPhrase = function(router, phrase) {
 
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
         if (phrase[method]) {
-            router[method]('/' + url, new Function('req', 'res', 'sr', phrase[method].code));
+            router[method]('/' + url, new Function('req', 'res', 'next', commonCode.get() + phrase[method].code));
         }
     });
 };

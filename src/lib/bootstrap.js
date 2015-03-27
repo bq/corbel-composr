@@ -18,6 +18,14 @@ var bootstrap = function() {
             console.log(phrase);
             phraseManager.registerPhrase(router, phrase);
         });
+
+        //add mocks
+        // var phrases = require('../../public/mocks/phrases.json');
+
+        // phrases.forEach(function(phrase) {
+        //     console.log(phrase);
+        //     phraseManager.registerPhrase(router, phrase);
+        // });
     }).catch(function(error) {
         console.error('Bootstrap error', error);
     });
