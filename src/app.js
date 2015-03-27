@@ -11,12 +11,15 @@ var express = require('express'),
     bootstrap = require('./lib/bootstrap'),
     worker = require('./lib/worker'),
     cors = require('cors'),
+    corbel = require('corbel-js'),
     app = express();
 
 // view engine setup
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+app.set('corbel', corbel);
 
 var env = process.env.NODE_ENV || 'prod';
 app.locals.ENV = env;
