@@ -3,7 +3,8 @@
 /* jshint evil:true */
 
 var validate = require('./validate'),
-    commonCode = require('./commonCode');
+    corbel = require('corbel-js'),
+    config = require('../config/config.json');
 
 var registerPhrase = function(router, phrase) {
     validate.isValue(router, 'undefined:router');
@@ -13,7 +14,28 @@ var registerPhrase = function(router, phrase) {
 
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
         if (phrase[method]) {
-            router[method]('/' + url, new Function('req', 'res', 'next', commonCode.get() + phrase[method].code));
+            router[method]('/' + url, function(req, res, next) {
+
+                var iamToken = req.get('Authorization') || undefined;
+                if (iamToken) {
+                    iamToken = {
+                        'accessToken': iamToken.replace('Bearer ', '')
+                    };
+                }
+
+                var corbelConfig = config['composr.corbel.options'];
+
+                var corbelDriver = corbel.getDriver({
+                    resourcesEndpoint: corbelConfig.resourcesEndpoint,
+                    iamEndpoint: corbelConfig.iamEndpoint,
+                    IamToken: iamToken
+                });
+
+                var funct = new Function('req', 'res', 'next', 'corbelDriver', phrase[method].code);
+                var args = [req, res, next, corbelDriver];
+
+                return funct.apply(null, args);
+            });
         }
     });
 };
