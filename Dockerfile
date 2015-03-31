@@ -10,9 +10,6 @@ RUN yum install -y npm
 # Copy source code inside the Docker image:
 COPY . /src
 
-# npm install:
-RUN cd /src; npm install
-
 # Apps bind port: 
 EXPOSE 3000
 

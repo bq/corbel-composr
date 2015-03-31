@@ -46,9 +46,33 @@ This project requires nodejs to run properly.
 
 * forever nodejs
 
+## Run in a docker container
+
+- clone repo
+- install dev
+
+  ```
+  npm install
+  ```
+- build image
+
+  ```
+  docker build -t <username>/corbel-composer .
+  ```
+
+- run container
+  
+  ```
+  docker run -d -p 3000:3000 --name="corbel-composr"  <username>/corbel-composer 
+  ```
+- start/stop container
+  
+  ```
+  docker start/stop corbel-composr 
+  ```
 
 ## Debug
-
+e
 ```
 npm install -g node-inspector
 ```
