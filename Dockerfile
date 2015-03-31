@@ -11,7 +11,7 @@ RUN yum install -y npm
 COPY . /src
 
 # npm install:
-RUN cd /src; npm installl
+RUN cd /src; npm install
 
 # Apps bind port: 
 EXPOSE 3000
