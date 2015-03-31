@@ -29,12 +29,18 @@ This project requires nodejs to run properly.
 
 - clone repo
 - install dev
+
+  ```
+  npm install
+  ```
+
 - run server
-- 
+  
+  ```
+  npm start
+  ```
+
 - npm install:service
-
-
-
 
 ## Install as a service
 
@@ -50,6 +56,4 @@ npm install -g node-inspector
 ```
 npm run debug
 ```
-
-Open a browser with the url `http://localhost:3000/debug?port=5858`
 
