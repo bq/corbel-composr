@@ -5,24 +5,17 @@
     "rabbitmq.password": "guest",
     "rabbitmq.reconntimeout": 10000,
 
-    "composr.corbel.options": {
+    "corbel.composer.credentials": {
         "clientId": "9bdbd5c5",
         "clientSecret": "e5e9cb9702cdd29d70aba9e80f77f357106d06bc101a7ab183b3b0fdbde4c731",
+        "scopes": "composr:comp:base"
+    },
 
-        "urlBase": "http://localhost:8080/{{module}}",
+    "corbel.driver.options": {
+        "urlBase": "https://{{module}}-int.bqws.io/v1.0/",
         "resourcesEndpoint": "https://resources-int.bqws.io/v1.0/",
         "iamEndpoint": "https://iam-int.bqws.io/v1.0/",
         "evciEndpoint": "https://evci-int.bqws.io/v1.0/",
-        "oauthEndpoint": "https://oauth-int.bqws.io/v1.0/",
-
-        "scopesApp": "composr:comp:base",
-        "scopesUserLogin": "",
-        "scopesUserCreate": "",
-
-        "oauthClientId": "",
-        "oauthSecret": "",
-        "oauthService": "",
-
-        "device_id": ""
+        "oauthEndpoint": "https://oauth-int.bqws.io/v1.0/"
     }
 }
