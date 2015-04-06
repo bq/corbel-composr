@@ -40,11 +40,15 @@ This project requires nodejs to run properly.
   npm start
   ```
 
-- npm install:service
+## Postman Playground
 
-## Install as a service
+1. Get [postman](https://www.getpostman.com/)
+2. Import corbel-composer collection:
 
-* forever nodejs
+  ```
+  https://raw.githubusercontent.com/bq/corbel-composer/master/test/postman.json
+  ```
+3. Enjoy!
 
 ## Run in a docker container
 
