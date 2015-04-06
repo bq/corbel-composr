@@ -5,24 +5,17 @@
     "rabbitmq.password": "RABBIT_PASSWORD",
     "rabbitmq.reconntimeout": 10000,
 
-    "composr.corbel.options": {
+    "corbel.composer.credentials": {
         "clientId": "CLIENT_ID",
         "clientSecret": "CLIENT_SECRET",
+        "scopes": "composr:comp:base"
+    },
 
-        "urlBase": "http://localhost:8080/{{module}}",
+    "corbel.driver.options": {
+        "urlBase": "https://{{module}}.io/v1.0/",
         "resourcesEndpoint": "https://resources.io/v1.0/",
         "iamEndpoint": "https://iam.io/v1.0/",
         "evciEndpoint": "https://evci.io/v1.0/",
-        "oauthEndpoint": "https://oauth.io/v1.0/",
-
-        "scopesApp": "composr:comp:base",
-        "scopesUserLogin": "",
-        "scopesUserCreate": "",
-
-        "oauthClientId": "",
-        "oauthSecret": "",
-        "oauthService": "",
-
-        "device_id": ""
+        "oauthEndpoint": "https://oauth.io/v1.0/"
     }
 }

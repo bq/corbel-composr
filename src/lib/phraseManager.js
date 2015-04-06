@@ -4,11 +4,16 @@
 
 var validate = require('./validate'),
     corbel = require('corbel-js'),
-    config = require('../config/config.json');
+    config = require('../config/config.json'),
+    phrases = require('./phrases');
 
 var registerPhrase = function(router, phrase) {
     validate.isValue(router, 'undefined:router');
     validate.isValue(phrase, 'undefined:phrase');
+
+    var domain = phrase.id.split(':')[0];
+    phrases.list[domain] = phrases.list[domain] || [];
+    phrases.list[domain].push(phrase);
 
     var url = phrase.id.replace(':', '/');
 
@@ -23,13 +28,10 @@ var registerPhrase = function(router, phrase) {
                     };
                 }
 
-                var corbelConfig = config['composr.corbel.options'];
+                var corbelConfig = config['corbel.driver.options'];
+                corbelConfig.iamToken = iamToken;
 
-                var corbelDriver = corbel.getDriver({
-                    resourcesEndpoint: corbelConfig.resourcesEndpoint,
-                    iamEndpoint: corbelConfig.iamEndpoint,
-                    IamToken: iamToken
-                });
+                var corbelDriver = corbel.getDriver(corbelConfig);
 
                 var funct = new Function('req', 'res', 'next', 'corbelDriver', phrase[method].code);
                 var args = [req, res, next, corbelDriver];
