@@ -3,23 +3,18 @@
 var express = require('express'),
     router = express.Router(),
     phraseManager = require('./phraseManager'),
-    corbel = require('corbel-js'),
-    config = require('../config/config.json'),
-    _ = require('underscore');
+    connection = require('./corbelConnection');
 
 var bootstrap = function() {
     process.env.PHRASES_COLLECTION = 'composr:Phrase';
 
-    var corbelConfig = config['corbel.driver.options'];
-    corbelConfig = _.extend(corbelConfig, config['corbel.composer.credentials']);
+    connection.driver.then(function(driver) {
 
-    var corbelDriver = corbel.getDriver(corbelConfig);
+        return driver.resources.collection(connection.PHRASES_COLLECTION).get();
 
-    corbelDriver.iam.token().create().then(function() {
-        return corbelDriver.resources.collection(process.env.PHRASES_COLLECTION).get();
     }).then(function(response) {
 
-        response.data.forEach(function(phrase) {
+        return response.data.forEach(function(phrase) {
             console.log(phrase);
             phraseManager.registerPhrase(router, phrase);
         });

@@ -84,7 +84,7 @@ router.put('/phrase', function(req, res) {
 
     var corbelDriver = corbel.getDriver(corbelConfig);
 
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update('application/json', phrase).then(function(response) {
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
         console.error('error:phrase:create', error);
