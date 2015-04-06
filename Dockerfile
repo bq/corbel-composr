@@ -1,17 +1,25 @@
-FROM    centos:centos6
+FROM    ubuntu
+# Author / Maintainer
 MAINTAINER Silkroad Team <support-silkroad@bq.com>
 
-# Enable EPEL for Node.js
-RUN  rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+# Update repository
+RUN apt-get update
 
-# Install Node.js and npm:
-RUN yum install -y npm
+# Install dependencies
+RUN apt-get -y install curl
+RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
 
-# Copy source code inside the Docker image:
+# Install nodejs
+RUN apt-get -y install nodejs git git-core
+
+# Copy app source
 COPY . /src
 
-# Apps bind port: 
-EXPOSE 3000
+# Install dev dependencies
+RUN cd /src; npm install
+
+# Expose port
+EXPOSE  3000
 
 # Enable corbel-composer
 CMD cd /src; npm start

@@ -49,11 +49,6 @@ This project requires nodejs to run properly.
 ## Run in a docker container
 
 - clone repo
-- install dev
-
-  ```
-  npm install
-  ```
 - build image
 
   ```
