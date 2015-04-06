@@ -5,7 +5,8 @@
 var validate = require('./validate'),
     corbel = require('corbel-js'),
     config = require('../config/config.json'),
-    phrases = require('./phrases');
+    phrases = require('./phrases'),
+    _ = require('underscore');
 
 var registerPhrase = function(router, phrase) {
     validate.isValue(router, 'undefined:router');
@@ -13,7 +14,16 @@ var registerPhrase = function(router, phrase) {
 
     var domain = phrase.id.split(':')[0];
     phrases.list[domain] = phrases.list[domain] || [];
-    phrases.list[domain].push(phrase);
+
+    var exists = _.findIndex(phrases.list[domain], function(item) {
+        return item.id === phrase.id;
+    });
+
+    if (exists !== -1) {
+        phrases.list[domain][exists] = phrase;
+    } else {
+        phrases.list[domain].push(phrase);
+    }
 
     var url = phrase.id.replace(':', '/');
 

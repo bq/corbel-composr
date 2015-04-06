@@ -1,6 +1,7 @@
 'use strict';
 
 var phraseManager = require('./phraseManager'),
+    connection = require('./corbelConnection'),
     express = require('express'),
     router = express.Router(),
     amqp = require('amqplib'),
@@ -14,19 +15,22 @@ var worker = function() {
     amqp.connect(connUrl).then(function(conn) {
 
         function doWork(msg) {
-            if (msg.fields.routingKey === 'class com.bqreaders.silkroad.event.ResourceModifiedEvent') {
+            if (msg.fields.routingKey === 'class com.bqreaders.silkroad.event.ResourceEvent') {
                 var message = msg.content.toString();
                 message = JSON.parse(message);
 
-                if (message.type === process.env.PHRASES_COLLECTION) {
+                if (message.type === connection.PHRASES_COLLECTION) {
                     switch (message.action) {
                         case 'DELETE':
                             var url = message.resourceId.replace(':', '/');
                             phraseManager.unregisterPhrase(router, url);
                             break;
                         default: // 'CREATE' or 'UPDATE'
-                            // @todo get phrase from sr
-                            // @todo phraseManager.registerPhrase(router, phrase);
+                            connection.driver.then(function(driver) {
+                                return driver.resources.resource(connection.PHRASES_COLLECTION, message.resourceId).get().then(function(response) {
+                                    phraseManager.registerPhrase(router, response.data);
+                                });
+                            });
                     }
                 }
             }
