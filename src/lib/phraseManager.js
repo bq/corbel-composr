@@ -12,7 +12,7 @@ var registerPhrase = function(router, phrase) {
     validate.isValue(router, 'undefined:router');
     validate.isValue(phrase, 'undefined:phrase');
 
-    var domain = phrase.id.split(':')[0];
+    var domain = phrase.id.split('!')[0];
     phrases.list[domain] = phrases.list[domain] || [];
 
     var exists = _.findIndex(phrases.list[domain], function(item) {
@@ -25,7 +25,7 @@ var registerPhrase = function(router, phrase) {
         phrases.list[domain].push(phrase);
     }
 
-    var url = phrase.id.replace(':', '/');
+    var url = phrase.id.replace('!', '/');
 
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
         if (phrase[method]) {
