@@ -27,17 +27,16 @@ This project requires nodejs to run properly.
 
 ## QuickStart
 
-- clone repo
-- install dev
+- install
 
   ```
-  npm install
+  npm install -g bq/corbel-composer
   ```
 
 - run server
   
   ```
-  npm start
+  corbel-composer
   ```
 
 ## Postman Playground
