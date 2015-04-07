@@ -73,7 +73,7 @@ router.put('/phrase', function(req, res) {
         return;
     }
 
-    phrase.id = extractDomain(auth) + ':' + phrase.id;
+    phrase.id = extractDomain(auth) + '!' + phrase.id;
 
     var iamToken = {
         'accessToken': auth.replace('Bearer ', '')
