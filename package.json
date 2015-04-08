@@ -1,66 +1,68 @@
 {
-    "name": "corbel-composer",
-    "description": "A corbel composer is a middleware based in nodeJS with express, to offer developers to make his own specific application API.",
-    "version": "0.0.1",
-    "bin": "bin/composer",
-    "license": "Apache-2.0",
-    "keywords": "corbel nodejs express middleware",
-    "authors": [
-        "Rubén Carrasco Fernández <rcarrasco@bq.com>",
-        "Daniel García González <daniel.garcia@bq.com>",
-        "Anthan Pham Trinh <@antaipt>"
-    ],
-    "homepage": "http://opensource.bq.com/corbel-composer",
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:bq/corbel-composer.git"
-    },
-    "engines": {
-        "node": ">=0.10.3 <0.12",
-        "npm": "~2.1.9"
-    },
-    "scripts": {
-        "test:debug": "node-debug $(which grunt) test",
-        "start": "node bin/composer",
-        "debug": "node-debug bin/composer",
-        "clean": "rm -rf node_modules",
-        "test": "grunt jshint"
-    },
-    "dependencies": {
-        "amqplib": "^0.3.2",
-        "atob": "^1.1.2",
-        "body-parser": "~1.12.0",
-        "cookie-parser": "~1.3.3",
-        "corbel": "bq/corbel-js#a4da5f05ffaa89b451df13923c006326717ac53b",
-        "cors": "^2.5.3",
-        "debug": "~2.1.0",
-        "ejs": "~2.3.1",
-        "es6-promise": "~2.0.1",
-        "express": "~4.12.0",
-        "morgan": "^1.5.2",
-        "node-localstorage": "~0.5.0",
-        "request": "~2.53.0",
-        "serve-favicon": "^2.2.0",
-        "underscore": "^1.8.2",
-        "uuid": "~2.0.1"
-    },
-    "devDependencies": {
-        "chai": "^2.1.1",
-        "grunt": "~0.4.5",
-        "grunt-blanket": "0.0.8",
-        "grunt-cli": "^0.1.13",
-        "grunt-contrib-clean": "^0.6.0",
-        "grunt-contrib-copy": "^0.8.0",
-        "grunt-contrib-jshint": "^0.11.0",
-        "grunt-contrib-watch": "~0.6.1",
-        "grunt-coveralls": "^1.0.0",
-        "grunt-develop": "~0.4.0",
-        "grunt-mocha-test": "~0.12.7",
-        "jshint-stylish": "^1.0.1",
-        "load-grunt-tasks": "~3.1.0",
-        "mocha": "~2.2.1",
-        "mocha-lcov-reporter": "0.0.2",
-        "time-grunt": "~1.1.0",
-        "travis-cov": "^0.2.5"
-    }
+  "name": "corbel-composer",
+  "description": "A corbel composer is a middleware based in nodeJS with express, to offer developers to make his own specific application API.",
+  "version": "0.0.1",
+  "bin": "bin/composer",
+  "license": "Apache-2.0",
+  "keywords": "corbel nodejs express middleware",
+  "authors": [
+    "Rubén Carrasco Fernández <rcarrasco@bq.com>",
+    "Daniel García González <daniel.garcia@bq.com>",
+    "Anthan Pham Trinh <@antaipt>"
+  ],
+  "homepage": "http://opensource.bq.com/corbel-composer",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:bq/corbel-composer.git"
+  },
+  "engines": {
+    "node": ">=0.10.3 <0.12",
+    "npm": "~2.1.9"
+  },
+  "scripts": {
+    "test:debug": "node-debug $(which grunt) test",
+    "start": "node bin/composer",
+    "debug": "node-debug bin/composer",
+    "clean": "rm -rf node_modules",
+    "test": "grunt test"
+  },
+  "dependencies": {
+    "amqplib": "^0.3.2",
+    "atob": "^1.1.2",
+    "body-parser": "~1.12.0",
+    "cookie-parser": "~1.3.3",
+    "corbel": "bq/corbel-js#a4da5f05ffaa89b451df13923c006326717ac53b",
+    "cors": "^2.5.3",
+    "debug": "~2.1.0",
+    "ejs": "~2.3.1",
+    "es6-promise": "~2.0.1",
+    "express": "~4.12.0",
+    "morgan": "^1.5.2",
+    "node-localstorage": "~0.5.0",
+    "request": "~2.53.0",
+    "serve-favicon": "^2.2.0",
+    "underscore": "^1.8.2",
+    "uuid": "~2.0.1"
+  },
+  "devDependencies": {
+    "chai": "^2.1.1",
+    "grunt": "~0.4.5",
+    "grunt-blanket": "0.0.8",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-jshint": "^0.11.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-coveralls": "^1.0.0",
+    "grunt-develop": "~0.4.0",
+    "grunt-express-server": "^0.5.1",
+    "grunt-mocha-test": "~0.12.7",
+    "jshint-stylish": "^1.0.1",
+    "load-grunt-tasks": "~3.1.0",
+    "mocha": "~2.2.1",
+    "mocha-lcov-reporter": "0.0.2",
+    "request": "^2.53.0",
+    "time-grunt": "~1.1.0",
+    "travis-cov": "^0.2.5"
+  }
 }
