@@ -15,7 +15,7 @@
     "owner": 0,
     "sharedWithTeam": false,
     "subscribed": false,
-    "remoteLink": "https://www.getpostman.com/collections/977e0cb5ea19024a684e",
+    "remoteLink": "https://www.getpostman.com/collections/852caa266b407daae0da",
     "public": false,
     "write": true,
     "requests": [
@@ -107,7 +107,7 @@
             "currentHelper": "normal",
             "helperAttributes": {},
             "time": 1428487489191,
-            "name": "4- Version copy",
+            "name": "4- Delete phrase",
             "description": "Removes a phrase",
             "collectionId": "904fc24e-f937-5516-d804-0120772eca13",
             "responses": [],
