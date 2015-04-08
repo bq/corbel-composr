@@ -3,13 +3,8 @@
 var express = require('express'),
     corbel = require('corbel-js'),
     config = require('../config/config.json'),
-    router = express.Router();
-
-var extractDomain = function(token) {
-    var atob = require('atob');
-    var decoded = token.replace('Bearer ', '').split('.');
-    return JSON.parse(atob(decoded[0])).domainId;
-};
+    router = express.Router(),
+    connection = require('../lib/corbelConnection');
 
 /**
  * Creates or updates a phrase
@@ -65,29 +60,42 @@ var extractDomain = function(token) {
 router.put('/phrase', function(req, res) {
 
     var phrase = req.body || {};
-
     var auth = req.get('Authorization');
 
     if (!auth) {
         res.status(401).send('missing:header:authorization');
         return;
     }
+    var corbelDriver = connection.getTokenDriver(auth);
 
-    phrase.id = extractDomain(auth) + '!' + phrase.id;
-
-    var iamToken = {
-        'accessToken': auth.replace('Bearer ', '')
-    };
-
-    var corbelConfig = config['corbel.driver.options'];
-    corbelConfig.iamToken = iamToken;
-
-    var corbelDriver = corbel.getDriver(corbelConfig);
+    phrase.id = connection.extractDomain(auth) + '!' + phrase.id;
 
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
         console.error('error:phrase:create', error);
+        res.send(error.status, error);
+    });
+
+});
+
+router.delete('/phrase', function(req, res) {
+
+    var phrase = req.body || {};
+    var auth = req.get('Authorization');
+
+    if (!auth) {
+        res.status(401).send('missing:header:authorization');
+        return;
+    }
+    var corbelDriver = connection.getTokenDriver(auth);
+
+    phrase.id = connection.extractDomain(auth) + '!' + phrase.id;
+
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).delete().then(function(response) {
+        res.send(response.status, response.data);
+    }).catch(function(error) {
+        console.error('error:phrase:delete', error);
         res.send(error.status, error);
     });
 
@@ -101,7 +109,7 @@ router.get('/phrase', function(req, res) {
         return;
     }
 
-    res.send(require('../lib/phrases').list[extractDomain(auth)]);
+    res.send(require('../lib/phrases').list[connection.extractDomain(auth)]);
 });
 
 router.post('/token', function(req, res) {

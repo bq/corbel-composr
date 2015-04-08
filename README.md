@@ -83,11 +83,19 @@ grunt test:coverage
 
 ## Debug
 
+Requires [node-inspector](https://github.com/node-inspector/node-inspector)
 ```
 npm install -g node-inspector
 ```
 
-```
-npm run debug
-```
+* Server
 
+  ```
+  npm run debug
+  ```
+
+* Tests
+
+  ```
+  npm run test:debug
+  ```
