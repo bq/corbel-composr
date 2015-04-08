@@ -52,10 +52,15 @@ var registerPhrase = function(router, phrase) {
     });
 };
 
-var unregisterPhrase = function(router, url) {
+var unregisterPhrase = function(router, phrase) {
     validate.isValue(router, 'undefined:router');
-    validate.isValue(url, 'undefined:url');
+    validate.isValue(phrase, 'undefined:phrase');
+    validate.isValue(phrase.id, 'undefined:phrase:id');
 
+    var domain = phrase.id.split('!')[0];
+    var url = '/' + phrase.id.replace('!', '/');
+
+    // remove from express
     var i = 0;
     while (i < router.stack.length) {
         if (router.stack[i].route.path === url) {
@@ -63,6 +68,15 @@ var unregisterPhrase = function(router, url) {
         } else {
             i++;
         }
+    }
+
+    // remove from internal data
+    var exists = _.findIndex(phrases.list[domain], function(item) {
+        return item.id === phrase.id;
+    });
+
+    if (exists !== -1) {
+        phrases.list[domain].splice(exists, 1);
     }
 };
 
