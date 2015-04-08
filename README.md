@@ -45,7 +45,7 @@ This project requires nodejs to run properly.
 2. Import corbel-composer collection:
 
   ```
-  https://raw.githubusercontent.com/bq/corbel-composer/master/test/postman.json
+  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman.json
   ```
 3. Enjoy!
 
@@ -68,6 +68,12 @@ This project requires nodejs to run properly.
   ```
   docker start/stop corbel-composer 
   ```
+
+## Tests
+
+```
+npm test
+```
 
 ## Debug
 

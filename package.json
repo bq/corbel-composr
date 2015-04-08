@@ -24,7 +24,7 @@
         "start": "node bin/composer",
         "debug": "node-debug bin/composer",
         "clean": "rm -rf node_modules",
-        "test": "grunt jshint"
+        "test": "grunt test"
     },
     "dependencies": {
         "amqplib": "^0.3.2",
@@ -55,11 +55,13 @@
         "grunt-contrib-watch": "~0.6.1",
         "grunt-coveralls": "^1.0.0",
         "grunt-develop": "~0.4.0",
+        "grunt-express-server": "^0.5.1",
         "grunt-mocha-test": "~0.12.7",
         "jshint-stylish": "^1.0.1",
         "load-grunt-tasks": "~3.1.0",
         "mocha": "~2.2.1",
         "mocha-lcov-reporter": "0.0.2",
+        "request": "^2.53.0",
         "time-grunt": "~1.1.0",
         "travis-cov": "^0.2.5"
     }
