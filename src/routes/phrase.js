@@ -10,7 +10,7 @@ var express = require('express'),
  * Creates or updates a phrase
  * @param  phrase:
  * {
- *     "id": "domain:phrase1",
+ *     "url": "phrase1/:pathparam",
  *     "get": {
  *         "code": "",
  *         "description": "",
@@ -68,7 +68,7 @@ router.put('/phrase', function(req, res) {
     }
     var corbelDriver = connection.getTokenDriver(auth);
 
-    phrase.id = connection.extractDomain(auth) + '!' + phrase.id;
+    phrase.id = connection.extractDomain(auth) + '!' + phrase.url.replace(/\//g, '!');
 
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
         res.send(response.status, response.data);
@@ -79,9 +79,7 @@ router.put('/phrase', function(req, res) {
 
 });
 
-router.delete('/phrase', function(req, res) {
-
-    var phrase = req.body || {};
+router.delete('/phrase/:phraseid', function(req, res) {
     var auth = req.get('Authorization');
 
     if (!auth) {
@@ -90,9 +88,7 @@ router.delete('/phrase', function(req, res) {
     }
     var corbelDriver = connection.getTokenDriver(auth);
 
-    phrase.id = connection.extractDomain(auth) + '!' + phrase.id;
-
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).delete().then(function(response) {
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, req.params.phraseid).delete().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
         console.error('error:phrase:delete', error);
