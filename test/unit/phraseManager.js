@@ -56,7 +56,7 @@ describe('in phraseManager module', function() {
             var routerstacklength = router.stack.length;
 
             for (var i = 0; i < 2; i++) {
-                phraseManager.registerPhrase(router, getPhrase('domain:test' + i));
+                phraseManager.registerPhrase(router, getPhrase('domain!test' + i));
             }
 
             assert.equal(router.stack.length, routerstacklength + 8);
@@ -79,8 +79,8 @@ describe('in phraseManager module', function() {
 
         it('it deletes the expected phrases', function() {
             var routerstacklength = router.stack.length;
-            phraseManager.registerPhrase(router, getPhrase('domain:delete'));
-            phraseManager.registerPhrase(router, getPhrase('domain:nodelete'));
+            phraseManager.registerPhrase(router, getPhrase('domain!delete'));
+            phraseManager.registerPhrase(router, getPhrase('domain!nodelete'));
             assert.equal(router.stack.length, routerstacklength + 8);
 
             routerstacklength = router.stack.length;
