@@ -6,9 +6,9 @@
     "license": "Apache-2.0",
     "keywords": "corbel nodejs express middleware",
     "authors": [
-        "Rubén Carrasco Fernández <rcarrasco@bq.com>",
         "Daniel García González <daniel.garcia@bq.com>",
-        "Anthan Pham Trinh <@antaipt>"
+        "Anthan Pham Trinh <@antaipt>",
+        "Silkroad Team <silkroad-dev@bq.com>"
     ],
     "homepage": "http://opensource.bq.com/corbel-composer",
     "repository": {
