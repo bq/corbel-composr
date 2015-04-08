@@ -54,7 +54,7 @@ var worker = function() {
                 pattern = '';
 
             var ok = ch.assertQueue(queue, {
-                durable: true,
+                durable: false,
                 autoDelete: true
             });
 
