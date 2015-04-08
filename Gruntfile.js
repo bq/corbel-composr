@@ -24,7 +24,10 @@ module.exports = function(grunt) {
                 expand: true,
                 src: [
                     'test/**',
-                    'src/**'
+                    'src/**',
+                    // express files
+                    'public/**',
+                    'package.json'
                 ],
                 dest: '.tmp/coverage/'
             }
@@ -83,7 +86,7 @@ module.exports = function(grunt) {
                 options: {
                     reporter: 'spec',
                 },
-                src: ['.tmp/coverage/test/test-suite.js']
+                src: ['.tmp/coverage/test/runner.js']
             },
             coverage: {
                 options: {
@@ -91,7 +94,7 @@ module.exports = function(grunt) {
                     quiet: true,
                     captureFile: '.tmp/coverage/coverage.html'
                 },
-                src: ['.tmp/coverage/test/test-suite.js']
+                src: ['.tmp/coverage/test/runner.js']
             },
             coveralls: {
                 options: {
@@ -99,13 +102,13 @@ module.exports = function(grunt) {
                     quiet: true,
                     captureFile: '.tmp/coverage/lcov.info'
                 },
-                src: ['.tmp/coverage/test/test-suite.js']
+                src: ['.tmp/coverage/test/runner.js']
             },
             'travis-cov': {
                 options: {
                     reporter: 'travis-cov'
                 },
-                src: ['.tmp/coverage/test/test-suite.js']
+                src: ['.tmp/coverage/test/runner.js']
             },
             tap: {
                 options: {
@@ -113,10 +116,34 @@ module.exports = function(grunt) {
                     captureFile: 'target/test_results.dirty.tap', // Optionally capture the reporter output to a file
                     quiet: false // Optionally suppress output to standard out (defaults to false)
                 },
-                src: ['test/test-suite.js']
+                src: ['test/runner.js']
             },
             ci: {
-                src: ['test/test-suite.js']
+                options: {
+                    reporter: 'spec',
+                },
+                src: ['test/runner.js']
+            }
+        },
+
+        express: {
+            composer: {
+                options: {
+                    script: 'bin/composer',
+                    logs: {
+                        out: 'composer.out.log',
+                        err: 'composer.err.log'
+                    }
+                }
+            },
+            coverage: {
+                options: {
+                    script: 'bin/composer.coverage',
+                    logs: {
+                        out: 'composer.out.log',
+                        err: 'composer.err.log'
+                    }
+                }
             }
         },
 
@@ -163,6 +190,7 @@ module.exports = function(grunt) {
         'jshint',
         'copy:coverage',
         'blanket',
+        'express:coverage',
         'mochaTest:testCoverage',
         'mochaTest:coverage',
         'mochaTest:coveralls',
@@ -172,6 +200,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test', [
         'jshint',
+        'express:composer',
         'mochaTest:ci'
     ]);
 };
