@@ -25,10 +25,11 @@ var registerPhrase = function(router, phrase) {
         phrases.list[domain].push(phrase);
     }
 
-    var url = phrase.id.replace('!', '/');
+    var url = phrase.id.replace(/!/g, '/');
 
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
         if (phrase[method]) {
+            console.log('Registering ' + method.toUpperCase() + ' ' + url);
             router[method]('/' + url, function(req, res, next) {
 
                 var iamToken = req.get('Authorization') || undefined;
