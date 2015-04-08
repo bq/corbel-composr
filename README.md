@@ -75,6 +75,12 @@ This project requires nodejs to run properly.
 npm test
 ```
 
+## Coverage
+
+```
+grunt test:coverage
+```
+
 ## Debug
 
 ```
