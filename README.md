@@ -59,20 +59,26 @@ This project requires nodejs to run properly.
   ```
 
 - run container
-  
+
   ```
-  docker run -d -p 3000:3000 --name="corbel-composer"  <username>/corbel-composer 
+  docker run -d -p 3000:3000 --name="corbel-composer"  <username>/corbel-composer
   ```
 - start/stop container
-  
+
   ```
-  docker start/stop corbel-composer 
+  docker start/stop corbel-composer
   ```
 
 ## Tests
 
 ```
 npm test
+```
+
+## Coverage
+
+```
+grunt test:coverage
 ```
 
 ## Debug
