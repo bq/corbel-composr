@@ -71,10 +71,16 @@ describe('in phraseManager module', function() {
             }).to.throw('undefined:router');
         });
 
-        it('url is required', function() {
+        it('phrase object is required', function() {
             expect(function() {
                 phraseManager.unregisterPhrase({});
-            }).to.throw('undefined:url');
+            }).to.throw('undefined:phrase');
+        });
+
+        it('phrase.id is required', function() {
+            expect(function() {
+                phraseManager.unregisterPhrase({}, {});
+            }).to.throw('undefined:phrase:id');
         });
 
         it('it deletes the expected phrases', function() {
@@ -84,7 +90,9 @@ describe('in phraseManager module', function() {
             assert.equal(router.stack.length, routerstacklength + 8);
 
             routerstacklength = router.stack.length;
-            phraseManager.unregisterPhrase(router, '/domain/delete');
+            phraseManager.unregisterPhrase(router, {
+                id: 'domain!delete'
+            });
             assert.equal(router.stack.length, routerstacklength - 4);
         });
 
