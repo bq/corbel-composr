@@ -7,6 +7,7 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     index = require('./routes/index'),
+    version = require('./routes/version'),
     phrase = require('./routes/phrase'),
     bootstrap = require('./lib/bootstrap'),
     worker = require('./lib/worker'),
@@ -35,6 +36,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(index);
+app.use(version);
 app.use(bootstrap);
 app.use(worker);
 app.use(phrase);
