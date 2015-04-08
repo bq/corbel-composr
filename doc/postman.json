@@ -5,7 +5,9 @@
     "order": [
         "1122b68a-3002-5f14-5fcd-523e64ff3632",
         "dac22c80-5b2f-1470-8136-4ed3b43648e3",
-        "83aded9f-b88b-8f19-8583-57a8beeb6317"
+        "83aded9f-b88b-8f19-8583-57a8beeb6317",
+        "c17c420d-24d1-09fa-af8d-ff54de63e6c8",
+        "26e43a16-0427-82bd-dc5a-6ea358a96d0e"
     ],
     "folders": [],
     "timestamp": 1427795539820,
@@ -13,7 +15,7 @@
     "owner": 0,
     "sharedWithTeam": false,
     "subscribed": false,
-    "remoteLink": "https://www.getpostman.com/collections/740c18cdf8598a79a04c",
+    "remoteLink": "https://www.getpostman.com/collections/977e0cb5ea19024a684e",
     "public": false,
     "write": true,
     "requests": [
@@ -51,6 +53,26 @@
             "synced": false
         },
         {
+            "id": "26e43a16-0427-82bd-dc5a-6ea358a96d0e",
+            "headers": "",
+            "url": "https://composr-int.bqws.io/v1.0/version",
+            "preRequestScript": "",
+            "pathVariables": {},
+            "method": "GET",
+            "data": [],
+            "dataMode": "params",
+            "version": 2,
+            "tests": "",
+            "currentHelper": "normal",
+            "helperAttributes": {},
+            "time": 1428485302507,
+            "name": "5- Version",
+            "description": "Retrieves composer version (not phrases)",
+            "collectionId": "904fc24e-f937-5516-d804-0120772eca13",
+            "responses": [],
+            "synced": false
+        },
+        {
             "id": "83aded9f-b88b-8f19-8583-57a8beeb6317",
             "headers": "Authorization: Bearer YOUR_ACCESS_TOKEN\nContent-Type: application/json\n",
             "url": "https://composr-int.bqws.io/v1.0/phrase",
@@ -70,6 +92,27 @@
             "responses": [],
             "synced": false,
             "rawModeData": "{\n    \"id\": \"phraseName\",\n    \"get\": {\n        \"code\": \"res.render('index', {title: 'hello world'});\",\n        \"description\": \"Phrase description\",\n        \"query\": {\n            \"param1\": {\n                \"type\": \"Number\",\n                \"description\": \"Param description\",\n                \"default\": 0\n            }\n        },\n        \"responses\": {\n            \"200\": {\n                \"body\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"type\": \"object\",\n                            \"description\": \"A canonical song\",\n                            \"properties\": {\n                                \"title\": {\n                                    \"type\": \"String\"\n                                },\n                                \"artist\": {\n                                    \"type\": \"String\"\n                                }\n                            },\n                            \"required\": [\"title\", \"artist\"]\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n"
+        },
+        {
+            "id": "c17c420d-24d1-09fa-af8d-ff54de63e6c8",
+            "headers": "Authorization: Bearer YOUR_ACCESS_TOKEN\nContent-Type: application/json\n",
+            "url": "https://composr-int.bqws.io/v1.0/phrase",
+            "preRequestScript": "",
+            "pathVariables": {},
+            "method": "DELETE",
+            "data": [],
+            "dataMode": "raw",
+            "version": 2,
+            "tests": "",
+            "currentHelper": "normal",
+            "helperAttributes": {},
+            "time": 1428487489191,
+            "name": "4- Version copy",
+            "description": "Removes a phrase",
+            "collectionId": "904fc24e-f937-5516-d804-0120772eca13",
+            "responses": [],
+            "synced": false,
+            "rawModeData": "{\n    \"id\": \"phraseName\"\n}\n"
         },
         {
             "id": "dac22c80-5b2f-1470-8136-4ed3b43648e3",

@@ -9,7 +9,6 @@ var phraseManager = require('./phraseManager'),
     config = require('../config/config.json');
 
 var worker = function() {
-    // http://172.16.30.227:15672/#/
     var connUrl = 'amqp://' + config['rabbitmq.username'] + ':' + config['rabbitmq.password'] + '@' + config['rabbitmq.host'] + ':' + config['rabbitmq.port'];
 
     amqp.connect(connUrl).then(function(conn) {
@@ -20,18 +19,26 @@ var worker = function() {
                 message = JSON.parse(message);
 
                 if (message.type === connection.PHRASES_COLLECTION) {
+
                     switch (message.action) {
                         case 'DELETE':
-                            var url = message.resourceId.replace(':', '/');
-                            phraseManager.unregisterPhrase(router, url);
-                            break;
-                        default: // 'CREATE' or 'UPDATE'
-                            connection.driver.then(function(driver) {
-                                return driver.resources.resource(connection.PHRASES_COLLECTION, message.resourceId).get().then(function(response) {
-                                    phraseManager.registerPhrase(router, response.data);
-                                });
+
+                            phraseManager.unregisterPhrase(router, {
+                                id:  message.resourceId
                             });
+                            break;
+
+                        default: // 'CREATE' or 'UPDATE'
+
+                            connection.driver.then(function(driver) {
+                                return driver.resources.resource(connection.PHRASES_COLLECTION, message.resourceId).get();
+                            }).then(function(response) {
+                                phraseManager.registerPhrase(router, response.data);
+                            });
+                            break;
+
                     }
+
                 }
             }
         }
