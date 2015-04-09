@@ -11,7 +11,7 @@ corbelConfig = _.extend(corbelConfig, config['corbel.composer.credentials']);
 
 var corbelDriver = corbel.getDriver(corbelConfig);
 
-var onConnectPromise = corbelDriver.iam.token().create().then(function(response) {
+var onConnectPromise = corbelDriver.iam.token().create().then(function() {
     console.log('corbel:connection:success');
 	return corbelDriver;
 }).catch(function(error) {
