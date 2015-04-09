@@ -48,7 +48,7 @@ A corbel-composer is a middleware based in nodeJS with express, to offer develop
 
 ## Example Phrases
 
-### `count value in collections query
+### `count` value in collections query
 
 ```json
 {
