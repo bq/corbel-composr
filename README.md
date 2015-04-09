@@ -6,7 +6,7 @@
 [![Dev Dependency Status](https://david-dm.org/bq/corbel-composer/dev-status.png)](https://david-dm.org/bq/corbel-composer#info=devDependencies&view=table)
 [![Coverage Status](https://coveralls.io/repos/bq/corbel-composer/badge.svg?branch=master)](https://coveralls.io/r/bq/corbel-composer?branch=master)
 
-A corbel-composer is a middleware based in nodeJS with express, to offer developers to make his own specific application API bsed in [corbel-js](https://github.com/bq/corbel-js)
+A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) with [express](http://expressjs.com/4x/api.html), to offer developers to make his own specific application API bsed in [corbel-js](https://github.com/bq/corbel-js)
 
 ## [Homepage](http://opensource.bq.com/corbel-js/)
 
