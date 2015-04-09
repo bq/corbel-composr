@@ -35,6 +35,15 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
+// cors
+app.use(cors({
+    origin: function(origin, callback) {
+        callback(null, true);
+    },
+    credentials: true
+}));
+app.options('*', cors());
+
 app.use(index);
 app.use(version);
 app.use(bootstrap);
@@ -47,14 +56,6 @@ app.use(function(req, res, next) {
     err.status = 404;
     next(err);
 });
-
-// cors
-app.use(cors({
-    origin: function(origin, callback) {
-        callback(null, true);
-    },
-    credentials: true
-}));
 
 /// error handlers
 
