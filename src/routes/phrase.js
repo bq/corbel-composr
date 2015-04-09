@@ -97,6 +97,23 @@ router.delete('/phrase/:phraseid', function(req, res) {
 
 });
 
+router.get('/phrase/:phraseid', function(req, res) {
+    var auth = req.get('Authorization');
+
+    if (!auth) {
+        res.status(401).send('missing:header:authorization');
+        return;
+    }
+    var corbelDriver = connection.getTokenDriver(auth);
+
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, req.params.phraseid).get().then(function(response) {
+        res.send(response.status, response.data);
+    }).catch(function(error) {
+        console.error('error:phrase:getPhrase', error);
+        res.send(error.status, error);
+    });
+});
+
 router.get('/phrase', function(req, res) {
     var auth = req.get('Authorization');
 
