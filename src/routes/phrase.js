@@ -88,7 +88,8 @@ router.delete('/phrase/:phraseid', function(req, res) {
     }
     var corbelDriver = connection.getTokenDriver(auth);
 
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, req.params.phraseid).delete().then(function(response) {
+    var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).delete().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
         console.error('error:phrase:delete', error);
@@ -106,7 +107,8 @@ router.get('/phrase/:phraseid', function(req, res) {
     }
     var corbelDriver = connection.getTokenDriver(auth);
 
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, req.params.phraseid).get().then(function(response) {
+    var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).get().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
         console.error('error:phrase:getPhrase', error);
