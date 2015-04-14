@@ -12,6 +12,6 @@
     },
 
     "corbel.driver.options": {
-        "urlBase": "https://{{module}}.io/"
+        "urlBase": "https://{{module}}corbel-domain.io/"
     }
 }
