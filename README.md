@@ -98,6 +98,47 @@ corbelDriver.resources.collection('test:ComposrTest').get(undefined, {
 * [Response object](http://expressjs.com/4x/api.html#res)
 * [RAML](http://raml.org/) for phrase definition
 
+## API design best practices
+
+### Naming
+
+* Use nouns not verbs
+* Use plural nouns
+
+| Resource     | GET (read)             | POST (create)            | PUT (update)                | DELETE                    |
+| ------------ | ---------------------- | ------------------------ | --------------------------- | ------------------------- |
+| /cars        | Returns a list of cars | Create a new ticket      | Bulk update of cars         | Delete all cars           |
+| /cars/711    | Returns a specific car | Method not allowed (405) | Updates a specific ticket   | Deletes a specific ticket |
+| /purchase    | Get al purchases       | Create a new purchase    | Bulk update of purschases   | Delete all purchases      |
+| /purchase/85 | Returns a purchase     | Method not allowed (405) | Updates a specific purchase | Delete all purchases      |
+
+
+Resource  GET
+read  POST
+create  PUT
+update  DELETE
+/cars Returns a list of cars  Create a new ticket Bulk update of cars Delete all cars
+/cars/711 Returns a specific car  Method not allowed (405)   Deletes a specific ticket
+
+### Versioning your phrases
+
+A simple way to achieve this is definning the phrase version in the url, like this
+
+```
+domain/v1/phrase
+```
+
+A phrase version should change only if the phrase contract is broken
+
+
+
+### Reference
+
+* [APIgee](http://apigee.com/about/resources/ebooks/web-api-design)
+* [Principios de diseño de APIs REST](https://leanpub.com/introduccion_apis_rest)
+* [Best Practices for Designing a Pragmatic RESTful API](http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#versioning)
+* [REST API Resoruces](http://www.restapitutorial.com/resources.html)
+
 ## Run in a docker container
 
 - clone repo
