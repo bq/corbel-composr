@@ -3,21 +3,51 @@
 var express = require('express'),
     router = express.Router(),
     phraseManager = require('./phraseManager'),
-    connection = require('./corbelConnection');
+    connection = require('./corbelConnection'),
+    q = require('q');
+
+var PAGE_SIZE = 10;
+
+var getPhrase = function(driver, phrasesCollection, phrases, promise, pageNumber) {
+    phrases = phrases || [];
+    pageNumber = pageNumber || 0;
+    promise = promise || q.resolve();
+
+    return promise.then(function() {
+        
+        var params = {
+            pagination: {
+                page: pageNumber
+            }
+        };
+
+        return driver.resources.collection(phrasesCollection).get(params, 'application/json').
+            then(function(response) {                
+                phrases = phrases.concat(response.data);
+                if(response.data.length < PAGE_SIZE) {
+                    return phrases;
+                } else {
+                    return getPhrase(driver, phrasesCollection, phrases, promise, pageNumber + 1);
+                }
+            });
+    });
+};
+
 
 var bootstrap = function() {
     process.env.PHRASES_COLLECTION = 'composr:Phrase';
 
     connection.driver.then(function(driver) {
+         getPhrase(driver, connection.PHRASES_COLLECTION).then(function(phrases){
+            return phrases.forEach(function(phrase) {
+                console.log(phrase);
+                phraseManager.registerPhrase(router, phrase);
+            });
+        }).
+         fail (function(error) {
+        console.error('Bootstrap error', error);
 
-        return driver.resources.collection(connection.PHRASES_COLLECTION).get();
-
-    }).then(function(response) {
-
-        return response.data.forEach(function(phrase) {
-            console.log(phrase);
-            phraseManager.registerPhrase(router, phrase);
-        });
+         });    
 
     }).catch(function(error) {
         console.error('Bootstrap error', error);
