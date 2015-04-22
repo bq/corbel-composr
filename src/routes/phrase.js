@@ -6,6 +6,16 @@ var express = require('express'),
     router = express.Router(),
     connection = require('../lib/corbelConnection');
 
+var isValidPhrase = function(phrase) {
+  if(!phrase.hasOwnProperty('url')) {
+    return false;
+  }
+  if(!phrase.hasOwnProperty('get') && !phrase.hasOwnProperty('update') && !phrase.hasOwnProperty('delete') && !phrase.hasOwnProperty('post')) {
+    return false;
+  }
+  return true;
+};
+
 /**
  * Creates or updates a phrase
  * @param  phrase:
@@ -66,6 +76,12 @@ router.put('/phrase', function(req, res) {
         res.status(401).send('missing:header:authorization');
         return;
     }
+
+    if(!isValidPhrase(phase)) {
+      res.status(422).send('bad:entity:phrase');
+      return;
+    }
+
     var corbelDriver = connection.getTokenDriver(auth);
 
     phrase.id = connection.extractDomain(auth) + '!' + phrase.url.replace(/\//g, '!');
