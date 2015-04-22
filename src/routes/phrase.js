@@ -1,10 +1,20 @@
 'use strict';
 
 var express = require('express'),
-    corbel = require('corbel-js'),
-    config = require('../config/config.json'),
-    router = express.Router(),
-    connection = require('../lib/corbelConnection');
+  corbel = require('corbel-js'),
+  config = require('../config/config.json'),
+  router = express.Router(),
+  connection = require('../lib/corbelConnection');
+
+var isValidPhrase = function(phrase) {
+  if (!phrase.hasOwnProperty('url')) {
+    return false;
+  }
+  if (!phrase.hasOwnProperty('get') && !phrase.hasOwnProperty('update') && !phrase.hasOwnProperty('delete') && !phrase.hasOwnProperty('post')) {
+    return false;
+  }
+  return true;
+};
 
 /**
  * Creates or updates a phrase
@@ -59,92 +69,98 @@ var express = require('express'),
  */
 router.put('/phrase', function(req, res) {
 
-    var phrase = req.body || {};
-    var auth = req.get('Authorization');
+  var phrase = req.body || {};
+  var auth = req.get('Authorization');
 
-    if (!auth) {
-        res.status(401).send('missing:header:authorization');
-        return;
-    }
-    var corbelDriver = connection.getTokenDriver(auth);
+  if (!auth) {
+    res.status(401).send('missing:header:authorization');
+    return;
+  }
 
-    phrase.id = connection.extractDomain(auth) + '!' + phrase.url.replace(/\//g, '!');
+  if (!isValidPhrase(phase)) {
+    res.status(422).send('bad:entity:phrase');
+    return;
+  }
 
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
-        res.send(response.status, response.data);
-    }).catch(function(error) {
-        console.error('error:phrase:create', error);
-        res.send(error.status, error);
-    });
+  var corbelDriver = connection.getTokenDriver(auth);
+
+  phrase.id = connection.extractDomain(auth) + '!' + phrase.url.replace(/\//g, '!');
+
+  corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
+    res.send(response.status, response.data);
+  }).catch(function(error) {
+    console.error('error:phrase:create', error);
+    res.send(error.status, error);
+  });
 
 });
 
 router.delete('/phrase/:phraseid', function(req, res) {
-    var auth = req.get('Authorization');
+  var auth = req.get('Authorization');
 
-    if (!auth) {
-        res.status(401).send('missing:header:authorization');
-        return;
-    }
-    var corbelDriver = connection.getTokenDriver(auth);
+  if (!auth) {
+    res.status(401).send('missing:header:authorization');
+    return;
+  }
+  var corbelDriver = connection.getTokenDriver(auth);
 
-    var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).delete().then(function(response) {
-        res.send(response.status, response.data);
-    }).catch(function(error) {
-        console.error('error:phrase:delete', error);
-        res.send(error.status, error);
-    });
+  var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
+  corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).delete().then(function(response) {
+    res.send(response.status, response.data);
+  }).catch(function(error) {
+    console.error('error:phrase:delete', error);
+    res.send(error.status, error);
+  });
 
 });
 
 router.get('/phrase/:phraseid', function(req, res) {
-    var auth = req.get('Authorization');
+  var auth = req.get('Authorization');
 
-    if (!auth) {
-        res.status(401).send('missing:header:authorization');
-        return;
-    }
-    var corbelDriver = connection.getTokenDriver(auth);
+  if (!auth) {
+    res.status(401).send('missing:header:authorization');
+    return;
+  }
+  var corbelDriver = connection.getTokenDriver(auth);
 
-    var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).get().then(function(response) {
-        res.send(response.status, response.data);
-    }).catch(function(error) {
-        console.error('error:phrase:getPhrase', error);
-        res.send(error.status, error);
-    });
+  var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
+  corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).get().then(function(response) {
+    res.send(response.status, response.data);
+  }).catch(function(error) {
+    console.error('error:phrase:getPhrase', error);
+    res.send(error.status, error);
+  });
 });
 
 router.get('/phrase', function(req, res) {
-    var auth = req.get('Authorization');
+  var auth = req.get('Authorization');
 
-    if (!auth) {
-        res.status(401).send('missing:header:authorization');
-        return;
-    }
+  if (!auth) {
+    res.status(401).send('missing:header:authorization');
+    return;
+  }
 
-    res.send(require('../lib/phrases').list[connection.extractDomain(auth)]);
+  res.send(require('../lib/phrases').list[connection.extractDomain(auth)]);
 });
 
 router.post('/token', function(req, res) {
 
-    var data = req.body || {};
+  var data = req.body || {};
 
-    var corbelConfig = config['corbel.driver.options'];
+  var corbelConfig = config['corbel.driver.options'];
 
-    corbelConfig.clientId = data.clientId;
-    corbelConfig.clientSecret = data.clientSecret;
-    corbelConfig.scopes = data.scopes;
+  corbelConfig.clientId = data.clientId;
+  corbelConfig.clientSecret = data.clientSecret;
+  corbelConfig.scopes = data.scopes;
 
-    var corbelDriver = corbel.getDriver(corbelConfig);
+  var corbelDriver = corbel.getDriver(corbelConfig);
 
-    corbelDriver.iam.token().create().then(function(response) {
-        res.send(response);
-    }).catch(function(error) {
-        console.error('error:token', error);
-        res.send(error.status, error);
-    });
+  corbelDriver.iam.token().create().then(function(response) {
+    res.send(response);
+  }).catch(function(error) {
+    console.error('error:token', error);
+    res.send(error.status, error);
+  });
 
 });
 
