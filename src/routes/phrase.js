@@ -10,7 +10,7 @@ var isValidPhrase = function(phrase) {
   if (!phrase.hasOwnProperty('url')) {
     return false;
   }
-  if (!phrase.hasOwnProperty('get') && !phrase.hasOwnProperty('update') && !phrase.hasOwnProperty('delete') && !phrase.hasOwnProperty('post')) {
+  if (!phrase.hasOwnProperty('get') && !phrase.hasOwnProperty('put') && !phrase.hasOwnProperty('delete') && !phrase.hasOwnProperty('post') ) {
     return false;
   }
   return true;
