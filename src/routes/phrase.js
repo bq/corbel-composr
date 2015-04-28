@@ -4,7 +4,8 @@ var express = require('express'),
   corbel = require('corbel-js'),
   config = require('../config/config.json'),
   router = express.Router(),
-  connection = require('../lib/corbelConnection');
+  connection = require('../lib/corbelConnection'),
+  phraseManager = require('../lib/phraseManager');
 
 var isValidPhrase = function(phrase) {
   if (!phrase.hasOwnProperty('url')) {
@@ -140,7 +141,7 @@ router.get('/phrase', function(req, res) {
     return;
   }
 
-  res.send(require('../lib/phrases').list[connection.extractDomain(auth)]);
+  res.send(phraseManager.getPhrases(connection.extractDomain(auth)));
 });
 
 router.post('/token', function(req, res) {
