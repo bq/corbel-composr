@@ -81,5 +81,10 @@ var unregisterPhrase = function(router, phrase) {
     }
 };
 
+var getPhrases = function(domain) {
+    return phrases.list[domain];
+};
+
 module.exports.registerPhrase = registerPhrase;
 module.exports.unregisterPhrase = unregisterPhrase;
+module.exports.getPhrases = getPhrases;
