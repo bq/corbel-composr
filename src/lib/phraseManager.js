@@ -5,7 +5,7 @@
 var validate = require('./validate'),
     corbel = require('corbel-js'),
     config = require('../config/config.json'),
-    phrases = require('./phrases'),
+    phrases = require('./phrasesData'),
     _ = require('underscore');
 
 var registerPhrase = function(router, phrase) {
@@ -43,11 +43,12 @@ var registerPhrase = function(router, phrase) {
                 corbelConfig.iamToken = iamToken;
 
                 var corbelDriver = corbel.getDriver(corbelConfig);
-
+           
                 var funct = new Function('req', 'res', 'next', 'corbelDriver', phrase[method].code);
                 var args = [req, res, next, corbelDriver];
 
                 return funct.apply(null, args);
+
             });
         }
     });

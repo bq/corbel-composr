@@ -22,7 +22,7 @@ app.set('view engine', 'ejs');
 
 app.set('corbel', corbel);
 
-var env = process.env.NODE_ENV || 'prod';
+var env = process.env.NODE_ENV || 'development';
 app.locals.ENV = env;
 app.locals.ENV_DEVELOPMENT = env === 'development';
 
@@ -57,33 +57,6 @@ app.use(function(req, res, next) {
     next(err);
 });
 
-/// error handlers
-
-// development error handler
-// will print stacktrace
-
-if (app.get('env') === 'development') {
-    app.use(function(err, req, res) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err,
-            title: 'error'
-        });
-    });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res) {
-    res.status(err.status || 500);
-    res.render('error', {
-        message: err.message,
-        error: {},
-        title: 'error'
-    });
-});
-
 // 404 handler
 app.use(function(req, res, next) {
     res.status(404);
@@ -109,5 +82,20 @@ app.use(function(req, res, next) {
     res.type('txt').send('Not found');
     next();
 });
+
+/// error handlers
+var errorHandler = function(err, req, res, next) {
+    var status = err.status || 500;
+    res.status(status);
+    res.json({
+        httpStatus: status,
+        error: err.message,
+        // development error handler
+        // will print stacktrace
+        trace: (app.get('env') === 'development' ? err : {})
+    });
+    next();
+};
+app.use(errorHandler);
 
 module.exports = app;
