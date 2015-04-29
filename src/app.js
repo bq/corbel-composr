@@ -10,6 +10,7 @@ var express = require('express'),
     version = require('./routes/version'),
     phrase = require('./routes/phrase'),
     bootstrap = require('./lib/bootstrap'),
+    ComposerError = require('./lib/composerError'),
     worker = require('./lib/worker'),
     cors = require('cors'),
     corbel = require('corbel-js'),
@@ -51,48 +52,22 @@ app.use(worker);
 app.use(phrase);
 
 /// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-    var err = new Error('Not Found');
-    err.status = 404;
-    next(err);
-});
+var NotFundHandler = function(req, res, next) {
+    next(new ComposerError('error:not_found', 'Not Found', 404));
+};
+app.use(NotFundHandler);
 
-// 404 handler
-app.use(function(req, res, next) {
-    res.status(404);
-
-    // respond with html page
-    if (req.accepts('html')) {
-        res.render('404', {
-            url: req.url
-        });
-        return;
-    }
-
-    // respond with json
-    if (req.accepts('json')) {
-        res.send({
-            error: 'not_found',
-            errorDescription: 'Not found'
-        });
-        return;
-    }
-
-    // default to plain-text. send()
-    res.type('txt').send('Not found');
-    next();
-});
-
-/// error handlers
+// error handler
 var errorHandler = function(err, req, res, next) {
     var status = err.status || 500;
     res.status(status);
     res.json({
         httpStatus: status,
         error: err.message,
+        errorDescription: err.errorDescription || '',
         // development error handler
         // will print stacktrace
-        trace: (app.get('env') === 'development' ? err : {})
+        trace: (app.get('env') === 'development' ? err.stack : '')
     });
     next();
 };

@@ -9,13 +9,14 @@ Object.setPrototypeOf = Object.setPrototypeOf || function(obj, proto) {
 };
 
 //custom error
-var ComposerError = function(message, params) {
-    var err = new Error(message);
+var ComposerError = function(error, description, status) {
+    var err = new Error(error);
     Object.setPrototypeOf(err, ComposerError.prototype);
 
     //set properties specific to the custom error
-	params = params || {};
-    err.status = params.status;
+    err.status = status;
+    err.error = error;
+    err.errorDescription = description;
 
     return err;
 };

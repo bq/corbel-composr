@@ -16,8 +16,8 @@ var onConnectPromise = corbelDriver.iam.token().create().then(function() {
     console.log('corbel:connection:success');
 	return corbelDriver;
 }).catch(function(error) {
-    console.error('error:ccomposer:corbel:token', error);
-    throw new Error('error:ccomposer:corbel:token');
+    console.error('error:composer:corbel:token', error);
+    throw new ComposerError('error:composer:corbel:token', '', 401);
 });
 
 var extractDomain = function(accessToken) {
@@ -26,7 +26,7 @@ var extractDomain = function(accessToken) {
     try {
         return JSON.parse(atob(decoded[0])).domainId;
     } catch (e) {
-        throw new ComposerError('connection:token:error');
+        throw new ComposerError('error:composer:corbel:token_format', '', 401);
     }
 };
 
