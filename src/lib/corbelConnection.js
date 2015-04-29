@@ -2,7 +2,8 @@
 
 var corbel = require('corbel-js'),
     config = require('../config/config.json'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    ComposerError = require('./composerError');
 
 var PHRASES_COLLECTION = 'composr:Phrase';
 
@@ -22,13 +23,17 @@ var onConnectPromise = corbelDriver.iam.token().create().then(function() {
 var extractDomain = function(accessToken) {
     var atob = require('atob');
     var decoded = accessToken.replace('Bearer ', '').split('.');
-    return JSON.parse(atob(decoded[0])).domainId;
+    try {
+        return JSON.parse(atob(decoded[0])).domainId;
+    } catch (e) {
+        throw new ComposerError('connection:token:error');
+    }
 };
 
 var getTokenDriver = function(accessToken) {
 
     if (!accessToken) {
-        throw new Error('error:connection:undefiend:accessToken');
+        throw new ComposerError('error:connection:undefiend:accessToken');
     }
 
     var iamToken = {
