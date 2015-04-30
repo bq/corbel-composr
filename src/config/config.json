@@ -7,6 +7,8 @@
 
     "bootstrap.retrytimeout": 10000,
 
+    "timeout": 2000,
+
     "corbel.composer.credentials": {
         "clientId": "CLIENT_ID",
         "clientSecret": "CLIENT_SECRET",

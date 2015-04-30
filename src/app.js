@@ -12,6 +12,9 @@ var express = require('express'),
     bootstrap = require('./lib/bootstrap'),
     ComposerError = require('./lib/composerError'),
     worker = require('./lib/worker'),
+    config = require('./config/config.json'),
+    timeout = require('connect-timeout'),
+    responseTime = require('response-time'),
     cors = require('cors'),
     corbel = require('corbel-js'),
     app = express();
@@ -27,6 +30,8 @@ var env = process.env.NODE_ENV || 'development';
 app.locals.ENV = env;
 app.locals.ENV_DEVELOPMENT = env === 'development';
 
+app.disable('x-powered-by');
+app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -45,11 +50,22 @@ app.use(cors({
 }));
 app.options('*', cors());
 
+app.use(timeout(config.timeout || 10000, {
+    status: 408
+}));
+
 app.use(index);
 app.use(version);
 app.use(bootstrap);
 app.use(worker);
 app.use(phrase);
+
+var haltOnTimedout = function(req, res, next) {
+    if (!req.timedout) {
+        next();
+    }
+};
+app.use(haltOnTimedout);
 
 /// catch 404 and forward to error handler
 var NotFundHandler = function(req, res, next) {
@@ -60,6 +76,9 @@ app.use(NotFundHandler);
 // error handler
 var errorHandler = function(err, req, res, next) {
     var status = err.status || 500;
+    if (err.timeout) {
+        status = 408;
+    }
     res.status(status);
     res.json({
         httpStatus: status,
@@ -73,5 +92,11 @@ var errorHandler = function(err, req, res, next) {
     next();
 };
 app.use(errorHandler);
+
+process.on('uncaughtException', function(err) {
+    if (!err || err.message !== 'Can\'t set headers after they are sent.') {
+        process.exit(1);
+    }
+});
 
 module.exports = app;
