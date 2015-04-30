@@ -6,6 +6,7 @@ var validate = require('./validate'),
     corbel = require('corbel-js'),
     config = require('../config/config.json'),
     phrases = require('./phrasesData'),
+    tripwire = require('tripwire'),
     _ = require('underscore');
 
 var registerPhrase = function(router, phrase) {
@@ -43,11 +44,17 @@ var registerPhrase = function(router, phrase) {
                 corbelConfig.iamToken = iamToken;
 
                 var corbelDriver = corbel.getDriver(corbelConfig);
-           
+
+                // set the limit of execution time to 2000 milliseconds
+                tripwire.resetTripwire(config.timeout || 10000);
+
                 var funct = new Function('req', 'res', 'next', 'corbelDriver', phrase[method].code);
                 var args = [req, res, next, corbelDriver];
 
-                return funct.apply(null, args);
+                funct.apply(null, args);
+
+                // clear the tripwire (in this case this code is never reached)
+                tripwire.clearTripwire();
 
             });
         }
