@@ -69,6 +69,7 @@ var errorHandler = function(err, req, res, next) {
         // will print stacktrace
         trace: (app.get('env') === 'development' ? err.stack : '')
     });
+    console.error(err);
     next();
 };
 app.use(errorHandler);

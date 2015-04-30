@@ -6,16 +6,17 @@ var express = require('express'),
     router = express.Router(),
     connection = require('../lib/corbelConnection'),
     phraseManager = require('../lib/phraseManager'),
-    docBuilder = require('../lib/docBuilder');
+    phraseValidator = require('../lib/phraseValidator'),
+    ComposerError = require('../lib/composerError');
 
-var isValidPhrase = function(phrase) {
-    if (!phrase.hasOwnProperty('url')) {
-        return false;
-    }
-    if (!phrase.hasOwnProperty('get') && !phrase.hasOwnProperty('put') && !phrase.hasOwnProperty('delete') && !phrase.hasOwnProperty('post')) {
-        return false;
-    }
-    return true;
+var getAuth = function(req) {
+    var auth = req.get('Authorization');
+
+    if (!auth) {
+        throw new ComposerError('missing:header:authorization', 'Authorization header not found', 401);
+    } 
+
+    return auth;
 };
 
 /**
@@ -58,94 +59,59 @@ var isValidPhrase = function(phrase) {
  */
 router.put('/phrase', function(req, res) {
 
+    var auth = getAuth(req);    
+
     var phrase = req.body || {};
-    var auth = req.get('Authorization');
-
-    if (!auth) {
-        res.status(401).send('missing:header:authorization');
-        return;
-    }
-
-    if (!isValidPhrase(phrase)) {
-        res.status(422).send('bad:entity:phrase');
-        return;
-    }
 
     var corbelDriver = connection.getTokenDriver(auth);
 
     var domain = connection.extractDomain(auth);
 
-    docBuilder.load(domain, phrase).then(function() {
+    phraseValidator.validate(domain, phrase).then(function() {
 
         phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
 
         corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
             res.send(response.status, response.data);
         }).catch(function(error) {
-            console.error('error:phrase:create', error);
-            res.send(error.status, error);
+            throw new ComposerError('error:phrase:create', error.message, error.status);
         });
 
     }, function(error) {
-
-        res.status(422).send('Error parsing doc: ' + error);
-
-    });
-
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
-        res.send(response.status, response.data);
-    }).catch(function(error) {
-        console.error('error:phrase:create', error);
-        res.send(error.status, error);
+        throw new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422);
     });
 
 });
 
 router.delete('/phrase/:phraseid', function(req, res) {
-    var auth = req.get('Authorization');
+    var auth = getAuth(req);
 
-    if (!auth) {
-        res.status(401).send('missing:header:authorization');
-        return;
-    }
     var corbelDriver = connection.getTokenDriver(auth);
 
     var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).delete().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
-        console.error('error:phrase:delete', error);
-        res.send(error.status, error);
+        throw new ComposerError('error:phrase:delete', error.message, error.status);
     });
 
 });
 
 router.get('/phrase/:phraseid', function(req, res) {
-    var auth = req.get('Authorization');
+    var auth = getAuth(req);
 
-    if (!auth) {
-        res.status(401).send('missing:header:authorization');
-        return;
-    }
     var corbelDriver = connection.getTokenDriver(auth);
 
     var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).get().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
-        console.error('error:phrase:getPhrase', error);
-        res.send(error.status, error);
+        throw new ComposerError('error:phrase:get', error.message, error.status);
     });
 });
 
 router.get('/phrase', function(req, res) {
-    var auth = req.get('Authorization');
-
-    if (!auth) {
-        res.status(401).send('missing:header:authorization');
-        return;
-    }
-
+    var auth = getAuth(req);
     res.send(phraseManager.getPhrases(connection.extractDomain(auth)));
 });
 
@@ -164,8 +130,7 @@ router.post('/token', function(req, res) {
     corbelDriver.iam.token().create().then(function(response) {
         res.send(response);
     }).catch(function(error) {
-        console.error('error:token', error);
-        res.send(error.status, error);
+        throw new ComposerError('error:token', error.message, error.status);
     });
 
 });
