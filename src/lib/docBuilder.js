@@ -25,7 +25,7 @@ var buildDefinition = function(domain, phrase) {
         }
     });
 
-    var urlBase = config['corbel.driver.options'].urlBase;
+    var urlBase = config['corbel.driver.options'].urlBase.replace('{{module}}', '');
 
     var definition = [
         '#%RAML 0.8',
