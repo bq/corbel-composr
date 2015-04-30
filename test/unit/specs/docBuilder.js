@@ -1,4 +1,3 @@
-/*global results*/
 'use strict';
 
 var docBuilder = require('../../../src/lib/docBuilder.js'),
@@ -80,7 +79,7 @@ describe('in docBuilder', function() {
         });
 
         it('the built definition can be loaded by raml', function(done) {
-            var response = docBuilder.load('domain', getPhrase()).then(function(result) {
+            docBuilder.load('domain', getPhrase()).then(function(result) {
             	assert.equal('url', result.title);
             	assert.equal(config['corbel.driver.options'].urlBase + 'domain', result.baseUri);
             	assert.include('HTTPS', result.protocols);

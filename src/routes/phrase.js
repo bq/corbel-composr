@@ -6,17 +6,7 @@ var express = require('express'),
     router = express.Router(),
     connection = require('../lib/corbelConnection'),
     phraseManager = require('../lib/phraseManager'),
-    docBuilder = require('../lib/docBuilder');
-
-var isValidPhrase = function(phrase) {
-    if (!phrase.hasOwnProperty('url')) {
-        return false;
-    }
-    if (!phrase.hasOwnProperty('get') && !phrase.hasOwnProperty('put') && !phrase.hasOwnProperty('delete') && !phrase.hasOwnProperty('post')) {
-        return false;
-    }
-    return true;
-};
+    phraseValidator = require('../lib/phraseValidator');
 
 /**
  * Creates or updates a phrase
@@ -58,24 +48,20 @@ var isValidPhrase = function(phrase) {
  */
 router.put('/phrase', function(req, res) {
 
-    var phrase = req.body || {};
     var auth = req.get('Authorization');
 
     if (!auth) {
         res.status(401).send('missing:header:authorization');
         return;
-    }
+    }    
 
-    if (!isValidPhrase(phrase)) {
-        res.status(422).send('bad:entity:phrase');
-        return;
-    }
+    var phrase = req.body || {};
 
     var corbelDriver = connection.getTokenDriver(auth);
 
     var domain = connection.extractDomain(auth);
 
-    docBuilder.load(domain, phrase).then(function() {
+    phraseValidator.validate(domain, phrase).then(function() {
 
         phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
 
@@ -87,9 +73,7 @@ router.put('/phrase', function(req, res) {
         });
 
     }, function(error) {
-
-        res.status(422).send('Error parsing doc: ' + error);
-
+        res.status(422).send('Error validating phrase: ' + error);
     });
 
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {

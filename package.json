@@ -45,7 +45,8 @@
     "uuid": "~2.0.1",
     "q": "^1.2.0",
     "raml-parser": "~0.8.10",
-    "yamljs": "~0.2.1"
+    "yamljs": "~0.2.1",
+    "syntax-error": "~1.1.3"
   },
   "devDependencies": {
     "chai": "^2.1.1",
