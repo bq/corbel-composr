@@ -45,7 +45,7 @@ var registerPhrase = function(router, phrase) {
 
                 var corbelDriver = corbel.getDriver(corbelConfig);
 
-                // set the limit of execution time to 2000 milliseconds
+                // set the limit of execution time to 10000 milliseconds
                 tripwire.resetTripwire(config.timeout || 10000);
 
                 var funct = new Function('req', 'res', 'next', 'corbelDriver', phrase[method].code);

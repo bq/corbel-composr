@@ -67,6 +67,10 @@ var haltOnTimedout = function(req, res, next) {
 };
 app.use(haltOnTimedout);
 
+if(app.get('env') === 'development') {
+    app.use(require('./routes/test'));
+}
+
 /// catch 404 and forward to error handler
 var NotFundHandler = function(req, res, next) {
     next(new ComposerError('error:not_found', 'Not Found', 404));
