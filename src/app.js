@@ -7,6 +7,7 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     index = require('./routes/index'),
+    doc = require('./routes/doc'),
     phrase = require('./routes/phrase'),
     bootstrap = require('./lib/bootstrap'),
     ComposerError = require('./lib/composerError'),
@@ -57,6 +58,7 @@ app.use(index);
 app.use(bootstrap);
 app.use(worker);
 app.use(phrase);
+app.use(doc);
 
 var haltOnTimedout = function(req, res, next) {
     if (!req.timedout) {

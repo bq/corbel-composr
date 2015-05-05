@@ -3,19 +3,13 @@
 var config = require('../config/config.json'),
     raml = require('raml-parser'),
     YAML = require('yamljs'),
-    validate = require('./validate');
+    validate = require('./validate'),
+    _ = require('underscore');
 
-/**
- * Builds a raml definition from the doc contained into a phrase
- * @param  {String} domain
- * @param  {Object} phrase
- * @return {String}
- */
-var buildDefinition = function(domain, phrase) {
-
+var buildPhraseDefinition = function(phrase) {
     var doc = {};
 
-    var url = '/' + phrase.url + ':';
+    var url = '/' + phrase.url;
     doc[url] = {};
 
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
@@ -25,12 +19,27 @@ var buildDefinition = function(domain, phrase) {
         }
     });
 
+    return doc;
+};
+
+/**
+ * Builds a raml definition from the doc contained into a phrase
+ * @param  {String} domain
+ * @param  {Object} phrase
+ * @return {String}
+ */
+var buildDefinition = function(domain, phrases) {
     var urlBase = config['corbel.driver.options'].urlBase.replace('{{module}}', 'composr');
+
+    var doc = {};
+    phrases.forEach(function(phrase) {
+        _.extend(doc, buildPhraseDefinition(phrase));
+    });
 
     var definition = [
         '#%RAML 0.8',
         '---',
-        'title: ' + phrase.url,
+        'title: ' + domain,
         'baseUri: ' + urlBase + domain,
         YAML.stringify(doc, 4)
     ].join('\n');

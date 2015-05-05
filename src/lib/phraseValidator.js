@@ -41,7 +41,7 @@ var validate = function(domain, phrase) {
         throw new ComposerError('undefined:phrase:http_method', 'no http method defined', 400);
     }
 
-    return docBuilder.load(domain, phrase);
+    return docBuilder.load(domain, [phrase]);
 };
 
 
