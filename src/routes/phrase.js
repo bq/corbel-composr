@@ -7,17 +7,9 @@ var express = require('express'),
     connection = require('../lib/corbelConnection'),
     phraseManager = require('../lib/phraseManager'),
     phraseValidator = require('../lib/phraseValidator'),
-    ComposerError = require('../lib/composerError');
+    ComposerError = require('../lib/composerError'),
+    auth = require('../lib/auth');
 
-var getAuth = function(req) {
-    var auth = req.get('Authorization');
-
-    if (!auth) {
-        throw new ComposerError('missing:header:authorization', 'Authorization header not found', 401);
-    } 
-
-    return auth;
-};
 
 /**
  * Creates or updates a phrase
@@ -59,13 +51,13 @@ var getAuth = function(req) {
  */
 router.put('/phrase', function(req, res) {
 
-    var auth = getAuth(req);    
+    var authorization = auth.getAuth(req);    
 
     var phrase = req.body || {};
 
-    var corbelDriver = connection.getTokenDriver(auth);
+    var corbelDriver = connection.getTokenDriver(authorization);
 
-    var domain = connection.extractDomain(auth);
+    var domain = connection.extractDomain(authorization);
 
     phraseValidator.validate(domain, phrase).then(function() {
 
@@ -84,11 +76,11 @@ router.put('/phrase', function(req, res) {
 });
 
 router.delete('/phrase/:phraseid', function(req, res) {
-    var auth = getAuth(req);
+    var authorization = auth.getAuth(req);
 
-    var corbelDriver = connection.getTokenDriver(auth);
+    var corbelDriver = connection.getTokenDriver(authorization);
 
-    var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
+    var phraseIdentifier = connection.extractDomain(authorization) + '!' + req.params.phraseid;
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).delete().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
@@ -98,11 +90,11 @@ router.delete('/phrase/:phraseid', function(req, res) {
 });
 
 router.get('/phrase/:phraseid', function(req, res) {
-    var auth = getAuth(req);
+    var authorization = auth.getAuth(req);
 
-    var corbelDriver = connection.getTokenDriver(auth);
+    var corbelDriver = connection.getTokenDriver(authorization);
 
-    var phraseIdentifier = connection.extractDomain(auth) + '!' + req.params.phraseid;
+    var phraseIdentifier = connection.extractDomain(authorization) + '!' + req.params.phraseid;
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).get().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
@@ -111,8 +103,8 @@ router.get('/phrase/:phraseid', function(req, res) {
 });
 
 router.get('/phrase', function(req, res) {
-    var auth = getAuth(req);
-    res.send(phraseManager.getPhrases(connection.extractDomain(auth)));
+    var authorization = auth.getAuth(req);
+    res.send(phraseManager.getPhrases(connection.extractDomain(authorization)));
 });
 
 router.post('/token', function(req, res) {

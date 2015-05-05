@@ -8,6 +8,7 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     index = require('./routes/index'),
     version = require('./routes/version'),
+    doc = require('./routes/doc'),
     phrase = require('./routes/phrase'),
     bootstrap = require('./lib/bootstrap'),
     ComposerError = require('./lib/composerError'),
@@ -59,6 +60,7 @@ app.use(version);
 app.use(bootstrap);
 app.use(worker);
 app.use(phrase);
+app.use(doc);
 
 var haltOnTimedout = function(req, res, next) {
     if (!req.timedout) {
