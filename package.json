@@ -65,6 +65,7 @@
     "grunt-develop": "~0.4.0",
     "grunt-express-server": "^0.5.1",
     "grunt-mocha-test": "~0.12.7",
+    "grunt-release": "^0.12.0",
     "jshint-stylish": "^1.0.1",
     "load-grunt-tasks": "~3.1.0",
     "mocha": "~2.2.1",
