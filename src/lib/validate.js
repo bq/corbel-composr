@@ -1,5 +1,6 @@
 'use strict';
 
+var ComposerError = require('../lib/composerError');
 /**
  * Checks if some value is not undefined
  * @param  {Mixed}  value
@@ -11,7 +12,7 @@ var isDefined = function(value, message) {
     var isUndefined = value === undefined;
 
     if (isUndefined && message) {
-        throw new Error(message);
+        throw new ComposerError(message, '', 422);
     }
     return !isUndefined;
 };
@@ -27,7 +28,7 @@ var failIfIsDefined = function(value, message) {
     var isDefined = value !== undefined;
 
     if (isDefined && message) {
-        throw new Error(message);
+        throw new ComposerError(message, '', 422);
     }
     return !isDefined;
 };
@@ -43,7 +44,7 @@ var isNotNull = function(value, message) {
     var isNull = value === null;
 
     if (isNull && message) {
-        throw new Error(message);
+        throw new ComposerError(message, '', 422);
     }
     return !isNull;
 };
@@ -71,7 +72,7 @@ var isGreaterThan = function(value, greaterThan, message) {
     var gt = this.isValue(value) && value > greaterThan;
 
     if (!gt && message) {
-        throw new Error(message);
+        throw new ComposerError(message, '', 422);
     }
     return gt;
 };
@@ -88,7 +89,7 @@ var isGreaterThanOrEqual = function(value, isGreaterThanOrEqual, message) {
     var gte = this.isValue(value) && value >= isGreaterThanOrEqual;
 
     if (!gte && message) {
-        throw new Error(message);
+        throw new ComposerError(message, '', 422);
     }
     return gte;
 };
