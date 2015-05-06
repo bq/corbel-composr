@@ -50,42 +50,41 @@ A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) wit
 
 ```
 {
-  "url": "phraseName",
-  "get": {
-    "code": "res.render('index', {title: 'hello world'});",
-    "description": "Phrase description",
-    "query": {
-      "param1": {
-        "type": "Number",
-        "description": "Param description",
-        "default": 0
-      }
-    },
-    "responses": {
-      "200": {
-        "body": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "description": "A canonical song",
-              "properties": {
-                "title": {
-                  "type": "String"
-                },
-                "artist": {
-                  "type": "String"
+    "url": "phraseName",
+    "get": {
+        "code": "res.render('index', {title: 'hello world'});",
+        "doc": {
+            "description": "Phrase description",
+            "query": {
+                "param1": {
+                    "type": "Number",
+                    "description": "Param description",
+                    "default": 0
                 }
-              },
-              "required": [
-                "title",
-                "artist"
-              ]
+            },
+            "responses": {
+                "200": {
+                    "body": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "A canonical song",
+                                "properties": {
+                                    "title": {
+                                        "type": "String"
+                                    },
+                                    "artist": {
+                                        "type": "String"
+                                    }
+                                },
+                                "required": ["title", "artist"]
+                            }
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     }
-  }
 }
 ```
 
