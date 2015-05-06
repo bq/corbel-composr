@@ -29,6 +29,7 @@ var buildPhraseDefinition = function(phrase) {
  * @return {String}
  */
 var buildDefinition = function(domain, phrases) {
+    phrases = phrases || [];
     var urlBase = config['corbel.driver.options'].urlBase.replace('{{module}}', 'composr');
 
     var doc = {};
