@@ -55,7 +55,7 @@ A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) wit
         "code": "res.render('index', {title: 'hello world'});",
         "doc": {
             "description": "Phrase description",
-            "query": {
+            "queryParameters": {
                 "param1": {
                     "type": "Number",
                     "description": "Param description",
