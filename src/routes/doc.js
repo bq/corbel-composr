@@ -9,7 +9,7 @@ var express = require('express'),
     ComposerError = require('../lib/composerError'),
     raml2html = require('raml2html');
 
-router.get('/doc', function(req, res) {
+router.get('/doc', function(req, res, next) {
 
     var authorization = auth.getAuth(req);
     var domain = connection.extractDomain(authorization);
@@ -21,7 +21,7 @@ router.get('/doc', function(req, res) {
     raml2html.render(source, config, function(result) {
         res.send(result);
     }, function(error) {
-        throw new ComposerError('error:phrase:doc', 'Error generating doc: ' + error, 422);
+        next(new ComposerError('error:phrase:doc', 'Error generating doc: ' + error, 422));
     });
 });
 
