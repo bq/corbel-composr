@@ -49,7 +49,7 @@ var express = require('express'),
  * }
  * @return {promise}
  */
-router.put('/phrase', function(req, res) {
+router.put('/phrase', function(req, res, next) {
 
     var authorization = auth.getAuth(req);    
 
@@ -66,16 +66,16 @@ router.put('/phrase', function(req, res) {
         corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
             res.send(response.status, response.data);
         }).catch(function(error) {
-            throw new ComposerError('error:phrase:create', error.message, error.status);
+            next(new ComposerError('error:phrase:create', error, error.status));
         });
 
     }, function(error) {
-        throw new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422);
+        next(new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422));
     });
 
 });
 
-router.delete('/phrase/:phraseid', function(req, res) {
+router.delete('/phrase/:phraseid', function(req, res, next) {
     var authorization = auth.getAuth(req);
 
     var corbelDriver = connection.getTokenDriver(authorization);
@@ -84,12 +84,12 @@ router.delete('/phrase/:phraseid', function(req, res) {
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).delete().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
-        throw new ComposerError('error:phrase:delete', error.message, error.status);
+        next(new ComposerError('error:phrase:delete', error.message, error.status));
     });
 
 });
 
-router.get('/phrase/:phraseid', function(req, res) {
+router.get('/phrase/:phraseid', function(req, res, next) {
     var authorization = auth.getAuth(req);
 
     var corbelDriver = connection.getTokenDriver(authorization);
@@ -98,7 +98,7 @@ router.get('/phrase/:phraseid', function(req, res) {
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).get().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
-        throw new ComposerError('error:phrase:get', error.message, error.status);
+        next(new ComposerError('error:phrase:get', error.message, error.status));
     });
 });
 
@@ -107,7 +107,7 @@ router.get('/phrase', function(req, res) {
     res.send(phraseManager.getPhrases(connection.extractDomain(authorization)));
 });
 
-router.post('/token', function(req, res) {
+router.post('/token', function(req, res, next) {
 
     var data = req.body || {};
 
@@ -122,7 +122,7 @@ router.post('/token', function(req, res) {
     corbelDriver.iam.token().create().then(function(response) {
         res.send(response);
     }).catch(function(error) {
-        throw new ComposerError('error:token', error.message, error.status);
+        next(new ComposerError('error:token', error.message, error.status));
     });
 
 });

@@ -93,7 +93,7 @@ var errorHandler = function(err, req, res, next) {
         trace: (app.get('env') === 'development' ? err.stack : '')
     });
     console.error(err);
-    next();
+    next(err);
 };
 app.use(errorHandler);
 
