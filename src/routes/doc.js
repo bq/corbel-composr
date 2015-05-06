@@ -9,10 +9,9 @@ var express = require('express'),
     ComposerError = require('../lib/composerError'),
     raml2html = require('raml2html');
 
-router.get('/doc', function(req, res, next) {
+router.get('/doc/:domain', function(req, res, next) {
 
-    var authorization = auth.getAuth(req);
-    var domain = connection.extractDomain(authorization);
+    var domain = req.params.domain || '';
     var phrases = phraseManager.getPhrases(domain);
 
     var source = docBuilder.buildDefinition(domain, phrases);
