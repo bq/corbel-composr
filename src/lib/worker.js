@@ -6,6 +6,7 @@ var phraseManager = require('./phraseManager'),
     router = express.Router(),
     amqp = require('amqplib'),
     uuid = require('uuid'),
+    ComposerError = require('./composerError'),
     config = require('../config/config.json');
 
 var worker = function() {
@@ -15,8 +16,13 @@ var worker = function() {
 
         function doWork(msg) {
             if (msg.fields.routingKey === 'class com.bqreaders.silkroad.event.ResourceEvent') {
-                var message = msg.content.toString();
-                message = JSON.parse(message);
+
+                var message;
+                try {
+                    message = JSON.parse(msg.content.toString());
+                } catch (error) {
+                    throw new ComposerError('error:worker:message', 'Error parsing message: ' + error, 422);
+                }
 
                 if (message.type === connection.PHRASES_COLLECTION) {
 
@@ -24,7 +30,7 @@ var worker = function() {
                         case 'DELETE':
 
                             phraseManager.unregisterPhrase(router, {
-                                id:  message.resourceId
+                                id: message.resourceId
                             });
                             break;
 
@@ -72,7 +78,7 @@ var worker = function() {
             return ok;
         });
     }).then(null, function(err) {
-        console.error('Error %s', err);
+        console.error('Worker error %s', err);
         setTimeout(worker, config['rabbitmq.reconntimeout']);
     });
 };
