@@ -14,6 +14,7 @@ router.get('/doc', function(req, res) {
     var authorization = auth.getAuth(req);
     var domain = connection.extractDomain(authorization);
     var phrases = phraseManager.getPhrases(domain);
+    phrases = phrases || [];
 
     var source = docBuilder.buildDefinition(domain, phrases);
     var config = raml2html.getDefaultConfig(true);
