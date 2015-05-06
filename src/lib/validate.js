@@ -1,17 +1,18 @@
 'use strict';
 
+var ComposerError = require('../lib/composerError');
 /**
  * Checks if some value is not undefined
  * @param  {Mixed}  value
- * @param  {String}  [message]
- * @throws {Error} If return value is false and message are defined
+ * @param  {String}  [errorCode]
+ * @throws {Error} If return value is false and errorCode are defined
  * @return {Boolean}
  */
-var isDefined = function(value, message) {
+var isDefined = function(value, errorCode) {
     var isUndefined = value === undefined;
 
-    if (isUndefined && message) {
-        throw new Error(message);
+    if (isUndefined && errorCode) {
+        throw new ComposerError(errorCode, 'isDefined undefined: ' + value, 422);
     }
     return !isUndefined;
 };
@@ -19,15 +20,15 @@ var isDefined = function(value, message) {
 /**
  * Checks if some value is defined and throw error
  * @param  {Mixed}  value
- * @param  {String}  [message]
- * @throws {Error} If return value is false and message are defined
+ * @param  {String}  [errorCode]
+ * @throws {Error} If return value is false and errorCode are defined
  * @return {Boolean}
  */
-var failIfIsDefined = function(value, message) {
+var failIfIsDefined = function(value, errorCode) {
     var isDefined = value !== undefined;
 
-    if (isDefined && message) {
-        throw new Error(message);
+    if (isDefined && errorCode) {
+        throw new ComposerError(errorCode, 'failIfIsDefined undefined: ' + value, 422);
     }
     return !isDefined;
 };
@@ -35,15 +36,15 @@ var failIfIsDefined = function(value, message) {
 /**
  * Checks whenever value are null or not
  * @param  {Mixed}  value
- * @param  {String}  [message]
- * @throws {Error} If return value is false and message are defined
+ * @param  {String}  [errorCode]
+ * @throws {Error} If return value is false and errorCode are defined
  * @return {Boolean}
  */
-var isNotNull = function(value, message) {
+var isNotNull = function(value, errorCode) {
     var isNull = value === null;
 
-    if (isNull && message) {
-        throw new Error(message);
+    if (isNull && errorCode) {
+        throw new ComposerError(errorCode, 'isNotNull undefined: ' + value, 422);
     }
     return !isNull;
 };
@@ -51,27 +52,27 @@ var isNotNull = function(value, message) {
 /**
  * Checks whenever a value is not null and not undefined
  * @param  {Mixed}  value
- * @param  {String}  [message]
- * @throws {Error} If return value is false and message are defined
+ * @param  {String}  [errorCode]
+ * @throws {Error} If return value is false and errorCode are defined
  * @return {Boolean}
  */
-var isValue = function(value, message) {
-    return this.isDefined(value, message) && this.isNotNull(value, message);
+var isValue = function(value, errorCode) {
+    return this.isDefined(value, errorCode) && this.isNotNull(value, errorCode);
 };
 
 /**
  * Checks whenever a value is greater than other
  * @param  {Mixed}  value
  * @param  {Mixed}  greaterThan
- * @param  {String}  [message]
- * @throws {Error} If return value is false and message are defined
+ * @param  {String}  [errorCode]
+ * @throws {Error} If return value is false and errorCode are defined
  * @return {Boolean}
  */
-var isGreaterThan = function(value, greaterThan, message) {
+var isGreaterThan = function(value, greaterThan, errorCode) {
     var gt = this.isValue(value) && value > greaterThan;
 
-    if (!gt && message) {
-        throw new Error(message);
+    if (!gt && errorCode) {
+        throw new ComposerError(errorCode, 'isGreaterThan undefined: ' + value, 422);
     }
     return gt;
 };
@@ -80,15 +81,15 @@ var isGreaterThan = function(value, greaterThan, message) {
  * Checks whenever a value is greater or equal than other
  * @param  {Mixed}  value
  * @param  {Mixed} isGreaterThanOrEqual
- * @param  {String}  [message]
- * @throws {Error} If return value is false and message are defined
+ * @param  {String}  [errorCode]
+ * @throws {Error} If return value is false and errorCode are defined
  * @return {Boolean}
  */
-var isGreaterThanOrEqual = function(value, isGreaterThanOrEqual, message) {
+var isGreaterThanOrEqual = function(value, isGreaterThanOrEqual, errorCode) {
     var gte = this.isValue(value) && value >= isGreaterThanOrEqual;
 
-    if (!gte && message) {
-        throw new Error(message);
+    if (!gte && errorCode) {
+        throw new ComposerError(errorCode, 'isGreaterThanOrEqual undefined: ' + value, 422);
     }
     return gte;
 };
