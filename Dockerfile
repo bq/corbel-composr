@@ -1,16 +1,6 @@
-FROM    ubuntu
+FROM    devopsbq/base:1.0
 # Author / Maintainer
 MAINTAINER Silkroad Team <support-silkroad@bq.com>
-
-# Update repository
-RUN apt-get update
-
-# Install dependencies
-RUN apt-get -y install curl
-RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
-
-# Install nodejs
-RUN apt-get -y install nodejs git git-core
 
 # Copy app source
 COPY . /src
