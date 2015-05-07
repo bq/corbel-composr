@@ -17,7 +17,7 @@
     "owner": 0,
     "sharedWithTeam": false,
     "subscribed": false,
-    "remoteLink": "https://www.getpostman.com/collections/bedf10f24dea1bbab8c6",
+    "remoteLink": "https://www.getpostman.com/collections/2942a69c0bff9c211763",
     "public": false,
     "write": true,
     "requests": [
@@ -68,7 +68,7 @@
         },
         {
             "id": "31570e74-fb6b-4df3-3595-d978504dcaea",
-            "headers": "Authorization: Bearer YOUR_ACCESS_TOKEN\n",
+            "headers": "",
             "url": "{{composerEndpoint}}doc",
             "preRequestScript": "",
             "pathVariables": {},
@@ -79,7 +79,7 @@
             "tests": "",
             "currentHelper": "normal",
             "helperAttributes": {},
-            "time": 1430899874812,
+            "time": 1430930659431,
             "name": "5- Domain phrases documentation",
             "description": "Retrieves all created domain phrases as HTML",
             "collectionId": "7ab55767-da04-ddc3-d7c4-8b3aea48813d",

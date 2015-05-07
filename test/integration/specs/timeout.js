@@ -10,7 +10,6 @@ describe('When a request to composr takes more than 10 seconds', function() {
         this.timeout(30000);
 
         request('http://localhost:3000/t1', function(error, response, body) {
-
             expect(response).to.be.an('object');
             if (response.statusCode === 408) {
                 return done();
