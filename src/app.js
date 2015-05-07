@@ -19,8 +19,10 @@ var express = require('express'),
     corbel = require('corbel-js'),
     app = express();
 
-// view engine setup
+var ERROR_CODE_SERVER_TIMEOUT = 504;
+var DEFAULT_TIMEOUT = 10000;
 
+// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -50,10 +52,9 @@ app.use(cors({
 }));
 app.options('*', cors());
 
-app.use(timeout(config.timeout || 10000, {
-    status: 408
+app.use(timeout(config.timeout || DEFAULT_TIMEOUT, {
+    status: ERROR_CODE_SERVER_TIMEOUT
 }));
-
 app.use(index);
 app.use(bootstrap);
 app.use(worker);
@@ -81,8 +82,15 @@ app.use(NotFundHandler);
 var errorHandler = function(err, req, res, next) {
     var status = err.status || 500;
     if (err.timeout) {
-        status = 408;
+        status = ERROR_CODE_SERVER_TIMEOUT;
     }
+
+    if(req.process){
+      req.process.kill('SIGINT');
+      //Close the process of the phrase
+      //TODO: see if this behaves correctly
+    }
+
     res.status(status);
     res.json({
         httpStatus: status,
@@ -92,13 +100,17 @@ var errorHandler = function(err, req, res, next) {
         // will print stacktrace
         trace: (app.get('env') === 'development' ? err.stack : '')
     });
+
     console.error(err);
-    next(err);
+
 };
+
 app.use(errorHandler);
 
 process.on('uncaughtException', function(err) {
+  console.log(err);
     if (!err || err.message !== 'Can\'t set headers after they are sent.') {
+        console.log('err');
         process.exit(1);
     }
 });
