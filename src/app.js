@@ -12,6 +12,7 @@ var express = require('express'),
     bootstrap = require('./lib/bootstrap'),
     ComposerError = require('./lib/composerError'),
     worker = require('./lib/worker'),
+    phraseProcessManager = require('./lib/phraseProcessManager'),
     config = require('./config/config.json'),
     timeout = require('connect-timeout'),
     responseTime = require('response-time'),
@@ -19,8 +20,10 @@ var express = require('express'),
     corbel = require('corbel-js'),
     app = express();
 
-// view engine setup
+var ERROR_CODE_SERVER_TIMEOUT = 504;
+var DEFAULT_TIMEOUT = 10000;
 
+// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -50,10 +53,9 @@ app.use(cors({
 }));
 app.options('*', cors());
 
-app.use(timeout(config.timeout || 10000, {
-    status: 408
+app.use(timeout(config.timeout || DEFAULT_TIMEOUT, {
+    status: ERROR_CODE_SERVER_TIMEOUT
 }));
-
 app.use(index);
 app.use(bootstrap);
 app.use(worker);
@@ -67,8 +69,12 @@ var haltOnTimedout = function(req, res, next) {
 };
 app.use(haltOnTimedout);
 
+//Initialize pool of child process for phrases management
+phraseProcessManager.initializeProcesses();
+
 if(app.get('env') === 'development') {
     app.use(require('./routes/test'));
+    app.use(require('./routes/process'));
 }
 
 /// catch 404 and forward to error handler
@@ -81,8 +87,15 @@ app.use(NotFundHandler);
 var errorHandler = function(err, req, res, next) {
     var status = err.status || 500;
     if (err.timeout) {
-        status = 408;
+        status = ERROR_CODE_SERVER_TIMEOUT;
     }
+
+    if(req.__proc){
+      req.__proc.end();
+      //Close the process of the phrase
+      //TODO: see if this behaves correctly
+    }
+
     res.status(status);
     res.json({
         httpStatus: status,
@@ -92,13 +105,18 @@ var errorHandler = function(err, req, res, next) {
         // will print stacktrace
         trace: (app.get('env') === 'development' ? err.stack : '')
     });
-    console.error(err);
+
+    console.error(err, err.stack);
     next(err);
 };
+
 app.use(errorHandler);
 
+
 process.on('uncaughtException', function(err) {
+  console.log(err);
     if (!err || err.message !== 'Can\'t set headers after they are sent.') {
+        console.log('err');
         process.exit(1);
     }
 });
