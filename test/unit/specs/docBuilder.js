@@ -3,7 +3,7 @@
 var docBuilder = require('../../../src/lib/docBuilder.js'),
     chai = require('chai'),
     expect = chai.expect,
-    config = require('../../../src/config/config.json'),
+    config = require('../../../src/config/config'),
     assert = chai.assert;
 
 var getPhraseWithoutDoc = function() {

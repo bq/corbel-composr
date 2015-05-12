@@ -7,7 +7,7 @@ var phraseManager = require('./phraseManager'),
     amqp = require('amqplib'),
     uuid = require('uuid'),
     ComposerError = require('./composerError'),
-    config = require('../config/config.json');
+    config = require('../config/config');
 
 var worker = function() {
     var connUrl = 'amqp://' + config['rabbitmq.username'] + ':' + config['rabbitmq.password'] + '@' + config['rabbitmq.host'] + ':' + config['rabbitmq.port'];

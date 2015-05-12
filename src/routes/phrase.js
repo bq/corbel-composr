@@ -2,7 +2,7 @@
 
 var express = require('express'),
     corbel = require('corbel-js'),
-    config = require('../config/config.json'),
+    config = require('../config/config'),
     router = express.Router(),
     connection = require('../lib/corbelConnection'),
     phraseManager = require('../lib/phraseManager'),
@@ -51,7 +51,7 @@ var express = require('express'),
  */
 router.put('/phrase', function(req, res, next) {
 
-    var authorization = auth.getAuth(req);    
+    var authorization = auth.getAuth(req);
 
     var phrase = req.body || {};
 

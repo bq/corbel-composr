@@ -4,11 +4,11 @@
 
 var validate = require('./validate'),
     corbel = require('corbel-js'),
-    config = require('../config/config.json'),
+    config = require('../config/config'),
     phrases = require('./phrasesData'),
     ComposerError = require('./composerError'),
     tripwire = require('tripwire'),
-    _ = require('underscore');
+    _ = require('lodash');
 
 var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDriver){
   var domain = require('domain').create();

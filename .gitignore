@@ -3,3 +3,4 @@ public/components
 .sass-cache
 *.log
 .tmp
+src/config/development.json

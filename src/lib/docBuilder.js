@@ -1,10 +1,10 @@
 'use strict';
 
-var config = require('../config/config.json'),
+var config = require('../config/config'),
     raml = require('raml-parser'),
     YAML = require('yamljs'),
     validate = require('./validate'),
-    _ = require('underscore');
+    _ = require('lodash');
 
 var buildPhraseDefinition = function(phrase) {
     var doc = {};

@@ -1,8 +1,8 @@
 'use strict';
 
 var corbel = require('corbel-js'),
-    config = require('../config/config.json'),
-    _ = require('underscore'),
+    config = require('../config/config'),
+    _ = require('lodash'),
     ComposerError = require('./composerError');
 
 var PHRASES_COLLECTION = 'composr:Phrase';

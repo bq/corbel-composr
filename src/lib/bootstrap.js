@@ -5,7 +5,7 @@ var express = require('express'),
   phraseManager = require('./phraseManager'),
   connection = require('./corbelConnection'),
   q = require('q'),
-  config = require('../config/config.json');
+  config = require('../config/config');
 
 var PAGE_SIZE = 10;
 
