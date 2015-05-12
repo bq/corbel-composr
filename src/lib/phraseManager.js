@@ -6,18 +6,25 @@ var validate = require('./validate'),
     corbel = require('corbel-js'),
     config = require('../config/config.json'),
     phrases = require('./phrasesData'),
+    ComposerError = require('./composerError'),
     tripwire = require('tripwire'),
     _ = require('underscore');
 
 var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDriver){
   var domain = require('domain').create();
 
-  domain.on('error', function(err) {
-    console.log('domain:error', err);
+  domain.on('error', function(error) {
+    console.log('domain:error', error);
+    if (error === 'Blocked event loop.'){
+      var err = new ComposerError('error:custom', 'phrase timeout', 503);
+      next(err);
+    }else{
+      var err = new ComposerError('error:custom', 'uncaught error', 500);
+      next(err);
+    }
   });
 
   domain.run(function() {
-
     // set the limit of execution time to 10000 milliseconds
     tripwire.resetTripwire(config.timeout || 10000);
 
@@ -27,7 +34,8 @@ var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDri
     funct.apply(null, args);
 
     // clear the tripwire (in this case this code is never reached)
-    tripwire.clearTripwire();
+    var context = { timedout: true };
+    tripwire.clearTripwire(context);
   });
 };
 
@@ -67,8 +75,8 @@ var registerPhrase = function(router, phrase) {
 
                 var corbelDriver = corbel.getDriver(corbelConfig);
 
-                executePhrase(phrase[method].code, req, res, next, corbelDriver);
 
+                executePhrase(phrase[method].code, req, res, next, corbelDriver);
 
             });
         }
