@@ -9,6 +9,28 @@ var validate = require('./validate'),
     tripwire = require('tripwire'),
     _ = require('underscore');
 
+var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDriver){
+  var domain = require('domain').create();
+
+  domain.on('error', function(err) {
+    console.log('domain:error', err);
+  });
+
+  domain.run(function() {
+
+    // set the limit of execution time to 10000 milliseconds
+    tripwire.resetTripwire(config.timeout || 10000);
+
+    var funct = new Function('req', 'res', 'next', 'corbelDriver', phraseBody);
+    var args = [req, res, next, corbelDriver];
+
+    funct.apply(null, args);
+
+    // clear the tripwire (in this case this code is never reached)
+    tripwire.clearTripwire();
+  });
+};
+
 var registerPhrase = function(router, phrase) {
     validate.isValue(router, 'undefined:router');
     validate.isValue(phrase, 'undefined:phrase');
@@ -45,16 +67,8 @@ var registerPhrase = function(router, phrase) {
 
                 var corbelDriver = corbel.getDriver(corbelConfig);
 
-                // set the limit of execution time to 10000 milliseconds
-                tripwire.resetTripwire(config.timeout || 10000);
+                executePhrase(phrase[method].code, req, res, next, corbelDriver);
 
-                var funct = new Function('req', 'res', 'next', 'corbelDriver', phrase[method].code);
-                var args = [req, res, next, corbelDriver];
-
-                funct.apply(null, args);
-
-                // clear the tripwire (in this case this code is never reached)
-                tripwire.clearTripwire();
 
             });
         }
@@ -95,4 +109,5 @@ var getPhrases = function(domain) {
 
 module.exports.registerPhrase = registerPhrase;
 module.exports.unregisterPhrase = unregisterPhrase;
+module.exports.executePhrase = executePhrase;
 module.exports.getPhrases = getPhrases;
