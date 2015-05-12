@@ -22,4 +22,4 @@ RUN cd /src; npm install
 EXPOSE  3000
 
 # Enable corbel-composer
-CMD cd /src; npm start
+CMD cd /src; npm start; ./node_modules/pm2/bin/pm2 logs
