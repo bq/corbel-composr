@@ -51,7 +51,7 @@ app.use(cors({
 app.options('*', cors());
 
 app.use(timeout(config.timeout || 10000, {
-    status: 408
+    status: 503
 }));
 
 app.use(index);
@@ -81,7 +81,7 @@ app.use(NotFundHandler);
 var errorHandler = function(err, req, res, next) {
     var status = err.status || 500;
     if (err.timeout) {
-        status = 408;
+        status = 503;
     }
     res.status(status);
     res.json({
