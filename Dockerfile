@@ -6,10 +6,10 @@ MAINTAINER Silkroad Team <support-silkroad@bq.com>
 COPY . /src
 
 # Install dev dependencies
-RUN cd /src; npm install
+RUN cd /src; npm install; npm install -g pm2
 
 # Expose port
 EXPOSE  3000
 
 # Enable corbel-composer
-CMD cd /src; npm start
+CMD cd /src; npm start; pm2 logs
