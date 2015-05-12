@@ -26,6 +26,7 @@
     "restart": "node node_modules/pm2/bin/pm2 restart composer",
     "debug": "node-debug bin/composer",
     "clean": "rm -rf node_modules",
+    "logs": "node node_modules/pm2/bin/pm2 logs",
     "test": "grunt test"
   },
   "dependencies": {
