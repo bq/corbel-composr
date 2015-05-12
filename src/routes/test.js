@@ -54,7 +54,7 @@ router.get('/t2', function(req, res) {
 });
 
 
-router.get('/t2phrase', function(req, res) {
+router.get('/t2phrase', function(req, res, next) {
 
 
   var phrase = function phrase(req, res){
@@ -77,7 +77,7 @@ router.get('/t2phrase', function(req, res) {
   //remove the function wrapper and only send the body to the phraseProcessManager
   var entire = phrase.toString();
   var body = entire.slice(entire.indexOf('{') + 1, entire.lastIndexOf('}'));
-  phraseManager.executePhrase(body, req, res);
+  phraseManager.executePhrase(body, req, res, next);
 
 });
 
