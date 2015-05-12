@@ -22,25 +22,33 @@ router.get('/t1', function(req, res) {
 
 router.get('/t2', function(req, res) {
 
-    var tripwire = require('tripwire');
+    var domain = require('domain').create();
 
-    // set the limit of execution time to 2000 milliseconds
-    tripwire.resetTripwire(2000);
+    domain.on('error', function() {
+        console.log('domain:error');
+    });
 
-    var start = new Date();
-    var loops = 300000;
-    for (var i = 0; i < loops; i++) {
-        //process.nextTick();
-        console.log(i / loops);
-    }
+    domain.run(function() {
+        var tripwire = require('tripwire');
 
-    var end = new Date();
-    console.log('delay', end.valueOf() - start.valueOf());
+        // set the limit of execution time to 2000 milliseconds
+        tripwire.resetTripwire(1000);
 
-    res.send('Esto no debería verse');
+        var start = new Date();
+        var loops = 30000000000;
+        for (var i = 0; i < loops; i++) {
+            //process.nextTick();
+            //console.log(i / loops);
+        }
 
-    // clear the tripwire (in this case this code is never reached)
-    tripwire.clearTripwire();
+        var end = new Date();
+        console.log('delay', end.valueOf() - start.valueOf());
+
+        res.send('Esto no debería verse');
+
+        // clear the tripwire (in this case this code is never reached)
+        tripwire.clearTripwire();
+    });
 
 });
 
