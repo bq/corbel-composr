@@ -1,36 +1,47 @@
 'use strict';
 
-var request = require('request'),
+var request = require('supertest'),
     chai = require('chai'),
     expect = chai.expect;
 
-describe('Working:', function() {
+function test(app){
+  describe('Working:', function() {
 
-    it('calling a working composer', function(done) {
+      it('calling a working composer', function(done) {
 
-        request('http://localhost:3000', function(error, response, body) {
-            expect(response).to.be.an('object');
-            if (!error && response.statusCode === 200) {
-                return done();
-            } else {
-                return done(error || response);
-            }
-        });
+          request(app)
+            .get('/')
+            .expect(200)
+            .end(function(error, response) {
+              expect(response).to.be.an('object');
+              if (!error && response.statusCode === 200) {
+                  return done();
+              } else {
+                  return done(error || response);
+              }
+          });
 
-    });
+      });
 
-    it('responds when the phrase executes correctly', function(done) {
+      it('responds when the phrase executes correctly', function(done) {
 
-        request('http://localhost:3000/t3phrase', function(error, response, body) {
-            expect(response).to.be.an('object');
-            expect(JSON.parse(body).yes).to.equals('potatoe');
-            if (!error && response.statusCode === 200) {
-                return done();
-            } else {
-                return done(error || response);
-            }
-        });
+          request(app)
+            .get('/t3phrase')
+            .expect(200)
+            .end(function(error, response) {
+              expect(response).to.be.an('object');
+              expect(response.body.yes).to.equals('potatoe');
+              if (!error && response.statusCode === 200) {
+                  return done();
+              } else {
+                  return done(error || response);
+              }
+          });
 
-    });
+      });
 
-});
+  });
+
+}
+
+module.exports = test;

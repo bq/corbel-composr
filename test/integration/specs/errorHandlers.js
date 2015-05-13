@@ -1,36 +1,47 @@
 'use strict';
-var request = require('request'),
+var request = require('supertest'),
     chai = require('chai'),
     q = require('q'),
     expect = chai.expect;
 
-describe('When a request to composr has errors', function() {
+function test(app){
 
-    it('it fails with a 500 error', function(done) {
+  describe('When a request to composr has errors', function() {
 
-        request('http://localhost:3000/e1', function(error, response) {
+      it('it fails with a 500 error', function(done) {
 
-            expect(response).to.be.an('object');
-            if (response.statusCode === 500) {
-                return done();
-            } else {
-                return done(error || response);
-            }
+        request(app)
+          .get('/e1')
+          .expect(500)
+          .end(function(error, response) {
 
-        });
-    });
+              expect(response).to.be.an('object');
+              if (response.statusCode === 500) {
+                  return done();
+              } else {
+                  return done(error || response);
+              }
 
-    it('it fails with a 555 error', function(done) {
+          });
+      });
 
-        request('http://localhost:3000/e2', function(error, response) {
+      it('it fails with a 555 error', function(done) {
 
-            expect(response).to.be.an('object');
-            if (response.statusCode === 555) {
-                return done();
-            } else {
-                return done(error || response);
-            }
+        request(app)
+          .get('/e2')
+          .expect(555)
+          .end(function(error, response) {
 
-        });
-    });
-});
+              expect(response).to.be.an('object');
+              if (response.statusCode === 555) {
+                  return done();
+              } else {
+                  return done(error || response);
+              }
+
+          });
+      });
+  });
+}
+
+module.exports = test;

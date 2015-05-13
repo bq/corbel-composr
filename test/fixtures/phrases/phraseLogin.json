@@ -1,0 +1,16 @@
+{
+    "url": "logindemo",
+    "post": {
+        "code": "res.render('index', {title: 'hello world'});",
+        "doc": {
+            "description": "Phrase for login",
+            "queryParameters": {
+                "param1": {
+                    "type": "number",
+                    "description": "Param description",
+                    "default": 0
+                }
+            }
+        }
+    }
+}
