@@ -64,6 +64,7 @@ router.put('/phrase', function(req, res, next) {
         phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
 
         corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
+            res.set('Location', 'phrase/' + phrase.id);
             res.send(response.status, response.data);
         }).catch(function(error) {
             next(new ComposerError('error:phrase:create', error, error.status));
