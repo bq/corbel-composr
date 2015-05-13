@@ -29,7 +29,7 @@ A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) wit
   ```
 
 - run server
-  
+
   ```
   corbel-composer
   ```
@@ -57,7 +57,7 @@ A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) wit
             "description": "Phrase description",
             "queryParameters": {
                 "param1": {
-                    "type": "Number",
+                    "type": "number",
                     "description": "Param description",
                     "default": 0
                 }
@@ -71,10 +71,10 @@ A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) wit
                                 "description": "A canonical song",
                                 "properties": {
                                     "title": {
-                                        "type": "String"
+                                        "type": "string"
                                     },
                                     "artist": {
-                                        "type": "String"
+                                        "type": "string"
                                     }
                                 },
                                 "required": ["title", "artist"]
