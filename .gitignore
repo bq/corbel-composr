@@ -4,3 +4,6 @@ public/components
 *.log
 .tmp
 src/config/development.json
+test/fixtures/client/_clientAdmin.json
+test/fixtures/client/_clientDemo.json
+test/fixtures/user/_userDemo.json
