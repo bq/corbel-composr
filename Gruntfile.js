@@ -25,6 +25,7 @@ module.exports = function(grunt) {
                 src: [
                     'test/**',
                     'src/**',
+                    'bin/**',
                     // express files
                     'public/**',
                     'package.json'
@@ -120,7 +121,7 @@ module.exports = function(grunt) {
             },
             ci: {
                 options: {
-                    reporter: 'spec',
+                    reporter: 'spec'
                 },
                 src: ['test/runner.js']
             }

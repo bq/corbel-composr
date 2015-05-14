@@ -237,3 +237,72 @@ npm install -g node-inspector
   ```
   npm run test:debug
   ```
+
+  # Example code for phrases
+
+  ## Login a client
+
+  ```javascript
+  corbelDriver.iam.token().create().then(function(response) {
+    res.send(response);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+  ```
+
+  ## Login a user
+
+  ```javascript
+  //Extract the clientId from the auth token
+  var jwtDecoded = corbel.jwt.decode(req.get('Authorization'));
+  var clientId = jwtDecoded.clientId;
+
+  //Claims object for log the user in
+  var claims = {
+    'iss' : clientId,
+    'scopes' : req.body.scopes,
+    'basic_auth.username' : req.body.username,
+    'basic_auth.password' : req.body.password
+  };
+
+  console.log('claims', claims, clientId);
+
+  var tokenObject;
+
+  //Request a session token for the user
+  corbelDriver.iam.token().create({
+      claims : claims
+    })
+    .then(function(response){
+      console.log('token', response);
+
+      //Tenemos el token de usuario, asimismo tambien el refresh y el expires
+      tokenObject = response.data;
+
+      //Recreamos el corbelDriver con los settings del usuario
+      var corbelDriver = corbel.generateDriver({
+        iamToken : tokenObject
+      });
+
+      //Obtain the logged user data
+      return corbelDriver.iam.user('me').get();
+    })
+    .then(function(response){
+      console.log('user', response.data);
+      res.send({
+        tokenObject: tokenObject,
+        user: response.data
+      });
+    })
+    .catch(function(err){
+      console.log('error', err);
+      res.status(500).send(err);
+    });
+  ```
+
+  ## Return current user info
+
+  ```
+  corbelDriver.iam.user('me').get();
+  ```
