@@ -1,4 +1,4 @@
-FROM    devopsbq/base:1.0
+FROM    devopsbq/base:1.1
 # Author / Maintainer
 MAINTAINER Silkroad Team <support-silkroad@bq.com>
 
