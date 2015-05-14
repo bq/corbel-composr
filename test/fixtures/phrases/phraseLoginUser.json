@@ -1,0 +1,9 @@
+{
+    "url": "loginuser",
+    "post": {
+        "code": "console.log('ayut', req.get('authorization'));var jwtDecoded=corbel.jwt.decode(req.get('Authorization')),clientId=jwtDecoded[1].iss,claims={iss:clientId,scopes:req.body.scopes,'basic_auth.username':req.body.username,'basic_auth.password':req.body.password};console.log('claims',claims,clientId),console.log('ayut',req.get('authorization'));var tokens;corbelDriver.iam.token().create({claims:claims}).then(function(e){console.log('response obtained from token creation',e.data),console.log('..........'),tokens=e.data;var o=tokens.access_token,s=corbel.generateDriver({iamToken:o});return s.iam.user('me').get()}).then(function(e){console.log('optained user data',e.data),res.send({tokens:tokens,user:e.data})})['catch'](function(e){console.log('An error has happened',e),res.send(500,e)});",
+        "doc": {
+            "description": "Phrase for login a user"
+        }
+    }
+}

@@ -3,15 +3,7 @@ var request = require('supertest'),
     chai = require('chai'),
     expect = chai.expect;
 
-var clientData = require('../../fixtures/client/clientAdmin.json');
-
-//Use environment variables (if jenkins provided those), fixtures ones other way.
-var adminClientData = {
-  clientId : process.env.COMPOSR_TEST_ADMINUSER_CLIENTID ? process.env.COMPOSR_TEST_ADMINUSER_CLIENTID : clientData.clientId,
-  clientSecret : process.env.COMPOSR_TEST_ADMINUSER_CLIENTSECRET ? process.env.COMPOSR_TEST_ADMINUSER_CLIENTSECRET : clientData.clientSecret,
-  scopes : process.env.COMPOSR_TEST_ADMINUSER_SCOPES ? process.env.COMPOSR_TEST_ADMINUSER_SCOPES : clientData.scopes
-};
-
+var adminClientData = require('../utils/client').getAdminClient();
 var clientToken, phraseLocationForDeletion;
 
 function test(app){
