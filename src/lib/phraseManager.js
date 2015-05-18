@@ -8,9 +8,10 @@ var validate = require('./validate'),
     phrases = require('./phrasesData'),
     ComposerError = require('./composerError'),
     tripwire = require('tripwire'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    q = require('q');
 
-var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDriver){
+var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDriver, corbel, lodash, q){
   var domain = require('domain').create();
 
   domain.on('error', function(error) {
@@ -29,8 +30,8 @@ var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDri
     // set the limit of execution time to 10000 milliseconds
     tripwire.resetTripwire(config.timeout || 10000);
 
-    var funct = new Function('req', 'res', 'next', 'corbelDriver', phraseBody);
-    var args = [req, res, next, corbelDriver];
+    var funct = new Function('req', 'res', 'next', 'corbelDriver', 'corbel', '_', 'q', phraseBody);
+    var args = [req, res, next, corbelDriver, corbel, lodash, q];
 
     funct.apply(null, args);
 
@@ -71,13 +72,20 @@ var registerPhrase = function(router, phrase) {
                     };
                 }
 
-                var corbelConfig = config['corbel.driver.options'];
-                corbelConfig.iamToken = iamToken;
-
-                var corbelDriver = corbel.getDriver(corbelConfig);
 
 
-                executePhrase(phrase[method].code, req, res, next, corbelDriver);
+                var driverObtainFunction = function(defaults){
+                  return function(options){
+                    return corbel.getDriver(_.defaults(options, defaults));
+                  };
+                };
+
+                corbel.generateDriver = driverObtainFunction(config['corbel.driver.options']);
+                var corbelDriver = corbel.generateDriver({
+                  iamToken: iamToken
+                });
+
+                executePhrase(phrase[method].code, req, res, next, corbelDriver, corbel, _, q);
 
             });
         }
