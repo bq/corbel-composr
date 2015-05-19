@@ -123,7 +123,7 @@ router.post('/token', function(req, res, next) {
     corbelDriver.iam.token().create().then(function(response) {
         res.send(response);
     }).catch(function(error) {
-        next(new ComposerError('error:token', error.message, error.status));
+        next(new ComposerError('error:token', error, error.status));
     });
 
 });
