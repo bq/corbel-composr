@@ -66,19 +66,7 @@ A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) wit
                 "200": {
                     "body": {
                         "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "description": "A canonical song",
-                                "properties": {
-                                    "title": {
-                                        "type": "string"
-                                    },
-                                    "artist": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": ["title", "artist"]
-                            }
+                            "schema": "{\n\t"$schema": "http://json-schema.org/schema",\n\t"type": "object",\n\t"description": "A canonical song",\n\t"properties": {\n\t\t"title": {\n\t\t\t"type": "String"\n\t\t},\n\t\t"artist": {\n\t\t\t"type": "String"\n\t\t}\n\t},\n\t"required": ["title", "artist"]\n}"
                         }
                     }
                 }
