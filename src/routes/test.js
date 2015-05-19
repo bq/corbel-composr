@@ -3,6 +3,7 @@
 var express = require('express'),
     router = express.Router(),
     ComposerError = require('../lib/composerError'),
+    compoSR = require('../lib/compoSR'),
     phraseManager = require('../lib/phraseManager');
 
 router.get('/e1', function(res) {
@@ -14,11 +15,9 @@ router.get('/e2', function() {
 });
 
 router.get('/t1', function(req, res) {
-
-    setTimeout(function() {
-        res.send('Esto no debería verse');
-    }, 100000);
-
+  setTimeout(function() {
+      res.send('Esto no debería verse');
+  }, 100000);
 });
 
 router.get('/t2', function(req, res) {
@@ -96,6 +95,21 @@ router.get('/t3phrase', function(req, res) {
   var entire = phrase.toString();
   var body = entire.slice(entire.indexOf('{') + 1, entire.lastIndexOf('}'));
   phraseManager.executePhrase(body, req, res);
+
+});
+
+router.get('/t4snippet', function(req, res) {
+
+  var phrase = function phrase(){
+    //Code of the phrase
+    compoSR.run('sendJson', { res : res });
+  };
+
+  var snippetsRunner = compoSR.getSnippetsRunner('silkroad-qa');
+  //remove the function wrapper and only send the body to the phraseProcessManager
+  var entire = phrase.toString();
+  var body = entire.slice(entire.indexOf('{') + 1, entire.lastIndexOf('}'));
+  phraseManager.executePhrase(body, req, res, null, null, null, snippetsRunner);
 
 });
 
