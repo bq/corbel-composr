@@ -35,7 +35,7 @@ var getPhrase = function(driver, phrasesCollection, phrases, promise, pageNumber
 };
 
 
-var bootstrap = function() {
+var bootstrapPhrases = function() {
   process.env.PHRASES_COLLECTION = 'composr:Phrase';
 
   connection.driver.then(function(driver) {
@@ -47,14 +47,45 @@ var bootstrap = function() {
     }).
     fail(function(error) {
       console.error('error:bootstrap:load', error);
-      setTimeout(bootstrap, config['bootstrap.retrytimeout']);
+      setTimeout(bootstrapPhrases, config['bootstrap.retrytimeout']);
     });
 
   }).catch(function(error) {
     console.error('error:bootstrap:driver', error);
   });
+
 };
 
-bootstrap();
+function bootstrapSnippets(){
+  //TODO: obtain snippets
+}
 
-module.exports = router;
+function getSnippets(){
+  return {
+    'silkroad-qa' : [
+      {
+        name : 'log',
+        code : 'console.log("ey");'
+      },
+      {
+        name : 'example',
+        code : 'this.log();'
+      },
+      {
+        name : 'sendJson',
+        code : 'compoSR.run("json", params)'
+      },
+      {
+        name : 'json',
+        code: 'params.res.send({ hello2 : params.message})'
+      }
+    ]
+  };
+}
+
+module.exports = {
+  router: router,
+  phrases : bootstrapPhrases,
+  snippets : bootstrapSnippets,
+  getSnippets : getSnippets
+};

@@ -238,71 +238,119 @@ npm install -g node-inspector
   npm run test:debug
   ```
 
-  # Example code for phrases
+# Example code for phrases
 
-  ## Login a client
+## Login a client
 
-  ```javascript
-  corbelDriver.iam.token().create().then(function(response) {
-    res.send(response);
+```javascript
+corbelDriver.iam.token().create().then(function(response) {
+  res.send(response);
+})
+.catch(function(err){
+  res.status(500).send(err);
+});
+```
+
+## Login a user
+
+```javascript
+//Extract the clientId from the auth token
+var jwtDecoded = corbel.jwt.decode(req.get('Authorization'));
+var clientId = jwtDecoded.clientId;
+
+//Claims object for log the user in
+var claims = {
+  'iss' : clientId,
+  'scopes' : req.body.scopes,
+  'basic_auth.username' : req.body.username,
+  'basic_auth.password' : req.body.password
+};
+
+console.log('claims', claims, clientId);
+
+var tokenObject;
+
+//Request a session token for the user
+corbelDriver.iam.token().create({
+    claims : claims
+  })
+  .then(function(response){
+    console.log('token', response);
+
+    //Tenemos el token de usuario, asimismo tambien el refresh y el expires
+    tokenObject = response.data;
+
+    //Recreamos el corbelDriver con los settings del usuario
+    var corbelDriver = corbel.generateDriver({
+      iamToken : tokenObject
+    });
+
+    //Obtain the logged user data
+    return corbelDriver.iam.user('me').get();
+  })
+  .then(function(response){
+    console.log('user', response.data);
+    res.send({
+      tokenObject: tokenObject,
+      user: response.data
+    });
   })
   .catch(function(err){
+    console.log('error', err);
     res.status(500).send(err);
   });
-  ```
+```
 
-  ## Login a user
+## Return current user info
 
-  ```javascript
-  //Extract the clientId from the auth token
-  var jwtDecoded = corbel.jwt.decode(req.get('Authorization'));
-  var clientId = jwtDecoded.clientId;
+```javascript
+corbelDriver.iam.user('me').get();
+```
 
-  //Claims object for log the user in
-  var claims = {
-    'iss' : clientId,
-    'scopes' : req.body.scopes,
-    'basic_auth.username' : req.body.username,
-    'basic_auth.password' : req.body.password
-  };
+# Code snippets
 
-  console.log('claims', claims, clientId);
+Code snippets are a minor form of `phrases`, they are accesible through the `compoSR` object on your phrases.
 
-  var tokenObject;
+You can run your code snippets by executing `compoSR.run('snippetName', params);` where `params` is anything you want it to be. From your snippets you will be allowed to access to the `params` variable and the `compoSR` object itself.
 
-  //Request a session token for the user
-  corbelDriver.iam.token().create({
-      claims : claims
-    })
-    .then(function(response){
-      console.log('token', response);
+`compoSR` will be allowed to access any snippets defined in your domain and your parent domains.
 
-      //Tenemos el token de usuario, asimismo tambien el refresh y el expires
-      tokenObject = response.data;
+For example, `_silkroad:composer` will be able to access all the `_silkroad:composer` snippets and all the `_silkroad` snippets. If a snippet has the same name on both of the domains, the one with a deepest hierarchy will overwrite the first one.
 
-      //Recreamos el corbelDriver con los settings del usuario
-      var corbelDriver = corbel.generateDriver({
-        iamToken : tokenObject
-      });
+Let's take a look at it:
+  - Given this snippets:
 
-      //Obtain the logged user data
-      return corbelDriver.iam.user('me').get();
-    })
-    .then(function(response){
-      console.log('user', response.data);
-      res.send({
-        tokenObject: tokenObject,
-        user: response.data
-      });
-    })
-    .catch(function(err){
-      console.log('error', err);
-      res.status(500).send(err);
-    });
-  ```
+```javascript
+var snippets = {
+  'domainName' : [
+    {
+      name : 'myFunction',
+      code : 'compoSR.run("hello", "world")'
+    },
+    {
+      name : 'hello',
+      code: 'console.log(params);'
+    }
+  ],
+  'domainName:childDomain' : [
+    {
+      name : 'hello',
+      code: 'console.log("I am the child: ", params);'
+    }
+  ],
+}
+```
 
-  ## Return current user info
+  - If we run the `myFunction` snippet, accesing from a client that belongs to the domain named `domainName:childDomain` it will show this:
 
-  ```
-  corbelDriver.iam.user('me').get();
-  ```
+```javascript
+compoSR.run('myFunction');
+//=> I am the child: world
+```
+
+  - If the client or user belongs to the domain named `domainName` and we execute the same function we'll get:
+  
+```javascript
+compoSR.run('myFunction');
+//=> hello world
+```
