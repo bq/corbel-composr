@@ -1,17 +1,17 @@
 'use strict';
 
-/* jshint evil:true */
 
 var validate = require('./validate'),
     corbel = require('corbel-js'),
     config = require('../config/config'),
     phrases = require('./phrasesData'),
     ComposerError = require('./composerError'),
+    engine = require('./engine'),
     tripwire = require('tripwire'),
     _ = require('lodash'),
     q = require('q');
 
-var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDriver, corbel, lodash, q){
+var executePhrase = function executePhrase(context, compoSR, phraseBody){
   var domain = require('domain').create();
 
   domain.on('error', function(error) {
@@ -19,10 +19,10 @@ var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDri
     var err;
     if (error === 'Blocked event loop.'){
       err = new ComposerError('error:custom', 'phrase timeout', 503);
-      next(err);
+      context.next(err);
     }else{
       err = new ComposerError('error:custom', 'uncaught error', 500);
-      next(err);
+      context.next(err);
     }
   });
 
@@ -30,14 +30,13 @@ var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDri
     // set the limit of execution time to 10000 milliseconds
     tripwire.resetTripwire(config.timeout || 10000);
 
-    var funct = new Function('req', 'res', 'next', 'corbelDriver', 'corbel', '_', 'q', phraseBody);
-    var args = [req, res, next, corbelDriver, corbel, lodash, q];
-
-    funct.apply(null, args);
+    /* jshint evil:true */
+    var funct = Function.apply(null, _.keys(context).concat('compoSR', phraseBody));
+    funct.apply(null, _.values(context).concat(compoSR));
 
     // clear the tripwire (in this case this code is never reached)
-    var context = { timedout: true };
-    tripwire.clearTripwire(context);
+    var ctx = { timedout: true };
+    tripwire.clearTripwire(ctx);
   });
 };
 
@@ -72,20 +71,32 @@ var registerPhrase = function(router, phrase) {
                     };
                 }
 
-
-
                 var driverObtainFunction = function(defaults){
                   return function(options){
                     return corbel.getDriver(_.defaults(options, defaults));
                   };
                 };
 
+
                 corbel.generateDriver = driverObtainFunction(config['corbel.driver.options']);
                 var corbelDriver = corbel.generateDriver({
                   iamToken: iamToken
                 });
 
-                executePhrase(phrase[method].code, req, res, next, corbelDriver, corbel, _, q);
+                var context = {
+                  req: req,
+                  res: res,
+                  next: next,
+                  corbelDriver: corbelDriver,
+                  corbel: corbel,
+                  _: _,
+                  q: q
+                };
+                //We have left compoSR alone, without including it in the context because someday we might
+                //want to have compoSR use the context for binding req, res... to the snippets
+                var compoSR = engine.getCompoSR(domain);
+
+                executePhrase(context, compoSR, phrase[method].code);
 
             });
         }

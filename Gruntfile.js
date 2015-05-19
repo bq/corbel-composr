@@ -79,6 +79,10 @@ module.exports = function(grunt) {
                 options: {
                     livereload: reloadPort
                 }
+            },
+            test : {
+              files: ['test/**/*.js', 'src/lib/**/*.js'],
+              tasks: ['mochaTest:unit']
             }
         },
 
@@ -124,6 +128,12 @@ module.exports = function(grunt) {
                     reporter: 'spec'
                 },
                 src: ['test/runner.js']
+            },
+            unit: {
+                options: {
+                    reporter: 'spec'
+                },
+                src: ['test/unit/test-suite.js']
             }
         },
 
@@ -211,5 +221,10 @@ module.exports = function(grunt) {
     grunt.registerTask('test', [
         'jshint',
         'mochaTest:ci'
+    ]);
+
+    grunt.registerTask('tdd', [
+        'mochaTest:unit',
+        'watch:test'
     ]);
 };
