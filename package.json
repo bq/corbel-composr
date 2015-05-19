@@ -74,6 +74,7 @@
     "mocha": "~2.2.1",
     "mocha-lcov-reporter": "0.0.2",
     "request": "^2.53.0",
+    "sinon": "^1.14.1",
     "supertest": "^1.0.0",
     "time-grunt": "~1.1.0",
     "travis-cov": "^0.2.5"
