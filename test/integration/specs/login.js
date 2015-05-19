@@ -48,7 +48,6 @@ function test(app) {
             var domain = phraseClientLoginLocation.replace('phrase/', '').split('!')[0];
             clientLoginPhraseUrl = '/' + domain + '/' + phraseEndpoint;
             this.timeout(30000);
-            console.log(demoAppClientData);
 
             //let's wait till corbel triggers the event to register the phrase in composr
             //TODO: use any tool to know when it happens
@@ -113,8 +112,9 @@ function test(app) {
                             expect(response.body).to.be.an('object');
                             expect(response.body.tokenObject).to.be.an('object');
                             expect(response.body.user).to.be.an('object');
-                            console.log('tokenObject', response.body.tokenObject);
                             expect(response.body.tokenObject.accessToken).to.exist;
+                            expect(response.body.tokenObject.expiresAt).to.exist;
+                            expect(response.body.tokenObject.refreshToken).to.exist;
                             demoAppClientToken = response.body.tokenObject.accessToken;
                             done(err);
                         });
@@ -123,7 +123,6 @@ function test(app) {
 
             });
 
-            //TODO: return the user data
         });
 
 

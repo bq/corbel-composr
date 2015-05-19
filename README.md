@@ -266,8 +266,6 @@ npm install -g node-inspector
     'basic_auth.password' : req.body.password
   };
 
-  console.log('claims', claims, clientId);
-
   var tokenObject;
 
   //Request a session token for the user
@@ -275,7 +273,6 @@ npm install -g node-inspector
       claims : claims
     })
     .then(function(response){
-      console.log('token', response);
 
       //Tenemos el token de usuario, asimismo tambien el refresh y el expires
       tokenObject = response.data;
@@ -289,14 +286,12 @@ npm install -g node-inspector
       return corbelDriver.iam.user('me').get();
     })
     .then(function(response){
-      console.log('user', response.data);
       res.send({
         tokenObject: tokenObject,
         user: response.data
       });
     })
     .catch(function(err){
-      console.log('error', err);
       res.status(500).send(err);
     });
   ```

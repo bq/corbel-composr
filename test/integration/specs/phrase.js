@@ -4,7 +4,8 @@ var request = require('supertest'),
     expect = chai.expect;
 
 var adminClientData = require('../utils/client').getAdminClient();
-var clientToken, phraseLocationForDeletion;
+var phrase = require('../../fixtures/phrases/helloWorld.json');
+var clientToken;
 
 function test(app){
   describe('Login a client for creating phrases', function(){
@@ -27,7 +28,6 @@ function test(app){
 
     it('it registers a new phrase', function(done) {
         this.timeout(30000);
-        var phrase = require('../../fixtures/phrases/helloWorld.json');
 
         request(app)
           .put('/phrase')
@@ -36,8 +36,7 @@ function test(app){
           .expect(204)
           .end(function(err, response){
             expect(response.headers).to.exist;
-            phraseLocationForDeletion = response.headers['location'];
-            expect(phraseLocationForDeletion.length).to.be.above(0);
+            expect(response.headers['location'].length).to.be.above(0);
             done(err);
           });
     });
@@ -48,7 +47,7 @@ function test(app){
     it('it deletes a phrase', function(done) {
 
         request(app)
-          .del('/' + phraseLocationForDeletion)
+          .del('/phrase/' + phrase.url)
           .set('Authorization', clientToken)
           .expect(204)
           .end(function(err, response){
