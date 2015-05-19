@@ -1,9 +1,18 @@
 {
-    "url": "loginuser",
-    "post": {
-        "code": "var jwtDecoded=corbel.jwt.decode(req.get('Authorization')),clientId=jwtDecoded.clientId,claims={iss:clientId,scopes:req.body.scopes,'basic_auth.username':req.body.username,'basic_auth.password':req.body.password};console.log('claims',claims,clientId);var tokenObject;corbelDriver.iam.token().create({claims:claims}).then(function(e){console.log('token',e),tokenObject=e.data;var o=corbel.generateDriver({iamToken:tokenObject});return o.iam.user('me').get()}).then(function(e){console.log('user',e.data),res.send({tokenObject:tokenObject,user:e.data})})['catch'](function(e){console.log('error',e),res.status(500).send(e)});",
-        "doc": {
-            "description": "Phrase for login a user"
-        }
-    }
+	"url": "loginuser",
+	"post": {
+		"code": "var jwtDecoded=corbel.jwt.decode(req.get('Authorization')),clientId=jwtDecoded.clientId,claims={iss:clientId,scopes:req.body.scopes,'basic_auth.username':req.body.username,'basic_auth.password':req.body.password};console.log('claims',claims,clientId);var tokenObject;corbelDriver.iam.token().create({claims:claims}).then(function(e){console.log('token',e),tokenObject=e.data;var o=corbel.generateDriver({iamToken:tokenObject});return o.iam.user('me').get()}).then(function(e){console.log('user',e.data),res.send({tokenObject:tokenObject,user:e.data})})['catch'](function(e){console.log('error',e),res.status(500).send(e)});",
+		"doc": {
+			"description": "Phrase for login a user",
+			"responses": {
+				"200": {
+					"body": {
+						"application/json": {
+							"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR login response\",\n\t\"properties\": {\n\t\t\"token\": {\n\t\t\t\"type\": \"object\",\n\t\t\t\"description\": \"CompoSR login response\",\n\t\t\t\"properties\": {\n\t\t\t\t\"accessToken\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"descrption\": \"accessToken to send in every authorized request\"\n\t\t\t\t},\n\t\t\t\t\"expiresAt\": {\n\t\t\t\t\t\"type\": \"number\",\n\t\t\t\t\t\"descrption\": \"epoch time until token expiration\"\n\t\t\t\t},\n\t\t\t\t\"refreshToken\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"descrption\": \"refreshToken to send to renew an accessToken\"\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"user\": {\n\t\t\t\"type\": \"object\",\n\t\t\t\"description\": \"User object\",\n\t\t\t\"properties\": {\n\t\t\t\t\"firstName\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"description\": \"User firstName\"\n\t\t\t\t},\n\t\t\t\t\"lastName\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"description\": \"User lastName\"\n\t\t\t\t},\n\t\t\t\t\"email\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"description\": \"User email\"\n\t\t\t\t},\n\t\t\t\t\"properties\": {\n\t\t\t\t\t\"type\": \"object\",\n\t\t\t\t\t\"description\": \"Any custom propierties attached to user\"\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t},\n\t\"required\": [\"token\", \"user\"]\n}\n"
+						}
+					}
+				}
+			}
+		}
+	}
 }
