@@ -16,6 +16,11 @@ var buildPhraseDefinition = function(phrase) {
         if (phrase[method]) {
             validate.isValue(phrase[method].doc, 'undefined:phrase:' + method + ':doc');
             doc[url][method] = phrase[method].doc;
+
+            // oauth_2_0 has specific type for common header documentation
+            if (phrase[method].doc && phrase[method].doc.securedBy && phrase[method].doc.securedBy.indexOf('oauth_2_0') !== -1) {
+                doc[url].type = 'secured';
+            }
         }
     });
 
@@ -42,6 +47,35 @@ var buildDefinition = function(domain, phrases) {
         '---',
         'title: ' + domain,
         'baseUri: ' + urlBase + domain,
+        'securitySchemes:',
+        '    - oauth_2_0:',
+        '        description: Corbel supports OAuth 2.0 for authenticating all API requests.',
+        '        type: OAuth 2.0',
+        '        describedBy:',
+        '            headers:',
+        '                Authorization:',
+        '                    description: Used to send a valid OAuth 2 access token.',
+        '                    type: string',
+        '            responses:',
+        '                401:',
+        '                    description: Bad or expired token. To fix, you should re-authenticate the user.',
+        '        settings:',
+        '            authorizationUri: https://oauth.corbel.io/v1.0/oauth/authorize',
+        '            accessTokenUri: https://iam.corbel.io/v1.0/oauth/token',
+        '            authorizationGrants: [ code, token ]',
+        // workaround to show authorization headers in html doc
+        'resourceTypes:',
+        '    - secured:',
+        '        get?: &common',
+        '            headers:',
+        '                Authorization:',
+        '                    description: Token to access secured resources',
+        '                    type: string',
+        '                    required: true',
+        '        post?: *common',
+        '        patch?: *common',
+        '        put?: *common',
+        '        delete?: *common',
         YAML.stringify(doc, 4)
     ].join('\n');
 

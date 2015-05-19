@@ -95,7 +95,7 @@ module.exports = function(grunt) {
                     quiet: true,
                     captureFile: '.tmp/coverage/coverage.html'
                 },
-                src: ['.tmp/coverage/test/runner.coverage.js']
+                src: ['.tmp/coverage/test/runner.js']
             },
             coveralls: {
                 options: {
@@ -103,13 +103,13 @@ module.exports = function(grunt) {
                     quiet: true,
                     captureFile: '.tmp/coverage/lcov.info'
                 },
-                src: ['.tmp/coverage/test/runner.coverage.js']
+                src: ['.tmp/coverage/test/runner.js']
             },
             'travis-cov': {
                 options: {
                     reporter: 'travis-cov'
                 },
-                src: ['.tmp/coverage/test/runner.coverage.js']
+                src: ['.tmp/coverage/test/runner.js']
             },
             tap: {
                 options: {
