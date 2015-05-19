@@ -83,6 +83,11 @@ var worker = function() {
     });
 };
 
-worker();
 
-module.exports = router;
+
+module.exports = {
+  router : router,
+  init : function(){
+    worker();
+  }
+};

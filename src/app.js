@@ -6,12 +6,8 @@ var express = require('express'),
     logger = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
-    index = require('./routes/index'),
-    doc = require('./routes/doc'),
-    phrase = require('./routes/phrase'),
-    bootstrap = require('./lib/bootstrap'),
+    compoSR = require('./lib/compoSR'),
     ComposerError = require('./lib/composerError'),
-    worker = require('./lib/worker'),
     config = require('./config/config'),
     timeout = require('connect-timeout'),
     responseTime = require('response-time'),
@@ -55,11 +51,9 @@ app.options('*', cors());
 app.use(timeout(config.timeout || DEFAULT_TIMEOUT, {
     status: ERROR_CODE_SERVER_TIMEOUT
 }));
-app.use(index);
-app.use(bootstrap);
-app.use(worker);
-app.use(phrase);
-app.use(doc);
+
+//Init compoSR middlewares
+compoSR.init(app);
 
 var haltOnTimedout = function(req, res, next) {
     if (!req.timedout) {
@@ -67,12 +61,6 @@ var haltOnTimedout = function(req, res, next) {
     }
 };
 app.use(haltOnTimedout);
-
-
-if(app.get('env') === 'development') {
-    app.use(require('./routes/test'));
-  //  app.use(require('./routes/phrases'));
-}
 
 /// catch 404 and forward to error handler
 var NotFundHandler = function(req, res, next) {

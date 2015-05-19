@@ -7,11 +7,12 @@ var validate = require('./validate'),
     config = require('../config/config'),
     phrases = require('./phrasesData'),
     ComposerError = require('./composerError'),
+    compoSR = require('./compoSR'),
     tripwire = require('tripwire'),
     _ = require('lodash'),
     q = require('q');
 
-var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDriver, corbel, lodash, q){
+var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDriver, corbel,snippetsRunner, lodash, q){
   var domain = require('domain').create();
 
   domain.on('error', function(error) {
@@ -30,8 +31,8 @@ var executePhrase = function executePhrase(phraseBody, req, res, next, corbelDri
     // set the limit of execution time to 10000 milliseconds
     tripwire.resetTripwire(config.timeout || 10000);
 
-    var funct = new Function('req', 'res', 'next', 'corbelDriver', 'corbel', '_', 'q', phraseBody);
-    var args = [req, res, next, corbelDriver, corbel, lodash, q];
+    var funct = new Function('req', 'res', 'next', 'corbelDriver', 'corbel', 'compoSR', '_', 'q', phraseBody);
+    var args = [req, res, next, corbelDriver, corbel, snippetsRunner, lodash, q];
 
     funct.apply(null, args);
 
@@ -60,6 +61,8 @@ var registerPhrase = function(router, phrase) {
 
     var url = phrase.id.replace(/!/g, '/');
 
+    var snippetsRunner = compoSR.getSnippetsRunner(domain);
+
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
         if (phrase[method]) {
             console.log('Registering ' + method.toUpperCase() + ' ' + url);
@@ -72,20 +75,20 @@ var registerPhrase = function(router, phrase) {
                     };
                 }
 
-
-
                 var driverObtainFunction = function(defaults){
                   return function(options){
                     return corbel.getDriver(_.defaults(options, defaults));
                   };
                 };
 
+
+
                 corbel.generateDriver = driverObtainFunction(config['corbel.driver.options']);
                 var corbelDriver = corbel.generateDriver({
                   iamToken: iamToken
                 });
 
-                executePhrase(phrase[method].code, req, res, next, corbelDriver, corbel, _, q);
+                executePhrase(phrase[method].code, req, res, next, corbelDriver, corbel, snippetsRunner, _, q);
 
             });
         }
