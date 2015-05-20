@@ -3,6 +3,7 @@
 var express = require('express'),
     router = express.Router(),
     ComposerError = require('../lib/composerError'),
+    engine = require('../lib/engine'),
     phraseManager = require('../lib/phraseManager');
 
 router.get('/e1', function(res) {
@@ -14,11 +15,9 @@ router.get('/e2', function() {
 });
 
 router.get('/t1', function(req, res) {
-
-    setTimeout(function() {
-        res.send('Esto no debería verse');
-    }, 100000);
-
+  setTimeout(function() {
+      res.send('Esto no debería verse');
+  }, 100000);
 });
 
 router.get('/t2', function(req, res) {
@@ -57,7 +56,7 @@ router.get('/t2', function(req, res) {
 router.get('/t2phrase', function(req, res, next) {
 
 
-  var phrase = function phrase(req, res){
+  var phrase = function phrase(){
     //Code of the phrase
     console.log('start bad phrase');
 
@@ -77,16 +76,18 @@ router.get('/t2phrase', function(req, res, next) {
   //remove the function wrapper and only send the body to the phraseProcessManager
   var entire = phrase.toString();
   var body = entire.slice(entire.indexOf('{') + 1, entire.lastIndexOf('}'));
-  phraseManager.executePhrase(body, req, res, next);
+  var context = {
+    req: req,
+    res: res,
+    next: next
+  };
+  phraseManager.executePhrase(context,null, body);
 
 });
 
 router.get('/t3phrase', function(req, res) {
 
-  var phrase = function phrase(req, res){
-    //Code of the phrase
-    console.log('start good phrase');
-
+  var phrase = function phrase(){
     res.json({
       yes : 'potatoe'
     });
@@ -95,8 +96,24 @@ router.get('/t3phrase', function(req, res) {
   //remove the function wrapper and only send the body to the phraseProcessManager
   var entire = phrase.toString();
   var body = entire.slice(entire.indexOf('{') + 1, entire.lastIndexOf('}'));
-  phraseManager.executePhrase(body, req, res);
+  var context = {
+    req: req,
+    res: res
+  };
 
+  phraseManager.executePhrase(context,null,body);
+});
+
+router.get('/t4snippet', function(req, res) {
+
+  var phraseBody = 'compoSR.run("sendJson", {res: res, "message" : "yes"});';
+  var compoSR = engine.getCompoSR('silkroad-qa');
+  var context = {
+    req: req,
+    res: res
+  };
+
+  phraseManager.executePhrase(context, compoSR, phraseBody);
 });
 
 
