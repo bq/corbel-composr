@@ -1,7 +1,7 @@
 {
   "name": "corbel-composer",
   "description": "A corbel composer is a middleware based in nodeJS with express, to offer developers to make his own specific application API.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "bin": "bin/composer",
   "license": "Apache-2.0",
   "keywords": "corbel nodejs express middleware",
