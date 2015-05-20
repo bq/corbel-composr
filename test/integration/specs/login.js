@@ -14,7 +14,7 @@ var clientToken,
     clientLoginPhraseUrl;
 
 function test(app) {
-    describe.only('With Login phrases,', function() {
+    describe('With Login phrases,', function() {
 
         var loginphrase = require('../../fixtures/phrases/phraseLoginClient.json');
 
