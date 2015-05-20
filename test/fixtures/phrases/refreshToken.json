@@ -4,11 +4,28 @@
 		"code": "corbelDriver.iam.token().refresh(req.body.refreshToken, req.body.scopes).then(function(e) {res.send(e);})['catch'](function(e) {res.status(500).send(e);});",
 		"doc": {
 			"description": "Phrase for refresh an accessToken",
+			"body": {
+				"application/json": {
+					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR user refresh body\",\n\t\"properties\": {\n\t\t\"refreshToken\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"scopes\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t},\n\t\"required\": [\"refreshToken\", \"scopes\"]\n}",
+					"exmaple": "{\n\t\"refreshToken\": \"REFRESH_TOKEN\",\n\t\"scopes\": \"scope1 scope2\"\n}"
+
+				}
+			},
 			"responses": {
 				"200": {
 					"body": {
 						"application/json": {
-							"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login response\",\n\t\"properties\": {\n\t\t\"accessToken\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"accessToken to send in every authorized request\"\n\t\t},\n\t\t\"expiresAt\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"epoch time until token expiration\"\n\t\t}\n\t},\n\t\"required\": [\"accessToken\", \"expiresAt\"]\n}"
+							"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR login response\",\n\t\"properties\": {\n\t\t\"token\": {\n\t\t\t\"type\": \"object\",\n\t\t\t\"description\": \"CompoSR login response\",\n\t\t\t\"properties\": {\n\t\t\t\t\"accessToken\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"descrption\": \"accessToken to send in every authorized request\"\n\t\t\t\t},\n\t\t\t\t\"expiresAt\": {\n\t\t\t\t\t\"type\": \"number\",\n\t\t\t\t\t\"descrption\": \"epoch time until token expiration\"\n\t\t\t\t},\n\t\t\t\t\"refreshToken\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"descrption\": \"refreshToken to send to renew an accessToken\"\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"user\": {\n\t\t\t\"type\": \"object\",\n\t\t\t\"description\": \"User object\",\n\t\t\t\"properties\": {\n\t\t\t\t\"firstName\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"description\": \"User firstName\"\n\t\t\t\t},\n\t\t\t\t\"lastName\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"description\": \"User lastName\"\n\t\t\t\t},\n\t\t\t\t\"email\": {\n\t\t\t\t\t\"type\": \"string\",\n\t\t\t\t\t\"description\": \"User email\"\n\t\t\t\t},\n\t\t\t\t\"properties\": {\n\t\t\t\t\t\"type\": \"object\",\n\t\t\t\t\t\"description\": \"Any custom propierties attached to user\"\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t},\n\t\"required\": [\"token\", \"user\"]\n}",
+							"example": "{\n\t\"accessToken\": \"ACCESS_TOKEN\",\n\t\"refreshtoken\": \"REFRESH_TOKEN\",\n\t\"exporesAt\": 123123\n}"
+						}
+					}
+				},
+				"401": {
+					"description": "Not authorized",
+					"body": {
+						"application/json": {
+							"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR error response\",\n\t\"properties\": {\n\t\t\"httpStatus\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"HTTP status code\"\n\t\t},\n\t\t\"error\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"error code\"\n\t\t},\n\t\t\"errorDescription\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Public description\"\n\t\t},\n\t\t\"trace\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Development info description\"\n\t\t}\n\t},\n\t\"required\": [\"httpStatus\", \"error\", \"errorDescription\"]\n}",
+							"example": "{\n\t\"httpStatus\": 401,\n\t\"error\": \"unauthorized\",\n\t\"errorDescription\": \"\"\n}"
 						}
 					}
 				}
