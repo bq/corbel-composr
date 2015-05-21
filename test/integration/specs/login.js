@@ -4,14 +4,13 @@ var request = require('supertest'),
     expect = chai.expect,
     clientUtils = require('../utils/client');
 
-var clientData = clientUtils.getAdminClient();
+var AdminClientData = clientUtils.getAdminClient();
 var demoAppClientData = clientUtils.getDemoClient();
 
-var clientToken,
-    phraseClientLoginLocation,
-    demoAppClientToken,
-    demoAppRefreshToken,
-    clientLoginPhraseUrl;
+var adminClientToken,
+    demoClientToken,
+    demoUserToken,
+    demoUserRefreshToken;
 
 function test(app) {
     describe('With Login phrases,', function() {
@@ -22,28 +21,41 @@ function test(app) {
             this.timeout(30000);
             request(app)
                 .post('/token')
-                .send(demoAppClientData)
+                .send(AdminClientData)
                 .expect(200)
                 .end(function(err, response) {
                     expect(response).to.be.an('object');
                     expect(response.body.data.accessToken).to.exist;
-                    clientToken = response.body.data.accessToken;
-                    done(err);
+                    adminClientToken = response.body.data.accessToken;
+
+                    request(app)
+                        .post('/token')
+                        .send(demoAppClientData)
+                        .expect(200)
+                        .end(function(err, response) {
+                            expect(response).to.be.an('object');
+                            expect(response.body.data.accessToken).to.exist;
+                            demoClientToken = response.body.data.accessToken;
+                            done(err);
+                        });
+
                 });
         });
 
         describe('client login phrase', function() {
 
+            var phraseClientLoginLocation;
+
             it('is created correctly', function(done) {
                 this.timeout(30000);
                 request(app)
                     .put('/phrase')
-                    .set('Authorization', clientToken)
+                    .set('Authorization', adminClientToken)
                     .send(loginphrase)
                     .expect(204)
                     .end(function(err, response) {
                         expect(response.headers).to.exist;
-                        phraseClientLoginLocation = response.headers['location'];
+                        phraseClientLoginLocation = response.headers.location;
                         expect(phraseClientLoginLocation.length).to.be.above(0);
                         done(err);
                     });
@@ -52,7 +64,7 @@ function test(app) {
             it('receives a token after calling it', function(done) {
                 var phraseEndpoint = loginphrase.url;
                 var domain = phraseClientLoginLocation.replace('phrase/', '').split('!')[0];
-                clientLoginPhraseUrl = '/' + domain + '/' + phraseEndpoint;
+                var url = '/' + domain + '/' + phraseEndpoint;
                 this.timeout(30000);
 
                 //let's wait till corbel triggers the event to register the phrase in composr
@@ -60,13 +72,13 @@ function test(app) {
                 setTimeout(function() {
 
                     request(app)
-                        .post(clientLoginPhraseUrl)
+                        .post(url)
                         .send(demoAppClientData)
                         .expect(200)
                         .end(function(err, response) {
                             expect(response).to.be.an('object');
                             expect(response.body.data.accessToken).to.exist;
-                            demoAppClientToken = response.body.data.accessToken;
+                            //demoClientToken = response.body.data.accessToken;
                             done(err);
                         });
 
@@ -86,12 +98,12 @@ function test(app) {
                 this.timeout(30000);
                 request(app)
                     .put('/phrase')
-                    .set('Authorization', clientToken)
+                    .set('Authorization', adminClientToken)
                     .send(userLoginPhrase)
                     .expect(204)
                     .end(function(err, response) {
                         expect(response.headers).to.exist;
-                        phraseUserLoginLocation = response.headers['location'];
+                        phraseUserLoginLocation = response.headers.location;
                         expect(phraseUserLoginLocation.length).to.be.above(0);
                         done(err);
                     });
@@ -100,7 +112,7 @@ function test(app) {
             it('receives a token/expires/refresh after calling it', function(done) {
                 var phraseEndpoint = userLoginPhrase.url;
                 var domain = phraseUserLoginLocation.replace('phrase/', '').split('!')[0];
-                clientLoginPhraseUrl = '/' + domain + '/' + phraseEndpoint;
+                var url = '/' + domain + '/' + phraseEndpoint;
 
                 //Returns the data needed to make a user login
                 var demoUserData = clientUtils.getUser();
@@ -110,10 +122,10 @@ function test(app) {
                 //let's wait till corbel triggers the event to register the phrase in composr
                 //TODO: use any tool to know when it happens
                 setTimeout(function() {
-
+                    console.log('DEMO_CLIENT', demoClientToken);
                     request(app)
-                        .post(clientLoginPhraseUrl)
-                        .set('Authorization', clientToken)
+                        .post(url)
+                        .set('Authorization', demoClientToken)
                         .send(demoUserData)
                         .expect(200)
                         .end(function(err, response) {
@@ -124,8 +136,8 @@ function test(app) {
                             expect(response.body.tokenObject.accessToken).to.exist;
                             expect(response.body.tokenObject.expiresAt).to.exist;
                             expect(response.body.tokenObject.refreshToken).to.exist;
-                            demoAppClientToken = response.body.tokenObject.accessToken;
-                            demoAppRefreshToken = response.body.tokenObject.refreshToken;
+                            demoUserToken = response.body.tokenObject.accessToken;
+                            demoUserRefreshToken = response.body.tokenObject.refreshToken;
                             done(err);
                         });
 
@@ -144,12 +156,12 @@ function test(app) {
                 this.timeout(30000);
                 request(app)
                     .put('/phrase')
-                    .set('Authorization', clientToken)
+                    .set('Authorization', adminClientToken)
                     .send(refreshTokenPhrase)
                     .expect(204)
                     .end(function(err, response) {
                         expect(response.headers).to.exist;
-                        refreshTokenLocation = response.headers['location'];
+                        refreshTokenLocation = response.headers.location;
                         expect(refreshTokenLocation.length).to.be.above(0);
                         done(err);
                     });
@@ -158,11 +170,11 @@ function test(app) {
             it('can refresh user token with refreshToken', function(done) {
                 var phraseEndpoint = refreshTokenPhrase.url;
                 var domain = refreshTokenLocation.replace('phrase/', '').split('!')[0];
-                clientLoginPhraseUrl = '/' + domain + '/' + phraseEndpoint;
+                var url = '/' + domain + '/' + phraseEndpoint;
 
                 //Returns the data needed to make a user login
                 var data = {
-                    refreshToken: demoAppRefreshToken,
+                    refreshToken: demoUserRefreshToken,
                     scopes: clientUtils.getUser().scopes
                 };
 
@@ -171,10 +183,10 @@ function test(app) {
                 //let's wait till corbel triggers the event to register the phrase in composr
                 //TODO: use any tool to know when it happens
                 setTimeout(function() {
-
+                    console.log('DEMOCLIENTTOKEN', demoClientToken);    
                     request(app)
-                        .post(clientLoginPhraseUrl)
-                        .set('Authorization', clientToken)
+                        .post(url)
+                        .set('Authorization', demoClientToken)
                         .send(data)
                         .expect(200)
                         .end(function(err, response) {
@@ -184,9 +196,9 @@ function test(app) {
                             expect(response.body.data.accessToken).to.exist;
                             expect(response.body.data.expiresAt).to.exist;
                             expect(response.body.data.refreshToken).to.exist;
-                            expect(response.body.data.refreshToken).to.not.be.equal(demoAppRefreshToken);
-                            demoAppClientToken = response.body.data.accessToken;
-                            demoAppRefreshToken = response.body.data.refreshToken;
+                            expect(response.body.data.refreshToken).to.not.be.equal(demoUserRefreshToken);
+                            demoUserToken = response.body.data.accessToken;
+                            demoUserRefreshToken = response.body.data.refreshToken;
                             done(err);
                         });
 
