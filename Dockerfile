@@ -6,7 +6,7 @@ MAINTAINER Silkroad Team <support-silkroad@bq.com>
 COPY . /src
 
 # Install dev dependencies
-RUN cd /src; npm install
+RUN cd /src; npm install; npm rebuild
 
 # Expose port
 EXPOSE  3000
