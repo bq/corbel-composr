@@ -8,7 +8,7 @@
 			"body": {
 				"application/json": {
 					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR user login body\",\n\t\"properties\": {\n\t\t\"username\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"password\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t},\n\t\"required\": [\"username\", \"password\"]\n}",
-					"exmaple": "{\n\t\"username\": \"USERNAME\",\n\t\"password\": \"PASSWORD\"\n}"
+					"example": "{\n\t\"username\": \"USERNAME\",\n\t\"password\": \"PASSWORD\"\n}"
 
 				}
 			},

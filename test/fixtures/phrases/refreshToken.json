@@ -7,7 +7,7 @@
 			"body": {
 				"application/json": {
 					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR user refresh body\",\n\t\"properties\": {\n\t\t\"refreshToken\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"scopes\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t},\n\t\"required\": [\"refreshToken\", \"scopes\"]\n}",
-					"exmaple": "{\n\t\"refreshToken\": \"REFRESH_TOKEN\",\n\t\"scopes\": \"scope1 scope2\"\n}"
+					"example": "{\n\t\"refreshToken\": \"REFRESH_TOKEN\",\n\t\"scopes\": \"scope1 scope2\"\n}"
 
 				}
 			},
