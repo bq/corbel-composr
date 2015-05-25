@@ -338,3 +338,17 @@ compoSR.run('myFunction');
 compoSR.run('myFunction');
 //=> hello world
 ```
+
+# Logs
+
+Logs are written to the linux syslog and in the logs folder.
+
+You can set `logFile` and `logLevel` in your config file.
+
+Available log levels can be found at [winston's npm page](https://www.npmjs.com/package/winston#logging-levels):
+- debug
+- info
+- warn
+- error
+
+You can disable syslog by setting `syslog` property to `false` in the config file.
