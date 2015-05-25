@@ -3,7 +3,7 @@
 var express = require('express'),
     path = require('path'),
     favicon = require('serve-favicon'),
-    logger = require('morgan'),
+    morgan = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     engine = require('./lib/engine'),
@@ -13,15 +13,26 @@ var express = require('express'),
     responseTime = require('response-time'),
     cors = require('cors'),
     corbel = require('corbel-js'),
+    fs = require('fs'),
     app = express();
 
 var ERROR_CODE_SERVER_TIMEOUT = 503;
 var DEFAULT_TIMEOUT = 10000;
 
+/*************************************
+  Logs
+**************************************/
+var logger = require('./utils/logger');
+//Custom log
+app.set('logger', logger);
+
+// Access log, logs http requests
+var accessLogStream = fs.createWriteStream('logs/access.log', {flags: 'a'});
+app.use(morgan('combined', {stream: accessLogStream}));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
 app.set('corbel', corbel);
 
 var env = process.env.NODE_ENV || 'development';
@@ -31,7 +42,6 @@ app.locals.ENV_DEVELOPMENT = env === 'development';
 app.disable('x-powered-by');
 app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
-app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
@@ -39,7 +49,10 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// cors
+
+/*************************************
+  Cors
+**************************************/
 app.use(cors({
     origin: function(origin, callback) {
         callback(null, true);
@@ -52,7 +65,10 @@ app.use(timeout(config.timeout || DEFAULT_TIMEOUT, {
     status: ERROR_CODE_SERVER_TIMEOUT
 }));
 
-//Init engine middlewares
+
+/*************************************
+  Engine middlewares
+**************************************/
 engine.init(app);
 
 if(app.get('env') === 'development') {
@@ -64,7 +80,12 @@ var haltOnTimedout = function(req, res, next) {
         next();
     }
 };
+
 app.use(haltOnTimedout);
+
+/*************************************
+  Error handlers
+**************************************/
 
 /// catch 404 and forward to error handler
 var NotFundHandler = function(req, res, next) {
@@ -72,7 +93,6 @@ var NotFundHandler = function(req, res, next) {
 };
 app.use(NotFundHandler);
 
-// error handler
 var errorHandler = function(err, req, res, next) {
     var status = err.status || 500;
     if (err.timeout) {
@@ -89,17 +109,17 @@ var errorHandler = function(err, req, res, next) {
         trace: (app.get('env') === 'development' ? err.stack : '')
     });
 
-    console.error(err, err.stack);
+    logger.error(err, err.stack);
     next(err);
 };
 
 app.use(errorHandler);
 
-
 process.on('uncaughtException', function(err) {
-    if (!err || err.message !== 'Can\'t set headers after they are sent.') {
-        process.exit(1);
-    }
+  logger.error(err);
+  if (!err || err.message !== 'Can\'t set headers after they are sent.') {
+    process.exit(1);
+  }
 });
 
 module.exports = app;

@@ -8,6 +8,7 @@ var validate = require('./validate'),
     ComposerError = require('./composerError'),
     engine = require('./engine'),
     tripwire = require('tripwire'),
+    logger = require('../utils/logger'),
     _ = require('lodash'),
     q = require('q');
 
@@ -15,7 +16,7 @@ var executePhrase = function executePhrase(context, compoSR, phraseBody){
   var domain = require('domain').create();
 
   domain.on('error', function(error) {
-    console.log('domain:error', error);
+    logger.error('domain:error', error);
     var err;
     if (error === 'Blocked event loop.'){
       err = new ComposerError('error:custom', 'phrase timeout', 503);
@@ -61,7 +62,7 @@ var registerPhrase = function(router, phrase) {
 
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
         if (phrase[method]) {
-            console.log('Registering ' + method.toUpperCase() + ' ' + url);
+            logger.info('Registering ' + method.toUpperCase() + ' ' + url);
             router[method]('/' + url, function(req, res, next) {
 
                 var iamToken = req.get('Authorization') || undefined;
