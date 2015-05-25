@@ -5,7 +5,8 @@ var express = require('express'),
   phraseManager = require('./phraseManager'),
   connection = require('./corbelConnection'),
   q = require('q'),
-  config = require('../config/config');
+  config = require('../config/config'),
+  logger = require('../utils/logger');
 
 var PAGE_SIZE = 10;
 
@@ -41,17 +42,17 @@ var bootstrapPhrases = function() {
   connection.driver.then(function(driver) {
     getPhrase(driver, connection.PHRASES_COLLECTION).then(function(phrases) {
       return phrases.forEach(function(phrase) {
-        console.log(phrase);
+        logger.debug('Phrase loaded', phrase);
         phraseManager.registerPhrase(router, phrase);
       });
     }).
     fail(function(error) {
-      console.error('error:bootstrap:load', error);
+      logger.error('error:bootstrap:load', error);
       setTimeout(bootstrapPhrases, config['bootstrap.retrytimeout']);
     });
 
   }).catch(function(error) {
-    console.error('error:bootstrap:driver', error);
+    logger.error('error:bootstrap:driver', error);
   });
 
 };

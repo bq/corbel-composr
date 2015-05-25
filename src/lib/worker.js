@@ -7,7 +7,8 @@ var phraseManager = require('./phraseManager'),
     amqp = require('amqplib'),
     uuid = require('uuid'),
     ComposerError = require('./composerError'),
-    config = require('../config/config');
+    config = require('../config/config'),
+    logger = require('../utils/logger');
 
 var worker = function() {
     var connUrl = 'amqp://' + config['rabbitmq.username'] + ':' + config['rabbitmq.password'] + '@' + config['rabbitmq.host'] + ':' + config['rabbitmq.port'];
@@ -72,13 +73,13 @@ var worker = function() {
                 ch.consume(queue, doWork, {
                     noAck: true
                 });
-                console.log('Worker up');
+                logger.debug('Worker up');
             });
 
             return ok;
         });
     }).then(null, function(err) {
-        console.error('Worker error %s', err);
+        logger.error('Worker error %s', err);
         setTimeout(worker, config['rabbitmq.reconntimeout']);
     });
 };
