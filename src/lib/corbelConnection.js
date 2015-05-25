@@ -3,7 +3,8 @@
 var corbel = require('corbel-js'),
     config = require('../config/config'),
     _ = require('lodash'),
-    ComposerError = require('./composerError');
+    ComposerError = require('./composerError'),
+    logger = require('../utils/logger');
 
 var PHRASES_COLLECTION = 'composr:Phrase';
 
@@ -13,10 +14,10 @@ corbelConfig = _.extend(corbelConfig, config['corbel.composer.credentials']);
 var corbelDriver = corbel.getDriver(corbelConfig);
 
 var onConnectPromise = corbelDriver.iam.token().create().then(function() {
-    console.log('corbel:connection:success');
+    logger.debug('corbel:connection:success');
 	return corbelDriver;
 }).catch(function(error) {
-    console.error('error:composer:corbel:token', error);
+    logger.error('error:composer:corbel:token', error);
     throw new ComposerError('error:composer:corbel:token', '', 401);
 });
 
