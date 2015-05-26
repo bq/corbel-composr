@@ -93,12 +93,6 @@ var registerPhrase = function(router, phrase) {
             logger.info('Registering ' + method.toUpperCase() + ' ' + url);
             router[method]('/' + url, function(req, res, next) {
 
-                var iamToken = req.get('Authorization') || undefined;
-                if (iamToken) {
-                    iamToken = {
-                        'accessToken': iamToken.replace('Bearer ', '')
-                    };
-                }
 
                 var driverObtainFunction = function(defaults){
                   return function(options){
@@ -106,11 +100,19 @@ var registerPhrase = function(router, phrase) {
                   };
                 };
 
-
                 corbel.generateDriver = driverObtainFunction(config['corbel.driver.options']);
-                var corbelDriver = corbel.generateDriver({
-                  iamToken: iamToken
-                });
+                var corbelDriver = null;
+
+                //If token is present, pregenerate a corbelDriver, otherwise let them manage the corbelDriver instantiation
+                var iamToken = req.get('Authorization') || undefined;
+                if (iamToken) {
+                    iamToken = {
+                        'accessToken': iamToken.replace('Bearer ', '')
+                    };
+                    corbelDriver = corbel.generateDriver({
+                      iamToken: iamToken
+                    });
+                }
 
                 var context = {
                   req: req,

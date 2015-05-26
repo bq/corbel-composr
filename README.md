@@ -231,6 +231,12 @@ npm install -g node-inspector
 ## Login a client
 
 ```javascript
+var corbelDriver = corbel.generateDriver({
+  clientId : req.body.clientId,
+  clientSecret : req.body.clientSecret,
+  scopes : req.body.scopes
+});
+
 corbelDriver.iam.token().create().then(function(response) {
   res.send(response);
 })
@@ -284,6 +290,8 @@ corbelDriver.iam.token().create({
   res.status(500).send(err);
 });
 ```
+
+
 
 ## Return current user info
 
