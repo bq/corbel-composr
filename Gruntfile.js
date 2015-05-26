@@ -1,6 +1,7 @@
 'use strict';
 
 var request = require('request');
+var madge = require('madge');
 
 module.exports = function(grunt) {
     // show elapsed time at the end
@@ -183,6 +184,21 @@ module.exports = function(grunt) {
     files = grunt.config('watch.server.files');
     files = grunt.file.expand(files);
 
+    //Register circular dependencies
+    grunt.registerTask('madge', 'Run madge.', function() {
+      var dependencyObject = madge('./src');
+      var listOfCircularDependencies = dependencyObject.circular().getArray();
+
+      if(listOfCircularDependencies.length > 0){
+        grunt.log.error('CIRCULAR DEPENDENCIES FOUND');
+        grunt.log.error(listOfCircularDependencies);
+        return false;
+      }else{
+        grunt.log.writeln('No circular dependencies found :)');
+      }
+    });
+
+
     grunt.registerTask('delayed-livereload', 'Live reload after the node server has restarted.', function() {
         var done = this.async();
         setTimeout(function() {
@@ -209,6 +225,7 @@ module.exports = function(grunt) {
     grunt.registerTask('test:coverage', [
         'clean',
         'jshint',
+        'madge',
         'copy:coverage',
         'blanket',
         'mochaTest:testCoverage',
@@ -220,6 +237,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test', [
         'jshint',
+        'madge',
         'mochaTest:ci'
     ]);
 
