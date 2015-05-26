@@ -6,7 +6,7 @@ var express = require('express'),
   ComposerError = require('./composerError'),
   connection = require('./corbelConnection'),
   q = require('q'),
-  config = require('../config/config'),
+  config = require('./config'),
   logger = require('../utils/logger');
 
 var PAGE_SIZE = 10;

@@ -1,6 +1,6 @@
 'use strict';
 
-var config = require('../config/config'),
+var config = require('./config'),
     raml = require('raml-parser'),
     YAML = require('yamljs'),
     validate = require('./validate'),

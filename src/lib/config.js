@@ -2,16 +2,16 @@ var _ = require('lodash'),
     fs = require('fs');
 
 var env = process.env.NODE_ENV || 'development';
-var config = require('./config.json');
+var config = require('../config/config.json');
 
 
 //Check if environment config file exists and overwrite the defaults
 var environmentFileConfig = env + '.json';
 
 try  {
-	var fstat = fs.statSync(__dirname + '/' + environmentFileConfig);
+	var fstat = fs.statSync(__dirname + '/../config/' + environmentFileConfig);
 	if (fstat.isFile()) {
-	    var envConfigFile = require('./' + environmentFileConfig);
+	    var envConfigFile = require('../config/' + environmentFileConfig);
 	    config = _.defaults(envConfigFile, config);
 	}
 } catch (e) {

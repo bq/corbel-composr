@@ -2,7 +2,7 @@
 
 var express = require('express'),
     corbel = require('corbel-js'),
-    config = require('../config/config'),
+    config = require('../lib/config'),
     router = express.Router(),
     connection = require('../lib/corbelConnection'),
     phraseManager = require('../lib/phraseManager'),

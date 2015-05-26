@@ -11,8 +11,14 @@ RUN cd /src; npm install; npm rebuild
 # Expose port
 EXPOSE  3000
 
-#Set delay to 30 in order to wait until resources is up, set -e="DELAY=0" to avoid delay
-ENV DELAY 120
+#Set the endpoint suffix for the environment to use
+ENV ENDPOINT_SUFFIX "-qa"
 
 # Enable corbel-composer
-CMD sleep $DELAY; cd /src; npm start && npm run logs
+CMD E=0; \
+    while [ "$E" != 401 ]; \
+    do E=`curl -s -o /dev/null -w "%{http_code}" https://iam$ENDPOINT_SUFFIX.bqws.io`; \
+    echo $E ; \
+    sleep 5 ; \
+    done ; \ 
+    cd /src && npm start && npm run logs

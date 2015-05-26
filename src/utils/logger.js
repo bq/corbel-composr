@@ -2,7 +2,7 @@
 
 var winston = require('winston');
 var mkdirp = require('mkdirp');
-var config = require('../config/config');
+var config = require('../lib/config');
 var logLevel = config.logLevel ? config.logLevel : 'error';
 var logFile = config.logFile ? config.logFile : 'logs/composr.log';
 var useSyslog = config.syslog;

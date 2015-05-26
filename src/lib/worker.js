@@ -7,7 +7,7 @@ var phraseManager = require('./phraseManager'),
     amqp = require('amqplib'),
     uuid = require('uuid'),
     ComposerError = require('./composerError'),
-    config = require('../config/config'),
+    config = require('./config'),
     logger = require('../utils/logger');
 
 var worker = function() {

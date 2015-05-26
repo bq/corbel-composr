@@ -3,7 +3,7 @@
 
 var validate = require('./validate'),
     corbel = require('corbel-js'),
-    config = require('../config/config'),
+    config = require('./config'),
     phrases = require('./phrasesData'),
     ComposerError = require('./composerError'),
     snippetsBundler = require('./snippetsBundler'),
