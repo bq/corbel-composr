@@ -11,5 +11,8 @@ RUN cd /src; npm install; npm rebuild
 # Expose port
 EXPOSE  3000
 
+#Set delay to 30 in order to wait until resources is up, set -e="DELAY=0" to avoid delay
+ENV DELAY 30
+
 # Enable corbel-composer
-CMD cd /src; npm start && npm run logs
+CMD sleep $DELAY; cd /src; npm start && npm run logs
