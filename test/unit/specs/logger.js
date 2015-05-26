@@ -25,11 +25,15 @@ describe('Log file creation', function(){
   });
 
   it('creates a log file', function(done){
+    this.timeout(30000);
     logger.error('bob el silencioso', function(){
-      fs.exists(logFile, function (exists) {
-        expect(exists).to.equals(true);
-        done();
-      });
+      setTimeout(function(){
+        fs.exists(logFile, function (exists) {
+          expect(exists).to.equals(true);
+          done();
+        });
+      }, 2000);
+
     });
   });
 
