@@ -3,4 +3,4 @@ node_js:
   - 0.12.2
 before_script: npm install
 script:
-  - grunt test:coverage
+  - grunt test
