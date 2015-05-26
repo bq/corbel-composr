@@ -17,5 +17,9 @@
 
     "corbel.driver.options": {
         "urlBase": "https://{{module}}corbel-domain.io/"
-    }
+    },
+
+    "logLevel": "error",
+    "logFile": "logs/composr.log",
+    "syslog" : true
 }
