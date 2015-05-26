@@ -1,7 +1,7 @@
 {
 	"url": "loginclient",
 	"post": {
-		"code": "corbelDriver.iam.token().create().then(function(e){res.send(e)})['catch'](function(e){res.status(500).send(e)});",
+		"code": "var corbelDriver=corbel.generateDriver({clientId:req.body.clientId,clientSecret:req.body.clientSecret,scopes:req.body.scopes});corbelDriver.iam.token().create().then(function(e){res.send(e)})['catch'](function(e){res.status(500).send(e)});",
 		"doc": {
 			"description": "Phrase for login a client",
 			"body": {
