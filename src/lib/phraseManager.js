@@ -6,11 +6,39 @@ var validate = require('./validate'),
     config = require('../config/config'),
     phrases = require('./phrasesData'),
     ComposerError = require('./composerError'),
-    engine = require('./engine'),
+    snippetsBundler = require('./snippetsBundler'),
     tripwire = require('tripwire'),
     logger = require('../utils/logger'),
     _ = require('lodash'),
     q = require('q');
+
+/**
+ Returns the snippets runner for being embebed into the phrases executions
+**/
+function getCompoSR(domain){
+  var snippets = {
+    'silkroad-qa' : [
+      {
+        name : 'log',
+        code : 'console.log("ey");'
+      },
+      {
+        name : 'example',
+        code : 'this.log();'
+      },
+      {
+        name : 'sendJson',
+        code : 'compoSR.run("json", params)'
+      },
+      {
+        name : 'json',
+        code: 'params.res.send({ hello2 : params.message})'
+      }
+    ]
+  };
+
+  return snippetsBundler.getRunner(domain, snippets);
+}
 
 var executePhrase = function executePhrase(context, compoSR, phraseBody){
   var domain = require('domain').create();
@@ -95,7 +123,7 @@ var registerPhrase = function(router, phrase) {
                 };
                 //We have left compoSR alone, without including it in the context because someday we might
                 //want to have compoSR use the context for binding req, res... to the snippets
-                var compoSR = engine.getCompoSR(domain);
+                var compoSR = getCompoSR(domain);
 
                 executePhrase(context, compoSR, phrase[method].code);
 

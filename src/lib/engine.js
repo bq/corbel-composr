@@ -2,7 +2,6 @@
 
 var bootstrap = require('./bootstrap'),
     worker = require('./worker'),
-    snippetsBundler = require('./snippetsBundler'),
     routes = require('../routes');
 
 //Add necesary middlewares to express
@@ -22,14 +21,7 @@ function init(app){
   middlewares(app);
 }
 
-/**
- Returns the snippets runner for being embebed into the phrases executions
-**/
-function getCompoSR(domain){
-  return snippetsBundler.getRunner(domain, bootstrap.getSnippets());
-}
 
 module.exports = {
-  init : init,
-  getCompoSR: getCompoSR
+  init : init
 };
