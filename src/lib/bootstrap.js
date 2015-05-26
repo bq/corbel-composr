@@ -3,6 +3,7 @@
 var express = require('express'),
   router = express.Router(),
   phraseManager = require('./phraseManager'),
+  ComposerError = require('./composerError'),
   connection = require('./corbelConnection'),
   q = require('q'),
   config = require('../config/config'),
@@ -25,11 +26,15 @@ var getPhrase = function(driver, phrasesCollection, phrases, promise, pageNumber
 
     return driver.resources.collection(phrasesCollection).get(params, 'application/json').
     then(function(response) {
-      phrases = phrases.concat(response.data);
-      if (response.data.length < PAGE_SIZE) {
-        return phrases;
-      } else {
-        return getPhrase(driver, phrasesCollection, phrases, promise, pageNumber + 1);
+      if(response.data && response.status === 200){
+        phrases = phrases.concat(response.data);
+        if (response.data.length < PAGE_SIZE) {
+          return phrases;
+        } else {
+          return getPhrase(driver, phrasesCollection, phrases, promise, pageNumber + 1);
+        }
+      }else{
+        throw new ComposerError('error:composer:corbel:phrases', '', 500);
       }
     });
   });
