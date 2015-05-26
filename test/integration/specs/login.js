@@ -24,18 +24,15 @@ function test(app) {
                 .send(AdminClientData)
                 .expect(200)
                 .end(function(err, response) {
-                  console.log('we log this', response.body.data);
                     expect(response).to.be.an('object');
                     expect(response.body.data.accessToken).to.exist;
                     adminClientToken = response.body.data.accessToken;
-                    console.log(demoAppClientData);
 
                     request(app)
                         .post('/token')
                         .send(demoAppClientData)
                         .expect(200)
                         .end(function(err, response) {
-                          console.log('waaaaatever', response.body.data);
                             expect(response).to.be.an('object');
                             expect(response.body.data.accessToken).to.exist;
                             demoClientToken = response.body.data.accessToken;
