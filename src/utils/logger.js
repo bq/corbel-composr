@@ -1,10 +1,16 @@
 'use strict';
 
 var winston = require('winston');
+var fs = require('fs');
 var config = require('../config/config');
 var logLevel = config.logLevel ? config.logLevel : 'error';
 var logFile = config.logFile ? config.logFile : 'logs/composr.log';
 var useSyslog = config.syslog;
+
+var logDir = logFile.split('/')[0];
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
+}
 
 require('winston-syslog').Syslog; // jshint ignore:line
 
