@@ -12,7 +12,7 @@ RUN cd /src; npm install; npm rebuild
 EXPOSE  3000
 
 #Set delay to 30 in order to wait until resources is up, set -e="DELAY=0" to avoid delay
-ENV DELAY 30
+ENV DELAY 120
 
 # Enable corbel-composer
 CMD sleep $DELAY; cd /src; npm start && npm run logs
