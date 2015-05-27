@@ -3,7 +3,7 @@
 	"post": {
 		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var corbelDriver=corbel.generateDriver({iamToken:\"\"});corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){res.send(e.data)})[\"catch\"](function(e){res.status(500).send(e)});",
 		"doc": {
-			"description": "Phrase for refresh an accessToken",
+			"description": "Phrase for refresh an accessToken using JWT. (claims: `iss`, `refresh_token`, `aud`, `scope`, `exp`)",
 			"body": {
 				"application/json": {
 					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"jwt\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"JWT Assertion\"\n\t\t}\n\t},\n\t\"required\": [\n\t\t\"jwt\"\n\t]\n}",

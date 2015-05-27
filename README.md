@@ -235,6 +235,14 @@ if (!req.body || !req.body.jwt) {
   throw new ComposerError('error:jwt:undefined', '', 401);
 }
 var corbelDriver = corbel.generateDriver({iamToken: ''});
+
+/*
+ * Required claims:
+ * iss: CLIENT_ID
+ * aud: 'http://iam.bqws.io'
+ * scope: 'scope1 scope2'
+ * exp: epoch + 1h
+ */
 corbelDriver.iam.token().create({
   jwt: req.body.jwt
 }).then(function(response) {
@@ -253,7 +261,17 @@ if (!req.body || !req.body.jwt) {
 var corbelDriver = corbel.generateDriver({iamToken: ''});
 
 var tokenObject;
-//Request a session token for the user
+
+/*
+ * Request a session token for the user 
+ * Required claims:
+ * iss: CLIENT_ID
+ * basic_auth.username: USERNAME
+ * basic_auth.password: PASSWORD
+ * aud: 'http://iam.bqws.io'
+ * scope: 'scope1 scope2'
+ * exp: epoch + 1h
+ */
 corbelDriver.iam.token().create({
   jwt : req.body.jwt
 }).then(function(response){
@@ -288,6 +306,14 @@ if (!req.body || !req.body.jwt) {
 var corbelDriver = corbel.generateDriver({iamToken: ''});
 
 
+/*
+ * Required claims:
+ * iss: CLIENT_ID
+ * refresh_token: REFRESH_TOKEN
+ * aud: 'http://iam.bqws.io'
+ * scope: 'scope1 scope2'
+ * exp: epoch + 1h
+ */
 corbelDriver.iam.token().create({
     jwt : req.body.jwt
   })
