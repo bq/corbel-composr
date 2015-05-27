@@ -16,7 +16,7 @@ var worker = function() {
     amqp.connect(connUrl).then(function(conn) {
 
         function doWork(msg) {
-            if (msg.fields.routingKey === 'class com.bqreaders.silkroad.event.ResourceEvent') {
+            if (msg.fields.routingKey === 'class com.bq.oss.corbel.event.ResourceEvent') {
 
                 var message;
                 try {
