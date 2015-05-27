@@ -45,6 +45,7 @@ var executePhrase = function executePhrase(context, compoSR, phraseBody){
 
   domain.on('error', function(error) {
     logger.error('domain:error', error);
+    logger.debug('Error caught by domain.on error', error);
     var err;
     if (error === 'Blocked event loop.'){
       err = new ComposerError('error:custom', 'phrase timeout', 503);
@@ -81,8 +82,10 @@ var registerPhrase = function(router, phrase) {
     });
 
     if (exists !== -1) {
+        logger.debug('Phrase already exists, overwritting', domain);
         phrases.list[domain][exists] = phrase;
     } else {
+        logger.debug('Adding new phrase to the list', domain);
         phrases.list[domain].push(phrase);
     }
 
@@ -93,21 +96,21 @@ var registerPhrase = function(router, phrase) {
             logger.info('Registering ' + method.toUpperCase() + ' ' + url);
             router[method]('/' + url, function(req, res, next) {
 
-
                 var driverObtainFunction = function(defaults){
                   return function(options){
-                    return corbel.getDriver(_.defaults(options, defaults));
+                    var generatedOptions = _.defaults(options, defaults);
+                    logger.debug('Options for generate driver:', generatedOptions);
+                    return corbel.getDriver(generatedOptions);
                   };
                 };
 
                 corbel.generateDriver = driverObtainFunction(config['corbel.driver.options']);
-                var corbelDriver = null;
 
+                var corbelDriver = null;
                 //If token is present, pregenerate a corbelDriver, otherwise let them manage the corbelDriver instantiation
-                var iamToken = req.get('Authorization') || undefined;
-                if (iamToken) {
-                    iamToken = {
-                        'accessToken': iamToken.replace('Bearer ', '')
+                if (req.get('Authorization')) {
+                    var iamToken = {
+                        'accessToken': req.get('Authorization').replace('Bearer ', '')
                     };
                     corbelDriver = corbel.generateDriver({
                       iamToken: iamToken
@@ -127,6 +130,7 @@ var registerPhrase = function(router, phrase) {
                 //want to have compoSR use the context for binding req, res... to the snippets
                 var compoSR = getCompoSR(domain);
 
+                logger.debug('Executing phrase', method, url);
                 executePhrase(context, compoSR, phrase[method].code);
 
             });
@@ -135,12 +139,15 @@ var registerPhrase = function(router, phrase) {
 };
 
 var unregisterPhrase = function(router, phrase) {
+
     validate.isValue(router, 'undefined:router');
     validate.isValue(phrase, 'undefined:phrase');
     validate.isValue(phrase.id, 'undefined:phrase:id');
 
     var domain = phrase.id.split('!')[0];
     var url = '/' + phrase.id.replace(/!/g, '/');
+
+    logger.debug('Unregistering phrase', domain, url);
 
     // remove from express
     var i = 0;

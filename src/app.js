@@ -94,6 +94,8 @@ var NotFundHandler = function(req, res, next) {
 app.use(NotFundHandler);
 
 var errorHandler = function(err, req, res, next) {
+    logger.debug('Error caught by express error handler', err);
+
     var status = err.status || 500;
     if (err.timeout) {
         status = ERROR_CODE_SERVER_TIMEOUT;
@@ -116,6 +118,7 @@ var errorHandler = function(err, req, res, next) {
 app.use(errorHandler);
 
 process.on('uncaughtException', function(err) {
+  logger.debug('Error caught by uncaughtException', err);
   logger.error(err);
   if (!err || err.message !== 'Can\'t set headers after they are sent.') {
     process.exit(1);
