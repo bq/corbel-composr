@@ -1,8 +1,6 @@
 'use strict';
 
 var express = require('express'),
-    corbel = require('corbel-js'),
-    config = require('../lib/config'),
     router = express.Router(),
     connection = require('../lib/corbelConnection'),
     phraseManager = require('../lib/phraseManager'),
@@ -106,26 +104,6 @@ router.get('/phrase/:phraseid', function(req, res, next) {
 router.get('/phrase', function(req, res) {
     var authorization = auth.getAuth(req);
     res.send(phraseManager.getPhrases(connection.extractDomain(authorization)));
-});
-
-router.post('/token', function(req, res, next) {
-
-    var data = req.body || {};
-
-    var corbelConfig = config('corbel.driver.options');
-
-    corbelConfig.clientId = data.clientId;
-    corbelConfig.clientSecret = data.clientSecret;
-    corbelConfig.scopes = data.scopes;
-
-    var corbelDriver = corbel.getDriver(corbelConfig);
-
-    corbelDriver.iam.token().create().then(function(response) {
-        res.send(response);
-    }).catch(function(error) {
-        next(new ComposerError('error:token', error, error.status));
-    });
-
 });
 
 module.exports = router;

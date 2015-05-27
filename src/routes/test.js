@@ -2,8 +2,10 @@
 
 var express = require('express'),
   router = express.Router(),
+  corbel = require('corbel-js'),
   ComposerError = require('../lib/composerError'),
   engine = require('../lib/engine'),
+  config = require('../lib/config'),
   phraseManager = require('../lib/phraseManager');
 
 router.get('/e1', function(res) {
@@ -52,6 +54,34 @@ router.get('/t2', function(req, res) {
 
 });
 
+router.post('/jwt', function(req, res) {
+
+  req.body = req.body || {};
+  req.body.claims.aud = corbel.Iam.AUD;
+
+  res.json(corbel.jwt.generate(req.body.claims, req.body.secret));
+
+});
+
+router.post('/token', function(req, res, next) {
+
+    var data = req.body || {};
+
+    var corbelConfig = config('corbel.driver.options');
+
+    corbelConfig.clientId = data.clientId;
+    corbelConfig.clientSecret = data.clientSecret;
+    corbelConfig.scopes = data.scopes;
+
+    var corbelDriver = corbel.getDriver(corbelConfig);
+
+    corbelDriver.iam.token().create().then(function(response) {
+        res.send(response);
+    }).catch(function(error) {
+        next(new ComposerError('error:token', error, error.status));
+    });
+
+});
 
 router.get('/t2phrase', function(req, res, next) {
 

@@ -82,7 +82,7 @@ function test(app) {
                         .expect(200)
                         .end(function(err, response) {
                             expect(response).to.be.an('object');
-                            expect(response.body.data.accessToken).to.exist;
+                            expect(response.body.accessToken).to.exist;
                             //demoClientToken = response.body.data.accessToken;
                             done(err);
                         });
@@ -202,13 +202,12 @@ function test(app) {
                           console.log(response);
                             expect(response).to.be.an('object');
                             expect(response.body).to.be.an('object');
-                            expect(response.body.data).to.be.an('object');
-                            expect(response.body.data.accessToken).to.exist;
-                            expect(response.body.data.expiresAt).to.exist;
-                            expect(response.body.data.refreshToken).to.exist;
-                            expect(response.body.data.refreshToken).to.not.be.equal(demoUserRefreshToken);
-                            demoUserToken = response.body.data.accessToken;
-                            demoUserRefreshToken = response.body.data.refreshToken;
+                            expect(response.body.accessToken).to.exist;
+                            expect(response.body.expiresAt).to.exist;
+                            expect(response.body.refreshToken).to.exist;
+                            expect(response.body.refreshToken).to.not.be.equal(demoUserRefreshToken);
+                            demoUserToken = response.body.accessToken;
+                            demoUserRefreshToken = response.body.refreshToken;
                             done(err);
                         });
 
