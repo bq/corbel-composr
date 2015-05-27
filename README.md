@@ -278,8 +278,27 @@ corbelDriver.iam.token().create({
   res.status(500).send(err);
 });
 ```
+## Refresh a token
+
+```javascript
+if (!req.body || !req.body.jwt) {
+  throw new ComposerError('error:jwt:undefined', '', 401);
+}
+
+var corbelDriver = corbel.generateDriver({iamToken: ''});
 
 
+corbelDriver.iam.token().create({
+    jwt : req.body.jwt
+  })
+  .then(function(response){
+    res.send(response);
+  })
+  .catch(function(err){
+    res.status(500).send(err);
+  });
+
+```
 
 ## Return current user info
 

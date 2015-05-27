@@ -185,9 +185,7 @@ function test(app) {
                 var demoUserData = clientUtils.getUser();
 
                 var data = {
-                  refreshToken: demoUserRefreshToken,
-                  scopes: demoUserData.scopes
-                  //jwt : corbelSigner.getUserAssertion(demoClientToken, demoClientData.clientSecret, demoUserData)
+                  jwt: corbelSigner.getTokenRefreshAssertion(demoUserRefreshToken, demoUserData.scopes, demoAppClientData)
                 };
 
                 this.timeout(30000);
@@ -195,13 +193,13 @@ function test(app) {
                 //let's wait till corbel triggers the event to register the phrase in composr
                 //TODO: use any tool to know when it happens
                 setTimeout(function() {
-                    console.log('DEMOCLIENTTOKEN', demoClientToken);
+
                     request(app)
                         .post(url)
-                        .set('Authorization', demoClientToken)
                         .send(data)
                         .expect(200)
                         .end(function(err, response) {
+                          console.log(response);
                             expect(response).to.be.an('object');
                             expect(response.body).to.be.an('object');
                             expect(response.body.data).to.be.an('object');

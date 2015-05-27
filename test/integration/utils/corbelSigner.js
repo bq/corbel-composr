@@ -25,8 +25,18 @@ function getClientAssertion(clientData){
   return generateAssertion(claims, clientData.clientSecret);
 }
 
+function getTokenRefreshAssertion(tokenRefresh, userScopes, clientData){
+  var claims={
+    iss : clientData.clientId,
+    scope : userScopes,
+    refresh_token: tokenRefresh
+  };
+  return generateAssertion(claims, clientData.clientSecret);
+}
+
 module.exports = {
   generateAssertion: generateAssertion,
   getUserAssertion : getUserAssertion,
-  getClientAssertion: getClientAssertion
+  getClientAssertion: getClientAssertion,
+  getTokenRefreshAssertion: getTokenRefreshAssertion
 }
