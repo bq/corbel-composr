@@ -98,7 +98,8 @@ var registerPhrase = function(router, phrase) {
 
                 var driverObtainFunction = function(defaults){
                   return function(options){
-                    var generatedOptions = _.defaults(options, defaults);
+                    logger.debug(defaults, '-----', options);
+                    var generatedOptions = _.defaults(_.cloneDeep(options), _.cloneDeep(defaults));
                     logger.debug('Options for generate driver:', generatedOptions);
                     return corbel.getDriver(generatedOptions);
                   };
@@ -109,6 +110,7 @@ var registerPhrase = function(router, phrase) {
                 var corbelDriver = null;
                 //If token is present, pregenerate a corbelDriver, otherwise let them manage the corbelDriver instantiation
                 if (req.get('Authorization')) {
+                    logger.debug('Found Authorization header: precreating a corbelDriver for the phrase');
                     var iamToken = {
                         'accessToken': req.get('Authorization').replace('Bearer ', '')
                     };

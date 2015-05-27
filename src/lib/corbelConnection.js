@@ -8,8 +8,8 @@ var corbel = require('corbel-js'),
 
 var PHRASES_COLLECTION = 'composr:Phrase';
 
-var corbelConfig = config['corbel.driver.options'];
-corbelConfig = _.extend(corbelConfig, config['corbel.composer.credentials']);
+var corbelConfig = _.cloneDeep(config['corbel.driver.options']);
+corbelConfig = _.extend(corbelConfig, _.cloneDeep(config['corbel.composer.credentials']));
 
 var corbelDriver = corbel.getDriver(corbelConfig);
 
@@ -41,7 +41,7 @@ var getTokenDriver = function(accessToken) {
         'accessToken': accessToken.replace('Bearer ', '')
     };
 
-    var corbelConfig = config['corbel.driver.options'];
+    var corbelConfig = _.cloneDeep(config['corbel.driver.options']);
     corbelConfig.iamToken = iamToken;
 
     return corbel.getDriver(corbelConfig);
