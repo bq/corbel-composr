@@ -35,6 +35,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.set('corbel', corbel);
 
+// Environment setup
 var env = process.env.NODE_ENV || 'development';
 app.locals.ENV = env;
 app.locals.ENV_DEVELOPMENT = env === 'development';
@@ -61,6 +62,10 @@ app.use(cors({
 }));
 app.options('*', cors());
 
+
+/*************************************
+  Timeout
+**************************************/
 app.use(timeout(config.timeout || DEFAULT_TIMEOUT, {
     status: ERROR_CODE_SERVER_TIMEOUT
 }));
@@ -71,28 +76,28 @@ app.use(timeout(config.timeout || DEFAULT_TIMEOUT, {
 **************************************/
 engine.init(app);
 
-if(app.get('env') === 'development') {
-  app.use(require('./routes/test'));
-}
 
+/*************************************
+  Timeout handler
+**************************************/
 var haltOnTimedout = function(req, res, next) {
     if (!req.timedout) {
         next();
     }
 };
-
 app.use(haltOnTimedout);
 
 /*************************************
   Error handlers
 **************************************/
 
-/// catch 404 and forward to error handler
+// Catch 404 and forward to error handler
 var NotFundHandler = function(req, res, next) {
     next(new ComposerError('error:not_found', 'Not Found', 404));
 };
 app.use(NotFundHandler);
 
+// Generic error handler
 var errorHandler = function(err, req, res, next) {
     logger.debug('Error caught by express error handler', err);
 
@@ -114,9 +119,9 @@ var errorHandler = function(err, req, res, next) {
     logger.error(err, err.stack);
     next(err);
 };
-
 app.use(errorHandler);
 
+// Uncaught exception handler
 process.on('uncaughtException', function(err) {
   logger.debug('Error caught by uncaughtException', err);
   logger.error(err);
