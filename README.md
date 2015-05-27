@@ -238,7 +238,7 @@ var corbelDriver = corbel.generateDriver({iamToken: ''});
 corbelDriver.iam.token().create({
   jwt: req.body.jwt
 }).then(function(response) {
-  res.send(response);
+  res.send(response.data);
 }).catch(function(err){
   res.status(500).send(err);
 });
@@ -292,7 +292,7 @@ corbelDriver.iam.token().create({
     jwt : req.body.jwt
   })
   .then(function(response){
-    res.send(response);
+    res.send(response.data);
   })
   .catch(function(err){
     res.status(500).send(err);
