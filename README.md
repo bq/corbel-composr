@@ -234,6 +234,7 @@ npm install -g node-inspector
 if (!req.body || !req.body.jwt) {
   throw new ComposerError('error:jwt:undefined', '', 401);
 }
+var corbelDriver = corbel.generateDriver({iamToken: ''});
 corbelDriver.iam.token().create({
   jwt: req.body.jwt
 }).then(function(response) {
@@ -249,8 +250,9 @@ corbelDriver.iam.token().create({
 if (!req.body || !req.body.jwt) {
   throw new ComposerError('error:jwt:undefined', '', 401);
 }
-var tokenObject;
+var corbelDriver = corbel.generateDriver({iamToken: ''});
 
+var tokenObject;
 //Request a session token for the user
 corbelDriver.iam.token().create({
   jwt : req.body.jwt
@@ -260,7 +262,7 @@ corbelDriver.iam.token().create({
   tokenObject = response.data;
 
   //Recreamos el corbelDriver con los settings del usuario
-  var corbelDriver = corbel.generateDriver({
+  corbelDriver = corbel.generateDriver({
     iamToken : tokenObject
   });
 
