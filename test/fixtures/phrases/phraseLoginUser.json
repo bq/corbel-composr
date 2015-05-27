@@ -3,7 +3,7 @@
 	"post": {
 		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var tokenObject;var corbelDriver = corbel.generateDriver({ iamToken : ''}); corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){tokenObject=e.data;corbelDriver=corbel.generateDriver({iamToken:tokenObject});return corbelDriver.iam.user(\"me\").get()}).then(function(e){res.send({tokenObject:tokenObject,user:e.data})})[\"catch\"](function(e){console.log(\"error\",e),res.status(500).send(e)});",
 		"doc": {
-			"description": "Phrase for login a user",
+			"description": "Phrase for login a user using JWT. (claims: `iss`, `aud`, `basic_auth.username`, `basic_auth.password`, `scope`, `exp`)",
 			"body": {
 				"application/json": {
 					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"jwt\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"JWT Assertion\"\n\t\t}\n\t},\n\t\"required\": [\n\t\t\"jwt\"\n\t]\n}",
