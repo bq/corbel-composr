@@ -11,7 +11,7 @@ var phraseManager = require('./phraseManager'),
     logger = require('../utils/logger');
 
 var worker = function() {
-    var connUrl = 'amqp://' + config['rabbitmq.username'] + ':' + config['rabbitmq.password'] + '@' + config['rabbitmq.host'] + ':' + config['rabbitmq.port'];
+    var connUrl = 'amqp://' + config('rabbitmq.username') + ':' + config('rabbitmq.password') + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
 
     amqp.connect(connUrl).then(function(conn) {
 
@@ -80,7 +80,7 @@ var worker = function() {
         });
     }).then(null, function(err) {
         logger.error('Worker error %s', err);
-        setTimeout(worker, config['rabbitmq.reconntimeout']);
+        setTimeout(worker, config('rabbitmq.reconntimeout'));
     });
 };
 

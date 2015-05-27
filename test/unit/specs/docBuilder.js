@@ -3,7 +3,7 @@
 var docBuilder = require('../../../src/lib/docBuilder.js'),
     chai = require('chai'),
     expect = chai.expect,
-    config = require('../../../src/config/config'),
+    config = require('../../../src/lib/config'),
     assert = chai.assert;
 
 var getPhraseWithoutDoc = function() {
@@ -41,7 +41,7 @@ var getPhrase = function() {
 
 describe('in docBuilder', function() {
 
-    var baseUri = config['corbel.driver.options'].urlBase.replace('{{module}}', 'composr');
+    var baseUri = config('corbel.driver.options').urlBase.replace('{{module}}', 'composr');
 
     it('is defined and is an object', function() {
         expect(docBuilder).to.be.an('object');
