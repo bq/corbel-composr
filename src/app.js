@@ -61,7 +61,7 @@ app.use(cors({
 }));
 app.options('*', cors());
 
-app.use(timeout(config.timeout || DEFAULT_TIMEOUT, {
+app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
     status: ERROR_CODE_SERVER_TIMEOUT
 }));
 

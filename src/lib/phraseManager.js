@@ -58,7 +58,7 @@ var executePhrase = function executePhrase(context, compoSR, phraseBody){
 
   domain.run(function() {
     // set the limit of execution time to 10000 milliseconds
-    tripwire.resetTripwire(config.timeout || 10000);
+    tripwire.resetTripwire(config('timeout') || 10000);
 
     /* jshint evil:true */
     var funct = Function.apply(null, _.keys(context).concat('compoSR', phraseBody));
@@ -99,13 +99,13 @@ var registerPhrase = function(router, phrase) {
                 var driverObtainFunction = function(defaults){
                   return function(options){
                     logger.debug(defaults, '-----', options);
-                    var generatedOptions = _.defaults(_.cloneDeep(options), _.cloneDeep(defaults));
+                    var generatedOptions = _.defaults(_.cloneDeep(options), defaults);
                     logger.debug('Options for generate driver:', generatedOptions);
                     return corbel.getDriver(generatedOptions);
                   };
                 };
 
-                corbel.generateDriver = driverObtainFunction(config['corbel.driver.options']);
+                corbel.generateDriver = driverObtainFunction(config('corbel.driver.options'));
 
                 var corbelDriver = null;
                 //If token is present, pregenerate a corbelDriver, otherwise let them manage the corbelDriver instantiation

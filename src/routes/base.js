@@ -11,7 +11,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/version', function(req, res) {
-    res.send(config);
+    res.send(config());
 });
 
 module.exports = router;

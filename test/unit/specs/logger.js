@@ -8,7 +8,7 @@ var logger = require('../../../src/utils/logger.js'),
     fs = require('fs'),
     sinon = require('sinon');
 
-var logFile = config.logFile ? config.logFile : 'logs/composr.log';
+var logFile = config('logFile') ? config('logFile') : 'logs/composr.log';
 
 describe('Log file creation', function(){
 
