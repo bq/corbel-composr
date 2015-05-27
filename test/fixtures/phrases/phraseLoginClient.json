@@ -6,8 +6,8 @@
 			"description": "Phrase for login a client",
 			"body": {
 				"application/json": {
-					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"clientId\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"client id\"\n\t\t},\n\t\t\"clientSecret\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"client secret\"\n\t\t},\n\t\t\"scopes\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"string with scopes separated with spaces\"\n\t\t}\n\t},\n\t\"required\": [\"clientId\", \"cientSecret\", \"scopes\"]\n}",
-					"example": "{\n\t\"clientId\": \"CLIENT_ID\",\n\t\"clientSecret\": \"CLIENT_SECRET\",\n\t\"scopes\": \"scope1 scope2\"\n}"
+					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"jwt\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"JWT Assertion\"\n\t\t}\n\t},\n\t\"required\": [\n\t\t\"jwt\"\n\t]\n}",
+					"example": "{\n\t\"jwt\": \"JWT\"\n}"
 
 				}
 			},

@@ -3,6 +3,7 @@
     "post": {
         "code": "res.render('index', {title: 'hello world'});",
         "doc": {
+            "securedBy": ["oauth_2_0"],
             "description": "Phrase for login",
             "queryParameters": {
                 "param1": {
