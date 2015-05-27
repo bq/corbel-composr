@@ -231,16 +231,14 @@ npm install -g node-inspector
 ## Login a client
 
 ```javascript
-var corbelDriver = corbel.generateDriver({
-  clientId : req.body.clientId,
-  clientSecret : req.body.clientSecret,
-  scopes : req.body.scopes
-});
-
-corbelDriver.iam.token().create().then(function(response) {
+if (!req.body || !req.body.jwt) {
+  throw new ComposerError('error:jwt:undefined', '', 401);
+}
+corbelDriver.iam.token().create({
+  jwt: req.body.jwt
+}).then(function(response) {
   res.send(response);
-})
-.catch(function(err){
+}).catch(function(err){
   res.status(500).send(err);
 });
 ```
@@ -248,25 +246,15 @@ corbelDriver.iam.token().create().then(function(response) {
 ## Login a user
 
 ```javascript
-//Extract the clientId from the auth token
-var jwtDecoded = corbel.jwt.decode(req.get('Authorization'));
-var clientId = jwtDecoded.clientId;
-
-//Claims object for log the user in
-var claims = {
-  'iss' : clientId,
-  'scopes' : req.body.scopes,
-  'basic_auth.username' : req.body.username,
-  'basic_auth.password' : req.body.password
-};
-
+if (!req.body || !req.body.jwt) {
+  throw new ComposerError('error:jwt:undefined', '', 401);
+}
 var tokenObject;
 
 //Request a session token for the user
 corbelDriver.iam.token().create({
-  claims : claims
-})
-.then(function(response){
+  jwt : req.body.jwt
+}).then(function(response){
 
   //Tenemos el token de usuario, asimismo tambien el refresh y el expires
   tokenObject = response.data;
@@ -278,14 +266,12 @@ corbelDriver.iam.token().create({
 
   //Obtain the logged user data
   return corbelDriver.iam.user('me').get();
-})
-.then(function(response){
+}).then(function(response){
   res.send({
     tokenObject: tokenObject,
     user: response.data
   });
-})
-.catch(function(err){
+}).catch(function(err){
   console.log('error', err);
   res.status(500).send(err);
 });
