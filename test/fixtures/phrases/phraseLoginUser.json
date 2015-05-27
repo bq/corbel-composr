@@ -1,7 +1,7 @@
 {
 	"url": "loginuser",
 	"post": {
-		"code": "var jwtDecoded=corbel.jwt.decode(req.get('Authorization')),clientId=jwtDecoded.clientId,claims={iss:clientId,scopes:req.body.scopes,'basic_auth.username':req.body.username,'basic_auth.password':req.body.password};console.log('claims',claims,clientId);var tokenObject;corbelDriver.iam.token().create({claims:claims}).then(function(e){console.log('token',e),tokenObject=e.data;var o=corbel.generateDriver({iamToken:tokenObject});return o.iam.user('me').get()}).then(function(e){console.log('user',e.data),res.send({tokenObject:tokenObject,user:e.data})})['catch'](function(e){console.log('error',e),res.status(500).send(e)});",
+		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var tokenObject;corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){tokenObject=e.data;var r=corbel.generateDriver({iamToken:tokenObject});return r.iam.user(\"me\").get()}).then(function(e){res.send({tokenObject:tokenObject,user:e.data})})[\"catch\"](function(e){console.log(\"error\",e),res.status(500).send(e)});",
 		"doc": {
 			"securedBy": ["oauth_2_0"],
 			"description": "Phrase for login a user",

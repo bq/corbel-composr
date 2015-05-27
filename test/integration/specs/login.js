@@ -2,7 +2,8 @@
 var request = require('supertest'),
     chai = require('chai'),
     expect = chai.expect,
-    clientUtils = require('../utils/client');
+    clientUtils = require('../utils/client'),
+    corbelSigner = require('../utils/corbelSigner');
 
 var AdminClientData = clientUtils.getAdminClient();
 var demoAppClientData = clientUtils.getDemoClient();
@@ -65,6 +66,10 @@ function test(app) {
                 var phraseEndpoint = loginphrase.url;
                 var domain = phraseClientLoginLocation.replace('phrase/', '').split('!')[0];
                 var url = '/' + domain + '/' + phraseEndpoint;
+                var demoClientJwt = {
+                  jwt : corbelSigner.getClientAssertion(demoAppClientData)
+                };
+
                 this.timeout(30000);
 
                 //let's wait till corbel triggers the event to register the phrase in composr
@@ -73,7 +78,7 @@ function test(app) {
 
                     request(app)
                         .post(url)
-                        .send(demoAppClientData)
+                        .send(demoClientJwt)
                         .expect(200)
                         .end(function(err, response) {
                             expect(response).to.be.an('object');
@@ -117,6 +122,10 @@ function test(app) {
                 //Returns the data needed to make a user login
                 var demoUserData = clientUtils.getUser();
 
+                var demoUserJwt = {
+                  jwt : corbelSigner.getUserAssertion(demoClientToken, demoAppClientData.clientSecret, demoUserData)
+                };
+
                 this.timeout(30000);
 
                 //let's wait till corbel triggers the event to register the phrase in composr
@@ -126,7 +135,7 @@ function test(app) {
                     request(app)
                         .post(url)
                         .set('Authorization', demoClientToken)
-                        .send(demoUserData)
+                        .send(demoUserJwt)
                         .expect(200)
                         .end(function(err, response) {
                             expect(response).to.be.an('object');
@@ -173,9 +182,13 @@ function test(app) {
                 var url = '/' + domain + '/' + phraseEndpoint;
 
                 //Returns the data needed to make a user login
+
+                var demoUserData = clientUtils.getUser();
+
                 var data = {
-                    refreshToken: demoUserRefreshToken,
-                    scopes: clientUtils.getUser().scopes
+                  refreshToken: demoUserRefreshToken,
+                  scopes: demoUserData.scopes
+                  //jwt : corbelSigner.getUserAssertion(demoClientToken, demoClientData.clientSecret, demoUserData)
                 };
 
                 this.timeout(30000);

@@ -1,7 +1,7 @@
 {
 	"url": "loginclient",
 	"post": {
-		"code": "if(!(req.body&&req.body.clientId&&req.body.clientSecret&&req.body.scopes))throw new ComposerError(\"error:unauthorized\",\"\",401);var corbelDriver=corbel.generateDriver({clientId:req.body.clientId,clientSecret:req.body.clientSecret,scopes:req.body.scopes});corbelDriver.iam.token().create().then(function(e){res.send(e)})[\"catch\"](function(e){res.status(500).send(e)});",
+		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var corbelDriver = corbel.generateDriver({ iamToken : ''}); corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){res.send(e)})[\"catch\"](function(e){res.status(500).send(e)});",
 		"doc": {
 			"description": "Phrase for login a client",
 			"body": {
