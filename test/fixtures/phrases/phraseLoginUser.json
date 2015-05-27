@@ -8,7 +8,6 @@
 				"application/json": {
 					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"jwt\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"JWT Assertion\"\n\t\t}\n\t},\n\t\"required\": [\n\t\t\"jwt\"\n\t]\n}",
 					"example": "{\n\t\"jwt\": \"JWT\"\n}"
-
 				}
 			},
 			"responses": {
