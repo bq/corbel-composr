@@ -53,7 +53,7 @@ var bootstrapPhrases = function() {
     }).
     fail(function(error) {
       logger.error('error:bootstrap:load', error);
-      setTimeout(bootstrapPhrases, config['bootstrap.retrytimeout']);
+      setTimeout(bootstrapPhrases, config('bootstrap.retrytimeout'));
     });
 
   }).catch(function(error) {
