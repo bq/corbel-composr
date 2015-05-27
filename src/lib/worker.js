@@ -16,7 +16,7 @@ var worker = function() {
     amqp.connect(connUrl).then(function(conn) {
 
         function doWork(msg) {
-            if (msg.fields.routingKey === 'class com.bq.oss.corbel.event.ResourceEvent') {
+            if (msg.fields.routingKey === config['rabbitmq.event']) {
 
                 var message;
                 try {
