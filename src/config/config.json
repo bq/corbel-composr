@@ -4,6 +4,7 @@
     "rabbitmq.username": "RABBIT_USERNAME",
     "rabbitmq.password": "RABBIT_PASSWORD",
     "rabbitmq.reconntimeout": 10000,
+    "rabbitmq.event": "eventName",
 
     "bootstrap.retrytimeout": 10000,
 
