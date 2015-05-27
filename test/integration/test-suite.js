@@ -6,6 +6,7 @@ var timeoutTests = require('./specs/timeout.js'),
     exampleTests = require('./specs/example.js'),
     cacheTests = require('./specs/cache.js'),
     loginTests = require('./specs/login.js'),
+    brokenPhraseTests = require('./specs/brokenPhrase.js'),
     phraseTests = require('./specs/phrase.js');
 
 module.exports = function(app){
@@ -13,6 +14,7 @@ module.exports = function(app){
   timeoutTests(app);
   errorHandlerTests(app);
   exampleTests(app);
+  brokenPhraseTests(app);
   phraseTests(app);
   loginTests(app);
 };

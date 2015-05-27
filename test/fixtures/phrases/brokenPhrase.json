@@ -1,0 +1,35 @@
+{
+	"url": "brokenphrase",
+	"post": {
+		"code": "var corbelDriver=corbel.generateDriver({clientsId:req.body.clientId,clientSecreta:req.body.clientSecret,scopes:req.body.scopes});corbelDriver.iam.token().create().then(function(e){res.send(e)})['catch'](function(e){res.status(500).send(e)});",
+		"doc": {
+			"description": "Phrase for login a client",
+			"body": {
+				"application/json": {
+					"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"clientId\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"client id\"\n\t\t},\n\t\t\"clientSecret\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"client secret\"\n\t\t},\n\t\t\"scopes\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"string with scopes separated with spaces\"\n\t\t}\n\t},\n\t\"required\": [\"clientId\", \"cientSecret\", \"scopes\"]\n}",
+					"example": "{\n\t\"clientId\": \"CLIENT_ID\",\n\t\"clientSecret\": \"CLIENT_SECRET\",\n\t\"scopes\": \"scope1 scope2\"\n}"
+
+				}
+			},
+			"responses": {
+				"200": {
+					"body": {
+						"application/json": {
+							"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login response\",\n\t\"properties\": {\n\t\t\"accessToken\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"accessToken to send in every authorized request\"\n\t\t},\n\t\t\"expiresAt\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"epoch time until token expiration\"\n\t\t}\n\t},\n\t\"required\": [\"accessToken\", \"expiresAt\"]\n}",
+							"example": "{\n\t\"accessToken\": \"ACCESS_TOKEN\",\n\t\"expiresAt\": 123123\n}"
+						}
+					}
+				},
+				"401": {
+					"description": "Not authorized",
+					"body": {
+						"application/json": {
+							"schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR error response\",\n\t\"properties\": {\n\t\t\"httpStatus\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"HTTP status code\"\n\t\t},\n\t\t\"error\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"error code\"\n\t\t},\n\t\t\"errorDescription\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Public description\"\n\t\t},\n\t\t\"trace\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Development info description\"\n\t\t}\n\t},\n\t\"required\": [\"httpStatus\", \"error\", \"errorDescription\"]\n}",
+							"example": "{\n\t\"httpStatus\": 401,\n\t\"error\": \"unauthorized\",\n\t\"errorDescription\": \"\"\n}"
+						}
+					}
+				}
+			}
+		}
+	}
+}

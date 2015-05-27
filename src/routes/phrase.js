@@ -3,6 +3,7 @@
 var express = require('express'),
     corbel = require('corbel-js'),
     config = require('../lib/config'),
+    _ = require('lodash'),
     router = express.Router(),
     connection = require('../lib/corbelConnection'),
     phraseManager = require('../lib/phraseManager'),
@@ -112,7 +113,7 @@ router.post('/token', function(req, res, next) {
 
     var data = req.body || {};
 
-    var corbelConfig = config['corbel.driver.options'];
+    var corbelConfig = _.cloneDeep(config['corbel.driver.options']);
 
     corbelConfig.clientId = data.clientId;
     corbelConfig.clientSecret = data.clientSecret;
