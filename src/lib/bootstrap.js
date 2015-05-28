@@ -47,7 +47,7 @@ var bootstrapPhrases = function() {
   connection.driver.then(function(driver) {
     getPhrase(driver, connection.PHRASES_COLLECTION).then(function(phrases) {
       return phrases.forEach(function(phrase) {
-        logger.debug('Phrase loaded', phrase);
+        logger.debug('Phrase loaded', phrase.id);
         phraseManager.registerPhrase(router, phrase);
       });
     }).

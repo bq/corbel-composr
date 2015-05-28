@@ -63,7 +63,7 @@ router.put('/phrase', function(req, res, next) {
 
         corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
             res.set('Location', 'phrase/' + phrase.id);
-            res.send(response.status, response.data);
+            res.status(response.status).send(response.data);
         }).catch(function(error) {
             next(new ComposerError('error:phrase:create', error, error.status));
         });

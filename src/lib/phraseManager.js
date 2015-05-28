@@ -100,7 +100,7 @@ var registerPhrase = function(router, phrase) {
                   return function(options){
                     logger.debug(defaults, '-----', options);
                     var generatedOptions = _.defaults(_.cloneDeep(options), defaults);
-                    logger.debug('Options for generate driver:', generatedOptions);
+                    logger.debug('phraseManager:corbel.generateDriver', generatedOptions);
                     return corbel.getDriver(generatedOptions);
                   };
                 };

@@ -17,7 +17,6 @@ var worker = function() {
 
     function doWork(msg) {
       if (msg.fields.routingKey === config('rabbitmq.event')) {
-        logger.debug('ROUTINGKEY', msg.content.toString());
 
         var message;
         try {
@@ -26,9 +25,8 @@ var worker = function() {
           throw new ComposerError('error:worker:message', 'Error parsing message: ' + error, 422);
         }
 
-        logger.debug('TYPE', message.type);
         if (message.type === connection.PHRASES_COLLECTION) {
-          logger.debug('PHRASES_COLLECTION', message);
+          logger.debug('WORKER', message);
           switch (message.action) {
             case 'DELETE':
 
