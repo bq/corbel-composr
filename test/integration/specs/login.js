@@ -1,223 +1,338 @@
 'use strict';
+
 var request = require('supertest'),
   chai = require('chai'),
   expect = chai.expect,
   clientUtils = require('../utils/client'),
-  corbelSigner = require('../utils/corbelSigner');
+  corbel = require('corbel-js');
 
-var AdminClientData = clientUtils.getAdminClient();
-var demoAppClientData = clientUtils.getDemoClient();
-
-var adminClientToken,
-  demoClientToken,
-  demoUserToken,
-  demoUserRefreshToken;
+function generateAssertion(claims, clientSecret) {
+  claims.aud = corbel.Iam.AUD;
+  return corbel.jwt.generate(claims, clientSecret);
+}
 
 function test(app) {
-  describe('With Login phrases,', function() {
 
-    var loginphrase = require('../../fixtures/phrases/phraseLoginClient.json');
+  /**
+   * @param  {object} credentials
+   * @param  {string} credentials.clientId
+   * @param  {string} credentials.clientSecret
+   * @param  {string} credentials.scopes
+   * @return {Promise}
+   */
+  function getToken(credentials) {
+    return new Promise(function(resolve, reject) {
 
-    before(function(done) {
-      this.timeout(30000);
       request(app)
         .post('/token')
-        .send(AdminClientData)
+        .send(credentials)
         .expect(200)
         .end(function(err, response) {
-          expect(response).to.be.an('object');
-          expect(response.body.data.accessToken).to.exist;
-          adminClientToken = response.body.data.accessToken;
 
-          request(app)
-            .post('/token')
-            .send(demoAppClientData)
-            .expect(200)
-            .end(function(err, response) {
-              expect(response).to.be.an('object');
-              expect(response.body.data.accessToken).to.exist;
-              demoClientToken = response.body.data.accessToken;
-              done(err);
-            });
+          expect(response).to.be.an('object');
+          expect(response.body.data.accessToken).to.be.a('string');
+
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response.body.data);
+          }
+        });
+
+    });
+  }
+
+  /**
+   * @param  {object} phrase
+   * @param  {string} accessToken
+   * @return {Promise}
+   */
+  function createPhrase(phrase, accessToken) {
+    return new Promise(function(resolve, reject) {
+
+      request(app)
+        .put('/phrase')
+        .set('Authorization', accessToken)
+        .send(phrase)
+        .expect(204)
+        .end(function(err, response) {
+          expect(response.headers).to.be.an('object');
+          expect(response.headers.location).to.be.a('string');
+
+          if (err) {
+            reject(err);
+            return;
+          }
+          //let's wait till corbel triggers the event to register the phrase in composr
+          //TODO: use any tool to know when it happens
+          setTimeout(function() {
+            resolve(response.headers.location);
+          }, 4000);
+        });
+
+    });
+  }
+
+  /**
+   * @param  {object} params
+   * @param  {string} params.url
+   * @param  {string} [params.method='post']
+   * @param  {number} [params.responseStatus=200]
+   * @param  {Mixed} [params.data]
+   * @return {Promise}
+   */
+  function callPhrase(params) {
+    params = params || {};
+    params.method = params.method || 'post';
+    params.responseStatus = params.responseStatus || 200;
+
+    return new Promise(function(resolve, reject) {
+
+      request(app)[params.method](params.url)
+        .send(params.data)
+        .expect(params.responseStatus)
+        .end(function(err, response) {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          resolve(response);
 
         });
+
+    });
+  }
+
+  /**
+   * @param  {string} loginClientURL
+   * @return {Promise}
+   */
+  function loginClient(loginClientURL) {
+
+    var credentials = clientUtils.getDemoClient();
+
+    return login({
+      url: loginClientURL,
+      claims: {
+        iss: credentials.clientId,
+        scope: credentials.scopes
+      },
+      clientSecret: credentials.clientSecret
+    });
+
+  }
+
+  /**
+   * @param  {string} loginUserURL
+   * @return {Promise}
+   */
+  function loginUser(loginUserURL) {
+
+    var credentialsUser = clientUtils.getUser();
+    var credentialsClient = clientUtils.getDemoClient();
+
+    return login({
+      url: loginUserURL,
+      claims: {
+        iss: credentialsClient.clientId,
+        'basic_auth.username': credentialsUser.username,
+        'basic_auth.password': credentialsUser.password,
+        scope: credentialsUser.scopes
+      },
+      clientSecret: credentialsClient.clientSecret
+    });
+
+  }
+
+  /**
+   * @param  {string} refreshTokenURL
+   * @param  {string} token
+   * @return {Promise}
+   */
+  function refreshToken(refreshTokenURL, token) {
+
+    var credentialsUser = clientUtils.getUser();
+    var credentialsClient = clientUtils.getDemoClient();
+
+    return login({
+      url: refreshTokenURL,
+      claims: {
+        iss: credentialsClient.clientId,
+        'refresh_token': token,
+        scope: credentialsUser.scopes
+      },
+      clientSecret: credentialsClient.clientSecret
+    });
+
+  }
+
+  /**
+   * @param  {object} params
+   * @param  {string} params.url
+   * @param  {string} params.clientSecret
+   * @param  {object} params.claims
+   * @param  {object} params.claims.iss
+   * @param  {object} params.claims.scope
+   * @param  {object} [params.claims.refresh_token]
+   * @param  {object} [params.claims.basic_auth.username]
+   * @param  {object} [params.claims.basic_auth.password]
+   * @return {Promise}
+   */
+  function login(params) {
+
+    var data = {
+      jwt: generateAssertion(params.claims, params.clientSecret)
+    };
+
+    return callPhrase({
+      url: params.url,
+      data: data
+    });
+
+  }
+
+  var AdminClientData = clientUtils.getAdminClient();
+  var demoAppClientData = clientUtils.getDemoClient();
+
+  var adminClientToken,
+    demoClientToken;
+
+  describe('With Login phrases,', function() {
+
+    this.timeout(30000);
+
+    before(function(done) {
+
+      var clientPromise = getToken(demoAppClientData);
+      var AdminPromise = getToken(AdminClientData);
+
+      Promise.all([clientPromise, AdminPromise])
+        .then(function(response) {
+          demoClientToken = response[0].accessToken;
+          adminClientToken = response[1].accessToken;
+          done();
+        }).catch(function(err) {
+          done(err);
+        });
+
     });
 
     describe('client login phrase', function() {
 
+      var loginphrase = require('../../fixtures/phrases/phraseLoginClient.json');
       var phraseClientLoginLocation;
 
-      it('is created correctly', function(done) {
-        this.timeout(30000);
-        request(app)
-          .put('/phrase')
-          .set('Authorization', adminClientToken)
-          .send(loginphrase)
-          .expect(204)
-          .end(function(err, response) {
-            expect(response.headers).to.exist;
-            phraseClientLoginLocation = response.headers.location;
-            expect(phraseClientLoginLocation).to.exist;
+      before('is created correctly', function(done) {
+        createPhrase(loginphrase, adminClientToken)
+          .then(function(location) {
+            phraseClientLoginLocation = location;
+            done();
+          }).catch(function(err) {
             done(err);
           });
+
       });
 
       it('receives a token after calling it', function(done) {
-        var phraseEndpoint = loginphrase.url;
-        var domain = phraseClientLoginLocation.replace('phrase/', '').split('!')[0];
-        var url = '/' + domain + '/' + phraseEndpoint;
-        var demoClientJwt = {
-          jwt: corbelSigner.getClientAssertion(demoAppClientData)
-        };
+        var url = phraseClientLoginLocation.replace('phrase/', '/').replace('!', '/');
 
-        this.timeout(30000);
-
-        //let's wait till corbel triggers the event to register the phrase in composr
-        //TODO: use any tool to know when it happens
-        setTimeout(function() {
-
-          request(app)
-            .post(url)
-            .send(demoClientJwt)
-            .expect(200)
-            .end(function(err, response) {
-              expect(response).to.be.an('object');
-              expect(response.body.accessToken).to.exist;
-              //demoClientToken = response.body.data.accessToken;
-              done(err);
-            });
-
-        }, 2000);
+        loginClient(url)
+          .then(function(response) {
+            expect(response).to.be.an('object');
+            expect(response.body.accessToken).to.be.a('string');
+            done();
+          })
+          .catch(function(err) {
+            done(err);
+          });
 
       });
 
     });
 
-
     describe('user login phrase', function() {
 
-      var phraseUserLoginLocation;
-      var userLoginPhrase = require('../../fixtures/phrases/phraseLoginUser.json');
+      var phraseUserLoginLocation,
+        phraseUserLoginURL,
+        userLoginPhrase = require('../../fixtures/phrases/phraseLoginUser.json');
 
-      it('is created correctly', function(done) {
-        this.timeout(30000);
-        request(app)
-          .put('/phrase')
-          .set('Authorization', adminClientToken)
-          .send(userLoginPhrase)
-          .expect(204)
-          .end(function(err, response) {
-            expect(response.headers).to.exist;
-            phraseUserLoginLocation = response.headers.location;
-            expect(phraseUserLoginLocation).to.exist;
+      before('is created correctly', function(done) {
+        createPhrase(userLoginPhrase, adminClientToken)
+          .then(function(location) {
+            phraseUserLoginLocation = location;
+            phraseUserLoginURL = phraseUserLoginLocation.replace('phrase/', '/').replace('!', '/');
+            done();
+          }).catch(function(err) {
             done(err);
           });
       });
 
       it('receives a token/expires/refresh after calling it', function(done) {
-        var phraseEndpoint = userLoginPhrase.url;
-        var domain = phraseUserLoginLocation.replace('phrase/', '').split('!')[0];
-        var url = '/' + domain + '/' + phraseEndpoint;
 
-        //Returns the data needed to make a user login
-        var demoUserData = clientUtils.getUser();
-
-        var demoUserJwt = {
-          jwt: corbelSigner.getUserAssertion(demoClientToken, demoAppClientData.clientSecret, demoUserData)
-        };
-
-        this.timeout(30000);
-
-        //let's wait till corbel triggers the event to register the phrase in composr
-        //TODO: use any tool to know when it happens
-        setTimeout(function() {
-          console.log('DEMO_CLIENT', demoClientToken);
-          request(app)
-            .post(url)
-            .send(demoUserJwt)
-            .expect(200)
-            .end(function(err, response) {
-              expect(response).to.be.an('object');
-              expect(response.body).to.be.an('object');
-              expect(response.body.tokenObject).to.be.an('object');
-              expect(response.body.user).to.be.an('object');
-              expect(response.body.tokenObject.accessToken).to.exist;
-              expect(response.body.tokenObject.expiresAt).to.exist;
-              expect(response.body.tokenObject.refreshToken).to.exist;
-              demoUserToken = response.body.tokenObject.accessToken;
-              demoUserRefreshToken = response.body.tokenObject.refreshToken;
-              done(err);
-            });
-
-        }, 2000);
-
-      });
-
-    });
-
-    describe('user tokenRefresh phrase', function() {
-
-      var refreshTokenLocation;
-      var refreshTokenPhrase = require('../../fixtures/phrases/refreshToken.json');
-
-      it('is created correctly', function(done) {
-        this.timeout(30000);
-        request(app)
-          .put('/phrase')
-          .set('Authorization', adminClientToken)
-          .send(refreshTokenPhrase)
-          .expect(204)
-          .end(function(err, response) {
-            expect(response.headers).to.exist;
-            refreshTokenLocation = response.headers.location;
-            expect(refreshTokenLocation).to.exist;
+        loginUser(phraseUserLoginURL)
+          .then(function(response) {
+            expect(response).to.be.an('object');
+            expect(response.body).to.be.an('object');
+            expect(response.body.tokenObject).to.be.an('object');
+            expect(response.body.tokenObject.accessToken).to.be.a('string');
+            done();
+          })
+          .catch(function(err) {
             done(err);
           });
+
       });
 
-      it('can refresh user token with refreshToken', function(done) {
-        var phraseEndpoint = refreshTokenPhrase.url;
-        var domain = refreshTokenLocation.replace('phrase/', '').split('!')[0];
-        var url = '/' + domain + '/' + phraseEndpoint;
+      describe('with accessToken, user tokenRefresh phrase', function() {
 
-        //Returns the data needed to make a user login
+        var refreshTokenLocation,
+          demoUserToken,
+          demoUserRefreshToken,
+          refreshTokenPhrase = require('../../fixtures/phrases/refreshToken.json');
 
-        var demoUserData = clientUtils.getUser();
+        before('is created correctly', function(done) {
 
-        var data = {
-          jwt: corbelSigner.getTokenRefreshAssertion(demoUserRefreshToken, demoUserData.scopes, demoAppClientData)
-        };
-
-        this.timeout(30000);
-
-        //let's wait till corbel triggers the event to register the phrase in composr
-        //TODO: use any tool to know when it happens
-        setTimeout(function() {
-
-          request(app)
-            .post(url)
-            .send(data)
-            .expect(200)
-            .end(function(err, response) {
-              expect(response).to.be.an('object');
-              expect(response.body).to.be.an('object');
-              expect(response.body.accessToken).to.exist;
-              expect(response.body.expiresAt).to.exist;
-              expect(response.body.refreshToken).to.exist;
-              expect(response.body.refreshToken).to.not.be.equal(demoUserRefreshToken);
-              demoUserToken = response.body.accessToken;
-              demoUserRefreshToken = response.body.refreshToken;
+          createPhrase(refreshTokenPhrase, adminClientToken)
+            .then(function(location) {
+              refreshTokenLocation = location;
+            })
+            .then(function() {
+              return loginUser(phraseUserLoginURL);
+            })
+            .then(function(response) {
+              demoUserToken = response.body.tokenObject.accessToken;
+              demoUserRefreshToken = response.body.tokenObject.refreshToken;
+              done();
+            })
+            .catch(function(err) {
               done(err);
             });
 
-        }, 2000);
+        });
+
+        it('can refresh user token with refreshToken', function(done) {
+          var url = refreshTokenLocation.replace('phrase/', '/').replace('!', '/');
+
+          refreshToken(url, demoUserRefreshToken).then(function(response) {
+            expect(response).to.be.an('object');
+            expect(response.body).to.be.an('object');
+            expect(response.body.accessToken).to.be.a('string');
+            expect(response.body.expiresAt).to.be.a('number');
+            expect(response.body.refreshToken).to.be.a('string');
+            expect(response.body.refreshToken).to.not.be.equal(demoUserRefreshToken);
+            done();
+          }).catch(function(err) {
+            done(err);
+          });
+
+        });
 
       });
+
     });
 
-
   });
-
 
 }
 
