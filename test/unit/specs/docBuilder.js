@@ -41,7 +41,7 @@ var getPhrase = function() {
 
 describe('in docBuilder', function() {
 
-    var baseUri = config('corbel.driver.options').urlBase.replace('{{module}}', 'composr');
+    var baseUri = config('corbel.driver.options').urlBase.replace('{{module}}', 'composr').replace('/v1.0', '');
 
     it('is defined and is an object', function() {
         expect(docBuilder).to.be.an('object');
@@ -61,7 +61,7 @@ describe('in docBuilder', function() {
         });
 
         it('it builds the expected definition', function() {
-            var expected = '#%RAML 0.8\n---\ntitle: domain\nbaseUri: https://composr-qa.bqws.io/v1.0/domain\nsecuritySchemes:\n    - oauth_2_0:\n        description: Corbel supports OAuth 2.0 for authenticating all API requests.\n        type: OAuth 2.0\n        describedBy:\n            headers:\n                Authorization:\n                    description: Used to send a valid OAuth 2 access token.\n                    type: string\n            responses:\n                401:\n                    description: Bad or expired token. To fix, you should re-authenticate the user.\n        settings:\n            authorizationUri: https://oauth.corbel.io/v1.0/oauth/authorize\n            accessTokenUri: https://iam.corbel.io/v1.0/oauth/token\n            authorizationGrants: [ code, token ]\nresourceTypes:\n    - secured:\n        get?: &common\n            headers:\n                Authorization:\n                    description: Token to access secured resources\n                    type: string\n                    required: true\n        post?: *common\n        patch?: *common\n        put?: *common\n        delete?: *common\n/url:\n    get:\n        description: \'This method will get all songs\'\n        queryParameters:\n            genre: {description: \'filter the songs by genre\'}\n        responses:\n            \'200\': {body: {application/json: {schema: \'{ "$schema": "http://json-schema.org/schema"}\'}, application/xml: null}}\n';
+            var expected = '#%RAML 0.8\n---\ntitle: domain\nbaseUri: ' + baseUri + 'domain\nsecuritySchemes:\n    - oauth_2_0:\n        description: Corbel supports OAuth 2.0 for authenticating all API requests.\n        type: OAuth 2.0\n        describedBy:\n            headers:\n                Authorization:\n                    description: Used to send a valid OAuth 2 access token.\n                    type: string\n            responses:\n                401:\n                    description: Bad or expired token. To fix, you should re-authenticate the user.\n        settings:\n            authorizationUri: https://oauth.corbel.io/v1.0/oauth/authorize\n            accessTokenUri: https://iam.corbel.io/v1.0/oauth/token\n            authorizationGrants: [ code, token ]\nresourceTypes:\n    - secured:\n        get?: &common\n            headers:\n                Authorization:\n                    description: Token to access secured resources\n                    type: string\n                    required: true\n        post?: *common\n        patch?: *common\n        put?: *common\n        delete?: *common\n/url:\n    get:\n        description: \'This method will get all songs\'\n        queryParameters:\n            genre: {description: \'filter the songs by genre\'}\n        responses:\n            \'200\': {body: {application/json: {schema: \'{ "$schema": "http://json-schema.org/schema"}\'}, application/xml: null}}\n';
             assert.equal(expected, docBuilder.buildDefinition('domain', [getPhrase()]));
         });
     });

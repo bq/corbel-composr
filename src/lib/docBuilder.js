@@ -35,7 +35,7 @@ var buildPhraseDefinition = function(phrase) {
  */
 var buildDefinition = function(domain, phrases) {
     phrases = phrases || [];
-    var urlBase = config('corbel.driver.options').urlBase.replace('{{module}}', 'composr');
+    var urlBase = config('corbel.driver.options').urlBase.replace('{{module}}', 'composr').replace('/v1.0', '');
 
     var doc = {};
     phrases.forEach(function(phrase) {
