@@ -41,9 +41,19 @@ A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) wit
 2. Import corbel-composer collection:
 
   ```
-  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman.json
+  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/postman.json
   ```
-3. Enjoy!
+3. Import evironment example:
+
+  ```
+  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/environment.example.json
+  ```
+4. Import globals:
+
+  ```
+  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/globals.example.json
+  ```
+5. Enjoy!
 
 
 ## Phrase Model
