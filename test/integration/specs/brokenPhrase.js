@@ -42,7 +42,7 @@ function test(app) {
                     .end(function(err, response) {
                         expect(response.headers).to.exist;
                         brokenPhraseLocation = response.headers.location;
-                        expect(brokenPhraseLocation.length).to.be.above(0);
+                        expect(brokenPhraseLocation).to.exist;
                         done(err);
                     });
             });
@@ -63,11 +63,14 @@ function test(app) {
                         .expect(500)
                         .end(function(err, response) {
                             expect(response).to.be.an('object');
-                            console.log('PUTAAA', err);
+                            console.log('BROKENPHRASEERROR', response.body);
+                            expect(response.body.httpStatus).to.be.equal(500);
+                            expect(response.body.error).to.be.a('string');
+                            expect(response.body.errorDescription).to.be.a('string');
                             done(err);
                         });
 
-                }, 2000);
+                }, 3000);
 
             });
 

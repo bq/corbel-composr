@@ -258,7 +258,7 @@ corbelDriver.iam.token().create({
 }).then(function(response) {
   res.send(response.data);
 }).catch(function(err){
-  res.status(500).send(err);
+  throw new ComposerError('error:unauthorized', err.data, 401);
 });
 ```
 
@@ -302,8 +302,7 @@ corbelDriver.iam.token().create({
     user: response.data
   });
 }).catch(function(err){
-  console.log('error', err);
-  res.status(500).send(err);
+  throw new ComposerError('error:unauthorized', err.data, 401);
 });
 ```
 ## Refresh a token
@@ -331,7 +330,7 @@ corbelDriver.iam.token().create({
     res.send(response.data);
   })
   .catch(function(err){
-    res.status(500).send(err);
+    throw new ComposerError('error:unauthorized', err.data, 401);
   });
 
 ```

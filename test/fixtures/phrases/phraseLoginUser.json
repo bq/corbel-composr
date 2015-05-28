@@ -1,7 +1,7 @@
 {
 	"url": "loginuser",
 	"post": {
-		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var tokenObject;var corbelDriver = corbel.generateDriver({ iamToken : ''}); corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){tokenObject=e.data;corbelDriver=corbel.generateDriver({iamToken:tokenObject});return corbelDriver.iam.user(\"me\").get()}).then(function(e){res.send({tokenObject:tokenObject,user:e.data})})[\"catch\"](function(e){console.log(\"error\",e),res.status(500).send(e)});",
+		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var tokenObject;var corbelDriver = corbel.generateDriver({ iamToken : ''}); corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){tokenObject=e.data;corbelDriver=corbel.generateDriver({iamToken:tokenObject});return corbelDriver.iam.user(\"me\").get()}).then(function(e){res.send({tokenObject:tokenObject,user:e.data})})[\"catch\"](function(e){throw new ComposerError('error:unauthorized', e.data, 401);});",
 		"doc": {
 			"description": "Phrase for login a user using JWT. (claims: `iss`, `aud`, `basic_auth.username`, `basic_auth.password`, `scope`, `exp`)",
 			"body": {
