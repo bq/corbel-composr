@@ -1,0 +1,16 @@
+[
+	{
+		"key": "accessToken",
+		"value": "YOUR_ACCESS_TOKEN",
+		"type": "text",
+		"name": "accessToken",
+		"enabled": true
+	},
+	{
+		"key": "domain",
+		"value": "YOUR_DOMAIN",
+		"type": "text",
+		"name": "domain",
+		"enabled": true
+	}
+]
