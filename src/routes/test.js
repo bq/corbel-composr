@@ -4,7 +4,7 @@ var express = require('express'),
   router = express.Router(),
   corbel = require('corbel-js'),
   ComposerError = require('../lib/composerError'),
-  engine = require('../lib/engine'),
+  compoSRBuilder = require('../lib/compoSRBuilder'),
   config = require('../lib/config'),
   phraseManager = require('../lib/phraseManager');
 
@@ -137,7 +137,7 @@ router.get('/t3phrase', function(req, res) {
 router.get('/t4snippet', function(req, res) {
 
   var phraseBody = 'compoSR.run("sendJson", {res: res, "message" : "yes"});';
-  var compoSR = engine.getCompoSR('silkroad-qa');
+  var compoSR = compoSRBuilder.getCompoSR('silkroad-qa');
   var context = {
     req: req,
     res: res
