@@ -335,6 +335,49 @@ corbelDriver.iam.token().create({
 
 ```
 
+## Logout a user
+
+### Only current session:
+```javascript
+if (!req.get('Authorization')) {
+  throw new ComposerError('error:unauthorized', 'Authorization missing', 401);
+}
+
+/*
+ * Disconnects a user session
+ */
+corbelDriver.iam.user('me')
+  .signOut()
+  .then(function(response){
+    res.send(response.data);
+  }).catch(function(err){
+    console.log(typeOf(err.body), typeOf(err.data), typeOf(err.data.body));
+    var errorCode = err.statusCode ? err.statusCode : 500;
+    var errorBody = err.body && typeOf(err.body) === 'string' && err.body.indexOf('{') !== -1 ? JSON.parse(err.body) : err;
+    res.status(errorCode).send(errorBody);
+  });
+```
+
+### All sessions:
+```javascript
+if (!req.get('Authorization')) {
+  throw new ComposerError('error:unauthorized', 'Authorization missing', 401);
+}
+
+/*
+ * Disconnects a user session
+ */
+
+corbelDriver.iam.user('me')
+  .disconnect()
+  .then(function(response){
+    res.send(response.data);
+    console.log(response.statusCode);
+  }).catch(function(err){
+    throw new ComposerError('error:unauthorized', err.data, 401);
+  });
+```
+
 ## Return current user info
 
 ```javascript

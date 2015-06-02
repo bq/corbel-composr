@@ -12,7 +12,9 @@ var phraseManager = require('./phraseManager'),
 
 var worker = function() {
   var connUrl = 'amqp://' + config('rabbitmq.username') + ':' + config('rabbitmq.password') + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
-
+  var id = Date.now();
+  logger.debug('WORKER', 'created worker with id', id);
+  
   amqp.connect(connUrl).then(function(conn) {
 
     function doWork(msg) {
