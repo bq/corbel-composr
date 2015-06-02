@@ -40,6 +40,23 @@ function test(app){
 
       });
 
+      it('responds when the snippet executes correctly', function(done) {
+
+          request(app)
+            .get('/t4snippet')
+            .expect(200)
+            .end(function(error, response) {
+              expect(response).to.be.an('object');
+              expect(response.body.hello2).to.equals('yes');
+              if (!error && response.statusCode === 200) {
+                  return done();
+              } else {
+                  return done(error || response);
+              }
+          });
+
+      });
+
   });
 
 }

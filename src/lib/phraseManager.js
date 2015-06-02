@@ -6,9 +6,9 @@ var validate = require('./validate'),
     config = require('./config'),
     phrases = require('./phrasesData'),
     ComposerError = require('./composerError'),
+    compoSRBuilder = require('./compoSRBuilder'),
     tripwire = require('tripwire'),
     logger = require('../utils/logger'),
-    compoSRConstructor = require('./compoSR'),
     _ = require('lodash'),
     q = require('q');
 
@@ -63,6 +63,8 @@ var registerPhrase = function(router, phrase) {
 
     var url = phrase.id.replace(/!/g, '/');
 
+    //TODO: No se pueden refrescar en caliente los endpoints de express https://github.com/strongloop/express/issues/2596
+
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
         if (phrase[method]) {
             logger.info('Phrase manager: Registering ' + method.toUpperCase() + ' ' + url);
@@ -97,12 +99,13 @@ var registerPhrase = function(router, phrase) {
                   next: next,
                   corbelDriver: corbelDriver,
                   corbel: corbel,
+                  ComposerError: ComposerError,
                   _: _,
                   q: q
                 };
                 //We have left compoSR alone, without including it in the context because someday we might
                 //want to have compoSR use the context for binding req, res... to the snippets
-                var compoSR = compoSRConstructor.getCompoSR(domain);
+                var compoSR = compoSRBuilder.getCompoSR(domain);
 
                 logger.debug('Phrase manager: Executing phrase', method, url);
                 executePhrase(context, compoSR, phrase[method].code);
