@@ -88,7 +88,15 @@ function test(app) {
 
     return new Promise(function(resolve, reject) {
 
-      request(app)[params.method](params.url)
+      var phraseRequest = request(app)[params.method](params.url);
+
+      if(params.headers){
+        Object.keys(params.headers).forEach(function(key){
+          phraseRequest.set(key, params.headers[key]);
+        });
+      }
+
+      phraseRequest
         .send(params.data)
         .expect(params.responseStatus)
         .end(function(err, response) {
@@ -112,7 +120,7 @@ function test(app) {
 
     var credentials = clientUtils.getDemoClient();
 
-    return login({
+    return callPhraseWithJWT({
       url: loginClientURL,
       claims: {
         iss: credentials.clientId,
@@ -132,7 +140,7 @@ function test(app) {
     var credentialsUser = clientUtils.getUser();
     var credentialsClient = clientUtils.getDemoClient();
 
-    return login({
+    return callPhraseWithJWT({
       url: loginUserURL,
       claims: {
         iss: credentialsClient.clientId,
@@ -141,6 +149,25 @@ function test(app) {
         scope: credentialsUser.scopes
       },
       clientSecret: credentialsClient.clientSecret
+    });
+
+  }
+
+  /**
+   * @param  {string} logoutUserURL
+   * @return {Promise}
+   */
+  function logoutUser(logoutUserURL, accessToken, responseStatus) {
+
+    var credentialsUser = clientUtils.getUser();
+    var credentialsClient = clientUtils.getDemoClient();
+
+    return callPhrase({
+      url: logoutUserURL,
+      responseStatus : responseStatus,
+      headers : {
+        'Authorization' : accessToken
+      }
     });
 
   }
@@ -155,7 +182,7 @@ function test(app) {
     var credentialsUser = clientUtils.getUser();
     var credentialsClient = clientUtils.getDemoClient();
 
-    return login({
+    return callPhraseWithJWT({
       url: refreshTokenURL,
       claims: {
         iss: credentialsClient.clientId,
@@ -179,7 +206,7 @@ function test(app) {
    * @param  {object} [params.claims.basic_auth.password]
    * @return {Promise}
    */
-  function login(params) {
+  function callPhraseWithJWT(params) {
 
     var data = {
       jwt: generateAssertion(params.claims, params.clientSecret)
@@ -325,6 +352,59 @@ function test(app) {
           }).catch(function(err) {
             done(err);
           });
+
+        });
+
+      });
+
+      describe('User logout', function() {
+
+        var phraseUserLogoutLocation,
+          phraseUserLogoutURL,
+          demoUserToken,
+          userLogoutPhrase = require('../../fixtures/phrases/phraseLogoutUser.json');
+
+        before('is created correctly', function(done) {
+          createPhrase(userLogoutPhrase, adminClientToken)
+            .then(function(location) {
+              phraseUserLogoutLocation = location;
+              phraseUserLogoutURL = phraseUserLogoutLocation.replace('phrase/', '/').replace('!', '/');
+              return loginUser(phraseUserLoginURL);
+            })
+            .then(function(response) {
+              demoUserToken = response.body.tokenObject.accessToken;
+              done();
+            })
+            .catch(function(err) {
+              done(err);
+            });
+        });
+
+        it('logs out a user', function(done) {
+
+          logoutUser(phraseUserLogoutURL, demoUserToken)
+            .then(function(response) {
+              expect(response).to.be.an('object');
+              expect(response.body).to.be.an('object');
+              done();
+            })
+            .catch(function(err) {
+              done(err);
+            });
+
+        });
+
+        it('does not log out a user other time', function(done) {
+
+          logoutUser(phraseUserLogoutURL, demoUserToken, 401)
+            .then(function(response) {
+              expect(response).to.be.an('object');
+              expect(response.body).to.be.an('object');
+              done();
+            })
+            .catch(function(err) {
+              done(err);
+            });
 
         });
 
