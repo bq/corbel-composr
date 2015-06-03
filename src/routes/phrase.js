@@ -6,9 +6,13 @@ var express = require('express'),
     phraseManager = require('../lib/phraseManager'),
     phraseValidator = require('../lib/phraseValidator'),
     ComposerError = require('../lib/composerError'),
+    logger = require('../utils/logger'),
     auth = require('../lib/auth');
 
-
+function getCorbelErrorBody(corbelErrResponse){
+  var errorBody = typeof(corbelErrResponse.data) !== 'undefined' && typeof(corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse;
+  return errorBody;
+}
 /**
  * Creates or updates a phrase
  * @param  phrase:
@@ -61,11 +65,14 @@ router.put('/phrase', function(req, res, next) {
 
         phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
 
+        logger.debug('Storing or updating phrase', phrase.id, domain, authorization);
+
         corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
             res.set('Location', 'phrase/' + phrase.id);
             res.status(response.status).send(response.data);
         }).catch(function(error) {
-            next(new ComposerError('error:phrase:create', error, error.status));
+            var errorBody = getCorbelErrorBody(error);
+            next(new ComposerError('error:phrase:create', errorBody, error.status));
         });
 
     }, function(error) {
@@ -94,10 +101,14 @@ router.get('/phrase/:phraseid', function(req, res, next) {
     var corbelDriver = connection.getTokenDriver(authorization);
 
     var phraseIdentifier = connection.extractDomain(authorization) + '!' + req.params.phraseid;
+
+    logger.debug('Trying to get phrase:', phraseIdentifier);
+
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).get().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
-        next(new ComposerError('error:phrase:get', error.message, error.status));
+        var errorBody = getCorbelErrorBody(error);
+        next(new ComposerError('error:phrase:get', errorBody, error.status));
     });
 });
 
