@@ -238,7 +238,41 @@ npm install -g node-inspector
 
 # Example code for phrases
 
-## Login a client
+
+## Login a client/application
+
+### Prerequisites for login a client/application: Generate a jwt
+
+**NodeJS** example
+
+```javascript
+var corbel = require('corbel-js');
+
+function generateAssertion(claims, clientSecret) {
+  claims.aud = corbel.Iam.AUD;
+  return corbel.jwt.generate(claims, clientSecret);
+}
+
+var claims = {
+  iss: credentials.clientId,
+  scope: credentials.scopes
+};
+
+var jwt = generateAssertion(claims, credentials.clientSecret);
+
+//Make a POST request to the login client phrase with jwt in the body
+/*
+ Expect an object containing
+  {
+
+    access_token : '',
+    refresh_token : ''
+  }
+*/
+```
+------
+
+### Login client/application phrase code
 
 ```javascript
 if (!req.body || !req.body.jwt) {
@@ -264,6 +298,48 @@ corbelDriver.iam.token().create({
 
 ## Login a user
 
+### Prerequisites for login a user: Generate a jwt
+
+**NodeJS** example
+
+```javascript
+var corbel = require('corbel-js');
+
+function generateAssertion(claims, clientSecret) {
+  claims.aud = corbel.Iam.AUD;
+  return corbel.jwt.generate(claims, clientSecret);
+}
+
+//Note that appCredentials contains the credentials of the client app
+
+var claims = {
+  iss: appCredentials.clientId,
+  'basic_auth.username': userCredentials.username,
+  'basic_auth.password': userCredentials.password,
+  scope: userCredentials.scopes
+};
+
+var jwt = generateAssertion(claims, appCredentials.clientSecret);
+
+//Make a POST request to the login user phrase with jwt in the body
+
+/*
+ Expect an object containing
+  {
+    tokenObject: {
+      access_token : '',
+      refresh_token : '',
+    },
+    user: {
+      ...
+    }
+  }
+*/
+```
+------
+
+### Login user phrase code
+
 ```javascript
 if (!req.body || !req.body.jwt) {
   throw new ComposerError('error:jwt:undefined', '', 401);
@@ -273,7 +349,7 @@ var corbelDriver = corbel.generateDriver({iamToken: ''});
 var tokenObject;
 
 /*
- * Request a session token for the user 
+ * Request a session token for the user
  * Required claims:
  * iss: CLIENT_ID
  * basic_auth.username: USERNAME
@@ -307,6 +383,34 @@ corbelDriver.iam.token().create({
 ```
 ## Refresh a token
 
+### Prerequisites for refreshing a user token: Generate a jwt with the refresh token
+
+**NodeJS** example
+
+```javascript
+var corbel = require('corbel-js');
+
+function generateAssertion(claims, clientSecret) {
+  claims.aud = corbel.Iam.AUD;
+  return corbel.jwt.generate(claims, clientSecret);
+}
+
+//Note that appCredentials contains the credentials of the client app
+
+var claims = {
+  iss: appCredentials.clientId,
+  'refresh_token': refresh_token,
+  scope: userCredentials.scopes
+};
+
+var jwt = generateAssertion(claims, appCredentials.clientSecret);
+
+//Make a POST request to the refresh token phrase with jwt in the body
+```
+------
+
+### Refresh token phrase code
+
 ```javascript
 if (!req.body || !req.body.jwt) {
   throw new ComposerError('error:jwt:undefined', '', 401);
@@ -337,7 +441,36 @@ corbelDriver.iam.token().create({
 
 ## Logout a user
 
-### Only current session:
+
+### Prerequisites for login out a user: *have an access_token*
+
+**NodeJS** example
+
+```javascript
+var http = require('http');
+
+var access_token = "xxxxx":
+
+var post_options = {
+  host: 'composrendpoint.composr',
+  path: '/logoutuser',
+  method: 'POST',
+  headers: {
+    'Authorization': access_token
+  }
+};
+
+
+//Make a POST request to the logout user phrase with an Authorization header
+http.request(post_options, function(res) {
+  //Expect 204 for a good logout, 401 for unauthorized
+});
+
+```
+------
+
+### Logout user phrase code
+
 ```javascript
 if (!req.get('Authorization')) {
   throw new ComposerError('error:unauthorized', 'Authorization missing', 401);
@@ -357,7 +490,7 @@ corbelDriver.iam.user('me')
   });
 ```
 
-### All sessions:
+### Logout a user from all devices:
 ```javascript
 if (!req.get('Authorization')) {
   throw new ComposerError('error:unauthorized', 'Authorization missing', 401);
@@ -371,7 +504,6 @@ corbelDriver.iam.user('me')
   .disconnect()
   .then(function(response){
     res.send(response.data);
-    console.log(response.statusCode);
   }).catch(function(err){
     var errorCode = err.status ? err.status : 500;
     var errorBody = err.data.body && typeof(err.data.body) === 'string' && err.data.body.indexOf('{') !== -1 ? JSON.parse(err.data.body) : err;
