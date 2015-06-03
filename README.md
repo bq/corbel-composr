@@ -238,7 +238,34 @@ npm install -g node-inspector
 
 # Example code for phrases
 
+
 ## Login a client
+
+### Prerequisites for login a client: Generate a jwt
+
+**NodeJS** example
+
+```javascript
+var corbel = require('corbel-js');
+
+function generateAssertion(claims, clientSecret) {
+  claims.aud = corbel.Iam.AUD;
+  return corbel.jwt.generate(claims, clientSecret);
+}
+
+var claims = {
+  iss: credentials.clientId,
+  scope: credentials.scopes
+};
+
+var jwt = generateAssertion(claims, credentials.clientSecret);
+
+//Make a POST request to the login client phrase with jwt in the body
+
+```
+------
+
+### Login client phrase code
 
 ```javascript
 if (!req.body || !req.body.jwt) {
@@ -264,6 +291,35 @@ corbelDriver.iam.token().create({
 
 ## Login a user
 
+### Prerequisites for login a user: Generate a jwt
+
+**NodeJS** example
+
+```javascript
+var corbel = require('corbel-js');
+
+function generateAssertion(claims, clientSecret) {
+  claims.aud = corbel.Iam.AUD;
+  return corbel.jwt.generate(claims, clientSecret);
+}
+
+//Note that credentialsClient contains the credentials of the client app
+
+var claims = {
+  iss: credentialsClient.clientId,
+  'basic_auth.username': credentialsUser.username,
+  'basic_auth.password': credentialsUser.password,
+  scope: credentialsUser.scopes
+};
+
+var jwt = generateAssertion(claims, credentialsClient.clientSecret);
+
+//Make a POST request to the login user phrase with jwt in the body
+```
+------
+
+### Login user phrase code
+
 ```javascript
 if (!req.body || !req.body.jwt) {
   throw new ComposerError('error:jwt:undefined', '', 401);
@@ -273,7 +329,7 @@ var corbelDriver = corbel.generateDriver({iamToken: ''});
 var tokenObject;
 
 /*
- * Request a session token for the user 
+ * Request a session token for the user
  * Required claims:
  * iss: CLIENT_ID
  * basic_auth.username: USERNAME
