@@ -1,7 +1,7 @@
 {
-  "url": "logoutuser",
+  "url": "logoutuser/:type",
   "post": {
-    "code": "if(!req.get(\"Authorization\"))throw new ComposerError(\"error:unauthorized\",\"Authorization missing\",401);corbelDriver.iam.user(\"me\").signOut().then(function(t){res.send(t.data)})[\"catch\"](function(t){var r=t.status?t.status:500,a=t.data.body&&\"string\"==typeof t.data.body&&-1!==t.data.body.indexOf(\"{\")?JSON.parse(t.data.body):t;res.status(r).send(a)});",
+    "code": "if(!req.get(\"Authorization\"))throw new ComposerError(\"error:unauthorized\",\"Authorization missing\",401);var method=req.params.type&&\"all\"===req.params.type?\"disconnect\":\"signOut\";corbelDriver.iam.user(\"me\")[method]().then(function(t){res.send(t.data)})[\"catch\"](function(t){var a=t.status?t.status:500,r=t.data.body&&\"string\"==typeof t.data.body&&-1!==t.data.body.indexOf(\"{\")?JSON.parse(t.data.body):t;res.status(a).send(r)});",
     "doc": {
       "description": "Phrase for login out a user using it's accessToken",
       "body": {
@@ -10,15 +10,10 @@
           "example": "{\n\t\"jwt\": \"JWT\"\n}"
 
         }
-      },  
+      },
       "responses": {
-        "200": {
-          "body": {
-            "application/json": {
-              "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login response\",\n\t\"properties\": {\n\t\t\"accessToken\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"accessToken to send in every authorized request\"\n\t\t},\n\t\t\"expiresAt\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"epoch time until token expiration\"\n\t\t}\n\t},\n\t\"required\": [\"accessToken\", \"expiresAt\"]\n}",
-              "example": "{\n\t\"accessToken\": \"ACCESS_TOKEN\",\n\t\"expiresAt\": 123123\n}"
-            }
-          }
+        "204": {
+          "description": "OK"
         },
         "401": {
           "description": "Not authorized",

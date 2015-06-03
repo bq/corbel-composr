@@ -368,7 +368,7 @@ function test(app) {
           createPhrase(userLogoutPhrase, adminClientToken)
             .then(function(location) {
               phraseUserLogoutLocation = location;
-              phraseUserLogoutURL = phraseUserLogoutLocation.replace('phrase/', '/').replace('!', '/');
+              phraseUserLogoutURL = phraseUserLogoutLocation.replace('phrase/', '/').replace(/!/g, '/');
               return loginUser(phraseUserLoginURL);
             })
             .then(function(response) {
@@ -382,7 +382,7 @@ function test(app) {
 
         it('logs out a user', function(done) {
 
-          logoutUser(phraseUserLogoutURL, demoUserToken)
+          logoutUser(phraseUserLogoutURL.replace(':type', ''), demoUserToken)
             .then(function(response) {
               expect(response).to.be.an('object');
               expect(response.body).to.be.an('object');
@@ -396,7 +396,7 @@ function test(app) {
 
         it('does not log out a user other time', function(done) {
 
-          logoutUser(phraseUserLogoutURL, demoUserToken, 401)
+          logoutUser(phraseUserLogoutURL.replace(':type', ''), demoUserToken, 401)
             .then(function(response) {
               expect(response).to.be.an('object');
               expect(response.body).to.be.an('object');

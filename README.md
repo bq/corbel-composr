@@ -264,10 +264,8 @@ var jwt = generateAssertion(claims, credentials.clientSecret);
 /*
  Expect an object containing
   {
-
     accessToken : '',
-    expiresAt : '',
-    refreshToken : ''
+    expiresAt : ''
   }
 */
 ```
@@ -411,16 +409,11 @@ var jwt = generateAssertion(claims, appCredentials.clientSecret);
 
 /*
  Expect an object containing
-  {
-    tokenObject: {
-      accessToken : '',
-      expiresAt : '',
-      refreshToken : ''
-    },
-    user: {
-      ...
-    }
-  }
+ {
+   accessToken : '',
+   expiresAt : '',
+   refreshToken : ''
+ }
 */
 ```
 ------
@@ -492,11 +485,12 @@ if (!req.get('Authorization')) {
   throw new ComposerError('error:unauthorized', 'Authorization missing', 401);
 }
 
+var method =  req.params.type && req.params.type === 'all' ? 'disconnect' : 'signOut';
+
 /*
  * Disconnects a user session
  */
-corbelDriver.iam.user('me')
-  .signOut()
+corbelDriver.iam.user('me')[method]()
   .then(function(response){
     res.send(response.data);
   }).catch(function(err){
