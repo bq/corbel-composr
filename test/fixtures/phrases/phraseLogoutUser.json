@@ -4,12 +4,12 @@
     "code": "if(!req.get(\"Authorization\"))throw new ComposerError(\"error:unauthorized\",\"Authorization missing\",401);var method=req.params.type&&\"all\"===req.params.type?\"disconnect\":\"signOut\";corbelDriver.iam.user(\"me\")[method]().then(function(t){res.send(t.data)})[\"catch\"](function(t){var a=t.status?t.status:500,r=t.data.body&&\"string\"==typeof t.data.body&&-1!==t.data.body.indexOf(\"{\")?JSON.parse(t.data.body):t;res.status(a).send(r)});",
     "doc": {
       "description": "Phrase for login out a user using it's accessToken",
-      "body": {
-        "application/json": {
-          "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"jwt\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"JWT Assertion\"\n\t\t}\n\t},\n\t\"required\": [\n\t\t\"jwt\"\n\t]\n}",
-          "example": "{\n\t\"jwt\": \"JWT\"\n}"
-
-        }
+      "queryParameters": {
+          "type": {
+              "type": "string",
+              "description": "Optional param, you can pass 'all' in order to close all the sessions of the user",
+              "default": ""
+          }
       },
       "responses": {
         "204": {
