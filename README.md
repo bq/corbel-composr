@@ -265,8 +265,9 @@ var jwt = generateAssertion(claims, credentials.clientSecret);
  Expect an object containing
   {
 
-    access_token : '',
-    refresh_token : ''
+    accessToken : '',
+    expiresAt : '',
+    refreshToken : ''
   }
 */
 ```
@@ -327,8 +328,9 @@ var jwt = generateAssertion(claims, appCredentials.clientSecret);
  Expect an object containing
   {
     tokenObject: {
-      access_token : '',
-      refresh_token : '',
+      accessToken : '',
+      expiresAt : '',
+      refreshToken : ''
     },
     user: {
       ...
@@ -406,6 +408,20 @@ var claims = {
 var jwt = generateAssertion(claims, appCredentials.clientSecret);
 
 //Make a POST request to the refresh token phrase with jwt in the body
+
+/*
+ Expect an object containing
+  {
+    tokenObject: {
+      accessToken : '',
+      expiresAt : '',
+      refreshToken : ''
+    },
+    user: {
+      ...
+    }
+  }
+*/
 ```
 ------
 
@@ -442,21 +458,21 @@ corbelDriver.iam.token().create({
 ## Logout a user
 
 
-### Prerequisites for login out a user: *have an access_token*
+### Prerequisites for login out a user: *have an accessToken*
 
 **NodeJS** example
 
 ```javascript
 var http = require('http');
 
-var access_token = "xxxxx":
+var accessToken = "xxxxx":
 
 var post_options = {
   host: 'composrendpoint.composr',
   path: '/logoutuser',
   method: 'POST',
   headers: {
-    'Authorization': access_token
+    'Authorization': accessToken
   }
 };
 
