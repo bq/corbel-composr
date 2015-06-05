@@ -65,11 +65,11 @@ app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
     status: ERROR_CODE_SERVER_TIMEOUT
 }));
 
-
 /*************************************
   Engine middlewares
 **************************************/
-engine.init(app);
+engine.middlewares(app);
+
 
 if(app.get('env') === 'development') {
   app.use(require('./routes/test'));
@@ -125,4 +125,5 @@ process.on('uncaughtException', function(err) {
   }
 });
 
-module.exports = app;
+
+module.exports = engine.init(app);

@@ -107,7 +107,7 @@ var registerPhrase = function(router, phrase) {
                 //want to have compoSR use the context for binding req, res... to the snippets
                 var compoSR = compoSRBuilder.getCompoSR(domain);
 
-                logger.debug('Phrase manager: Executing phrase', method, url);
+                logger.debug('Phrase manager: Executing phrase', method, url, req.params);
                 executePhrase(context, compoSR, phrase[method].code);
 
             });

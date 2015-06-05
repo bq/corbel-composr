@@ -2,7 +2,9 @@
 
 var bootstrap = require('./bootstrap'),
     worker = require('./worker'),
-    routes = require('../routes');
+    routes = require('../routes'),
+    logger = require('../utils/logger'),
+    q = require('q');
 
 //Add necesary middlewares to express
 function middlewares(app){
@@ -15,13 +17,19 @@ function middlewares(app){
 
 //Call necesary init functions
 function init(app){
-  bootstrap.phrases();
-  bootstrap.snippets();
-  worker.init();
-  middlewares(app);
+  var dfd = q.defer();
+
+  q.all([bootstrap.phrases(), bootstrap.snippets(), worker.init()])
+    .then(function(){
+      logger.info('Engine initialized, all data is loaded :)');
+      dfd.resolve(app);
+    })
+    .catch(dfd.reject);
+
+  return dfd.promise;
 }
 
-
 module.exports = {
-  init : init
+  init : init,
+  middlewares : middlewares
 };
