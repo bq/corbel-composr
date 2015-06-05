@@ -6,11 +6,13 @@ var phraseManager = require('./phraseManager'),
   router = express.Router(),
   amqp = require('amqplib'),
   uuid = require('uuid'),
+  q = require('q'),
   ComposerError = require('./composerError'),
   config = require('./config'),
   logger = require('../utils/logger');
 
 var worker = function() {
+  var dfd = q.defer();
 
   var connUrl = 'amqp://' + config('rabbitmq.username') + ':' + config('rabbitmq.password') + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
 
@@ -97,12 +99,14 @@ var worker = function() {
           }));
 
         logger.debug('Worker up');
+        dfd.resolve();
       });
 
       return ok;
     })
     .catch(function(err){
       logger.error('WORKER: error creating channel', err);
+      dfd.reject(err);
       if (conn) {
         conn.close(function() {
           process.exit(1);
@@ -114,11 +118,11 @@ var worker = function() {
     logger.error('Worker error %s', err);
     setTimeout(worker, config('rabbitmq.reconntimeout'));
   });
+
+  return dfd.promise;
 };
 
 module.exports = {
   router: router,
-  init: function() {
-    worker();
-  }
+  init: worker
 };

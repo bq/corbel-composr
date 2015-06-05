@@ -1,11 +1,24 @@
 #!/usr/bin/env node
-var debug = require('debug')('expressapp');
-var app = require('../src/app');
+var logger = require('../src/utils/logger');
+var q = require('q');
+var dfd = q.defer();
 
-app.set('port', process.env.PORT || 3000);
+require('../src/app')
+  .then(function(app){
+    app.set('port', process.env.PORT || 3000);
 
-var server = app.listen(app.get('port'), function() {
-  debug('Express server listening on port ' + server.address().port);
-});
+    var server = app.listen(app.get('port'), function() {
+      logger.debug('Express server listening on port ' + server.address().port);
 
-module.exports = app;
+      logger.salute( function(){
+        dfd.resolve(app);
+      });
+
+    });
+  })
+  .catch(function(err){
+    console.log('ERROR launching express application', err);
+    dfd.reject(err);
+  });
+
+module.exports = dfd.promise;
