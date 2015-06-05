@@ -7,15 +7,13 @@ var snippetsBundler = require('./snippetsBundler');
 **/
 function getCompoSR(domain){
   var snippets = {
+    'apps-sandbox' : [
+      {
+        name : 'global:parseError',
+        code : 'var errorCode=params.err.status?params.err.status:500,errorBody=params.err.data.body&&"string"==typeof params.err.data.body&&-1!==params.err.data.body.indexOf("{")?JSON.parse(params.err.data.body):params.err;params.res.status(errorCode).send(errorBody);'
+      }
+    ],
     'silkroad-qa' : [
-      {
-        name : 'log',
-        code : 'console.log("ey");'
-      },
-      {
-        name : 'example',
-        code : 'this.log();'
-      },
       {
         name : 'sendJson',
         code : 'compoSR.run("json", params)'
