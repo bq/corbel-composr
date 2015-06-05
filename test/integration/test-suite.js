@@ -10,13 +10,31 @@ var timeoutTests = require('./specs/timeout.js'),
     composerErrorPhrase = require('./specs/composerErrorPhrase.js'),
     phraseTests = require('./specs/phrase.js');
 
-module.exports = function(app){
-  cacheTests(app);
-  timeoutTests(app);
-  errorHandlerTests(app);
-  exampleTests(app);
-  brokenPhraseTests(app);
-  composerErrorPhrase(app);
-  phraseTests(app);
-  loginTests(app);
+module.exports = function(promise){
+  var application;
+
+  describe('setup', function(){
+    this.timeout(30000);
+    before(function(done){
+      //Wait for app initialization
+      promise.then(function(app){
+        application = app;
+        done();
+      });
+    });
+
+    //This wrapping is needed because otherwise application would be an empty object
+    it('Executes the integration tests', function(){
+      cacheTests(application);
+      timeoutTests(application);
+      errorHandlerTests(application);
+      exampleTests(application);
+      brokenPhraseTests(application);
+      composerErrorPhrase(application);
+      phraseTests(application);
+      loginTests(application);
+    });
+
+  });
+
 };

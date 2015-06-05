@@ -15,7 +15,7 @@ function test(app) {
 
   /**
    * @param  {object} credentials
-   * @param  {string} credentials.clientId
+   * @param  {string} credentials.clientIdl
    * @param  {string} credentials.clientSecret
    * @param  {string} credentials.scopes
    * @return {Promise}
@@ -407,6 +407,50 @@ function test(app) {
             });
 
         });
+
+
+        describe('User logout from all devices', function(){
+          before('logs the user', function(done) {
+            loginUser(phraseUserLoginURL)
+              .then(function(response) {
+                demoUserToken = response.body.tokenObject.accessToken;
+                done();
+              })
+              .catch(function(err) {
+                done(err);
+              });
+          });
+
+          it('logs out a user', function(done) {
+
+            logoutUser(phraseUserLogoutURL.replace(':type?', 'all'), demoUserToken)
+              .then(function(response) {
+                expect(response).to.be.an('object');
+                expect(response.body).to.be.an('object');
+                done();
+              })
+              .catch(function(err) {
+                done(err);
+              });
+
+          });
+
+          it('does not log out a user other time', function(done) {
+
+            logoutUser(phraseUserLogoutURL.replace(':type?', 'all'), demoUserToken, 401)
+              .then(function(response) {
+                expect(response).to.be.an('object');
+                expect(response.body).to.be.an('object');
+                done();
+              })
+              .catch(function(err) {
+                done(err);
+              });
+
+          });
+
+        });
+
 
       });
 

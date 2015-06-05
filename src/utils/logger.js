@@ -2,6 +2,7 @@
 
 var winston = require('winston');
 var mkdirp = require('mkdirp');
+var art = require('ascii-art');
 var config = require('../lib/config');
 var logLevel = config('logLevel') ? config('logLevel') : 'error';
 var logFile = config('logFile') ? config('logFile') : 'logs/composr.log';
@@ -62,9 +63,25 @@ function debug(){
   logger.log.apply(logger, ['debug'].concat(Array.prototype.slice.call(arguments)));
 }
 
+function fancy(text, cb){
+  art.font(text, 'Basic', 'green', function(rendered){
+    console.log(rendered);
+    cb();
+  });
+}
+
+function salute(cb){
+  art.font('compoSR', 'Basic', 'red').font('v1', 'Doom', 'magenta', function(rendered){
+    console.log(rendered);
+    cb();
+  });
+}
+
 module.exports = {
   error : error,
   info : info,
   debug : debug,
-  warn : warn
+  warn : warn,
+  fancy : fancy,
+  salute : salute
 };

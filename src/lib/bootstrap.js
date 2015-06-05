@@ -42,14 +42,19 @@ var getPhrase = function(driver, phrasesCollection, phrases, promise, pageNumber
 
 
 var bootstrapPhrases = function() {
+  var dfd = q.defer();
+
   process.env.PHRASES_COLLECTION = 'composr:Phrase';
 
   connection.driver.then(function(driver) {
     getPhrase(driver, connection.PHRASES_COLLECTION).then(function(phrases) {
-      return phrases.forEach(function(phrase) {
+
+      phrases.forEach(function(phrase) {
         logger.debug('Phrase loaded', phrase.id);
         phraseManager.registerPhrase(router, phrase);
       });
+
+      dfd.resolve();
     }).
     fail(function(error) {
       logger.error('error:bootstrap:load', error);
@@ -58,12 +63,17 @@ var bootstrapPhrases = function() {
 
   }).catch(function(error) {
     logger.error('error:bootstrap:driver', error);
+    dfd.reject(error);
   });
 
+  return dfd.promise;
 };
 
 function bootstrapSnippets(){
   //TODO: obtain snippets
+  var dfd = q.defer();
+  dfd.resolve();
+  return dfd.promise;
 }
 
 function getSnippets(){
