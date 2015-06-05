@@ -132,6 +132,27 @@ function test(app) {
   }
 
   /**
+   * @param  {string} loginClientURL
+   * @return {Promise}
+   */
+  function loginFakeClient(loginClientURL) {
+
+    var credentials = clientUtils.getDemoClient();
+
+    return callPhraseWithJWT({
+      url: loginClientURL,
+      claims: {
+        iss: 'notGood',
+        scope: credentials.scopes
+      },
+      clientSecret: credentials.clientSecret
+    }, {
+      responseStatus : 401
+    });
+
+  }
+
+  /**
    * @param  {string} loginUserURL
    * @return {Promise}
    */
@@ -206,16 +227,14 @@ function test(app) {
    * @param  {object} [params.claims.basic_auth.password]
    * @return {Promise}
    */
-  function callPhraseWithJWT(params) {
+  function callPhraseWithJWT(params, phraseParams) {
+    phraseParams = phraseParams ? phraseParams : {};
+    phraseParams.url = params.url;
 
-    var data = {
-      jwt: generateAssertion(params.claims, params.clientSecret)
-    };
+    phraseParams.data = phraseParams.data ? phraseParams.data : {};
+    phraseParams.data.jwt = generateAssertion(params.claims, params.clientSecret);
 
-    return callPhrase({
-      url: params.url,
-      data: data
-    });
+    return callPhrase(phraseParams);
 
   }
 
@@ -268,6 +287,21 @@ function test(app) {
           .then(function(response) {
             expect(response).to.be.an('object');
             expect(response.body.accessToken).to.be.a('string');
+            done();
+          })
+          .catch(function(err) {
+            done(err);
+          });
+
+      });
+
+      it('receives a 401 with bad credentials', function(done) {
+        var url = phraseClientLoginLocation.replace('phrase/', '/').replace('!', '/');
+
+        loginFakeClient(url)
+          .then(function(response) {
+            expect(response).to.be.an('object');
+            expect(response.body.errorDescription).to.be.a('string');
             done();
           })
           .catch(function(err) {

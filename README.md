@@ -291,7 +291,7 @@ corbelDriver.iam.token().create({
 }).then(function(response) {
   res.send(response.data);
 }).catch(function(err){
-  throw new ComposerError('error:unauthorized', err.data, 401);
+  compoSR.run('global:parseError', { err : err, res : res});
 });
 ```
 
@@ -378,7 +378,7 @@ corbelDriver.iam.token().create({
     user: response.data
   });
 }).catch(function(err){
-  throw new ComposerError('error:unauthorized', err.data, 401);
+  compoSR.run('global:parseError', { err : err, res : res});
 });
 ```
 ## Refresh a token
@@ -443,7 +443,7 @@ corbelDriver.iam.token().create({
     res.send(response.data);
   })
   .catch(function(err){
-    throw new ComposerError('error:unauthorized', err.data, 401);
+    compoSR.run('global:parseError', { err : err, res : res});
   });
 
 ```
@@ -494,9 +494,7 @@ corbelDriver.iam.user('me')[method]()
   .then(function(response){
     res.send(response.data);
   }).catch(function(err){
-    var errorCode = err.status ? err.status : 500;
-    var errorBody = err.data.body && typeof(err.data.body) === 'string' && err.data.body.indexOf('{') !== -1 ? JSON.parse(err.data.body) : err;
-    res.status(errorCode).send(errorBody);
+    compoSR.run('global:parseError', { err : err, res : res});
   });
 ```
 
@@ -515,9 +513,7 @@ corbelDriver.iam.user('me')
   .then(function(response){
     res.send(response.data);
   }).catch(function(err){
-    var errorCode = err.status ? err.status : 500;
-    var errorBody = err.data.body && typeof(err.data.body) === 'string' && err.data.body.indexOf('{') !== -1 ? JSON.parse(err.data.body) : err;
-    res.status(errorCode).send(errorBody);
+    compoSR.run('global:parseError', { err : err, res : res});
   });
 ```
 

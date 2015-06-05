@@ -1,7 +1,7 @@
 {
 	"url": "refreshtoken",
 	"post": {
-		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var corbelDriver=corbel.generateDriver({iamToken:\"\"});corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){res.send(e.data)})[\"catch\"](function(e){throw new ComposerError('error:unauthorized', e.data, 401);});",
+		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var corbelDriver=corbel.generateDriver({iamToken:\"\"});corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){res.send(e.data)})[\"catch\"](function(e){compoSR.run('global:parseError', { err : e, res : res});});",
 		"doc": {
 			"description": "Phrase for refresh an accessToken using JWT. (claims: `iss`, `refresh_token`, `aud`, `scope`, `exp`)",
 			"body": {
