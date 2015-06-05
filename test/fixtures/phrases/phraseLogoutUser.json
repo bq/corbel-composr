@@ -1,16 +1,9 @@
 {
-  "url": "logoutuser/:type",
+  "url": "logoutuser/:type?",
   "post": {
     "code": "if(!req.get(\"Authorization\"))throw new ComposerError(\"error:unauthorized\",\"Authorization missing\",401);var method=req.params.type&&\"all\"===req.params.type?\"disconnect\":\"signOut\";corbelDriver.iam.user(\"me\")[method]().then(function(t){res.send(t.data)})[\"catch\"](function(t){var a=t.status?t.status:500,r=t.data.body&&\"string\"==typeof t.data.body&&-1!==t.data.body.indexOf(\"{\")?JSON.parse(t.data.body):t;res.status(a).send(r)});",
     "doc": {
-      "description": "Phrase for login out a user using it's accessToken",
-      "queryParameters": {
-          "type": {
-              "type": "string",
-              "description": "Optional param, you can pass 'all' in order to close all the sessions of the user",
-              "default": ""
-          }
-      },
+      "description": "Phrase for login out a user using it's accessToken, send 'all' as parameter to disconnect the user from all sessions. Leave :type empty for only closing current session",
       "responses": {
         "204": {
           "description": "OK"

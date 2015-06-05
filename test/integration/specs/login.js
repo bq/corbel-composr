@@ -382,7 +382,7 @@ function test(app) {
 
         it('logs out a user', function(done) {
 
-          logoutUser(phraseUserLogoutURL.replace(':type', ''), demoUserToken)
+          logoutUser(phraseUserLogoutURL.replace(':type?', ''), demoUserToken)
             .then(function(response) {
               expect(response).to.be.an('object');
               expect(response.body).to.be.an('object');
@@ -396,7 +396,7 @@ function test(app) {
 
         it('does not log out a user other time', function(done) {
 
-          logoutUser(phraseUserLogoutURL.replace(':type', ''), demoUserToken, 401)
+          logoutUser(phraseUserLogoutURL.replace(':type?', ''), demoUserToken, 401)
             .then(function(response) {
               expect(response).to.be.an('object');
               expect(response.body).to.be.an('object');
