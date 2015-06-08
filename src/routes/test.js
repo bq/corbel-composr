@@ -54,6 +54,38 @@ router.get('/t2', function(req, res) {
 
 });
 
+router.get('/t3', function(req, res) {
+
+  var tripwire = require('tripwire');
+
+  tripwire.resetTripwire(1000);
+
+  var start = new Date();
+  var loops = 30000000000;
+  for (var i = 0; i < loops; i++) {
+    //process.nextTick();
+    //console.log(i / loops);
+  }
+
+  var end = new Date();
+  console.log('delay', end.valueOf() - start.valueOf());
+
+  res.send('Esto no debería verse');
+
+  tripwire.clearTripwire();
+
+});
+
+
+router.get('/t4', function() {
+
+ setTimeout(function() {
+  throw new ComposerError('custom:error', 'description', 555);
+ }, 1500);
+
+});
+
+
 router.post('/jwt', function(req, res) {
 
   req.body = req.body || {};
