@@ -1,0 +1,42 @@
+{
+    "url": "library",
+    "get": {
+        "code": "if(!req.get(\"Authorization\"))throw new ComposerError(\"error:authorization:undefined\",\"\",401);for(var books=[],i=0;20>i;i++)books.push({_id:Date.now(),_createdAt:new Date(\"2015-05-08T14:37:37.628Z\"),_src_id:\"Libranda\",_dst_id:\"books:Book/7004c092\",isbn:\"9788415564430\",distributorId:\"LIBR\",title:\"Remedio: la geografía\",synopsis:\"\",authors:[{name:\"Luigi Pirandello\",biographicalNote:\"\"}],rawCategories:[\"FA\"],storeCategories:[\"F\",\"FA\"],cover:\"http://www.nordicalibros.com/upload/fgr02102012145613.jpg\",format:\"epub\",language:\"spa\",publisherGroupName:\"Nordica Libros\",publishingTime:13477536e5,_updatedAt:new Date(\"2015-05-08T14:37:37.628Z\"),_order:1});res.send({data:books,count:books.length});",
+        "doc": {
+            "queryParameters": {
+                "archived": {
+                    "description": "Add archived=true if you want the archived books"
+                },
+                "pagination": {
+                    "description": "Add pagination false if you want to disable pagination, enabled by default"
+                }
+            },
+            "headers": {
+                "Authorization": {
+                    "displayName": "Authorization",
+                    "description": "User access token"
+                }
+            },
+            "description": "Phrase for returning the books assigned to a user",
+            "responses": {
+                "200": {
+                  "body": {
+                    "application/json": {
+                      "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login response\",\n\t\"properties\": {\n\t\t\"accessToken\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"accessToken to send in every authorized request\"\n\t\t},\n\t\t\"expiresAt\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"epoch time until token expiration\"\n\t\t}\n\t},\n\t\"required\": [\"accessToken\", \"expiresAt\"]\n}",
+                      "example": "{\n\t\"data\": \"BOOKS_ARRAY\",\n\t\"count\": 20\n}"
+                    }
+                  }
+                },
+                "401": {
+                    "description": "Not authorized",
+                    "body": {
+                        "application/json": {
+                            "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR error response\",\n\t\"properties\": {\n\t\t\"httpStatus\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"HTTP status code\"\n\t\t},\n\t\t\"error\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"error code\"\n\t\t},\n\t\t\"errorDescription\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Public description\"\n\t\t},\n\t\t\"trace\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Development info description\"\n\t\t}\n\t},\n\t\"required\": [\"httpStatus\", \"error\", \"errorDescription\"]\n}",
+                            "example": "{\n\t\"httpStatus\": 401,\n\t\"error\": \"unauthorized\",\n\t\"errorDescription\": \"\"\n}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
