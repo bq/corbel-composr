@@ -523,6 +523,56 @@ corbelDriver.iam.user('me')
 corbelDriver.iam.user('me').get();
 ```
 
+## Library
+
+### Get library phrase code
+
+```javascript
+if (!req.get('Authorization')) {
+  throw new ComposerError('error:authorization:undefined', '', 401);
+}
+
+var books = [];
+
+for( var i = 0; i < 20; i++){
+  books.push({
+     _id: Date.now(),
+     _createdAt: new Date("2015-05-08T14:37:37.628Z"),
+     _src_id: "Libranda",
+     _dst_id: "books:Book/7004c092",
+     isbn: "9788415564430",
+     distributorId: "LIBR",
+     title: "Remedio: la geografía",
+     synopsis: "",
+     authors: [
+         {
+             name: "Luigi Pirandello",
+             biographicalNote: ""
+         }
+     ],
+     rawCategories: [
+         "FA"
+     ],
+     storeCategories: [
+         "F",
+         "FA"
+     ],
+     cover: "http://www.nordicalibros.com/upload/fgr02102012145613.jpg",
+     format: "epub",
+     language: "spa",
+     publisherGroupName: "Nordica Libros",
+     publishingTime: 1347753600000,
+     _updatedAt: new Date("2015-05-08T14:37:37.628Z"),
+     _order: 1
+  });
+}
+
+res.send({
+  data : books,
+  count : books.length
+});
+```
+
 # Code snippets
 
 Code snippets are a minor form of `phrases`, they are accesible through the `compoSR` object on your phrases.
