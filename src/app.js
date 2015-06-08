@@ -12,6 +12,7 @@ var express = require('express'),
     config = require('./lib/config'),
     timeout = require('connect-timeout'),
     responseTime = require('response-time'),
+    domain = require('express-domain-middleware'),
     cors = require('cors'),
     corbel = require('corbel-js'),
     fs = require('fs'),
@@ -41,6 +42,13 @@ app.locals.ENV = env;
 app.locals.ENV_DEVELOPMENT = env === 'development';
 
 app.use(helmet());
+if(app.get('env') === 'development') {
+    var powered = require('./utils/powered');
+    var randomIndex = function(powered) {
+        return Math.floor((Math.random() * powered.length) + 1) - 1;
+    };
+    app.use(helmet.hidePoweredBy({ setTo: powered[randomIndex(powered)] }));
+}
 app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
 app.use(bodyParser.json());
@@ -50,6 +58,7 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
 
+app.use(domain);
 
 /*************************************
   Cors
@@ -90,24 +99,37 @@ var NotFundHandler = function(req, res, next) {
 app.use(NotFundHandler);
 
 var errorHandler = function(err, req, res, next) {
-    logger.debug('Error caught by express error handler', err);
+
+    var message = err.error || err.message || err;
+    if (message === 'Error caught by express error handler') {
+        message = 'error:internal';
+    }
+
+    logger.debug('error:handler:er', err);
+    logger.debug('error:handler:message', message);
 
     var status = err.status || 500;
-    if (err.timeout) {
+    if (err.timeout || message === 'Blocked event loop.') {
+        message = 'error:timeout';
         status = ERROR_CODE_SERVER_TIMEOUT;
+    }
+
+    if (err.domain) {
+        // usually a tripwire error
+        // release any resource...
     }
 
     res.status(status);
     res.json({
         httpStatus: status,
-        error: err.message,
+        error: message,
         errorDescription: err.errorDescription || '',
         // development error handler
         // will print stacktrace
         trace: (app.get('env') === 'development' ? err.stack : '')
     });
-
     logger.error(err, err.stack);
+
     next(err);
 };
 
@@ -120,6 +142,5 @@ process.on('uncaughtException', function(err) {
     process.exit(1);
   }
 });
-
 
 module.exports = engine.init(app);

@@ -16,11 +16,11 @@ require('winston-syslog').Syslog; // jshint ignore:line
 
 //Default transports
 var transports = [
-  new (winston.transports.Console)({
-    level : logLevel,
+  new(winston.transports.Console)({
+    level: logLevel,
     colorize: true
   }),
-  new (winston.transports.File)({
+  new(winston.transports.File)({
     name: 'error-file',
     filename: logFile,
     level: logLevel
@@ -28,60 +28,64 @@ var transports = [
 ];
 
 //Check if we want to use syslog
-if(useSyslog){
+if (useSyslog) {
   var syslogOptions = {
-    app_name : 'composr',// jshint ignore:line
+    app_name: 'composr', // jshint ignore:line
     protocol: 'unix',
     path: '/dev/log',
-    level : logLevel
+    level: logLevel
   };
 
-  transports.push(new (winston.transports.Syslog)(syslogOptions));
+  transports.push(new(winston.transports.Syslog)(syslogOptions));
 }
 
 //Initialize logger
-var logger = new (winston.Logger)({
+var logger = new(winston.Logger)({
   transports: transports
 });
 
 /**
   Logger levels
 **/
-function error(){
+function error() {
   logger.log.apply(logger, ['error'].concat(Array.prototype.slice.call(arguments)));
 }
 
-function info(){
+function info() {
   logger.log.apply(logger, ['info'].concat(Array.prototype.slice.call(arguments)));
 }
 
-function warn(){
+function warn() {
   logger.log.apply(logger, ['warn'].concat(Array.prototype.slice.call(arguments)));
 }
 
-function debug(){
-  logger.log.apply(logger, ['debug'].concat(Array.prototype.slice.call(arguments)));
+function debug() {
+  try {
+    logger.log.apply(logger, ['debug'].concat(Array.prototype.slice.call(arguments)));
+  } catch (e) {
+    // circular serialization
+  }
 }
 
-function fancy(text, cb){
-  art.font(text, 'Basic', 'green', function(rendered){
+function fancy(text, cb) {
+  art.font(text, 'Basic', 'green', function(rendered) {
     console.log(rendered);
     cb();
   });
 }
 
-function salute(cb){
-  art.font('compoSR', 'Basic', 'red').font('v1', 'Doom', 'magenta', function(rendered){
+function salute(cb) {
+  art.font('compoSR', 'Basic', 'red').font('v1', 'Doom', 'magenta', function(rendered) {
     console.log(rendered);
     cb();
   });
 }
 
 module.exports = {
-  error : error,
-  info : info,
-  debug : debug,
-  warn : warn,
-  fancy : fancy,
-  salute : salute
+  error: error,
+  info: info,
+  debug: debug,
+  warn: warn,
+  fancy: fancy,
+  salute: salute
 };
