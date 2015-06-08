@@ -71,11 +71,6 @@ app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
 **************************************/
 engine.middlewares(app);
 
-
-if(app.get('env') === 'development') {
-  app.use(require('./routes/test'));
-}
-
 var haltOnTimedout = function(req, res, next) {
     if (!req.timedout) {
         next();
