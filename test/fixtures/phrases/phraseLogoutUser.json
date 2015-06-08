@@ -11,6 +11,12 @@
               "default": ""
           }
       },
+      "headers": {
+          "Authorization": {
+              "displayName": "Authorization",
+              "description": "User access token"
+          }
+      },
       "responses": {
         "204": {
           "description": "OK"
