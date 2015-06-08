@@ -175,6 +175,28 @@ function test(app) {
   }
 
   /**
+   * @param  {string} loginUserURL
+   * @return {Promise}
+   */
+  function loginFakeUser(loginUserURL) {
+    var credentialsUser = clientUtils.getUser();
+    var credentialsClient = clientUtils.getDemoClient();
+
+    return callPhraseWithJWT({
+      url: loginUserURL,
+      claims: {
+        iss: credentialsClient.clientId,
+        'basic_auth.username': 'asdasdasd',
+        'basic_auth.password': credentialsUser.password,
+        scope: credentialsUser.scopes
+      },
+      clientSecret: credentialsClient.clientSecret
+    }, {
+      responseStatus : 401
+    });
+  }
+
+  /**
    * @param  {string} logoutUserURL
    * @return {Promise}
    */
@@ -267,9 +289,9 @@ function test(app) {
     describe('client login phrase', function() {
 
       var loginphrase = require('../../fixtures/phrases/phraseLoginClient.json');
-      var phraseClientLoginLocation;
+      var phraseClientLoginLocation = 'phrase/apps-sandbox/loginclient';
 
-      before('is created correctly', function(done) {
+      /*before('is created correctly', function(done) {
         createPhrase(loginphrase, adminClientToken)
           .then(function(location) {
             phraseClientLoginLocation = location;
@@ -278,7 +300,7 @@ function test(app) {
             done(err);
           });
 
-      });
+      });*/
 
       it('receives a token after calling it', function(done) {
         var url = phraseClientLoginLocation.replace('phrase/', '/').replace('!', '/');
@@ -318,7 +340,8 @@ function test(app) {
         phraseUserLoginURL,
         userLoginPhrase = require('../../fixtures/phrases/phraseLoginUser.json');
 
-      before('is created correctly', function(done) {
+        phraseUserLoginURL = '/apps-sandbox/loginuser';
+      /*before('is created correctly', function(done) {
         createPhrase(userLoginPhrase, adminClientToken)
           .then(function(location) {
             phraseUserLoginLocation = location;
@@ -327,7 +350,7 @@ function test(app) {
           }).catch(function(err) {
             done(err);
           });
-      });
+      });*/
 
       it('receives a token/expires/refresh after calling it', function(done) {
 
@@ -345,6 +368,21 @@ function test(app) {
 
       });
 
+      it('receives a 401 with bad user credentials', function(done) {
+
+        loginFakeUser(phraseUserLoginURL)
+          .then(function(response) {
+            expect(response).to.be.an('object');
+            expect(response.body).to.be.an('object');
+            expect(response.body.errorDescription).to.be.a('string');
+            done();
+          })
+          .catch(function(err) {
+            done(err);
+          });
+
+      });
+
       describe('with accessToken, user tokenRefresh phrase', function() {
 
         var refreshTokenLocation,
@@ -354,7 +392,7 @@ function test(app) {
 
         before('is created correctly', function(done) {
 
-          createPhrase(refreshTokenPhrase, adminClientToken)
+          /*createPhrase(refreshTokenPhrase, adminClientToken)
             .then(function(location) {
               refreshTokenLocation = location;
             })
@@ -368,8 +406,18 @@ function test(app) {
             })
             .catch(function(err) {
               done(err);
-            });
+            });*/
+            refreshTokenLocation = 'phrase/apps-sandbox/refreshtoken';
 
+            loginUser(phraseUserLoginURL)
+              .then(function(response) {
+                demoUserToken = response.body.tokenObject.accessToken;
+                demoUserRefreshToken = response.body.tokenObject.refreshToken;
+                done();
+              })
+              .catch(function(err) {
+                done(err);
+              });
         });
 
         it('can refresh user token with refreshToken', function(done) {
@@ -399,12 +447,22 @@ function test(app) {
           userLogoutPhrase = require('../../fixtures/phrases/phraseLogoutUser.json');
 
         before('is created correctly', function(done) {
-          createPhrase(userLogoutPhrase, adminClientToken)
+          /*createPhrase(userLogoutPhrase, adminClientToken)
             .then(function(location) {
               phraseUserLogoutLocation = location;
               phraseUserLogoutURL = phraseUserLogoutLocation.replace('phrase/', '/').replace(/!/g, '/');
               return loginUser(phraseUserLoginURL);
             })
+            .then(function(response) {
+              demoUserToken = response.body.tokenObject.accessToken;
+              done();
+            })
+            .catch(function(err) {
+              done(err);
+            });*/
+          phraseUserLogoutURL = '/apps-sandbox/logoutuser/:type?';
+
+          loginUser(phraseUserLoginURL)
             .then(function(response) {
               demoUserToken = response.body.tokenObject.accessToken;
               done();

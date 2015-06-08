@@ -19,7 +19,9 @@ function middlewares(app){
 function init(app){
   var dfd = q.defer();
 
-  q.all([bootstrap.phrases(), bootstrap.snippets(), worker.init()])
+  worker.init();
+  
+  q.all([bootstrap.phrases(), bootstrap.snippets()])
     .then(function(){
       logger.info('Engine initialized, all data is loaded :)');
       dfd.resolve(app);
