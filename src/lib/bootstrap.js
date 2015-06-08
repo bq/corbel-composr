@@ -76,32 +76,9 @@ function bootstrapSnippets(){
   return dfd.promise;
 }
 
-function getSnippets(){
-  return {
-    'silkroad-qa' : [
-      {
-        name : 'log',
-        code : 'console.log("ey");'
-      },
-      {
-        name : 'example',
-        code : 'this.log();'
-      },
-      {
-        name : 'sendJson',
-        code : 'compoSR.run("json", params)'
-      },
-      {
-        name : 'json',
-        code: 'params.res.send({ hello2 : params.message})'
-      }
-    ]
-  };
-}
 
 module.exports = {
   router: router,
   phrases : bootstrapPhrases,
-  snippets : bootstrapSnippets,
-  getSnippets : getSnippets
+  snippets : bootstrapSnippets
 };
