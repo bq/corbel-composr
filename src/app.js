@@ -4,6 +4,7 @@ var express = require('express'),
     path = require('path'),
     favicon = require('serve-favicon'),
     morgan = require('morgan'),
+    helmet = require('helmet'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     engine = require('./lib/engine'),
@@ -39,7 +40,7 @@ var env = process.env.NODE_ENV || 'development';
 app.locals.ENV = env;
 app.locals.ENV_DEVELOPMENT = env === 'development';
 
-app.disable('x-powered-by');
+app.use(helmet());
 app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
 app.use(bodyParser.json());
@@ -69,11 +70,6 @@ app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
   Engine middlewares
 **************************************/
 engine.middlewares(app);
-
-
-if(app.get('env') === 'development') {
-  app.use(require('./routes/test'));
-}
 
 var haltOnTimedout = function(req, res, next) {
     if (!req.timedout) {

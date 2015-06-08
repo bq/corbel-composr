@@ -3,5 +3,6 @@
 module.exports = {
 	base : require('./base'),
 	doc : require('./doc'),
-	phrase : require('./phrase')
+	phrase : require('./phrase'),
+	test : require('./test')
 };

@@ -88,7 +88,7 @@ router.delete('/phrase/:phraseid', function(req, res, next) {
 
     var phraseIdentifier = connection.extractDomain(authorization) + '!' + req.params.phraseid;
     corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).delete().then(function(response) {
-        res.send(response.status, response.data);
+        res.status(response.status).send(response.data);
     }).catch(function(error) {
         next(new ComposerError('error:phrase:delete', error.message, error.status));
     });

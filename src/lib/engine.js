@@ -1,28 +1,32 @@
 'use strict';
 
 var bootstrap = require('./bootstrap'),
-    worker = require('./worker'),
-    routes = require('../routes'),
-    logger = require('../utils/logger'),
-    q = require('q');
+  worker = require('./worker'),
+  routes = require('../routes'),
+  logger = require('../utils/logger'),
+  q = require('q');
 
 //Add necesary middlewares to express
-function middlewares(app){
+function middlewares(app) {
   app.use(routes.base);
   app.use(bootstrap.router);
   app.use(worker.router);
   app.use(routes.phrase);
   app.use(routes.doc);
+
+  if (app.get('env') === 'development') {
+    app.use(routes.test);
+  }
 }
 
 //Call necesary init functions
-function init(app){
+function init(app) {
   var dfd = q.defer();
 
   worker.init();
-  
+
   q.all([bootstrap.phrases(), bootstrap.snippets()])
-    .then(function(){
+    .then(function() {
       logger.info('Engine initialized, all data is loaded :)');
       dfd.resolve(app);
     })
@@ -32,6 +36,6 @@ function init(app){
 }
 
 module.exports = {
-  init : init,
-  middlewares : middlewares
+  init: init,
+  middlewares: middlewares
 };
