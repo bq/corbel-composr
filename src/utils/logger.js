@@ -46,6 +46,7 @@ var logger = new(winston.Logger)({
 
 /**
   Logger levels
+  @todo: Prevent circular reference problem
 **/
 function error() {
   logger.log.apply(logger, ['error'].concat(Array.prototype.slice.call(arguments)));

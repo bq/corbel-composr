@@ -117,4 +117,19 @@ router.get('/phrase', function(req, res) {
     res.send(phraseManager.getPhrases(connection.extractDomain(authorization)));
 });
 
+/**
+ * Meta-Endpoint for compoSR phrases
+ */
+router.all('*', function(req, res, next) {
+    var path = req.path.slice(1).split('/'),
+        domain = path[0],
+        phraseName = path.slice(1).join('/');
+
+    if (!domain || !phraseName) {
+        return next();
+    }
+
+    return phraseManager.run(domain, phraseName, req, res, next);
+});
+
 module.exports = router;

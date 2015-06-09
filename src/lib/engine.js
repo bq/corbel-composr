@@ -9,8 +9,6 @@ var bootstrap = require('./bootstrap'),
 //Add necesary middlewares to express
 function middlewares(app) {
   app.use(routes.base);
-  app.use(bootstrap.router);
-  app.use(worker.router);
   app.use(routes.phrase);
   app.use(routes.doc);
 
