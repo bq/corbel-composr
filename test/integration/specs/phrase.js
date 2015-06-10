@@ -37,7 +37,7 @@ function test(app) {
         .expect(204)
         .end(function(err, response) {
           expect(response.headers).to.exist;
-          expect(response.headers['location'].length).to.be.above(0);
+          expect(response.headers['location']).to.be.a('string');
           done(err);
         });
     });
@@ -58,7 +58,7 @@ function test(app) {
         .end(function(err, response) {
 
           expect(response.headers).to.exist;
-          expect(response.headers['location'].length).to.be.above(0);
+          expect(response.headers['location']).to.be.a('string');
 
           var decoded = corbeljs.jwt.decode(clientToken);
 

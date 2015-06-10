@@ -30,6 +30,8 @@ function test(app) {
         .end(function(err, response) {
 
           expect(response).to.be.an('object');
+          expect(response.body).to.be.an('object');
+          expect(response.body.data).to.be.an('object');
           expect(response.body.data.accessToken).to.be.a('string');
 
           if (err) {
@@ -56,6 +58,7 @@ function test(app) {
         .send(phrase)
         .expect(204)
         .end(function(err, response) {
+          expect(response).to.be.an('object');
           expect(response.headers).to.be.an('object');
           expect(response.headers.location).to.be.a('string');
 
