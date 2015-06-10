@@ -1,8 +1,6 @@
 'use strict';
 
-var express = require('express'),
-  router = express.Router(),
-  phraseManager = require('./phraseManager'),
+var phraseManager = require('./phraseManager'),
   ComposerError = require('./composerError'),
   connection = require('./corbelConnection'),
   q = require('q'),
@@ -26,14 +24,14 @@ var getPhrase = function(driver, phrasesCollection, phrases, promise, pageNumber
 
     return driver.resources.collection(phrasesCollection).get(params, 'application/json').
     then(function(response) {
-      if(response.data && response.status === 200){
+      if (response.data && response.status === 200) {
         phrases = phrases.concat(response.data);
         if (response.data.length < PAGE_SIZE) {
           return phrases;
         } else {
           return getPhrase(driver, phrasesCollection, phrases, promise, pageNumber + 1);
         }
-      }else{
+      } else {
         throw new ComposerError('error:composer:corbel:phrases', '', 500);
       }
     });
@@ -51,7 +49,7 @@ var bootstrapPhrases = function() {
 
       phrases.forEach(function(phrase) {
         logger.debug('Phrase loaded', phrase.id);
-        phraseManager.registerPhrase(router, phrase);
+        phraseManager.registerPhrase(phrase);
       });
 
       dfd.resolve();
@@ -69,7 +67,7 @@ var bootstrapPhrases = function() {
   return dfd.promise;
 };
 
-function bootstrapSnippets(){
+function bootstrapSnippets() {
   //TODO: obtain snippets
   var dfd = q.defer();
   dfd.resolve();
@@ -78,7 +76,6 @@ function bootstrapSnippets(){
 
 
 module.exports = {
-  router: router,
-  phrases : bootstrapPhrases,
-  snippets : bootstrapSnippets
+  phrases: bootstrapPhrases,
+  snippets: bootstrapSnippets
 };
