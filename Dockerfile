@@ -8,6 +8,9 @@ COPY . /src
 # Install dev dependencies
 RUN cd /src; npm install; npm rebuild
 
+#update packages
+RUN apt-get update
+
 # Any text editor
 RUN apt-get install -y nano
 
