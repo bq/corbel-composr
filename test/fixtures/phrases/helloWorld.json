@@ -1,6 +1,6 @@
 {
     "url": "helloworld",
-    "post": {
+    "get": {
         "code": "res.render('index', {title: 'hello world'});",
         "doc": {
             "securedBy": ["oauth_2_0"],

@@ -8,6 +8,9 @@ COPY . /src
 # Install dev dependencies
 RUN cd /src; npm install; npm rebuild
 
+# Any text editor
+RUN apt-get install -y nano
+
 # Expose port
 EXPOSE  3000
 
