@@ -55,10 +55,12 @@ var getByPhraseName = function(domain, phraseName) {
   validate.isValue(domain, 'undefined:domain');
   validate.isValue(phraseName, 'undefined:phraseName');
 
+  logger.debug('phrase_manager:get_phrase:', phraseName);
+
   return _.findIndex(phrases.list[domain], function(item) {
     var itemPhraseName = item.url.split(':')[0].slice(0, -1);
 
-    return phraseName.indexOf(itemPhraseName) !== -1;
+    return phraseName.indexOf(itemPhraseName) !== -1 && !(phraseName.length > 0 && itemPhraseName.length === 0);
   });
 };
 
@@ -128,6 +130,12 @@ var run = function(domain, phraseName, req, res, next) {
   logger.debug('phrase_manager:phrase.method:exist', !!phrase[method]);
   if (!phrase[method]) {
     logger.debug('phrase_manager:not_found');
+    return next();
+  }
+console.log(domain, phrase, phraseName);
+  logger.debug('phrase_manager:phrase.code:exist', phrase[method].code && phrase[method].code.length > 0);
+  if (!phrase[method].code || phrase[method].code.length === 0) {
+    logger.debug('phrase_manager:code:not_found');
     return next();
   }
 
