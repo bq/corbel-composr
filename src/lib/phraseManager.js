@@ -11,9 +11,12 @@ var validate = require('./validate'),
   _ = require('lodash'),
   q = require('q');
 
-var exports = {};
 
-exports.executePhrase = function executePhrase(context, compoSR, phraseBody) {
+var PhraseManager = function(){
+
+}
+
+PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR, phraseBody) {
 
   // set the limit of execution time to 10000 milliseconds
   tripwire.resetTripwire(config('timeout') || 10000);
@@ -35,11 +38,11 @@ exports.executePhrase = function executePhrase(context, compoSR, phraseBody) {
  * @param  {String} phraseId
  * @return {Number}
  */
-exports.getPhraseIndexById = function getPhraseIndexById(domain, phraseId) {
+PhraseManager.prototype.getPhraseIndexById = function getPhraseIndexById(domain, phraseId) {
   validate.isValue(domain, 'undefined:domain');
   validate.isValue(phraseId, 'undefined:phraseId');
   
-  return _.findIndex(exports.getPhrases(domain), function(item) {
+  return _.findIndex(this.getPhrases(domain), function(item) {
     return item.id === phraseId;
   });
 };
@@ -50,7 +53,7 @@ exports.getPhraseIndexById = function getPhraseIndexById(domain, phraseId) {
  * @param  {Array} pathparams
  * @return {Array}
  */
-exports.getPhrasesWithAllowedNumberOfArguments = function(phrases, params){
+PhraseManager.prototype.getPhrasesWithAllowedNumberOfArguments = function(phrases, params){
   var argumentsSize = params.length;
   
   var phrasesWithSameNumberOfArguments = _.filter(phrases, function(phrase){
@@ -90,13 +93,13 @@ exports.getPhrasesWithAllowedNumberOfArguments = function(phrases, params){
  * @param  {String} phraseName
  * @return {Number}
  */
-exports.getPhraseByName = function getPhraseByName(domain, phraseName) {
+PhraseManager.prototype.getPhraseByName = function getPhraseByName(domain, phraseName) {
   validate.isValue(domain, 'undefined:domain');
   validate.isValue(phraseName, 'undefined:phraseName');
 
   logger.debug('phrase_manager:get_phrase:', phraseName);
 
-  var domainPhrases = exports.getPhrases(domain);
+  var domainPhrases = this.getPhrases(domain);
 
   if(!domainPhrases || domainPhrases.length === 0){
     logger.debug('phrase_manager:get_phrase:no_phrases');
@@ -113,7 +116,7 @@ exports.getPhraseByName = function getPhraseByName(domain, phraseName) {
     }
   });
 
-  var phrasesWithAllowedNumberOfArguments = exports.getPhrasesWithAllowedNumberOfArguments(domainPhrases, pathParams);
+  var phrasesWithAllowedNumberOfArguments = this.getPhrasesWithAllowedNumberOfArguments(domainPhrases, pathParams);
 
   var possiblePhrases = _.compact(phrasesWithAllowedNumberOfArguments.map(function(phrase) {
     var options = {
@@ -158,14 +161,14 @@ exports.getPhraseByName = function getPhraseByName(domain, phraseName) {
   return possiblePhrases.length > 0 ? possiblePhrases[0].phrase : null;
 };
 
-exports.registerPhrase = function registerPhrase(phrase) {
+PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
 
   validate.isValue(phrase, 'undefined:phrase');
 
   var domain = phrase.id.split('!')[0];
   phrases.list[domain] = phrases.list[domain] || [];
 
-  var exists = exports.getPhraseIndexById(domain, phrase.id);
+  var exists = this.getPhraseIndexById(domain, phrase.id);
 
   if (exists !== -1) {
     logger.debug('phrase_manager:register_phrase:update', domain);
@@ -177,7 +180,7 @@ exports.registerPhrase = function registerPhrase(phrase) {
 
 };
 
-exports.unregisterPhrase = function unregisterPhrase(phrase) {
+PhraseManager.prototype.unregisterPhrase = function unregisterPhrase(phrase) {
 
   validate.isValue(phrase, 'undefined:phrase');
   validate.isValue(phrase.id, 'undefined:phrase:id');
@@ -188,18 +191,18 @@ exports.unregisterPhrase = function unregisterPhrase(phrase) {
   logger.debug('phrase_manager:unregister_phrase', domain, url);
 
   // remove from internal data
-  var exists = exports.getPhraseIndexById(domain, phrase.id);
+  var exists = this.getPhraseIndexById(domain, phrase.id);
 
   if (exists !== -1) {
     phrases.list[domain].splice(exists, 1);
   }
 };
 
-exports.getPhrases = function getPhrases(domain) {
+PhraseManager.prototype.getPhrases = function getPhrases(domain) {
   return phrases.list[domain];
 };
 
-exports.run = function run(domain, phraseName, req, res, next) {
+PhraseManager.prototype.run = function run(domain, phraseName, req, res, next) {
 
   logger.debug('phrase_manager:run', domain, phraseName, req.params);
 
@@ -208,7 +211,7 @@ exports.run = function run(domain, phraseName, req, res, next) {
 
   phrases.list[domain] = phrases.list[domain] || [];
 
-  var phrase = exports.getPhraseByName(domain, phraseName);
+  var phrase = this.getPhraseByName(domain, phraseName);
 
   logger.debug('phrase_manager:phrases:length', phrases.list[domain].length);
   logger.debug('phrase_manager:exists', phrase.url);
@@ -269,8 +272,8 @@ exports.run = function run(domain, phraseName, req, res, next) {
   //want to have compoSR use the context for binding req, res... to the snippets
   var compoSR = compoSRBuilder.getCompoSR(domain);
 
-  exports.executePhrase(context, compoSR, phrase[method].code);
+  this.executePhrase(context, compoSR, phrase[method].code);
 
 };
 
-module.exports = exports;
+module.exports = new PhraseManager();
