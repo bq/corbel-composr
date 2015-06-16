@@ -11,7 +11,9 @@ var validate = require('./validate'),
   _ = require('lodash'),
   q = require('q');
 
-var executePhrase = function(context, compoSR, phraseBody) {
+var exports = {};
+
+exports.executePhrase = function executePhrase(context, compoSR, phraseBody) {
 
   // set the limit of execution time to 10000 milliseconds
   tripwire.resetTripwire(config('timeout') || 10000);
@@ -33,13 +35,50 @@ var executePhrase = function(context, compoSR, phraseBody) {
  * @param  {String} phraseId
  * @return {Number}
  */
-var getById = function(domain, phraseId) {
+exports.getPhraseIndexById = function getPhraseIndexById(domain, phraseId) {
   validate.isValue(domain, 'undefined:domain');
   validate.isValue(phraseId, 'undefined:phraseId');
-
-  return _.findIndex(phrases.list[domain], function(item) {
+  
+  return _.findIndex(exports.getPhrases(domain), function(item) {
     return item.id === phraseId;
   });
+};
+
+/**
+ * Returns filtered list of possible phrases that would match the length of the uri
+ * @param  {Array} phrases
+ * @param  {Array} pathparams
+ * @return {Array}
+ */
+exports.getPhrasesWithAllowedNumberOfArguments = function(phrases, params){
+  var argumentsSize = params.length;
+  
+  var phrasesWithSameNumberOfArguments = _.filter(phrases, function(phrase){
+    var phraseArguments = _.filter(phrase.url.split('/'), function(item){
+      if(item.length !== 0){
+        return item;
+      }
+    });
+
+    var phraseArgumentsSizeMax = phraseArguments.length;
+    var phraseArgumentsSizeMin = phraseArgumentsSizeMax;
+    
+    //The minimum number of arguments decreases if there are optional arguments `:arg?`
+    for(var i = 0; i < phraseArguments.length; i++){
+      if(phraseArguments[i].indexOf('?') !== -1){
+        phraseArgumentsSizeMin--;
+      }
+    }
+
+    if(phraseArgumentsSizeMax === phraseArgumentsSizeMin && phraseArgumentsSizeMax === argumentsSize){
+      return phrase;
+    }else if(argumentsSize <= phraseArgumentsSizeMax && argumentsSize >= phraseArgumentsSizeMin){
+      return phrase;
+    }
+
+  });
+
+  return phrasesWithSameNumberOfArguments;
 };
 
 /**
@@ -51,27 +90,82 @@ var getById = function(domain, phraseId) {
  * @param  {String} phraseName
  * @return {Number}
  */
-var getByPhraseName = function(domain, phraseName) {
+exports.getPhraseByName = function getPhraseByName(domain, phraseName) {
   validate.isValue(domain, 'undefined:domain');
   validate.isValue(phraseName, 'undefined:phraseName');
 
   logger.debug('phrase_manager:get_phrase:', phraseName);
 
-  return _.findIndex(phrases.list[domain], function(item) {
-    var itemPhraseName = item.url.split(':')[0].slice(0, -1);
+  var domainPhrases = exports.getPhrases(domain);
 
-    return phraseName.indexOf(itemPhraseName) !== -1 && !(phraseName.length > 0 && itemPhraseName.length === 0);
+  if(!domainPhrases || domainPhrases.length === 0){
+    logger.debug('phrase_manager:get_phrase:no_phrases');
+    return null;
+  }
+
+  //Extract query params in order to search the matching phrase better
+  var queryParamsString = phraseName.indexOf('?') !== -1 ? phraseName.substring(phraseName.indexOf('?'), phraseName.length - 1) : '';
+  phraseName = phraseName.replace(queryParamsString, '');
+
+  var pathParams = _.filter(phraseName.split('/'), function(item){
+    if(item !== ''){
+      return item;
+    }
   });
+
+  var phrasesWithAllowedNumberOfArguments = exports.getPhrasesWithAllowedNumberOfArguments(domainPhrases, pathParams);
+
+  var possiblePhrases = _.compact(phrasesWithAllowedNumberOfArguments.map(function(phrase) {
+    var options = {
+      phrase : phrase,
+      weight : 0
+    };
+
+    //Remove empty arguments
+    var phraseArguments = _.filter(phrase.url.split('/'), function(item){
+      if(item.length !== 0){
+        return item;
+      }
+    });
+
+    //Empty url phrase `/` with no arguments
+    if(phraseArguments.length === 0 && pathParams.length === 0){
+      return options;
+    }
+
+    var matches = true;
+
+    phraseArguments.forEach(function(item, index){
+      if(item === pathParams[index] || item.indexOf(':') === 0){
+        options.weight++;
+      }else{
+        matches = false;
+      }
+    });
+
+    if(matches){
+      return options;
+    }
+
+  }));
+
+  logger.debug('phrase_manager:get_phrase_by_name:candidates', possiblePhrases.length);
+
+  possiblePhrases = _.sortBy(possiblePhrases, function(n){
+    return -n.weight;
+  });
+
+  return possiblePhrases.length > 0 ? possiblePhrases[0].phrase : null;
 };
 
-var registerPhrase = function(phrase) {
+exports.registerPhrase = function registerPhrase(phrase) {
 
   validate.isValue(phrase, 'undefined:phrase');
 
   var domain = phrase.id.split('!')[0];
   phrases.list[domain] = phrases.list[domain] || [];
 
-  var exists = getById(domain, phrase.id);
+  var exists = exports.getPhraseIndexById(domain, phrase.id);
 
   if (exists !== -1) {
     logger.debug('phrase_manager:register_phrase:update', domain);
@@ -83,7 +177,7 @@ var registerPhrase = function(phrase) {
 
 };
 
-var unregisterPhrase = function(phrase) {
+exports.unregisterPhrase = function unregisterPhrase(phrase) {
 
   validate.isValue(phrase, 'undefined:phrase');
   validate.isValue(phrase.id, 'undefined:phrase:id');
@@ -94,18 +188,18 @@ var unregisterPhrase = function(phrase) {
   logger.debug('phrase_manager:unregister_phrase', domain, url);
 
   // remove from internal data
-  var exists = getById(domain, phrase.id);
+  var exists = exports.getPhraseIndexById(domain, phrase.id);
 
   if (exists !== -1) {
     phrases.list[domain].splice(exists, 1);
   }
 };
 
-var getPhrases = function(domain) {
+exports.getPhrases = function getPhrases(domain) {
   return phrases.list[domain];
 };
 
-var run = function(domain, phraseName, req, res, next) {
+exports.run = function run(domain, phraseName, req, res, next) {
 
   logger.debug('phrase_manager:run', domain, phraseName, req.params);
 
@@ -114,17 +208,16 @@ var run = function(domain, phraseName, req, res, next) {
 
   phrases.list[domain] = phrases.list[domain] || [];
 
-  var exists = getByPhraseName(domain, phraseName);
+  var phrase = exports.getPhraseByName(domain, phraseName);
 
   logger.debug('phrase_manager:phrases:length', phrases.list[domain].length);
-  logger.debug('phrase_manager:exists', exists);
-  if (!phrases.list[domain] || exists === -1) {
+  logger.debug('phrase_manager:exists', phrase.url);
+  if (!phrases.list[domain] || !phrase) {
     logger.debug('phrase_manager:not_found');
     return next();
   }
 
-  var phrase = phrases.list[domain][exists],
-    method = req.method.toLowerCase();
+  var method = req.method.toLowerCase();
 
   logger.debug('phrase_manager:method', method);
   logger.debug('phrase_manager:phrase.method:exist', !!phrase[method]);
@@ -132,7 +225,7 @@ var run = function(domain, phraseName, req, res, next) {
     logger.debug('phrase_manager:not_found');
     return next();
   }
-console.log(domain, phrase, phraseName);
+
   logger.debug('phrase_manager:phrase.code:exist', phrase[method].code && phrase[method].code.length > 0);
   if (!phrase[method].code || phrase[method].code.length === 0) {
     logger.debug('phrase_manager:code:not_found');
@@ -176,14 +269,8 @@ console.log(domain, phrase, phraseName);
   //want to have compoSR use the context for binding req, res... to the snippets
   var compoSR = compoSRBuilder.getCompoSR(domain);
 
-  executePhrase(context, compoSR, phrase[method].code);
+  exports.executePhrase(context, compoSR, phrase[method].code);
 
 };
 
-module.exports.registerPhrase = registerPhrase;
-module.exports.unregisterPhrase = unregisterPhrase;
-module.exports.executePhrase = executePhrase;
-module.exports.getPhrases = getPhrases;
-module.exports.getById = getById;
-module.exports.getByPhraseName = getByPhraseName;
-module.exports.run = run;
+module.exports = exports;

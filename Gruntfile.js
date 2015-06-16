@@ -241,8 +241,7 @@ module.exports = function(grunt) {
         'mochaTest:ci'
     ]);
 
-    grunt.registerTask('tdd', [
-        'mochaTest:unit',
-        'watch:test'
+    grunt.registerTask('unit', [
+        'mochaTest:unit'
     ]);
 };
