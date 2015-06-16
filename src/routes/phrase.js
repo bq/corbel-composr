@@ -121,15 +121,18 @@ router.get('/phrase', function(req, res) {
  * Meta-Endpoint for compoSR phrases
  */
 router.all('*', function(req, res, next) {
+    //req.path => '/apps-sandbox/login'
+    //domain => 'apps-sandbox'
+    //phrasePath => 'login'
     var path = req.path.slice(1).split('/'),
         domain = path[0],
-        phraseName = path.slice(1).join('/');
+        phrasePath = path.slice(1).join('/');
 
-    if (!domain || !phraseName) {
+    if (!domain || !phrasePath) {
         return next();
     }
 
-    return phraseManager.run(domain, phraseName, req, res, next);
+    return phraseManager.run(domain, phrasePath, req, res, next);
 });
 
 module.exports = router;
