@@ -197,6 +197,7 @@ PhraseManager.prototype.unregisterPhrase = function unregisterPhrase(phrase) {
 };
 
 PhraseManager.prototype.getPhrases = function getPhrases(domain) {
+  logger.debug('phrase_manager:get_phrases:domain', domain);
   return phrases.list[domain];
 };
 

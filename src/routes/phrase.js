@@ -65,7 +65,7 @@ router.put('/phrase', function(req, res, next) {
 
         phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
 
-        logger.debug('Storing or updating phrase', phrase.id, domain, authorization);
+        logger.debug('Storing or updating phrase', phrase.id, domain);
 
         corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
             res.set('Location', 'phrase/' + phrase.id);
@@ -86,8 +86,10 @@ router.delete('/phrase/:phraseid', function(req, res, next) {
 
     var corbelDriver = connection.getTokenDriver(authorization);
 
-    var phraseIdentifier = connection.extractDomain(authorization) + '!' + req.params.phraseid;
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).delete().then(function(response) {
+    var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
+    logger.debug('phrase:delete:id', phraseId);
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseId).delete().then(function(response) {
+        logger.debug('phrase:deleted');
         res.status(response.status).send(response.data);
     }).catch(function(error) {
         next(new ComposerError('error:phrase:delete', error.message, error.status));
@@ -100,11 +102,11 @@ router.get('/phrase/:phraseid', function(req, res, next) {
 
     var corbelDriver = connection.getTokenDriver(authorization);
 
-    var phraseIdentifier = connection.extractDomain(authorization) + '!' + req.params.phraseid;
+    var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
 
-    logger.debug('Trying to get phrase:', phraseIdentifier);
+    logger.debug('Trying to get phrase:', phraseId);
 
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseIdentifier).get().then(function(response) {
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseId).get().then(function(response) {
         res.send(response.status, response.data);
     }).catch(function(error) {
         var errorBody = getCorbelErrorBody(error);
@@ -114,7 +116,7 @@ router.get('/phrase/:phraseid', function(req, res, next) {
 
 router.get('/phrase', function(req, res) {
     var authorization = auth.getAuth(req);
-    res.send(phraseManager.getPhrases(connection.extractDomain(authorization)));
+    res.json(phraseManager.getPhrases(connection.extractDomain(authorization)));
 });
 
 /**

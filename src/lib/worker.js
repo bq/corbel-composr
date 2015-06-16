@@ -45,7 +45,7 @@ var worker = function() {
               break;
 
             default: // 'CREATE' or 'UPDATE'
-              logger.debug('WORKER: triggered create or update event', message.resourceId);
+              logger.debug('WORKER triggered create or update event', message.resourceId);
 
               connection.driver.then(function(driver) {
                   return driver.resources.resource(connection.PHRASES_COLLECTION, message.resourceId).get();
@@ -69,48 +69,49 @@ var worker = function() {
     }
 
     return conn.createChannel().then(function(ch) {
-        process.once('SIGINT', function() {
-          conn.close();
-          process.exit();
-        });
-
-        var queue = 'composer-' + uuid.v4(),
-          exchange = 'eventbus.exchange',
-          pattern = '';
-
-        var ok = ch.assertQueue(queue, {
-          durable: false,
-          autoDelete: true
-        });
-
-        ok = ok.then(function() {
-          ch.bindQueue(queue, exchange, pattern);
-        });
-
-        ok = ok.then(function() {
-          ch.consume(queue, function(message) {
-              //Added callback function in case we need to do manual ack of the messages
-              doWork(ch, message);
-            },
-            Object.create({
-              noAck: true
-            }));
-
-          logger.debug('Worker up');
-          dfd.resolve();
-        });
-
-        return ok;
-      })
-      .catch(function(err) {
-        logger.error('WORKER: error creating channel', err);
-        dfd.reject(err);
-        if (conn) {
-          conn.close(function() {
-            process.exit(1);
-          });
-        }
+      process.once('SIGINT', function() {
+        conn.close();
+        process.exit();
       });
+
+      var queue = 'composer-' + uuid.v4(),
+        exchange = 'eventbus.exchange',
+        pattern = '';
+
+      var ok = ch.assertQueue(queue, {
+        durable: false,
+        autoDelete: true
+      }).then(function() {
+
+        return ch.bindQueue(queue, exchange, pattern);
+
+      }).then(function() {
+
+        ch.consume(queue, function(message) {
+            //Added callback function in case we need to do manual ack of the messages
+            doWork(ch, message);
+          },
+          Object.create({
+            noAck: true
+          }));
+
+        logger.debug('Worker up');
+        dfd.resolve();
+      });
+
+      return ok;
+
+    }).catch(function(err) {
+
+      logger.error('WORKER: error creating channel', err);
+      dfd.reject(err);
+      if (conn) {
+        conn.close(function() {
+          process.exit(1);
+        });
+      }
+
+    });
 
   }).then(null, function(err) {
     logger.error('Worker error %s', err);

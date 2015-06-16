@@ -22,13 +22,7 @@ var onConnectPromise = corbelDriver.iam.token().create().then(function() {
 });
 
 var extractDomain = function(accessToken) {
-    var atob = require('atob');
-    var decoded = accessToken.replace('Bearer ', '').split('.');
-    try {
-        return JSON.parse(atob(decoded[0])).domainId;
-    } catch (e) {
-        throw new ComposerError('error:composer:corbel:token_format', '', 401);
-    }
+    return corbel.jwt.decode(accessToken.replace('Bearer ', '')).domainId;
 };
 
 var getTokenDriver = function(accessToken) {

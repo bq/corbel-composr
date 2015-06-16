@@ -48,7 +48,7 @@ var bootstrapPhrases = function() {
     getPhrase(driver, connection.PHRASES_COLLECTION).then(function(phrases) {
 
       phrases.forEach(function(phrase) {
-        logger.debug('Phrase loaded', phrase.id);
+        logger.debug('bootstrap:phrase:loaded', phrase.id);
         phraseManager.registerPhrase(phrase);
       });
 
@@ -56,7 +56,7 @@ var bootstrapPhrases = function() {
     }).
     fail(function(error) {
       logger.error('error:bootstrap:load', error);
-      setTimeout(bootstrapPhrases, config('bootstrap.retrytimeout'));
+      setTimeout(bootstrapPhrases, config('bootstrap.retrytimeout') || 10000);
     });
 
   }).catch(function(error) {
