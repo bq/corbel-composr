@@ -4,6 +4,7 @@ var validate = require('./validate'),
   corbel = require('corbel-js'),
   config = require('./config'),
   phrases = require('./phrasesData'),
+  regexpGenerator = require('./regexpGenerator'),
   ComposerError = require('./composerError'),
   compoSRBuilder = require('./compoSRBuilder'),
   tripwire = require('tripwire'),
@@ -46,56 +47,23 @@ PhraseManager.prototype.getPhraseIndexById = function getPhraseIndexById(domain,
 };
 
 /**
- * Returns filtered list of possible phrases that would match the length of the uri
- * @param  {Array} phrases
- * @param  {Array} pathparams
- * @return {Array}
- */
-PhraseManager.prototype.getPhrasesWithAllowedNumberOfArguments = function(phrases, params){
-  var argumentsSize = params.length;
-  
-  var phrasesWithSameNumberOfArguments = _.filter(phrases, function(phrase){
-    var phraseArguments = _.filter(phrase.url.split('/'), function(item){
-      if(item.length !== 0){
-        return item;
-      }
-    });
-
-    var phraseArgumentsSizeMax = phraseArguments.length;
-    var phraseArgumentsSizeMin = phraseArgumentsSizeMax;
-    
-    //The minimum number of arguments decreases if there are optional arguments `:arg?`
-    for(var i = 0; i < phraseArguments.length; i++){
-      if(phraseArguments[i].indexOf('?') !== -1){
-        phraseArgumentsSizeMin--;
-      }
-    }
-
-    if(phraseArgumentsSizeMax === phraseArgumentsSizeMin && phraseArgumentsSizeMax === argumentsSize){
-      return phrase;
-    }else if(argumentsSize <= phraseArgumentsSizeMax && argumentsSize >= phraseArgumentsSizeMin){
-      return phrase;
-    }
-
-  });
-
-  return phrasesWithSameNumberOfArguments;
-};
-
-/**
- * Returns index of phrase in a specific domain that matches phraseName, -1 if not found
+ * Returns a phrase in a specific domain that matches path, null if not found
  * @example
- * phrase.url = 'domain/your/phrase/name/:param1?';
- * phraseName = 'your/phrase/name'
+ * phrase.url = 'your/phrase/name/:param1?';
+ * path = 'your/phrase/name'
  * @param  {String} domain
- * @param  {String} phraseName
- * @return {Number}
+ * @param  {String} path
+ * @return {Object}
  */
-PhraseManager.prototype.getPhraseByName = function getPhraseByName(domain, phraseName) {
+PhraseManager.prototype.getPhraseByMatchingPath = function(domain, path){
   validate.isValue(domain, 'undefined:domain');
-  validate.isValue(phraseName, 'undefined:phraseName');
+  validate.isValue(path, 'undefined:path');
 
-  logger.debug('phrase_manager:get_phrase:', phraseName);
+  var queryParamsString = path.indexOf('?') !== -1 ? path.substring(path.indexOf('?'), path.length - 1) : '';
+
+  path = path.replace(queryParamsString, '');
+
+  logger.debug('phrase_manager:get_phrase:', path);
 
   var domainPhrases = this.getPhrases(domain);
 
@@ -104,59 +72,14 @@ PhraseManager.prototype.getPhraseByName = function getPhraseByName(domain, phras
     return null;
   }
 
-  //Extract query params in order to search the matching phrase better
-  var queryParamsString = phraseName.indexOf('?') !== -1 ? phraseName.substring(phraseName.indexOf('?'), phraseName.length - 1) : '';
-  phraseName = phraseName.replace(queryParamsString, '');
-
-  var pathParams = _.filter(phraseName.split('/'), function(item){
-    if(item !== ''){
-      return item;
-    }
+  var candidates = _.filter(domainPhrases, function(phrase){
+    var regexp = new RegExp(phrase.regexp);
+    return regexp.test(path);
   });
 
-  var phrasesWithAllowedNumberOfArguments = this.getPhrasesWithAllowedNumberOfArguments(domainPhrases, pathParams);
-
-  var possiblePhrases = _.compact(phrasesWithAllowedNumberOfArguments.map(function(phrase) {
-    var options = {
-      phrase : phrase,
-      weight : 0
-    };
-
-    //Remove empty arguments
-    var phraseArguments = _.filter(phrase.url.split('/'), function(item){
-      if(item.length !== 0){
-        return item;
-      }
-    });
-
-    //Empty url phrase `/` with no arguments
-    if(phraseArguments.length === 0 && pathParams.length === 0){
-      return options;
-    }
-
-    var matches = true;
-
-    phraseArguments.forEach(function(item, index){
-      if(item === pathParams[index] || item.indexOf(':') === 0){
-        options.weight++;
-      }else{
-        matches = false;
-      }
-    });
-
-    if(matches){
-      return options;
-    }
-
-  }));
-
-  logger.debug('phrase_manager:get_phrase_by_name:candidates', possiblePhrases.length);
-
-  possiblePhrases = _.sortBy(possiblePhrases, function(n){
-    return -n.weight;
-  });
-
-  return possiblePhrases.length > 0 ? possiblePhrases[0].phrase : null;
+  logger.debug('phrase_manager:get_phrase_by_name:candidates', candidates.length);
+ 
+  return candidates.length > 0 ? candidates[0] : null;
 };
 
 PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
@@ -167,6 +90,8 @@ PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
   phrases.list[domain] = phrases.list[domain] || [];
 
   var exists = this.getPhraseIndexById(domain, phrase.id);
+  
+  phrase.regexp = regexpGenerator.regexpUrl(phrase.url);
 
   if (exists !== -1) {
     logger.debug('phrase_manager:register_phrase:update', domain);
@@ -201,19 +126,19 @@ PhraseManager.prototype.getPhrases = function getPhrases(domain) {
   return phrases.list[domain];
 };
 
-PhraseManager.prototype.run = function run(domain, phraseName, req, res, next) {
+PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
 
-  logger.debug('phrase_manager:run', domain, phraseName, req.params);
+  logger.debug('phrase_manager:run', domain, phrasePath, req.params);
 
   validate.isValue(domain, 'undefined:domain');
-  validate.isValue(phraseName, 'undefined:phraseName');
+  validate.isValue(phrasePath, 'undefined:phrasePath');
 
   phrases.list[domain] = phrases.list[domain] || [];
 
-  var phrase = this.getPhraseByName(domain, phraseName);
+  var phrase = this.getPhraseByMatchingPath(domain, phrasePath);
 
   logger.debug('phrase_manager:phrases:length', phrases.list[domain].length);
-  logger.debug('phrase_manager:exists', phrase.url);
+  logger.debug('phrase_manager:exists', (phrase ? phrase.url : null));
   if (!phrases.list[domain] || !phrase) {
     logger.debug('phrase_manager:not_found');
     return next();
