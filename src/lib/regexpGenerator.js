@@ -7,54 +7,79 @@
  * @param  {String} url
  * @return {String}
  */
-function regexpUrl(url){
-	var pathParams = url.split('/');
+function regexpUrl(url) {
+  var pathParams = url.split('/');
+  var EMPTY_PARAMS_REGEXP = '^$|^/$';
 
-	//Empty args, regex for empty element
-	if(pathParams.length === 1 && pathParams[0] === ''){
-		return '^$|^/$';
-	}
+  var paramsLength = pathParams.length;
 
-	var regexp = pathParams.reduce(function(prev, next, index){
-		var newValue = '';
-		
-		if(prev.length > 0){
-			//Theres a previous value, add a slash
-			newValue = '\/';
-		}else if(pathParams.length === 1 && next.indexOf(':') !== -1){
-			//Single param in the form of ':param'  or ':param?' requires indicator of start of the string
-			newValue = '^';
-		}
+  function isEmptyArgument() {
+    return paramsLength === 1 && pathParams[0] === '';
+  }
 
-		if(next.indexOf(':') === 0){
-			//Param can have any value, evaluate expression
-			if(index === pathParams.length -1 && pathParams.length !== 1 && next.indexOf('?') !== -1){
-				newValue += '(\\w+\/?)?';
-			}else{
-				newValue += '\\w+\/?';
-			}
-			
-		}else{
-			//Fixed value in the form of 'fixednameparam', replace the ? symbol in case it's an optional param
-			newValue += next.replace('?', '');
-		}
+  function isOptionalArgument(item) {
+    return item.indexOf('?') !== -1;
+  }
 
-		if(next.indexOf('?') !== -1){
-			//If is an optional param, add ( )
-			newValue = '(' + newValue + ')?';
-		}
+  function isParamArgument(item) {
+    return item.indexOf(':') !== -1;
+  }
 
-		//Single param in the form of ':param' , 'param' or ':param?' requires indicator of end of the string
-		if((pathParams.length === 1 && next.indexOf(':') !== -1) || (next.indexOf(':') !== -1 && index === pathParams.length -1)){
-			newValue += '$';
-		}
+  //Empty args, regex for empty element
+  if (isEmptyArgument()) {
+    return EMPTY_PARAMS_REGEXP;
+  }
 
-		return prev + newValue;
-	}, '');
+  var regexp = pathParams.reduce(function(prev, item, index) {
+    var newValue = '';
 
-	return regexp;
+    if (index !== 0) {
+      //Theres a previous value, add a slash
+      newValue = '\/';
+    }
+
+    if (isParamArgument(item)) {
+      //Param can have any value, evaluate expression
+      if (isOptionalArgument(item, index) && index === paramsLength - 1 && paramsLength !== 1) {
+        newValue += '(\\w+\/?)?';
+      } else {
+        newValue += '\\w+\/?';
+      }
+
+    } else {
+      //Fixed value in the form of 'fixednameparam', replace the ? symbol in case it's an optional param
+      newValue += item.replace('?', '');
+    }
+
+
+    if (isOptionalArgument(item, index)) {
+      //If is an optional param, add ( )
+      newValue = '(' + newValue + ')?';
+    }
+
+
+    if (pathParams.length === 1 && isParamArgument(item)) {
+      //Single param in the form of ':param'  or ':param?' requires indicator of start of the string
+      newValue = '^(\/)?' + newValue;
+    } else if (index === 0) {
+      newValue = '(\/)?' + newValue;
+    }
+
+
+    //Single param in the form of ':param' , 'param' or ':param?' requires indicator of end of the string
+    if (index === paramsLength - 1) {
+      if (!isParamArgument(item)) {
+        newValue += '(\/)?';
+      }
+      newValue += '$';
+    }
+
+    return prev + newValue;
+  }, '');
+
+  return regexp;
 }
 
 module.exports = {
-	regexpUrl : regexpUrl
+  regexpUrl: regexpUrl
 };
