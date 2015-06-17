@@ -212,12 +212,12 @@ PhraseManager.prototype.run = function run(domain, phraseName, req, res, next) {
 
   var phrase = this.getPhraseByName(domain, phraseName);
 
-  logger.debug('phrase_manager:phrases:length', phrases.list[domain].length);
-  logger.debug('phrase_manager:exists', phrase.url);
   if (!phrases.list[domain] || !phrase) {
     logger.debug('phrase_manager:not_found');
     return next();
   }
+  logger.debug('phrase_manager:phrases:length', phrases.list[domain].length);
+  logger.debug('phrase_manager:exists', phrase.url);
 
   var method = req.method.toLowerCase();
 
