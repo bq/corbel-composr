@@ -7,4 +7,5 @@ require('./specs/phraseManager.js');
 require('./specs/docBuilder.js');
 require('./specs/phraseValidator.js');
 require('./specs/regexpGenerator.js');
+require('./specs/paramsExtractor.js');
 //require('./specs/logger.js');
