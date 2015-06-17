@@ -5,10 +5,12 @@ var validate = require('./validate'),
   config = require('./config'),
   phrases = require('./phrasesData'),
   regexpGenerator = require('./regexpGenerator'),
+  paramsExtractor = require('./paramsExtractor'),
   ComposerError = require('./composerError'),
   compoSRBuilder = require('./compoSRBuilder'),
   tripwire = require('tripwire'),
   logger = require('../utils/logger'),
+  XRegExp = require('xregexp').XRegExp,
   _ = require('lodash'),
   q = require('q');
 
@@ -73,8 +75,9 @@ PhraseManager.prototype.getPhraseByMatchingPath = function(domain, path) {
   }
 
   var candidates = _.filter(domainPhrases, function(phrase) {
-    var regexp = new RegExp(phrase.regexp);
-    return regexp.test(path);
+    var regexp = XRegExp(phrase.regexpReference.regexp); //jshint ignore:line
+
+    return XRegExp.test(path, regexp);
   });
 
   logger.debug('phrase_manager:get_phrase_by_name:candidates', candidates.length);
@@ -91,7 +94,7 @@ PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
 
   var exists = this.getPhraseIndexById(domain, phrase.id);
 
-  phrase.regexp = regexpGenerator.regexpUrl(phrase.url);
+  phrase.regexpReference = regexpGenerator.regexpReference(phrase.url);
 
   if (exists !== -1) {
     logger.debug('phrase_manager:register_phrase:update', domain);
@@ -181,6 +184,9 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
       iamToken: iamToken
     });
   }
+
+  //Assign params
+  req.params = paramsExtractor.extract(phrasePath, phrase.regexpReference);
 
   var context = {
     req: req,

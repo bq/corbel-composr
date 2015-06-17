@@ -39,11 +39,12 @@ function regexpUrl(url) {
     }
 
     if (isParamArgument(item)) {
+
       //Param can have any value, evaluate expression
       if (isOptionalArgument(item, index) && index === paramsLength - 1 && paramsLength !== 1) {
-        newValue += '(\\w+\/?)?';
+        newValue += '((?<'+ item.replace(':', '').replace('?', '') +'>\\w+)\/?)?';
       } else {
-        newValue += '\\w+\/?';
+        newValue += '(?<'+ item.replace(':', '').replace('?', '') +'>\\w+)\/?';
       }
 
     } else {
@@ -60,16 +61,16 @@ function regexpUrl(url) {
 
     if (pathParams.length === 1 && isParamArgument(item)) {
       //Single param in the form of ':param'  or ':param?' requires indicator of start of the string
-      newValue = '^(\/)?' + newValue;
+      newValue = '^\/?' + newValue;
     } else if (index === 0) {
-      newValue = '(\/)?' + newValue;
+      newValue = '\/?' + newValue;
     }
 
 
     //Single param in the form of ':param' , 'param' or ':param?' requires indicator of end of the string
     if (index === paramsLength - 1) {
       if (!isParamArgument(item)) {
-        newValue += '(\/)?';
+        newValue += '\/?';
       }
       newValue += '$';
     }
@@ -80,6 +81,23 @@ function regexpUrl(url) {
   return regexp;
 }
 
+function regexpReference(url){
+  var PARAMS_EXTRACTOR_REGEX = /:(\w+)\?*/g;
+  var params = url.match(PARAMS_EXTRACTOR_REGEX) || [];
+  var regexp = regexpUrl(url);
+
+  params = params.map(function(param){
+    return param.replace(':', '');
+  });
+
+  return {
+    params : params,
+    regexp : regexp
+  };
+
+}
+
 module.exports = {
-  regexpUrl: regexpUrl
+  regexpUrl: regexpUrl,
+  regexpReference : regexpReference
 };

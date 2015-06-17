@@ -14,7 +14,7 @@ var getPhrase = function(id) {
   var code = 'res.render(\'index\', {title: \'test\'});';
   return {
     id: id,
-    url : '',
+    url: '',
     get: {
       code: code
     },
@@ -118,21 +118,19 @@ describe('in phraseManager module', function() {
   describe('Get the correct phrase index by id', function(){
     var domain = 'test';
     var stub;
-    var phrases = [
-      {
-        id : 'test'
-      },{
-        id : 'two'
-      }
-    ];
+    var phrases = [{
+      id: 'test'
+    }, {
+      id: 'two'
+    }];
 
-    before(function(){
-      stub = sinon.stub(phraseManager, 'getPhrases', function(){
+    before(function() {
+      stub = sinon.stub(phraseManager, 'getPhrases', function() {
         return phrases;
       })
     });
 
-    after(function(){
+    after(function() {
       stub.restore();
     });
 
@@ -144,45 +142,42 @@ describe('in phraseManager module', function() {
       expect(index).to.equals(0);
     });
 
-    it('does not find an undefined phrase', function(){
+    it('does not find an undefined phrase', function() {
       var index = phraseManager.getPhraseIndexById('test', 'asdasdasdasd');
       expect(index).to.equals(-1);
     });
   });
 
-  describe('Get the correct phrase index by name', function(){
+  describe('Get the correct phrase index by name', function() {
     var domain = 'test';
     var stub;
-    var phrases = [
-      {
-        url : ''
-      },{
-        url : ':param'
-      },{
-        url : 'pepito'
-      },{
-        url : 'test/:arg/:arg2'
-      },{
-        url : 'test/:arg/:optional?'
-      },{
-        url : 'user/:arg/:optional?/name'
-      }
-    ];
+    var phrases = [{
+      url: ''
+    }, {
+      url: ':param'
+    }, {
+      url: 'pepito'
+    }, {
+      url: 'test/:arg/:arg2'
+    }, {
+      url: 'test/:arg/:optional?'
+    }, {
+      url: 'user/:arg/:optional?/name'
+    }];
 
     //Populate regexps on the phrases
-    phrases = phrases.map(function(phrase){
-      var regexp = regexpGenerator.regexpUrl(phrase.url);
-      phrase.regexp = regexp;
+    phrases = phrases.map(function(phrase) {
+      phrase.regexpReference = regexpGenerator.regexpReference(phrase.url);
       return phrase;
     });
 
-    before(function(){
-      stub = sinon.stub(phraseManager, 'getPhrases', function(){
+    before(function() {
+      stub = sinon.stub(phraseManager, 'getPhrases', function() {
         return phrases;
       })
     });
 
-    after(function(){
+    after(function() {
       stub.restore();
     });
 
@@ -191,27 +186,27 @@ describe('in phraseManager module', function() {
       expect(phrase.url).to.equals('');
     });
 
-    it('gets phrases with url parameters: /:param', function(){
+    it('gets phrases with url parameters: /:param', function() {
       var phrase = phraseManager.getPhraseByMatchingPath('test', 'francisco');
       expect(phrase.url).to.equals(':param');
     });
 
-    it('gets the first phrase that matches with url parameters: /pepito', function(){
+    it('gets the first phrase that matches with url parameters: /pepito', function() {
       var phrase = phraseManager.getPhraseByMatchingPath('test', 'pepito');
       expect(phrase.url).to.equals(':param');
     });
 
-    it('gets phrases with query params: /url?param=test', function(){
+    it('gets phrases with query params: /url?param=test', function() {
       var phrase = phraseManager.getPhraseByMatchingPath('test', 'url?param=test');
       expect(phrase.url).to.equals(':param');
     });
 
-    it('gets phrases with optional parameters at the end: test/:arg/:optional?', function(){
+    it('gets phrases with optional parameters at the end: test/:arg/:optional?', function() {
       var phrase = phraseManager.getPhraseByMatchingPath('test', 'test/hola');
       expect(phrase.url).to.equals('test/:arg/:optional?');
     });
 
-    it('gets the first phrase if 2 phrases collide with number of arguments and importancy', function(){
+    it('gets the first phrase if 2 phrases collide with number of arguments and importancy', function() {
       var phrase = phraseManager.getPhraseByMatchingPath('test', 'test/hola/adios');
       expect(phrase.url).to.equals('test/:arg/:arg2');
     });
