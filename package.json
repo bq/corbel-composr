@@ -86,6 +86,8 @@
     "sinon": "^1.14.1",
     "supertest": "^1.0.0",
     "time-grunt": "~1.1.0",
-    "travis-cov": "^0.2.5"
+    "travis-cov": "^0.2.5",
+    "jaguarjs-jsdoc": "0.0.1",
+    "jsdoc": "3.2.2"
   }
 }

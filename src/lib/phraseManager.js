@@ -82,6 +82,10 @@ PhraseManager.prototype.getPhraseByMatchingPath = function(domain, path) {
   return candidates.length > 0 ? candidates[0] : null;
 };
 
+/**
+ * Registers a phrase on the phrases hashmap
+ * @param  {object} phrase
+ */
 PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
 
   validate.isValue(phrase, 'undefined:phrase');
