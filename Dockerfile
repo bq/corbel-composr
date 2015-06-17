@@ -14,6 +14,9 @@ RUN apt-get update
 # Any text editor
 RUN apt-get install -y nano
 
+# For allowing nano
+ENV TERM xterm
+
 # Expose port
 EXPOSE  3000
 

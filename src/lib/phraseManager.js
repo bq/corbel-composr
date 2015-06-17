@@ -13,7 +13,7 @@ var validate = require('./validate'),
   q = require('q');
 
 
-var PhraseManager = function(){};
+var PhraseManager = function() {};
 
 PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR, phraseBody) {
 
@@ -40,7 +40,7 @@ PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR,
 PhraseManager.prototype.getPhraseIndexById = function getPhraseIndexById(domain, phraseId) {
   validate.isValue(domain, 'undefined:domain');
   validate.isValue(phraseId, 'undefined:phraseId');
-  
+
   return _.findIndex(this.getPhrases(domain), function(item) {
     return item.id === phraseId;
   });
@@ -55,7 +55,7 @@ PhraseManager.prototype.getPhraseIndexById = function getPhraseIndexById(domain,
  * @param  {String} path
  * @return {Object}
  */
-PhraseManager.prototype.getPhraseByMatchingPath = function(domain, path){
+PhraseManager.prototype.getPhraseByMatchingPath = function(domain, path) {
   validate.isValue(domain, 'undefined:domain');
   validate.isValue(path, 'undefined:path');
 
@@ -67,18 +67,18 @@ PhraseManager.prototype.getPhraseByMatchingPath = function(domain, path){
 
   var domainPhrases = this.getPhrases(domain);
 
-  if(!domainPhrases || domainPhrases.length === 0){
+  if (!domainPhrases || domainPhrases.length === 0) {
     logger.debug('phrase_manager:get_phrase:no_phrases');
     return null;
   }
 
-  var candidates = _.filter(domainPhrases, function(phrase){
+  var candidates = _.filter(domainPhrases, function(phrase) {
     var regexp = new RegExp(phrase.regexp);
     return regexp.test(path);
   });
 
   logger.debug('phrase_manager:get_phrase_by_name:candidates', candidates.length);
- 
+
   return candidates.length > 0 ? candidates[0] : null;
 };
 
@@ -90,7 +90,7 @@ PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
   phrases.list[domain] = phrases.list[domain] || [];
 
   var exists = this.getPhraseIndexById(domain, phrase.id);
-  
+
   phrase.regexp = regexpGenerator.regexpUrl(phrase.url);
 
   if (exists !== -1) {
