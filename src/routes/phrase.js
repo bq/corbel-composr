@@ -13,10 +13,10 @@ function getCorbelErrorBody(corbelErrResponse){
   var errorBody = typeof(corbelErrResponse.data) !== 'undefined' && typeof(corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse;
   return errorBody;
 }
+
 /**
  * Creates or updates a phrase
- * @param  phrase:
- * {
+ * example phrase {
  *     "url": "phrase1/:pathparam",
  *     "get": {
  *         "code": "",
@@ -49,6 +49,8 @@ function getCorbelErrorBody(corbelErrResponse){
  *         ...
  *     }
  * }
+ * 
+ * @param  {json} phrase body
  * @return {promise}
  */
 router.put('/phrase', function(req, res, next) {
