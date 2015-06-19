@@ -11,9 +11,36 @@ var validate = require('./validate'),
   tripwire = require('tripwire'),
   logger = require('../utils/logger'),
   XRegExp = require('xregexp').XRegExp,
+  pmx = require('pmx'),
   _ = require('lodash'),
   q = require('q');
 
+/**********************************
+  Utils
+**********************************/
+function countPhrases() {
+  return Object.keys(phrases.list).reduce(function(prev, next) {
+    var domainPhrasesLength = Object.keys(phrases.list[next]).length;
+    return prev + domainPhrasesLength;
+  }, 0);
+}
+
+/**********************************
+  Metrics
+**********************************/
+var probe = pmx.probe();
+
+probe.metric({
+  name: 'Realtime phrases loaded',
+  agg_type: 'max', // jshint ignore : line
+  value: function() {
+    return countPhrases();
+  }
+});
+
+/**********************************
+  Phrase Manager
+**********************************/
 
 var PhraseManager = function() {};
 
@@ -61,7 +88,7 @@ PhraseManager.prototype.getPhraseByMatchingPath = function(domain, path) {
   validate.isValue(domain, 'undefined:domain');
   validate.isValue(path, 'undefined:path');
 
-  var queryParamsString = path.indexOf('?') !== -1 ? path.substring(path.indexOf('?'), path.length - 1) : '';
+  var queryParamsString = path.indexOf('?') !== -1 ? path.substring(path.indexOf('?'), path.length) : '';
 
   path = path.replace(queryParamsString, '');
 
@@ -98,6 +125,7 @@ PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
 
   var exists = this.getPhraseIndexById(domain, phrase.id);
 
+  //Construct the regexpression reference for the url
   phrase.regexpReference = regexpGenerator.regexpReference(phrase.url);
 
   if (exists !== -1) {
@@ -208,6 +236,10 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
 
   this.executePhrase(context, compoSR, phrase[method].code);
 
+};
+
+PhraseManager.prototype.getAmountOfPhrasesLoaded = function() {
+  return countPhrases();
 };
 
 module.exports = new PhraseManager();

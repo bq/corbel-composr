@@ -61,7 +61,9 @@ var bootstrapPhrases = function() {
 
   }).catch(function(error) {
     logger.error('error:bootstrap:driver', error);
-    dfd.reject(error);
+    connection.regenerateDriver();
+    setTimeout(bootstrapPhrases, config('bootstrap.retrytimeout') || 10000);
+    //dfd.reject(error); TODO: add retries max count
   });
 
   return dfd.promise;

@@ -5,6 +5,7 @@ var express = require('express'),
     favicon = require('serve-favicon'),
     morgan = require('morgan'),
     helmet = require('helmet'),
+    ejslocals = require('ejs-locals'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     engine = require('./lib/engine'),
@@ -15,6 +16,7 @@ var express = require('express'),
     domain = require('express-domain-middleware'),
     cors = require('cors'),
     corbel = require('corbel-js'),
+    pmx = require('pmx'),
     fs = require('fs'),
     app = express();
 
@@ -35,6 +37,8 @@ app.use(morgan('combined', {stream: accessLogStream}));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.engine('ejs', ejslocals);
+
 app.set('corbel', corbel);
 
 var env = process.env.NODE_ENV || 'development';
@@ -42,7 +46,7 @@ app.locals.ENV = env;
 app.locals.ENV_DEVELOPMENT = env === 'development';
 
 app.use(helmet());
-if(app.get('env') === 'development') {
+if(app.get('env') === 'development' || app.get('env') === 'test') {
     var powered = require('./utils/powered');
     var randomIndex = function(powered) {
         return Math.floor((Math.random() * powered.length) + 1) - 1;
@@ -134,6 +138,8 @@ var errorHandler = function(err, req, res, next) {
 };
 
 app.use(errorHandler);
+ 
+app.use(pmx.expressErrorHandler());
 
 process.on('uncaughtException', function(err) {
   logger.debug('Error caught by uncaughtException', err);

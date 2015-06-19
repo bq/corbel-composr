@@ -153,13 +153,15 @@ describe('in phraseManager module', function() {
     var stub;
     var phrases = [{
       url: ''
+    },{
+      url : 'composererror'
     }, {
       url: ':param'
     }, {
       url: 'pepito'
     }, {
       url: 'test/:arg/:arg2'
-    }, {
+    },{
       url: 'test/:arg/:optional?'
     }, {
       url: 'user/:arg/:optional?/name'
@@ -194,6 +196,11 @@ describe('in phraseManager module', function() {
     it('gets the first phrase that matches with url parameters: /pepito', function() {
       var phrase = phraseManager.getPhraseByMatchingPath('test', 'pepito');
       expect(phrase.url).to.equals(':param');
+    });
+
+    it('gets the first phrase that matches with url parameters: /composererror', function() {
+      var phrase = phraseManager.getPhraseByMatchingPath('test', 'composererror');
+      expect(phrase.url).to.equals('composererror');
     });
 
     it('gets phrases with query params: /url?param=test', function() {

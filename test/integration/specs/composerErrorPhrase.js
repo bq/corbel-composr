@@ -29,7 +29,7 @@ function test(app) {
                 });
         });
 
-        describe('Broken login phrase', function() {
+        describe('Composr error phrase', function() {
             var composerErrorPhraseLocation;
 
             it('is created correctly', function(done) {

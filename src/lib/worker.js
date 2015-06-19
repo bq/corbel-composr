@@ -55,6 +55,7 @@ var worker = function() {
                 })
                 .catch(function(err) {
                   logger.error('WORKER error: ', err);
+                  connection.regenerateDriver();
                   throw new ComposerError('error:worker:phrase', 'Error registering phrase: ' + err, 422);
                   //ch.nack(err, false, false);
                 });
