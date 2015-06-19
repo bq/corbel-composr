@@ -1,18 +1,37 @@
 'use strict';
 
 var express = require('express'),
-    router = express.Router(),
-    connection = require('../lib/corbelConnection'),
-    phraseManager = require('../lib/phraseManager'),
-    phraseValidator = require('../lib/phraseValidator'),
-    ComposerError = require('../lib/composerError'),
-    logger = require('../utils/logger'),
-    auth = require('../lib/auth');
+  router = express.Router(),
+  pmx = require('pmx'),
+  connection = require('../lib/corbelConnection'),
+  phraseManager = require('../lib/phraseManager'),
+  phraseValidator = require('../lib/phraseValidator'),
+  ComposerError = require('../lib/composerError'),
+  logger = require('../utils/logger'),
+  auth = require('../lib/auth');
 
-function getCorbelErrorBody(corbelErrResponse){
+/*************************************
+  Metrics
+*************************************/
+var probe = pmx.probe();
+
+var counterPhrasesBeingExecuted = probe.counter({
+  name: 'phrases_on_execution'
+});
+
+var counterPhrasesExecuted = probe.counter({
+  name: 'phrases_executed'
+});
+
+var counterPhrasesUpdated = probe.counter({
+  name: 'phrases_updated'
+});
+
+function getCorbelErrorBody(corbelErrResponse) {
   var errorBody = typeof(corbelErrResponse.data) !== 'undefined' && typeof(corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse;
   return errorBody;
 }
+
 /**
  * Creates or updates a phrase
  * @param  phrase:
@@ -52,89 +71,105 @@ function getCorbelErrorBody(corbelErrResponse){
  * @return {promise}
  */
 router.put('/phrase', function(req, res, next) {
+  //Metrics for phrases updated since last restart
+  counterPhrasesUpdated.inc();
 
-    var authorization = auth.getAuth(req);
+  var authorization = auth.getAuth(req);
 
-    var phrase = req.body || {};
+  var phrase = req.body || {};
 
-    var corbelDriver = connection.getTokenDriver(authorization);
+  var corbelDriver = connection.getTokenDriver(authorization);
 
-    var domain = connection.extractDomain(authorization);
+  var domain = connection.extractDomain(authorization);
 
-    phraseValidator.validate(domain, phrase).then(function() {
+  phraseValidator.validate(domain, phrase).then(function() {
 
-        phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
+    phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
 
-        logger.debug('Storing or updating phrase', phrase.id, domain);
-
-        corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
-            res.set('Location', 'phrase/' + phrase.id);
-            res.status(response.status).send(response.data);
-        }).catch(function(error) {
-            var errorBody = getCorbelErrorBody(error);
-            next(new ComposerError('error:phrase:create', errorBody, error.status));
-        });
-
-    }, function(error) {
-        next(new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422));
+    pmx.emit('phrase:updated_created', {
+      domain: domain,
+      id: phrase.id
     });
+
+    logger.debug('Storing or updating phrase', phrase.id, domain);
+
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
+      res.set('Location', 'phrase/' + phrase.id);
+      res.status(response.status).send(response.data);
+    }).catch(function(error) {
+      var errorBody = getCorbelErrorBody(error);
+      next(new ComposerError('error:phrase:create', errorBody, error.status));
+    });
+
+  }, function(error) {
+    next(new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422));
+  });
 
 });
 
 router.delete('/phrase/:phraseid', function(req, res, next) {
-    var authorization = auth.getAuth(req);
+  var authorization = auth.getAuth(req);
 
-    var corbelDriver = connection.getTokenDriver(authorization);
+  var corbelDriver = connection.getTokenDriver(authorization);
 
-    var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
-    logger.debug('phrase:delete:id', phraseId);
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseId).delete().then(function(response) {
-        logger.debug('phrase:deleted');
-        res.status(response.status).send(response.data);
-    }).catch(function(error) {
-        next(new ComposerError('error:phrase:delete', error.message, error.status));
-    });
+  var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
+  logger.debug('phrase:delete:id', phraseId);
+  corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseId).delete().then(function(response) {
+    logger.debug('phrase:deleted');
+    res.status(response.status).send(response.data);
+  }).catch(function(error) {
+    next(new ComposerError('error:phrase:delete', error.message, error.status));
+  });
 
 });
 
 router.get('/phrase/:phraseid', function(req, res, next) {
-    var authorization = auth.getAuth(req);
+  var authorization = auth.getAuth(req);
 
-    var corbelDriver = connection.getTokenDriver(authorization);
+  var corbelDriver = connection.getTokenDriver(authorization);
 
-    var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
+  var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
 
-    logger.debug('Trying to get phrase:', phraseId);
+  logger.debug('Trying to get phrase:', phraseId);
 
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseId).get().then(function(response) {
-        res.send(response.status, response.data);
-    }).catch(function(error) {
-        var errorBody = getCorbelErrorBody(error);
-        next(new ComposerError('error:phrase:get', errorBody, error.status));
-    });
+  corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phraseId).get().then(function(response) {
+    res.send(response.status, response.data);
+  }).catch(function(error) {
+    var errorBody = getCorbelErrorBody(error);
+    next(new ComposerError('error:phrase:get', errorBody, error.status));
+  });
 });
 
 router.get('/phrase', function(req, res) {
-    var authorization = auth.getAuth(req);
-    res.json(phraseManager.getPhrases(connection.extractDomain(authorization)));
+  var authorization = auth.getAuth(req);
+  res.json(phraseManager.getPhrases(connection.extractDomain(authorization)));
 });
 
 /**
+ *
  * Meta-Endpoint for compoSR phrases
+ * req.path => '/apps-sandbox/login'
+ * domain => 'apps-sandbox'
+ * phrasePath => 'login'
  */
 router.all('*', function(req, res, next) {
-    //req.path => '/apps-sandbox/login'
-    //domain => 'apps-sandbox'
-    //phrasePath => 'login'
-    var path = req.path.slice(1).split('/'),
-        domain = path[0],
-        phrasePath = path.slice(1).join('/');
+  //Metrics for phrases being executed at this moment
+  counterPhrasesBeingExecuted.inc();
+  counterPhrasesExecuted.inc();
 
-    if (!domain || !phrasePath) {
-        return next();
-    }
+  res.on('finish', function() {
+    counterPhrasesBeingExecuted.dec();
+  });
 
-    return phraseManager.run(domain, phrasePath, req, res, next);
+  var path = req.path.slice(1).split('/'),
+    domain = path[0],
+    phrasePath = path.slice(1).join('/');
+
+  if (!domain || !phrasePath) {
+    return next();
+  }
+
+  return phraseManager.run(domain, phrasePath, req, res, next);
 });
 
 module.exports = router;

@@ -19,6 +19,7 @@ var validate = function(domain, phrase) {
     validator.isValue(domain, 'undefined:domain');
     validator.isValue(phrase, 'undefined:phrase');
     validator.isValue(phrase.url, 'undefined:phrase:url');
+    validator.isValidUrl(phrase.url, 'error:phrase:url:syntax');
 
     var methodPresent = false;
 
