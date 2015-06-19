@@ -12,7 +12,7 @@ function middlewares(app) {
   app.use(routes.phrase);
   app.use(routes.doc);
 
-  if (app.get('env') === 'development') {
+  if (app.get('env') === 'development' || app.get('env') === 'test') {
     app.use(routes.test);
   }
 }
