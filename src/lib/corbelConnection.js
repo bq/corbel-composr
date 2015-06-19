@@ -13,13 +13,17 @@ corbelConfig = _.extend(corbelConfig, config('corbel.composer.credentials'));
 
 var corbelDriver = corbel.getDriver(corbelConfig);
 
-var onConnectPromise = corbelDriver.iam.token().create().then(function() {
-    logger.debug('corbel:connection:success');
-	return corbelDriver;
-}).catch(function(error) {
-    logger.error('error:composer:corbel:token', error);
-    throw new ComposerError('error:composer:corbel:token', '', 401);
-});
+function regenerateDriver(){
+    return corbelDriver.iam.token().create().then(function() {
+        logger.debug('corbel:connection:success');
+        return corbelDriver;
+    }).catch(function(error) {
+        logger.error('error:composer:corbel:token', error);
+        throw new ComposerError('error:composer:corbel:token', '', 401);
+    });
+}
+
+var onConnectPromise = regenerateDriver();
 
 var extractDomain = function(accessToken) {
     return corbel.jwt.decode(accessToken.replace('Bearer ', '')).domainId;
@@ -45,3 +49,4 @@ module.exports.driver = onConnectPromise;
 module.exports.PHRASES_COLLECTION = PHRASES_COLLECTION;
 module.exports.extractDomain = extractDomain;
 module.exports.getTokenDriver = getTokenDriver;
+module.exports.regenerateDriver = regenerateDriver;

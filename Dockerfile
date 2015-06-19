@@ -8,6 +8,12 @@ COPY . /src
 # Install dev dependencies
 RUN cd /src; npm install; npm rebuild
 
+#pm2 for utilities
+RUN npm install -g pm2
+
+#link pm2 keymetrics
+#RUN pm2 link $KEYMETRICS_PUBLIC $KEYMETRICS_PRIVATE $ENDPOINT_SUFFIX
+
 #update packages
 RUN apt-get update
 

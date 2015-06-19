@@ -2,6 +2,8 @@
 var request = require('supertest'),
   chai = require('chai'),
   corbeljs = require('corbel-js'),
+  phraseManager = require('../../../src/lib/phraseManager.js'),
+  sinon = require('sinon'),
   expect = chai.expect;
 
 var adminClientData = require('../utils/client').getAdminClient();
@@ -43,7 +45,17 @@ function test(app) {
     });
   });
 
+
+
   describe('Phrase : update', function() {
+    var spy;
+    before(function() {
+      spy = sinon.spy(phraseManager, 'registerPhrase');
+    });
+
+    after(function() {
+      spy.reset();
+    });
 
     it('it updates a phrase', function(done) {
       this.timeout(30000);
@@ -60,18 +72,24 @@ function test(app) {
           expect(response.headers).to.exist;
           expect(response.headers['location']).to.be.a('string');
 
-          var decoded = corbeljs.jwt.decode(clientToken);
+          if (process.env.NODE_ENV === 'development') {
+            var decoded = corbeljs.jwt.decode(clientToken);
 
-          setTimeout(function() {
-            request(app)
-              .get('/' + decoded.domainId + '/' + phrase.url)
-              .expect(200)
-              .end(function(err, response) {
-                expect(response.body).to.exist;
-                expect(response.body.value).to.be.equal('updated');
-                done(err);
-              });
-          }, 3000);
+            setTimeout(function() {
+              expect(spy.called).to.equals(true);
+
+              request(app)
+                .get('/' + decoded.domainId + '/' + phrase.url)
+                .expect(200)
+                .end(function(err, response) {
+                  expect(response.body).to.exist;
+                  expect(response.body.value).to.be.equal('updated');
+                  done(err);
+                });
+            }, 5000);
+          } else {
+            done(err);
+          }
 
         });
 
@@ -91,6 +109,34 @@ function test(app) {
         });
     });
   });
+
+
+  describe('Phrase: Badformed url', function() {
+    var phraseWithBadFormedUrl = {
+      url: 'test!/!:notgood/!12321!asdasd/!asda',
+      "get": {
+        "code": "console.log('ey');",
+        "doc": {
+          "description": "Phrase for login a client",
+        }
+      }
+    };
+
+    it('returns a 422 if the phrase has an invalid url', function(done) {
+      this.timeout(30000);
+
+      request(app)
+        .put('/phrase')
+        .set('Authorization', clientToken)
+        .send(phraseWithBadFormedUrl)
+        .expect(422)
+        .end(function(err, response) {
+          //console.log(response.body);
+          done(err);
+        });
+    });
+  });
+
 
 }
 
