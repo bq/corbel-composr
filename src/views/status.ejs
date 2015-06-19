@@ -1,0 +1,15 @@
+<% layout('layout') -%>
+  <h1><%-title %></h1>
+  
+  <div class="version">Version - <%- version %></div>
+
+  <% statuses.forEach(function(status){ %>
+    <div class="status">
+      <h3><%- status.title %>:</h3>
+      <% if(status.ok === true) { %>
+        <div class="ok">OK</div>
+      <% } else { %>
+        <div class="fail">Not loaded correctly</div>
+      <% }%>
+    </div>
+  <% }); %>
