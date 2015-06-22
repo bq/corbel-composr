@@ -8,6 +8,7 @@ var timeoutTests = require('./specs/timeout.js'),
     loginTests = require('./specs/login.js'),
     brokenPhraseTests = require('./specs/brokenPhrase.js'),
     pathParamsTests = require('./specs/pathParams.js'),
+    queryParams = require('./specs/queryParams.js'),
     composerErrorPhrase = require('./specs/composerErrorPhrase.js'),
     phraseTests = require('./specs/phrase.js');
 
@@ -35,6 +36,7 @@ module.exports = function(promise){
       phraseTests(application);
       loginTests(application);
       pathParamsTests(application);
+      queryParams(application);
     });
 
   });
