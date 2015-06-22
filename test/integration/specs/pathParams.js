@@ -99,6 +99,7 @@ function test(app) {
             code: 'console.log(req.params); res.send(req.params);'
           };
           phrase.regexpReference = regexpGenerator.regexpReference(phrase.url);
+          phraseManager.cacheMethods(phrase);
           return phrase;
         });
       });

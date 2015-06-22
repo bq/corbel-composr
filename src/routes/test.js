@@ -143,7 +143,9 @@ router.get('/t2phrase', function(req, res, next) {
     res: res,
     next: next
   };
-  phraseManager.executePhrase(context, null, body);
+
+  var result = phraseManager.evaluateCode(body);
+  phraseManager.executePhrase(context, null, result.fn);
 
 });
 
@@ -163,7 +165,8 @@ router.get('/t3phrase', function(req, res) {
     res: res
   };
 
-  phraseManager.executePhrase(context, null, body);
+  var result = phraseManager.evaluateCode(body);
+  phraseManager.executePhrase(context, null, result.fn);
 });
 
 router.get('/t4snippet', function(req, res) {
@@ -175,7 +178,8 @@ router.get('/t4snippet', function(req, res) {
     res: res
   };
 
-  phraseManager.executePhrase(context, compoSR, phraseBody);
+  var result = phraseManager.evaluateCode(phraseBody, ['req', 'res', 'compoSR']);
+  phraseManager.executePhrase(context, compoSR, result.fn);
 });
 
 

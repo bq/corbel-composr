@@ -44,20 +44,51 @@ probe.metric({
 
 var PhraseManager = function() {};
 
-PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR, phraseBody) {
+PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR, phraseFunction) {
 
   // set the limit of execution time to 10000 milliseconds
   tripwire.resetTripwire(config('timeout') || 10000);
 
-  /* jshint evil:true */
-  var funct = Function.apply(null, _.keys(context).concat('compoSR', phraseBody));
-  funct.apply(null, _.values(context).concat(compoSR));
+  phraseFunction.apply(null, _.values(context).concat(compoSR));
 
   // clear the tripwire (in this case this code is never reached)
   var ctx = {
     timedout: true
   };
   tripwire.clearTripwire(ctx);
+};
+
+
+PhraseManager.prototype.evaluateCode = function evaluePhrase(phraseBody, params){
+  var phraseParams = params ? params : ['req', 'res', 'next', 'corbelDriver', 'corbel', 'ComposerError', '_', 'q', 'compoSR'];
+  var result = {
+    fn: null,
+    error: false
+  };
+
+  try {
+    /* jshint evil:true */
+    result.fn = Function.apply(null, phraseParams.concat(phraseBody));
+  } catch (e) {
+    logger.warn('phrase_manager:evaluatecode:wrong_code', e);
+    result.error = true;
+  }
+
+  return result;
+};
+
+PhraseManager.prototype.cacheMethods = function cacheMethods(phrase) {
+
+  var methods = ['get', 'put', 'post', 'delete'];
+
+  phrase.codes = {};
+
+  methods.forEach(function(method) {
+    if (phrase[method] && phrase[method].code) {
+      logger.debug('phrase_manager:evaluatecode:', method, phrase.id);
+      phrase.codes[method] = this.evaluateCode(phrase[method].code);
+    }
+  }.bind(this));
 };
 
 /**
@@ -127,6 +158,9 @@ PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
 
   //Construct the regexpression reference for the url
   phrase.regexpReference = regexpGenerator.regexpReference(phrase.url);
+
+  //Cache methods 
+  this.cacheMethods(phrase);
 
   if (exists !== -1) {
     logger.debug('phrase_manager:register_phrase:update', domain);
@@ -234,7 +268,7 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
   //want to have compoSR use the context for binding req, res... to the snippets
   var compoSR = compoSRBuilder.getCompoSR(domain);
 
-  this.executePhrase(context, compoSR, phrase[method].code);
+  this.executePhrase(context, compoSR, phrase.codes[method].fn);
 
 };
 
