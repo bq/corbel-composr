@@ -26,7 +26,7 @@ It is responsible for **composing** **phrases** of code than can be reused by mu
 
 ### Diagram
 
-[image]
+![diagram](https://raw.githubusercontent.com/bq/corbel-composer/master/public/img/diagram.png)
 
 
 ## QuickStart
