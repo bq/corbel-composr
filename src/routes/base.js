@@ -10,7 +10,7 @@ var express = require('express'),
 
 router.get('/', function(req, res) {
   res.render('index', {
-    title: 'corbel-composr',
+    title: 'Composing your phrases',
     version: packageJSON.version
   });
 });

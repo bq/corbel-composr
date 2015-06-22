@@ -7,6 +7,10 @@ a {
   color: #00B7FF;
 }
 
+.header img{
+  width: 200px;
+}
+
 .version {
   border-radius: 10px;
   padding: 10px;

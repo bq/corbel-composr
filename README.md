@@ -1,4 +1,5 @@
-# corbel composer
+![composr](https://raw.githubusercontent.com/bq/corbel-composer/master/public/img/composr_medium.png)
+
 
 [![Build Status](https://api.travis-ci.org/bq/corbel-composer.png?branch=master)](http://travis-ci.org/bq/corbel-composer)
 [![npm version](https://badge.fury.io/js/corbel-composer.svg)](http://badge.fury.io/js/corbel-composer)
@@ -6,14 +7,22 @@
 [![Dev Dependency Status](https://david-dm.org/bq/corbel-composer/dev-status.png)](https://david-dm.org/bq/corbel-composer#info=devDependencies&view=table)
 [![Coverage Status](https://coveralls.io/repos/bq/corbel-composer/badge.svg?branch=master)](https://coveralls.io/r/bq/corbel-composer?branch=master)
 
-A corbel-composer is a middleware based in [nodeJS](https://nodejs.org/api/) with [express](http://expressjs.com/4x/api.html), to offer developers to make his own specific application API bsed in [corbel-js](https://github.com/bq/corbel-js)
 
-## [Homepage](http://opensource.bq.com/corbel-js/)
+## [Homepage](http://opensource.bq.com/composr/)
 
 
 ## Overview
 
-[text]
+CompoSR is a [nodeJS](https://nodejs.org/api/) middleware, built on top  of [express](http://expressjs.com/4x/api.html), for [Corbel][corbel-link]. 
+
+It offers developers the ability to make their own specific application API based in [corbel-js](https://github.com/bq/corbel-js)
+
+It is responsible for **composing** **phrases** of code than can be reused by multiple applications. This way you can keep your code reusable and simplify your API.
+
+> wiki: A composer (Latin com+ponere, literally "one who puts together") is a person who creates music.
+
+>wiki: In music and music theory, phrase and phrasing are concepts and practices related to grouping consecutive melodic notes, both in their composition and performance. A musical work is typically made up of a melody that consists of numerous consecutive phrases.
+
 
 ### Diagram
 
@@ -634,3 +643,6 @@ Available log levels can be found at [winston's npm page](https://www.npmjs.com/
 - error
 
 You can disable syslog by setting `syslog` property to `false` in the config file.
+
+
+[corbel-link]: https://github.com/bq/corbel
