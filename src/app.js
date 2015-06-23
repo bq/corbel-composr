@@ -1,4 +1,7 @@
 'use strict';
+var pmx = require('pmx');
+//Log routes and latency.
+pmx.http();  // You must do this BEFORE any require('http') 
 
 var express = require('express'),
     path = require('path'),
@@ -16,9 +19,10 @@ var express = require('express'),
     domain = require('express-domain-middleware'),
     cors = require('cors'),
     corbel = require('corbel-js'),
-    pmx = require('pmx'),
     fs = require('fs'),
     app = express();
+
+
 
 var ERROR_CODE_SERVER_TIMEOUT = 503;
 var DEFAULT_TIMEOUT = 10000;
