@@ -1,4 +1,12 @@
 #!/usr/bin/env node
+var pmx = require('pmx');
+//Log routes and latency.
+pmx.init({
+  http : true, 
+  network : true
+});
+// You must do this BEFORE any require('http') 
+
 var logger = require('../src/utils/logger');
 var q = require('q');
 var dfd = q.defer();
