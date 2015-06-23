@@ -38,6 +38,10 @@ probe.metric({
   }
 });
 
+
+pmx.action('get:phrases', { comment : 'Return all the phrases' }, function(reply) {
+  reply({phrases : phrases.list});
+});
 /**********************************
   Phrase Manager
 **********************************/
@@ -71,6 +75,7 @@ PhraseManager.prototype.evaluateCode = function evaluePhrase(phraseBody, params)
     result.fn = Function.apply(null, phraseParams.concat(phraseBody));
   } catch (e) {
     logger.warn('phrase_manager:evaluatecode:wrong_code', e);
+    pmx.notify('phrase_manager:evaluatecode:wrong_code');
     result.error = true;
   }
 
@@ -169,7 +174,6 @@ PhraseManager.prototype.registerPhrase = function registerPhrase(phrase) {
     logger.debug('phrase_manager:register_phrase:add', domain);
     phrases.list[domain].push(phrase);
   }
-
 };
 
 PhraseManager.prototype.unregisterPhrase = function unregisterPhrase(phrase) {
@@ -250,6 +254,11 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
       iamToken: iamToken
     });
   }
+
+  //Emit phrase executed metric
+  pmx.emit('phrase_executed', {
+    phraseId : phrase.id
+  });
 
   //Assign params
   req.params = paramsExtractor.extract(phrasePath, phrase.regexpReference);
