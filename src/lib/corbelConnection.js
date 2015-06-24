@@ -3,6 +3,7 @@
 var corbel = require('corbel-js'),
     config = require('./config'),
     _ = require('lodash'),
+    pmx = require('pmx'),
     ComposerError = require('./composerError'),
     logger = require('../utils/logger');
 
@@ -19,6 +20,7 @@ function regenerateDriver(){
         return corbelDriver;
     }).catch(function(error) {
         logger.error('error:composer:corbel:token', error);
+        pmx.notify('error:composer:corbel:token', error);
         throw new ComposerError('error:composer:corbel:token', '', 401);
     });
 }

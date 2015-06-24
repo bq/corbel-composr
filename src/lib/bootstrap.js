@@ -4,6 +4,7 @@ var phraseManager = require('./phraseManager'),
   ComposerError = require('./composerError'),
   connection = require('./corbelConnection'),
   q = require('q'),
+  pmx = require('pmx'),
   config = require('./config'),
   logger = require('../utils/logger');
 
@@ -32,6 +33,7 @@ var getPhrase = function(driver, phrasesCollection, phrases, promise, pageNumber
           return getPhrase(driver, phrasesCollection, phrases, promise, pageNumber + 1);
         }
       } else {
+        pmx.notify('error:composer:corbel:phrases');
         throw new ComposerError('error:composer:corbel:phrases', '', 500);
       }
     });
@@ -61,6 +63,7 @@ var bootstrapPhrases = function() {
 
   }).catch(function(error) {
     logger.error('error:bootstrap:driver', error);
+    pmx.notify('error:bootstrap:driver', error);
     connection.regenerateDriver();
     setTimeout(bootstrapPhrases, config('bootstrap.retrytimeout') || 10000);
     //dfd.reject(error); TODO: add retries max count
