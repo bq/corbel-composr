@@ -11,9 +11,6 @@ RUN cd /src; npm install; npm rebuild
 #pm2 for utilities
 RUN npm install -g pm2
 
-#link pm2 keymetrics
-#RUN pm2 link $KEYMETRICS_PUBLIC $KEYMETRICS_PRIVATE $ENDPOINT_SUFFIX
-
 #update packages
 RUN apt-get update
 
@@ -35,5 +32,5 @@ CMD E=0; \
     do E=`curl -s -o /dev/null -w "%{http_code}" https://iam$ENDPOINT_SUFFIX.bqws.io`; \
     echo $E ; \
     sleep 5 ; \
-    done ; \ 
+    done ; \
     cd /src && npm start && npm run logs
