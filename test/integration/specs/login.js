@@ -168,6 +168,7 @@ function test(app) {
       url: loginUserURL,
       claims: {
         iss: credentialsClient.clientId,
+        exp : (Date.now() + 3500) / 1000,
         'basic_auth.username': credentialsUser.username,
         'basic_auth.password': credentialsUser.password,
         scope: credentialsUser.scopes
@@ -223,19 +224,23 @@ function test(app) {
    * @param  {string} token
    * @return {Promise}
    */
-  function refreshToken(refreshTokenURL, token) {
-
+  function refreshToken(refreshTokenURL, token, status) {
+    status = status ? status : 200;
     var credentialsUser = clientUtils.getUser();
     var credentialsClient = clientUtils.getDemoClient();
+    var claims = {
+        iss: credentialsClient.clientId,
+        'refresh_token': token,
+        scope: credentialsUser.scopes,
+        exp : (Date.now() + 3500 )/ 1000
+      };
 
     return callPhraseWithJWT({
       url: refreshTokenURL,
-      claims: {
-        iss: credentialsClient.clientId,
-        'refresh_token': token,
-        scope: credentialsUser.scopes
-      },
+      claims: claims,
       clientSecret: credentialsClient.clientSecret
+    }, {
+      responseStatus : status
     });
 
   }
@@ -391,6 +396,7 @@ function test(app) {
         var refreshTokenLocation,
           demoUserToken,
           demoUserRefreshToken,
+          secondUserRefreshToken,
           refreshTokenPhrase = require('../../fixtures/phrases/refreshToken.json');
 
         before('is created correctly', function(done) {
@@ -433,6 +439,33 @@ function test(app) {
             expect(response.body.expiresAt).to.be.a('number');
             expect(response.body.refreshToken).to.be.a('string');
             expect(response.body.refreshToken).to.not.be.equal(demoUserRefreshToken);
+            done();
+          }).catch(function(err) {
+            done(err);
+          });
+
+        });
+        it('cant refresh user token with invalid refreshToken', function(done) {
+          var url = refreshTokenLocation.replace('phrase/', '/').replace('!', '/');
+
+          refreshToken(url, 'demoUserRefreshToken', 401).then(function(response) {
+            expect(response).to.be.an('object');
+            expect(response.body).to.be.an('object');
+            expect(response.body.error).to.be.a('string');
+            done();
+          }).catch(function(err) {
+            done(err);
+          });
+
+        });
+
+        it('cant refresh user token without refreshToken', function(done) {
+          var url = refreshTokenLocation.replace('phrase/', '/').replace('!', '/');
+
+          refreshToken(url, '', 401).then(function(response) {
+            expect(response).to.be.an('object');
+            expect(response.body).to.be.an('object');
+            expect(response.body.error).to.be.a('string');
             done();
           }).catch(function(err) {
             done(err);
