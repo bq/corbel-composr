@@ -457,6 +457,20 @@ function test(app) {
             done(err);
           });
 
+        }); 
+
+        it('cant refresh user token with invalid refreshToken', function(done) {
+          var url = refreshTokenLocation.replace('phrase/', '/').replace('!', '/');
+
+          refreshToken(url, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ', 401).then(function(response) {
+            expect(response).to.be.an('object');
+            expect(response.body).to.be.an('object');
+            expect(response.body.error).to.be.a('string');
+            done();
+          }).catch(function(err) {
+            done(err);
+          });
+
         });
 
         it('cant refresh user token without refreshToken', function(done) {
