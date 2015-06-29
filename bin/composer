@@ -2,8 +2,7 @@
 var pmx = require('pmx');
 //Log routes and latency.
 pmx.init({
-  http : true, 
-  network : true
+  http : true
 });
 // You must do this BEFORE any require('http') 
 

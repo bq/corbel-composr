@@ -270,6 +270,7 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
     corbelDriver: corbelDriver,
     corbel: corbel,
     ComposerError: ComposerError,
+    domain : domain,
     _: _,
     q: q
   };
