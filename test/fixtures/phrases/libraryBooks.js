@@ -76,7 +76,7 @@ var result = {
 		{
 			"id": "48eda201ae82b862679e3b30a4798e24",
 			"titleText" : "Ficciones",
-			"publisherName" : "Penguin Random House Grupo Editorial Espa&#xF1;a",
+			"publisherName" : "Penguin Random House Grupo Editorial España",
 			"publicationDate" : "20120726",
 			"numberOfPages" : "",
 			"authors": [
@@ -178,7 +178,7 @@ var result = {
 		{
 			"id": "8829e74bfdee5c6e1ee2d136208effb0",
 			"titleText" : "Un regalo muy especial (Fixed Layout) (Sara y Ulises * Ulises y Sara 1)",
-			"publisherName" : "Penguin Random House Grupo Editorial Espa&#xF1;a",
+			"publisherName" : "Penguin Random House Grupo Editorial España",
 			"publicationDate" : "20130905",
 			"numberOfPages" : "",
 			"authors": [
@@ -692,7 +692,7 @@ var result = {
 
 result.library = result.library.map(function(book){
 	book.coverImageUrl = 'https://resources-qa.bqws.io/v1.0/resource/books:Book/' + book.id;
-	book.downloadUrl = 'https://resources-qa.bqws.io/v1.0/resource/books:Book/' + book.id
+	book.downloadUrl = 'https://resources-qa.bqws.io/v1.0/resource/books:Book/' + book.id;
 	var date = book.publicationDate;
 	var year = date.substring(0, 4);
 	var month = parseInt(date.substring(4, 6)) - 1;

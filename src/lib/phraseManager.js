@@ -39,8 +39,12 @@ probe.metric({
 });
 
 
-pmx.action('get:phrases', { comment : 'Return all the phrases' }, function(reply) {
-  reply({phrases : phrases.list});
+pmx.action('get:phrases', {
+  comment: 'Return all the phrases'
+}, function(reply) {
+  reply({
+    phrases: phrases.list
+  });
 });
 /**********************************
   Phrase Manager
@@ -60,11 +64,11 @@ PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR,
     timedout: true
   };
   tripwire.clearTripwire(ctx);
-  
+
 };
 
 
-PhraseManager.prototype.evaluateCode = function evaluePhrase(phraseBody, params){
+PhraseManager.prototype.evaluateCode = function evaluePhrase(phraseBody, params) {
   var phraseParams = params ? params : ['req', 'res', 'next', 'corbelDriver', 'corbel', 'ComposerError', 'domain', '_', 'q', 'compoSR'];
   var result = {
     fn: null,
@@ -90,9 +94,10 @@ PhraseManager.prototype.cacheMethods = function cacheMethods(phrase) {
   phrase.codes = {};
 
   methods.forEach(function(method) {
-    if (phrase[method] && phrase[method].code) {
+    if (phrase[method] && (phrase[method].code || phrase[method].codebase64)) {
       logger.debug('phrase_manager:evaluatecode:', method, phrase.id);
-      phrase.codes[method] = this.evaluateCode(phrase[method].code);
+      var code = phrase[method].code ? phrase[method].code : new Buffer(phrase[method].codebase64, 'base64').toString('utf8');
+      phrase.codes[method] = this.evaluateCode(code);
     }
   }.bind(this));
 };
@@ -227,8 +232,9 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
     return next();
   }
 
-  logger.debug('phrase_manager:phrase.code:exist', phrase[method].code && phrase[method].code.length > 0);
-  if (!phrase[method].code || phrase[method].code.length === 0) {
+  var existsCode = (phrase[method].code && phrase[method].code.length > 0) || (phrase[method].codebase64 && phrase[method].codebase64.length > 0);
+  logger.debug('phrase_manager:phrase.code:exist', existsCode);
+  if (!existsCode) {
     logger.debug('phrase_manager:code:not_found');
     return next();
   }
@@ -258,7 +264,7 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
 
   //Emit phrase executed metric
   pmx.emit('phrase_executed', {
-    phraseId : phrase.id
+    phraseId: phrase.id
   });
 
   //Assign params
@@ -271,7 +277,7 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
     corbelDriver: corbelDriver,
     corbel: corbel,
     ComposerError: ComposerError,
-    domain : domain,
+    domain: domain,
     _: _,
     q: q
   };
