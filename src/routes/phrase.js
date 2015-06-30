@@ -28,6 +28,7 @@ function getCorbelErrorBody(corbelErrResponse) {
   return errorBody;
 }
 
+
 /**
  * Creates or updates a phrase
  * example phrase {
@@ -63,7 +64,7 @@ function getCorbelErrorBody(corbelErrResponse) {
  *         ...
  *     }
  * }
- * 
+ *
  * @param  {json} phrase body
  * @return {promise}
  */
@@ -152,7 +153,7 @@ router.get('/phrase', function(req, res) {
 router.all('*', function(req, res, next) {
   //Metrics for phrases being executed at this moment
   counterPhrasesBeingExecuted.inc();
-  
+
   res.on('finish', function() {
     counterPhrasesBeingExecuted.dec();
   });

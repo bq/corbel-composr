@@ -7,6 +7,7 @@ var timeoutTests = require('./specs/timeout.js'),
     cacheTests = require('./specs/cache.js'),
     loginTests = require('./specs/login.js'),
     brokenPhraseTests = require('./specs/brokenPhrase.js'),
+    codebase64 = require('./specs/codebase64.js'),
     pathParamsTests = require('./specs/pathParams.js'),
     queryParams = require('./specs/queryParams.js'),
     composerErrorPhrase = require('./specs/composerErrorPhrase.js'),
@@ -27,6 +28,9 @@ module.exports = function(promise){
 
     //This wrapping is needed because otherwise application would be an empty object
     it('Executes the integration tests', function(){
+      pathParamsTests(application);
+      queryParams(application);
+      codebase64(application);
       cacheTests(application);
       timeoutTests(application);
       errorHandlerTests(application);
@@ -35,8 +39,6 @@ module.exports = function(promise){
       composerErrorPhrase(application);
       phraseTests(application);
       loginTests(application);
-      pathParamsTests(application);
-      queryParams(application);
     });
 
   });

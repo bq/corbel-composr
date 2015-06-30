@@ -8,6 +8,7 @@ var request = require('supertest'),
 
 var adminClientData = require('../utils/client').getAdminClient();
 var phrase = require('../../fixtures/phrases/helloWorld.json');
+var phraseBase64 = require('../../fixtures/phrases/base64code.json');
 var clientToken;
 
 function test(app) {
@@ -36,6 +37,21 @@ function test(app) {
         .put('/phrase')
         .set('Authorization', clientToken)
         .send(phrase)
+        .expect(204)
+        .end(function(err, response) {
+          expect(response.headers).to.exist;
+          expect(response.headers['location']).to.be.a('string');
+          done(err);
+        });
+    });
+
+    it('it registers a new phrase with base64 code', function(done) {
+      this.timeout(30000);
+
+      request(app)
+        .put('/phrase')
+        .set('Authorization', clientToken)
+        .send(phraseBase64)
         .expect(204)
         .end(function(err, response) {
           expect(response.headers).to.exist;

@@ -25,10 +25,21 @@ var validate = function(domain, phrase) {
 
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
         if (phrase[method]) {
-            validator.isValue(phrase[method].code, 'undefined:phrase:' + method + ':code');
+
+            if(!phrase[method].codebase64){
+                validator.isValue(phrase[method].code, 'undefined:phrase:' + method + ':code');
+            }
+
+            if(!phrase[method].code){
+                validator.isValue(phrase[method].codebase64, 'undefined:phrase:' + method + ':codebase64');
+                validator.isValidBase64(phrase[method].codebase64, 'invalid:phrase:' + method + ':codebase64');
+            }
+
             validator.isValue(phrase[method].doc, 'undefined:phrase:' + method + ':doc');
 
-            var funct = new Function('req', 'res', 'next', 'corbelDriver', phrase[method].code);
+            var code = phrase[method].code ? phrase[method].code : new Buffer(phrase[method].codebase64, 'base64').toString('ascii');
+
+            var funct = new Function('req', 'res', 'next', 'corbelDriver', code);
             var error = check(funct);
             if (error) {
                 throw new ComposerError('error:phrase:syntax', error.message, error.status);

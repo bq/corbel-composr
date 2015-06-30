@@ -8,57 +8,17 @@ var request = require('supertest'),
 
 
 function test(app) {
-  describe('Path params', function() {
-    describe('Integration test for path params', function() {
+  describe('Base 64 code', function() {
+    describe('Integration test checking the base64 code evaluation', function() {
       var domain = 'test';
       var stub;
 
       var phrases = [
-        /*{
-        url: '',
-        callee: '',
-        test: {}
-      },*/
         {
           url: ':param',
           callee: 'hola',
           test: {
             param: 'hola'
-          }
-        }, /*{ //TODO ALLOW EMPTY CALLEES
-          url: ':param?',
-          callee: '',
-          test: {
-            param: null
-          }
-        }*/ {
-          url: ':param?',
-          callee: 'asd',
-          test: {
-            param: 'asd'
-          }
-        }, {
-          url: 'logoutuser/:type?',
-          callee: 'logoutuser/',
-          test: {
-            type: null
-          }
-        }, {
-          url: 'logoutuser/:type?',
-          callee: 'logoutuser/all',
-          test: {
-            type: 'all'
-          }
-        }, {
-          url: 'pepito',
-          callee: 'pepito',
-          test: {}
-        }, {
-          url: 'test/:arg/:arg2',
-          callee: 'test/hola/mundo',
-          test: {
-            arg: 'hola',
-            arg2: 'mundo'
           }
         }, {
           url: 'test/:arg/:optional?',
@@ -92,11 +52,13 @@ function test(app) {
       ];
 
       var PHRASE_INDEX = 0;
+      var code = 'res.send(req.params)';
+      var codebase64 = new Buffer(code).toString('base64');
 
       before(function() {
         phrases = phrases.map(function(phrase) {
           phrase.get = {
-            code: 'res.send(req.params);'
+            codebase64: codebase64
           };
           phrase.regexpReference = regexpGenerator.regexpReference(phrase.url);
           phraseManager.cacheMethods(phrase);
