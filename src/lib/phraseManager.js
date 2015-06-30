@@ -60,11 +60,12 @@ PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR,
     timedout: true
   };
   tripwire.clearTripwire(ctx);
+  
 };
 
 
 PhraseManager.prototype.evaluateCode = function evaluePhrase(phraseBody, params){
-  var phraseParams = params ? params : ['req', 'res', 'next', 'corbelDriver', 'corbel', 'ComposerError', '_', 'q', 'compoSR'];
+  var phraseParams = params ? params : ['req', 'res', 'next', 'corbelDriver', 'corbel', 'ComposerError', 'domain', '_', 'q', 'compoSR'];
   var result = {
     fn: null,
     error: false
