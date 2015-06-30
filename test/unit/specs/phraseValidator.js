@@ -1,7 +1,9 @@
 'use strict';
 
 var phraseValidator = require('../../../src/lib/phraseValidator.js'),
+    validate = require('../../../src/lib/validate'),
     chai = require('chai'),
+    sinon = require('sinon'),
     expect = chai.expect,
     assert = chai.assert;
 
@@ -109,6 +111,34 @@ describe('in phraseValidator', function() {
                     get: {}
                 });
             }).to.throw('undefined:phrase:get:code');
+        });
+
+        it('codehash has to be valid', function() {
+            expect(function() {
+                phraseValidator.validate('domain', {
+                    url: 'url',
+                    get: {
+                        codehash : 'asdasda'
+                    }
+                });
+            }).to.throw('invalid:phrase:get:codehash');
+        });
+
+        it('codehash validates well', function() {
+            var spy = sinon.spy(validate, 'isValidBase64');
+
+
+            phraseValidator.validate('domain', {
+                url: 'url',
+                get: {
+                    doc : 'eyy',
+                    codehash : "cmVzLnJlbmRlcignaW5kZXgnLCB7dGl0bGU6ICdoZWxsbyB3b3JsZCd9KTs="
+                }
+            });
+
+
+            expect(spy.calledOnce).to.equals(true);
+            expect(spy.returned(true)).to.equals(true);
         });
 
         it('doc is required', function() {

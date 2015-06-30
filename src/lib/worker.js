@@ -26,7 +26,7 @@ var worker = function() {
 
         var message;
         try {
-          message = JSON.parse(msg.content.toString());
+          message = JSON.parse(msg.content.toString('utf8'));
         } catch (error) {
           //ch.nack(error, false, false);
           throw new ComposerError('error:worker:message', 'Error parsing message: ' + error, 422);

@@ -1,0 +1,10 @@
+{
+    "url": "base64",
+    "get": {
+        "codehash": "cmVzLnJlbmRlcignaW5kZXgnLCB7dGl0bGU6ICdoZWxsbyB3b3JsZCd9KTs=",
+        "doc": {
+            "securedBy": ["oauth_2_0"],
+            "description": "Phrase with base64 code"
+        }
+    }
+}
