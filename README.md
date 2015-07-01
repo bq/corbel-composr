@@ -96,7 +96,25 @@ It is responsible for **composing** **phrases** of code than can be reused by mu
 ```
 
 
-## Example Phrases
+## Writting CompoSR phrases
+
+All the phrases are wrapped inside this `Function` closure, meaning you can access any of it's params:
+
+```
+function phrase(req, res, next, corbelDriver, corbel, ComposerError, domain, _, q, request, compoSR){
+  //Your phrase code
+}
+```
+
+- [q](https://www.npmjs.com/package/q) : A library for promises
+- [_](https://www.npmjs.com/package/lodash): Lodash, a library for modular utilities
+- [request](https://www.npmjs.com/package/request): Simplified HTTP request client
+- ComposerError: Our custom error manager. `new ComposerError('error:undefined:name', 'Please insert a name', 400)`
+- domain : Your domain name 
+- req, res, next : [express](https://www.npmjs.com/package/express) request parameters
+- [corbel](https://www.npmjs.com/package/corbel-js): Corbel JavaScript SDK with an extended `corbel.generateDriver` function that generates `corbelDriver` instances with the correct `urlBase`.
+- corbelDriver : An instance of corbelDriver provided by corbel, instantiated with your `Authorization` header if provided
+- compoSR : A snippet runner
 
 ### `count` value in collections query
 
@@ -431,11 +449,26 @@ var jwt = generateAssertion(claims, appCredentials.clientSecret);
 
 ```javascript
 if (!req.body || !req.body.jwt) {
-  throw new ComposerError('error:jwt:undefined', '', 401);
+  res.status(400).send(new ComposerError('error:jwt:undefined', 'JWT is missing', 400));
+  return false;
+}
+var decoded = corbel.jwt.decode(req.body.jwt);
+if(Object.keys(decoded).length === 0){
+  res.status(400).send(new ComposerError('error:jwt:malformed', 'Your JWT is malformed', 400));
+  return false;
 }
 
+if(!decoded.refresh_token){
+  res.status(400).send(new ComposerError('error:jwt:refresh_token:missing', 'Add the refresh_token property', 400));
+  return false;
+}else{
+ var refreshTokenDecoded = corbel.jwt.decode(decoded.refresh_token);
+ if(Object.keys(refreshTokenDecoded).length === 0){
+   res.status(400).send(new ComposerError('error:jwt:refresh_token:malformed', 'Your refresh_token is malformed', 400));
+  return false;
+ }
+}
 var corbelDriver = corbel.generateDriver({iamToken: ''});
-
 
 /*
  * Required claims:
@@ -454,7 +487,6 @@ corbelDriver.iam.token().create({
   .catch(function(err){
     compoSR.run('global:parseError', { err : err, res : res});
   });
-
 ```
 
 ## Logout a user

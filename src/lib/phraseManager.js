@@ -9,6 +9,7 @@ var validate = require('./validate'),
   ComposerError = require('./composerError'),
   compoSRBuilder = require('./compoSRBuilder'),
   tripwire = require('tripwire'),
+  request = require('request'),
   logger = require('../utils/logger'),
   XRegExp = require('xregexp').XRegExp,
   pmx = require('pmx'),
@@ -69,7 +70,7 @@ PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR,
 
 
 PhraseManager.prototype.evaluateCode = function evaluePhrase(phraseBody, params) {
-  var phraseParams = params ? params : ['req', 'res', 'next', 'corbelDriver', 'corbel', 'ComposerError', 'domain', '_', 'q', 'compoSR'];
+  var phraseParams = params ? params : ['req', 'res', 'next', 'corbelDriver', 'corbel', 'ComposerError', 'domain', '_', 'q', 'request', 'compoSR'];
   var result = {
     fn: null,
     error: false
@@ -279,7 +280,8 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
     ComposerError: ComposerError,
     domain: domain,
     _: _,
-    q: q
+    q: q,
+    request : request
   };
   //We have left compoSR alone, without including it in the context because someday we might
   //want to have compoSR use the context for binding req, res... to the snippets
