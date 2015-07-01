@@ -19,6 +19,10 @@ var counterPhrasesBeingExecuted = probe.counter({
   name: 'phrases_in_execution'
 });
 
+var counterPhrasesExecuted = probe.counter({
+  name: 'phrases_executed'
+});
+
 var counterPhrasesUpdated = probe.counter({
   name: 'phrases_updated'
 });
@@ -153,6 +157,7 @@ router.get('/phrase', function(req, res) {
 router.all('*', function(req, res, next) {
   //Metrics for phrases being executed at this moment
   counterPhrasesBeingExecuted.inc();
+  counterPhrasesExecuted.inc();
 
   res.on('finish', function() {
     counterPhrasesBeingExecuted.dec();
