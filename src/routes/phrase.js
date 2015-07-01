@@ -19,6 +19,10 @@ var counterPhrasesBeingExecuted = probe.counter({
   name: 'phrases_in_execution'
 });
 
+var counterPhrasesExecuted = probe.counter({
+  name: 'phrases_executed'
+});
+
 var counterPhrasesUpdated = probe.counter({
   name: 'phrases_updated'
 });
@@ -71,6 +75,7 @@ function getCorbelErrorBody(corbelErrResponse) {
 router.put('/phrase', function(req, res, next) {
   //Metrics for phrases updated since last restart
   counterPhrasesUpdated.inc();
+  counterPhrasesExecuted.inc();
 
   var authorization = auth.getAuth(req);
 
