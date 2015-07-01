@@ -448,7 +448,7 @@ function test(app) {
         it('cant refresh user token with invalid refreshToken', function(done) {
           var url = refreshTokenLocation.replace('phrase/', '/').replace('!', '/');
 
-          refreshToken(url, 'demoUserRefreshToken', 401).then(function(response) {
+          refreshToken(url, 'demoUserRefreshToken', 400).then(function(response) {
             expect(response).to.be.an('object');
             expect(response.body).to.be.an('object');
             expect(response.body.error).to.be.a('string');
@@ -476,7 +476,7 @@ function test(app) {
         it('cant refresh user token without refreshToken', function(done) {
           var url = refreshTokenLocation.replace('phrase/', '/').replace('!', '/');
 
-          refreshToken(url, '', 401).then(function(response) {
+          refreshToken(url, '', 400).then(function(response) {
             expect(response).to.be.an('object');
             expect(response.body).to.be.an('object');
             expect(response.body.error).to.be.a('string');
