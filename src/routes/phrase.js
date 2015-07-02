@@ -72,7 +72,7 @@ function getCorbelErrorBody(corbelErrResponse) {
  * @param  {json} phrase body
  * @return {promise}
  */
-router.put('/phrase', function(req, res, next) {
+function createOrUpdatePhrase(req, res, next) {
   //Metrics for phrases updated since last restart
   counterPhrasesUpdated.inc();
 
@@ -106,10 +106,25 @@ router.put('/phrase', function(req, res, next) {
   }, function(error) {
     next(new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422));
   });
+}
 
+router.put('/phrase', function(req, res, next) {
+  createOrUpdatePhrase(req, res, next);
 });
 
-router.delete('/phrase/:phraseid', function(req, res, next) {
+router.put('/v1.0/phrase', function(req, res, next) {
+  createOrUpdatePhrase(req, res, next);
+});
+
+
+/**
+ * Deletes a phrase
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+function deletePhrase(req, res, next) {
   var authorization = auth.getAuth(req);
 
   var corbelDriver = connection.getTokenDriver(authorization);
@@ -123,9 +138,25 @@ router.delete('/phrase/:phraseid', function(req, res, next) {
     next(new ComposerError('error:phrase:delete', error.message, error.status));
   });
 
+}
+
+router.delete('/phrase/:phraseid', function(req, res, next) {
+  deletePhrase(req, res, next);
 });
 
-router.get('/phrase/:phraseid', function(req, res, next) {
+router.delete('/v1.0/phrase/:phraseid', function(req, res, next) {
+  deletePhrase(req, res, next);
+});
+
+
+/**
+ * Returns a phrase by id
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+function getPhrase(req, res, next) {
   var authorization = auth.getAuth(req);
 
   var corbelDriver = connection.getTokenDriver(authorization);
@@ -140,11 +171,34 @@ router.get('/phrase/:phraseid', function(req, res, next) {
     var errorBody = getCorbelErrorBody(error);
     next(new ComposerError('error:phrase:get', errorBody, error.status));
   });
+}
+
+router.get('/phrase/:phraseid', function(req, res, next) {
+  getPhrase(req, res, next);
 });
 
-router.get('/phrase', function(req, res) {
+router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
+  getPhrase(req, res, next);
+});
+
+
+/**
+ * Returns all the domain phrases
+ * @param  {[type]} req [description]
+ * @param  {[type]} res [description]
+ * @return {[type]}     [description]
+ */
+function getPhrases(req, res) {
   var authorization = auth.getAuth(req);
   res.json(phraseManager.getPhrases(connection.extractDomain(authorization)));
+}
+
+router.get('/phrase', function(req, res) {
+  getPhrases(req, res);
+});
+
+router.get('/v1.0/phrase', function(req, res) {
+  getPhrases(req, res);
 });
 
 /**
@@ -154,7 +208,7 @@ router.get('/phrase', function(req, res) {
  * domain => 'apps-sandbox'
  * phrasePath => 'login'
  */
-router.all('*', function(req, res, next) {
+function executePhrase(endpointPath, req, res, next) {
   //Metrics for phrases being executed at this moment
   counterPhrasesBeingExecuted.inc();
   counterPhrasesExecuted.inc();
@@ -163,7 +217,7 @@ router.all('*', function(req, res, next) {
     counterPhrasesBeingExecuted.dec();
   });
 
-  var path = req.path.slice(1).split('/'),
+  var path = endpointPath.slice(1).split('/'),
     domain = path[0],
     phrasePath = path.slice(1).join('/');
 
@@ -172,6 +226,16 @@ router.all('*', function(req, res, next) {
   }
 
   return phraseManager.run(domain, phrasePath, req, res, next);
+}
+
+router.all('/v1.0/*', function(req, res, next) {
+  var path = req.path.replace('/v1.0', '');
+  executePhrase(path, req, res, next);
 });
+
+router.all('*', function(req, res, next) {
+  executePhrase(req.path, req, res, next);
+});
+
 
 module.exports = router;
