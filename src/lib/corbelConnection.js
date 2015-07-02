@@ -19,8 +19,8 @@ function regenerateDriver(){
         logger.debug('corbel:connection:success');
         return corbelDriver;
     }).catch(function(error) {
-        logger.error('error:composer:corbel:token', error);
-        pmx.notify('error:composer:corbel:token', error);
+        logger.error('error:composer:corbel:token', error.response.body);
+        pmx.notify('error:composer:corbel:token',  error.response.body);
         throw new ComposerError('error:composer:corbel:token', '', 401);
     });
 }

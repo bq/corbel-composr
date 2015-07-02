@@ -73,6 +73,14 @@ function getCorbelErrorBody(corbelErrResponse) {
  * @return {promise}
  */
 router.put('/phrase', function(req, res, next) {
+  createOrUpdatePhrase(req, res, ext);
+});
+
+router.put('/v1.0/phrase', function(req, res, next) {
+  createOrUpdatePhrase(req, res, ext);
+});
+
+function createOrUpdatePhrase(req, res, next){
   //Metrics for phrases updated since last restart
   counterPhrasesUpdated.inc();
 
@@ -106,10 +114,17 @@ router.put('/phrase', function(req, res, next) {
   }, function(error) {
     next(new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422));
   });
-
-});
+}
 
 router.delete('/phrase/:phraseid', function(req, res, next) {
+  deletePhrase(req, res, next);
+});
+
+router.delete('/v1.0/phrase/:phraseid', function(req, res, next) {
+  deletePhrase(req, res, next);
+});
+
+function deletePhrase(req, res, next){
   var authorization = auth.getAuth(req);
 
   var corbelDriver = connection.getTokenDriver(authorization);
@@ -123,9 +138,17 @@ router.delete('/phrase/:phraseid', function(req, res, next) {
     next(new ComposerError('error:phrase:delete', error.message, error.status));
   });
 
-});
+}
 
 router.get('/phrase/:phraseid', function(req, res, next) {
+  getPhrase(req, res, next);
+});
+
+router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
+  getPhrase(req, res, next);
+});
+
+function getPhrase(req, res, next){
   var authorization = auth.getAuth(req);
 
   var corbelDriver = connection.getTokenDriver(authorization);
@@ -140,12 +163,20 @@ router.get('/phrase/:phraseid', function(req, res, next) {
     var errorBody = getCorbelErrorBody(error);
     next(new ComposerError('error:phrase:get', errorBody, error.status));
   });
-});
+}
 
 router.get('/phrase', function(req, res) {
+  getPhrases(req, res);
+});
+
+router.get('/v1.0/phrase', function(req, res) {
+  getPhrases(req, res);
+});
+
+function getPhrases(req, res){
   var authorization = auth.getAuth(req);
   res.json(phraseManager.getPhrases(connection.extractDomain(authorization)));
-});
+}
 
 /**
  *
