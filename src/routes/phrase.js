@@ -190,7 +190,8 @@ router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
  */
 function getPhrases(req, res) {
   var authorization = auth.getAuth(req);
-  res.json(phraseManager.getPhrases(connection.extractDomain(authorization)));
+  var phrases = phraseManager.getPhrases(connection.extractDomain(authorization));
+  res.json(phrases || []);
 }
 
 router.get('/phrase', function(req, res) {

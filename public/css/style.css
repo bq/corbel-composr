@@ -37,3 +37,8 @@ a {
   padding: 20px; 
   color: white;
 }
+
+pre code{
+  font-size: 10px;
+  tab-size: 10px;
+}

@@ -302,7 +302,7 @@ var jwt = generateAssertion(claims, credentials.clientSecret);
 
 ```javascript
 if (!req.body || !req.body.jwt) {
-  throw new ComposerError('error:jwt:undefined', '', 401);
+  res.status(401).send(new ComposerError('error:jwt:undefined', '', 401));
 }
 var corbelDriver = corbel.generateDriver({iamToken: ''});
 
@@ -316,6 +316,8 @@ var corbelDriver = corbel.generateDriver({iamToken: ''});
 corbelDriver.iam.token().create({
   jwt: req.body.jwt
 }).then(function(response) {
+  //Enable assets access
+  corbelDriver.assets().access();
   res.send(response.data);
 }).catch(function(err){
   compoSR.run('global:parseError', { err : err, res : res});
@@ -369,7 +371,7 @@ var jwt = generateAssertion(claims, appCredentials.clientSecret);
 
 ```javascript
 if (!req.body || !req.body.jwt) {
-  throw new ComposerError('error:jwt:undefined', '', 401);
+  res.status(401).send(new ComposerError('error:jwt:undefined', '', 401));
 }
 var corbelDriver = corbel.generateDriver({iamToken: ''});
 
@@ -388,6 +390,8 @@ var tokenObject;
 corbelDriver.iam.token().create({
   jwt : req.body.jwt
 }).then(function(response){
+  //Enable assets access
+  corbelDriver.assets().access();
 
   //Tenemos el token de usuario, asimismo tambien el refresh y el expires
   tokenObject = response.data;
@@ -523,7 +527,7 @@ http.request(post_options, function(res) {
 
 ```javascript
 if (!req.get('Authorization')) {
-  throw new ComposerError('error:unauthorized', 'Authorization missing', 401);
+  res.status(401).send(new ComposerError('error:unauthorized', 'Authorization missing', 401));
 }
 
 var method =  req.params.type && req.params.type === 'all' ? 'disconnect' : 'signOut';
