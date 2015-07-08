@@ -9,7 +9,18 @@ var config = require('./config'),
 var buildPhraseDefinition = function(phrase) {
     var doc = {};
 
-    var url = '/' + phrase.url;
+    // convert express URL `path/:param1/:param2` to
+    // RAML URL`path/{param1}/{param2}`
+    var url = phrase.url.split('/');
+    url = url.map(function(item) {
+        if (item[0] === ':') {
+            item = item.replace(':', '{').replace('?', '');
+            item += '}';
+        }
+        return item;
+    }).join('/');
+
+    url = '/' + url;
     doc[url] = {};
 
     ['get', 'post', 'put', 'delete', 'options'].forEach(function(method) {
