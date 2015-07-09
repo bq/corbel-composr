@@ -3,16 +3,27 @@ if (!req.get("Authorization")) {
   return
 }
 
+var loggedClientOrUserAccesToken = req.get('Authorization');
+
 
 //Entry point, orchestates the main calls
 function loadCatalogueBooks(params) {
   var dfd = q.defer();
-  getAllBooksAssets()
-    .then(function(assets) {
-      return loadBooks(assets, params);
-    })
-    .then(dfd.resolve)
-    .catch(dfd.reject);
+  var accessTokenDecoded = corbel.jwt.decode(loggedClientOrUserAccesToken);
+  var isUser = accessTokenDecoded.hasOwnProperty('userId');
+
+  if (isUser) {
+    getAllBooksAssets()
+      .then(function(assets) {
+        return loadBooks(assets, params);
+      })
+      .then(dfd.resolve)
+      .catch(dfd.reject);
+  } else {
+    loadBooks([], params)
+      .then(dfd.resolve)
+      .catch(dfd.reject);
+  }
 
   return dfd.promise;
 }
