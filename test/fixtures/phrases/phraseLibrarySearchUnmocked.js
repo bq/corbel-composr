@@ -180,8 +180,8 @@ function getUserBooks(assetsIds, params) {
 
 
   var requestParams = {
-    //queries: userQueries,
-    query: userQueries[0].query,
+    queries: userQueries,
+    //query: userQueries[0].query,
     pagination: {
       page: 0,
       size: params.booksPerSection
@@ -225,7 +225,7 @@ function getCatalogueBooks(assetsIds, searchParamsCatalogue) {
     return newItem;
   });
 
-  searchParamsCatalogue.query = searchParamsCatalogue.queries[0].query;
+  //searchParamsCatalogue.query = searchParamsCatalogue.queries[0].query;
 
   corbelDriver.resources.relation('books:Store', 'booqs:demo', 'books:Book')
     .get(null, searchParamsCatalogue)
