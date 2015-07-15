@@ -180,7 +180,7 @@ function getUserBooks(assetsIds, params) {
 
 
   var requestParams = {
-    queries: userQueries,
+    //queries: userQueries,
     query: userQueries[0].query,
     pagination: {
       page: 0,
@@ -188,21 +188,15 @@ function getUserBooks(assetsIds, params) {
     }
   };
 
-  console.log(JSON.stringify(requestParams, null, 2))
-
-
   var caller = function() {
     return corbelDriver.resources.relation('books:Store', 'booqs:demo', 'books:Book')
       .get(null, requestParams);
   }
 
-  console.log(corbelDriver.resources.collection('resource:entity').getURL(requestParams));
-
   getAllRecursively(caller)
     .then(function(booksFetched) {
 
       var books = booksFetched.map(function(book) {
-        console.log(assetsIds.indexOf(book.id));
         return (new BookModel(book, assetsIds)).toSmall();
       });
 
@@ -220,7 +214,18 @@ function getUserBooks(assetsIds, params) {
 function getCatalogueBooks(assetsIds, searchParamsCatalogue) {
   var dfd = q.defer();
 
-  console.log(JSON.stringify(searchParamsCatalogue, null, 2))
+  searchParamsCatalogue.queries = searchParamsCatalogue.queries.map(function(queryItem) {
+    var newItem = _.cloneDeep(queryItem);
+
+    newItem.query.push({
+      '$nin': {
+        '_dst_id': assetsIds
+      }
+    });
+    return newItem;
+  });
+
+  searchParamsCatalogue.query = searchParamsCatalogue.queries[0].query;
 
   corbelDriver.resources.relation('books:Store', 'booqs:demo', 'books:Book')
     .get(null, searchParamsCatalogue)
@@ -263,8 +268,7 @@ function loadBooks(assets, params) {
           page: 0,
           size: params.booksPerSection
         },
-        //queries: params.queryObject.queries
-        query: params.queryObject.queries[0].query,
+        queries: params.queryObject.queries
         //search : params.queryObject.search
       };
 
