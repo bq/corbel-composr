@@ -3,7 +3,7 @@
   "description": "A corbel composer is a middleware based in nodeJS with express, to offer developers to make his own specific application API.",
   "version": "0.0.13",
   "build.version": "latest",
-  "build.date" : "Mon, 22 Jun 2015 08:24:25 GMT",
+  "build.date": "Mon, 22 Jun 2015 08:24:25 GMT",
   "bin": "bin/composer",
   "license": "Apache-2.0",
   "keywords": "corbel nodejs express middleware",
@@ -82,6 +82,8 @@
     "grunt-madge": "0.0.5",
     "grunt-mocha-test": "~0.12.7",
     "grunt-release": "^0.12.0",
+    "jaguarjs-jsdoc": "0.0.1",
+    "jsdoc": "3.2.2",
     "jshint-stylish": "^1.0.1",
     "load-grunt-tasks": "~3.1.0",
     "madge": "^0.5.0",
@@ -92,7 +94,6 @@
     "supertest": "^1.0.0",
     "time-grunt": "~1.1.0",
     "travis-cov": "^0.2.5",
-    "jaguarjs-jsdoc": "0.0.1",
-    "jsdoc": "3.2.2"
+    "v8-profiler": "^5.2.9"
   }
 }
