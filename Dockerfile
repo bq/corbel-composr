@@ -24,13 +24,13 @@ ENV TERM xterm
 EXPOSE  3000
 
 #Set the endpoint suffix for the environment to use
-ENV ENDPOINT_SUFFIX "-qa"
+ENV ENDPOINT_SUFFIX -qa
 
 # Enable corbel-composer
-CMD E=0; \
-    while [ "$E" != 401 ]; \
-    do E=`curl -s -o /dev/null -w "%{http_code}" https://iam$ENDPOINT_SUFFIX.bqws.io`; \
-    echo $E ; \
+CMD STATUS=0; \
+    while [ "$STATUS" != 200 ]; \
+    do STATUS=`curl -s -o /dev/null -w "%{http_code}" https://iam$ENDPOINT_SUFFIX.bqws.io/version`; \
+    echo $STATUS on https://iam$ENDPOINT_SUFFIX.bqws.io/version; \
     sleep 5 ; \
     done ; \
     cd /src && npm start && npm run logs
