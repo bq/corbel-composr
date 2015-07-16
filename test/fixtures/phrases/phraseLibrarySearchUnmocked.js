@@ -11,7 +11,7 @@ if(!req.query.ftsearch){
   res.status(400).send(new ComposerError("error:ftsearch:missing", "", 400));
 }
 
-var loggedClientOrUserAccesToken = req.get('Authorization');
+var loggedClientOrUserAccesToken = req.get('Authorization').replace('Bearer ', '');
 
 
 //Map ftsearch params to real names
@@ -68,19 +68,16 @@ function searchLibraryBooks(params) {
     params.queryObject = createQueryObject(params.ftsearch);
   }
 
-  if (isUser) {
-    getAllBooksAssets()
+  var userAssets = null;
+
+    getAllBooksAssets(isUser)
       .then(function(assets) {
+        userAssets = assets;
         return loadBooks(assets, params);
       })
       .then(dfd.resolve)
       .catch(dfd.reject);
-  } else {
-    loadBooks([], params)
-      .then(dfd.resolve)
-      .catch(dfd.reject);
-  }
-
+ 
   return dfd.promise;
 }
 
@@ -120,7 +117,10 @@ var getAllRecursively = function(caller, items, pageNumber, pageSize, promise) {
 /**
  * Return all the assets of the user that are associated to books
  */
-function getAllBooksAssets() {
+function getAllBooksAssets(isUser) {
+  if(!isUser){
+    return q.resolve([]);
+  }
 
   var caller = function(pageNumber, pageSize) {
     return corbelDriver.assets().get({
@@ -142,17 +142,16 @@ function getAllBooksAssets() {
 /**
  * Counts all the books the client can access to.
  */
-function countAllBooks() {
+function countAllBooks(params) {
   var dfd = q.defer();
 
+  params.aggregation = {
+    $count : '*'
+  };
+
   corbelDriver.resources.relation('books:Store', 'booqs:demo', 'books:Book')
-    .get(null, {
-      aggregation: {
-        $count: '*'
-      }
-    })
+    .get(null, params)
     .then(function(response) {
-      console.log(response.data.count, 'books counted');
       dfd.resolve(response.data.count);
     })
     .catch(dfd.reject)
@@ -181,7 +180,6 @@ function getUserBooks(assetsIds, params) {
 
   var requestParams = {
     queries: userQueries,
-    //query: userQueries[0].query,
     pagination: {
       page: 0,
       size: params.booksPerSection
@@ -193,26 +191,36 @@ function getUserBooks(assetsIds, params) {
       .get(null, requestParams);
   }
 
+  //console.log(corbelDriver.resources.collection('resource:entity').getURL(requestParams));
+
+  var booksFound = null;
+
   getAllRecursively(caller)
     .then(function(booksFetched) {
 
-      var books = booksFetched.map(function(book) {
+      booksFound = booksFetched.map(function(book) {
         return (new BookModel(book, assetsIds)).toSmall();
       });
 
-      dfd.resolve(books);
+      return countAllBooks({
+        queries: userQueries
+      });
+    })
+    .then(function(amount){
+      dfd.resolve({
+        results : booksFound,
+        count : amount
+      });
     })
     .catch(dfd.reject);
 
   return dfd.promise;
 }
 
-/**
- * Gets the catalogue books
- * TODO: Use queries and ftsearch
- */
 function getCatalogueBooks(assetsIds, searchParamsCatalogue) {
   var dfd = q.defer();
+
+  //console.log(JSON.stringify(searchParamsCatalogue, null, 2))
 
   searchParamsCatalogue.queries = searchParamsCatalogue.queries.map(function(queryItem) {
     var newItem = _.cloneDeep(queryItem);
@@ -223,18 +231,25 @@ function getCatalogueBooks(assetsIds, searchParamsCatalogue) {
       }
     });
     return newItem;
-  });
+  })
 
-  //searchParamsCatalogue.query = searchParamsCatalogue.queries[0].query;
-
+  var booksFound = null;
   corbelDriver.resources.relation('books:Store', 'booqs:demo', 'books:Book')
     .get(null, searchParamsCatalogue)
     .then(function(response) {
-      var books = response.data.map(function(book) {
+      booksFound = response.data.map(function(book) {
         return (new BookModel(book, assetsIds)).toSmall();
       })
 
-      dfd.resolve(books);
+      return countAllBooks({
+        queries: searchParamsCatalogue.queries
+      });
+    })
+    .then(function(amount){
+      dfd.resolve({
+        results : booksFound,
+        count : amount
+      });
     })
     .catch(dfd.reject);
 
@@ -260,8 +275,8 @@ function loadBooks(assets, params) {
   };
 
   getUserBooks(assetsIds, params)
-    .then(function(ownedBooks) {
-      result.ownedBooks = ownedBooks;
+    .then(function(resultOwnedBooks) {
+      result.ownedBooks = resultOwnedBooks;
 
       var searchParamsCatalogue = {
         pagination: {
@@ -274,8 +289,8 @@ function loadBooks(assets, params) {
 
       return getCatalogueBooks(assetsIds, searchParamsCatalogue);
     })
-    .then(function(catalogueBooks) {
-      result.catalogueBooks = catalogueBooks;
+    .then(function(resultCatalogueBooks) {
+      result.catalogueBooks = resultCatalogueBooks;
       dfd.resolve(result);
     })
     .catch(function(err) {
