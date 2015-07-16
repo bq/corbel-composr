@@ -1,44 +1,46 @@
 {
-    "url": "refreshtoken",
-    "post": {
-        "codehash": "aWYgKCFyZXEuYm9keSB8fCAhcmVxLmJvZHkuand0KSB7CiAgcmVzLnN0YXR1cyg0MDApLnNlbmQobmV3IENvbXBvc2VyRXJyb3IoJ2Vycm9yOmp3dDp1bmRlZmluZWQnLCAnSldUIGlzIG1pc3NpbmcnLCA0MDApKTsKICByZXR1cm4gZmFsc2U7Cn0KdmFyIGRlY29kZWQgPSBjb3JiZWwuand0LmRlY29kZShyZXEuYm9keS5qd3QpOwppZihPYmplY3Qua2V5cyhkZWNvZGVkKS5sZW5ndGggPT09IDApewogIHJlcy5zdGF0dXMoNDAwKS5zZW5kKG5ldyBDb21wb3NlckVycm9yKCdlcnJvcjpqd3Q6bWFsZm9ybWVkJywgJ1lvdXIgSldUIGlzIG1hbGZvcm1lZCcsIDQwMCkpOwogIHJldHVybiBmYWxzZTsKfQoKaWYoIWRlY29kZWQucmVmcmVzaF90b2tlbil7CiAgcmVzLnN0YXR1cyg0MDApLnNlbmQobmV3IENvbXBvc2VyRXJyb3IoJ2Vycm9yOmp3dDpyZWZyZXNoX3Rva2VuOm1pc3NpbmcnLCAnQWRkIHRoZSByZWZyZXNoX3Rva2VuIHByb3BlcnR5JywgNDAwKSk7CiAgcmV0dXJuIGZhbHNlOwp9ZWxzZXsKIHZhciByZWZyZXNoVG9rZW5EZWNvZGVkID0gY29yYmVsLmp3dC5kZWNvZGUoZGVjb2RlZC5yZWZyZXNoX3Rva2VuKTsKIGlmKE9iamVjdC5rZXlzKHJlZnJlc2hUb2tlbkRlY29kZWQpLmxlbmd0aCA9PT0gMCl7CiAgIHJlcy5zdGF0dXMoNDAwKS5zZW5kKG5ldyBDb21wb3NlckVycm9yKCdlcnJvcjpqd3Q6cmVmcmVzaF90b2tlbjptYWxmb3JtZWQnLCAnWW91ciByZWZyZXNoX3Rva2VuIGlzIG1hbGZvcm1lZCcsIDQwMCkpOwogIHJldHVybiBmYWxzZTsKIH0KfQp2YXIgY29yYmVsRHJpdmVyID0gY29yYmVsLmdlbmVyYXRlRHJpdmVyKHtpYW1Ub2tlbjogJyd9KTsKCi8qCiAqIFJlcXVpcmVkIGNsYWltczoKICogaXNzOiBDTElFTlRfSUQKICogcmVmcmVzaF90b2tlbjogUkVGUkVTSF9UT0tFTgogKiBhdWQ6ICdodHRwOi8vaWFtLmJxd3MuaW8nCiAqIHNjb3BlOiAnc2NvcGUxIHNjb3BlMicKICogZXhwOiBlcG9jaCArIDFoCiAqLwpjb3JiZWxEcml2ZXIuaWFtLnRva2VuKCkuY3JlYXRlKHsKICAgIGp3dCA6IHJlcS5ib2R5Lmp3dAogIH0pCiAgLnRoZW4oZnVuY3Rpb24ocmVzcG9uc2UpewogICAgcmVzLnNlbmQocmVzcG9uc2UuZGF0YSk7CiAgfSkKICAuY2F0Y2goZnVuY3Rpb24oZXJyKXsKICAgIGNvbXBvU1IucnVuKCdnbG9iYWw6cGFyc2VFcnJvcicsIHsgZXJyIDogZXJyLCByZXMgOiByZXN9KTsKICB9KTs=",
-        "doc": {
-		    		"securedBy": ["oauth_2_0"],
-            "description": "Phrase for refresh an accessToken using JWT. (claims: `iss`, `refresh_token`, `aud`, `scope`, `exp`)",
-            "responses": {
-                "200": {
-                    "body": {
-                        "application/json": {
-                            "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR refresh token response\",\n\t\"properties\": {\n\t\t\"accessToken\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"accessToken to send in every authorized request\"\n\t\t},\n\t\t\"expiresAt\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"epoch time until token expiration\"\n\t\t},\n\t\t\"refreshToken\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"refreshToken to send to renew an accessToken\"\n\t\t}\n\t},\n\t\"required\": [\"accessToken\", \"expiresAt\", \"refreshToken\"]\n}",
-                            "example": "{\n\t\"accessToken\": \"ACCESS_TOKEN\",\n\t\"refreshtoken\": \"REFRESH_TOKEN\",\n\t\"expiresAt\": 123123\n}"
-                        }
-                    }
-                },
-                "400": {
-                    "description": "Bad Response",
-                    "body": {
-                        "application/json": {
-                            "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR error response\",\n\t\"properties\": {\n\t\t\"httpStatus\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"HTTP status code\"\n\t\t},\n\t\t\"error\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"error code\"\n\t\t},\n\t\t\"errorDescription\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Public description\"\n\t\t},\n\t\t\"trace\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Development info description\"\n\t\t}\n\t},\n\t\"required\": [\"httpStatus\", \"error\", \"errorDescription\"]\n}",
-                            "example": "{\n\t\"httpStatus\": 400,\n\t\"error\": \"error:jwt:missing\",\n\t\"errorDescription\": \"Your JWT is missing\"\n}"
-                        }
-                    }
-                },
-                "401": {
-                    "description": "Not authorized",
-                    "body": {
-                        "application/json": {
-                            "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR error response\",\n\t\"properties\": {\n\t\t\"httpStatus\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"HTTP status code\"\n\t\t},\n\t\t\"error\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"error code\"\n\t\t},\n\t\t\"errorDescription\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Public description\"\n\t\t},\n\t\t\"trace\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Development info description\"\n\t\t}\n\t},\n\t\"required\": [\"httpStatus\", \"error\", \"errorDescription\"]\n}",
-                            "example": "{\n\t\"httpStatus\": 401,\n\t\"error\": \"unauthorized\",\n\t\"errorDescription\": \"\"\n}"
-                        }
-                    }
-                }
-            },
-            "body": {
-                "application/json": {
-                    "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"jwt\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"JWT Assertion\"\n\t\t}\n\t},\n\t\"required\": [\n\t\t\"jwt\"\n\t]\n}",
-                    "example": "{\n\t\"jwt\": \"JWT\"\n}"
-                }
+  "url": "refreshtoken",
+  "post": {
+    "codehash": "aWYgKCFyZXEuYm9keSB8fCAhcmVxLmJvZHkuand0KSB7CiAgcmVzLnN0YXR1cyg0MDApLnNlbmQobmV3IENvbXBvc2VyRXJyb3IoJ2Vycm9yOmp3dDp1bmRlZmluZWQnLCAnSldUIGlzIG1pc3NpbmcnLCA0MDApKTsKICByZXR1cm4gZmFsc2U7Cn0KdmFyIGRlY29kZWQ7CnRyeXsKICBkZWNvZGVkID0gY29yYmVsLmp3dC5kZWNvZGUocmVxLmJvZHkuand0KTsKfWNhdGNoKGUpewogIHJlcy5zdGF0dXMoNDAwKS5zZW5kKG5ldyBDb21wb3NlckVycm9yKCdlcnJvcjpqd3Q6bWFsZm9ybWVkJywgJ1lvdXIgSldUIGlzIG1hbGZvcm1lZCcsIDQwMCkpOwogIHJldHVybiBmYWxzZTsKfQoKaWYoIWRlY29kZWQucmVmcmVzaF90b2tlbil7CiAgcmVzLnN0YXR1cyg0MDApLnNlbmQobmV3IENvbXBvc2VyRXJyb3IoJ2Vycm9yOmp3dDpyZWZyZXNoX3Rva2VuOm1pc3NpbmcnLCAnQWRkIHRoZSByZWZyZXNoX3Rva2VuIHByb3BlcnR5JywgNDAwKSk7CiAgcmV0dXJuIGZhbHNlOwp9ZWxzZXsKIHZhciByZWZyZXNoVG9rZW5EZWNvZGVkID0gY29yYmVsLmp3dC5kZWNvZGUoZGVjb2RlZC5yZWZyZXNoX3Rva2VuKTsKIGlmKE9iamVjdC5rZXlzKHJlZnJlc2hUb2tlbkRlY29kZWQpLmxlbmd0aCA9PT0gMCl7CiAgIHJlcy5zdGF0dXMoNDAwKS5zZW5kKG5ldyBDb21wb3NlckVycm9yKCdlcnJvcjpqd3Q6cmVmcmVzaF90b2tlbjptYWxmb3JtZWQnLCAnWW91ciByZWZyZXNoX3Rva2VuIGlzIG1hbGZvcm1lZCcsIDQwMCkpOwogIHJldHVybiBmYWxzZTsKIH0KfQp2YXIgY29yYmVsRHJpdmVyID0gY29yYmVsLmdlbmVyYXRlRHJpdmVyKHtpYW1Ub2tlbjogJyd9KTsKCi8qCiAqIFJlcXVpcmVkIGNsYWltczoKICogaXNzOiBDTElFTlRfSUQKICogcmVmcmVzaF90b2tlbjogUkVGUkVTSF9UT0tFTgogKiBhdWQ6ICdodHRwOi8vaWFtLmJxd3MuaW8nCiAqIHNjb3BlOiAnc2NvcGUxIHNjb3BlMicKICogZXhwOiBlcG9jaCArIDFoCiAqLwpjb3JiZWxEcml2ZXIuaWFtLnRva2VuKCkuY3JlYXRlKHsKICAgIGp3dCA6IHJlcS5ib2R5Lmp3dAogIH0pCiAgLnRoZW4oZnVuY3Rpb24ocmVzcG9uc2UpewogICAgcmVzLnNlbmQocmVzcG9uc2UuZGF0YSk7CiAgfSkKICAuY2F0Y2goZnVuY3Rpb24oZXJyKXsKICAgIGNvbXBvU1IucnVuKCdnbG9iYWw6cGFyc2VFcnJvcicsIHsgZXJyIDogZXJyLCByZXMgOiByZXN9KTsKICB9KTs=",
+    "doc": {
+      "description": "Phrase for refresh an accessToken using JWT. (claims: `iss`, `refresh_token`, `aud`, `scope`, `exp`)",
+      "responses": {
+        "200": {
+          "body": {
+            "application/json": {
+              "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR refresh token response\",\n\t\"properties\": {\n\t\t\"accessToken\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"accessToken to send in every authorized request\"\n\t\t},\n\t\t\"expiresAt\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"epoch time until token expiration\"\n\t\t},\n\t\t\"refreshToken\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"refreshToken to send to renew an accessToken\"\n\t\t}\n\t},\n\t\"required\": [\"accessToken\", \"expiresAt\", \"refreshToken\"]\n}",
+              "example": "{\n\t\"accessToken\": \"ACCESS_TOKEN\",\n\t\"refreshtoken\": \"REFRESH_TOKEN\",\n\t\"expiresAt\": 123123\n}"
             }
+          }
+        },
+        "400": {
+          "description": "Bad Response",
+          "body": {
+            "application/json": {
+              "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR error response\",\n\t\"properties\": {\n\t\t\"httpStatus\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"HTTP status code\"\n\t\t},\n\t\t\"error\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"error code\"\n\t\t},\n\t\t\"errorDescription\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Public description\"\n\t\t},\n\t\t\"trace\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Development info description\"\n\t\t}\n\t},\n\t\"required\": [\"httpStatus\", \"error\", \"errorDescription\"]\n}",
+              "example": "{\n\t\"httpStatus\": 400,\n\t\"error\": \"error:jwt:missing\",\n\t\"errorDescription\": \"Your JWT is missing\"\n}"
+            }
+          }
+        },
+        "401": {
+          "description": "Not authorized",
+          "body": {
+            "application/json": {
+              "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR error response\",\n\t\"properties\": {\n\t\t\"httpStatus\": {\n\t\t\t\"type\": \"number\",\n\t\t\t\"descrption\": \"HTTP status code\"\n\t\t},\n\t\t\"error\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"error code\"\n\t\t},\n\t\t\"errorDescription\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Public description\"\n\t\t},\n\t\t\"trace\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"Development info description\"\n\t\t}\n\t},\n\t\"required\": [\"httpStatus\", \"error\", \"errorDescription\"]\n}",
+              "example": "{\n\t\"httpStatus\": 401,\n\t\"error\": \"unauthorized\",\n\t\"errorDescription\": \"\"\n}"
+            }
+          }
         }
+      },
+      "body": {
+        "application/json": {
+          "schema": "{\n\t\"$schema\": \"http://json-schema.org/schema\",\n\t\"type\": \"object\",\n\t\"description\": \"CompoSR client login body\",\n\t\"properties\": {\n\t\t\"jwt\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"descrption\": \"JWT Assertion\"\n\t\t}\n\t},\n\t\"required\": [\n\t\t\"jwt\"\n\t]\n}",
+          "example": "{\n\t\"jwt\": \"JWT\"\n}"
+        }
+      },
+      "securedBy": [
+        "oauth_2_0"
+      ]
     }
+  }
 }
