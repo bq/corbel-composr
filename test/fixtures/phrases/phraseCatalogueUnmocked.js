@@ -3,7 +3,7 @@ if (!req.get("Authorization")) {
   return
 }
 
-var loggedClientOrUserAccesToken = req.get('Authorization');
+var loggedClientOrUserAccesToken = req.get('Authorization').replace('Bearer ', '');
 
 //Entry point, orchestates the main calls
 function loadCatalogueBooks(params) {
