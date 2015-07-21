@@ -23,6 +23,10 @@ ENV TERM xterm
 # Expose port
 EXPOSE  3000
 
+# Global config environment variable
+
+ENV COMPOSR_CONFIG null
+
 #Set the endpoint suffix for the environment to use
 ENV ENDPOINT_SUFFIX -qa
 
