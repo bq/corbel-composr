@@ -25,7 +25,7 @@ EXPOSE  3000
 
 # Global config environment variable
 
-ENV COMPOSR_CONFIG null
+ENV COMPOSR_CONFIG ''
 
 #Set the endpoint suffix for the environment to use
 ENV ENDPOINT_SUFFIX -qa
