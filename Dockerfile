@@ -15,7 +15,7 @@ RUN npm install -g pm2
 RUN apt-get update
 
 # Any text editor
-RUN apt-get install -y nano
+RUN apt-get install -y nano net-tools
 
 # For allowing nano
 ENV TERM xterm
