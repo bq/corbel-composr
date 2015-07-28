@@ -42,9 +42,9 @@ function regexpUrl(url) {
 
       //Param can have any value, evaluate expression
       if (isOptionalArgument(item, index) && index === paramsLength - 1 && paramsLength !== 1) {
-        newValue += '((?<'+ item.replace(':', '').replace('?', '') +'>\\w+)\/?)?';
+        newValue += '((?<'+ item.replace(':', '').replace('?', '') +'>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?)?';
       } else {
-        newValue += '(?<'+ item.replace(':', '').replace('?', '') +'>\\w+)\/?';
+        newValue += '(?<'+ item.replace(':', '').replace('?', '') +'>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?';
       }
 
     } else {

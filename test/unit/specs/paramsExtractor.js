@@ -82,6 +82,12 @@ describe('in paramsExtractor module', function() {
         optional: 'hey',
         arg: 'ho'
       }
+    }, {
+      url: 'user/:name',
+      callee: 'user/onix-from-MySupplier-1437644873433-1437644873433',
+      test: {
+        name: 'onix-from-MySupplier-1437644873433-1437644873433'
+      }
     }];
 
     before(function() {

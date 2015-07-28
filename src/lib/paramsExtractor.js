@@ -18,7 +18,7 @@ function extractParams(path, phraseRegexpReference) {
 
   Object.keys(params).forEach(function(param) {
 
-    if (result.hasOwnProperty(param) && typeof(result[param]) !== 'undefined') {
+    if (result && result.hasOwnProperty(param) && typeof(result[param]) !== 'undefined') {
       params[param] = result[param];
     }
   });

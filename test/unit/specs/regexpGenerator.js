@@ -18,19 +18,19 @@ describe('in regexpGenerator module', function() {
       url: ':param',
       test: ['param', 'param/', '/param', '/param/'],
       testfail: ['', '/', 'asdd/asdsad', '/as/asd/asdas'],
-      regexp: '^\/?(?<param>\\w+)\/?$',
+      regexp: '^\/?(?<param>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?$',
       params: ['param']
     }, {
       url: ':param?',
       test: ['param', 'param/', '', '/'],
       testfail: ['optional/single', '/as/asd/asdas'],
-      regexp: '^\/?((?<param>\\w+)\/?)?$',
+      regexp: '^\/?((?<param>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?)?$',
       params: ['param']
     }, {
       url: 'logoutuser/:type?',
       test: ['logoutuser/all', 'logoutuser/', 'logoutuser', '/logoutuser/'],
       testfail: ['', '/', 'asdd/asdsad', 'logoutuser/asdsa/asdsad'],
-      regexp: '\/?logoutuser(\/((?<type>\\w+)\/?)?)?$',
+      regexp: '\/?logoutuser(\/((?<type>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?)?)?$',
       params: ['type']
     }, {
       url: 'pepito',
@@ -42,20 +42,26 @@ describe('in regexpGenerator module', function() {
       url: 'test/:arg/:arg2',
       test: ['test/param/param', '/test/param/param', '/test/param/param/'],
       testfail: ['asdad', '/', '-1', '/test/asd/', 'test/asdad', 'test/adsad/asdasd/adssad'],
-      regexp: '\/?test\/(?<arg>\\w+)\/?\/(?<arg2>\\w+)\/?$',
+      regexp: '\/?test\/(?<arg>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?\/(?<arg2>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?$',
       params: ['arg', 'arg2']
     }, {
       url: 'test/:arg/:optional?',
       test: ['test/arg/arg', 'test/arg', 'test/arg', '/test/arg/', '/test/arg/arg/'],
       testfail: ['asdad', '/', '-1', '/test/asd/asdas/asdad'],
-      regexp: '\/?test\/(?<arg>\\w+)\/?(\/((?<optional>\\w+)\/?)?)?$',
+      regexp: '\/?test\/(?<arg>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?(\/((?<optional>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?)?)?$',
       params: ['arg', 'optional']
     }, {
       url: 'user/:arg?/:optional/name',
       test: ['user/arg/name', 'user/arg/arg/name', '/user/arg/name', '/user/arg/arg/name', '/user/arg/arg/name/'],
       testfail: ['asdad', '/', '-1', 'user/asdasd/asda/paquito/name', 'user/asdasd/asda/paquito', '/user/arg/name/asda'],
-      regexp: '\/?user(\/(?<arg>\\w+)\/?)?\/(?<optional>\\w+)\/?\/name\/?$',
+      regexp: '\/?user(\/(?<arg>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?)?\/(?<optional>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?\/name\/?$',
       params: ['arg', 'optional']
+    }, {
+      url: 'user/:arg',
+      test: ['user/onix-from-MySupplier-1437644873433-1437644873433'],
+      testfail: [],
+      regexp: '\/?user\/(?<arg>[\\w-._~:?#\\[\\]@!$&()*+,;=!]+)\/?$',
+      params: ['arg']
     }];
 
     it('Parses correctly all the url types', function() {

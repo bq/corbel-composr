@@ -34,6 +34,12 @@ function test(app) {
           moto: 'verde'
         }
       }, {
+        url: 'logoutuser/:name',
+        callee: 'logoutuser?name=onix-from-MySupplier-1437644873433-1437644873433',
+        test: {
+          name: 'onix-from-MySupplier-1437644873433-1437644873433'
+        }
+      }, {
         url: 'pepito',
         callee: 'pepito?hola=mundo',
         test: {
