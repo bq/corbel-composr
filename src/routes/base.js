@@ -19,7 +19,8 @@ router.get('/version', function(req, res) {
   res.send(packageJSON);
 });
 
-router.get('/status', function(req, res) {
+function status(req, res) {
+
   var phrasesLoaded = phraseManager.getAmountOfPhrasesLoaded();
 
   var statuses = [{
@@ -55,21 +56,24 @@ router.get('/status', function(req, res) {
   q.all(promises)
     .then(function() {
       if (req.accepts('html')) {
-         res.render('status', {
+        res.render('status', {
           statuses: statuses,
           version: packageJSON.version,
           title: 'CompoSR Status',
           appName: 'CompoSR'
         });
-        
+
       } else {
-       res.send({
+        res.send({
           version: packageJSON.version,
           statuses: statuses
         });
       }
     });
 
-});
+}
+
+router.get('/status', status);
+router.get('/healthcheck', status);
 
 module.exports = router;
