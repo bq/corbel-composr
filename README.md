@@ -371,7 +371,7 @@ var jwt = generateAssertion(claims, appCredentials.clientSecret);
 
 ```javascript
 if (!req.body || !req.body.jwt) {
-  res.status(401).send(new ComposerError('error:jwt:undefined', '', 401));
+  return res.status(401).send(new ComposerError('error:jwt:undefined', '', 401));
 }
 var corbelDriver = corbel.generateDriver({iamToken: ''});
 
@@ -387,12 +387,12 @@ var tokenObject;
  * scope: 'scope1 scope2'
  * exp: epoch + 1h
  */
-corbelDriver.iam.token().create({
+return corbelDriver.iam.token().create({
   jwt : req.body.jwt
 }).then(function(response){
-  //Enable assets access
+  //Enable assets access (only for users)
   corbelDriver.assets().access();
-
+  
   //Tenemos el token de usuario, asimismo tambien el refresh y el expires
   tokenObject = response.data;
 
@@ -404,12 +404,12 @@ corbelDriver.iam.token().create({
   //Obtain the logged user data
   return corbelDriver.iam.user('me').get();
 }).then(function(response){
-  res.send({
+  return res.send({
     tokenObject: tokenObject,
     user: response.data
   });
 }).catch(function(err){
-  compoSR.run('global:parseError', { err : err, res : res});
+  return compoSR.run('global:parseError', { err : err, res : res});
 });
 ```
 ## Refresh a token
