@@ -59,11 +59,9 @@ function regexpUrl(url) {
     }
 
 
-    if (pathParams.length === 1 && isParamArgument(item)) {
+    if ((pathParams.length === 1 && isParamArgument(item)) || index === 0) {
       //Single param in the form of ':param'  or ':param?' requires indicator of start of the string
       newValue = '^\/?' + newValue;
-    } else if (index === 0) {
-      newValue = '\/?' + newValue;
     }
 
 

@@ -220,4 +220,42 @@ describe('in phraseManager module', function() {
 
   });
 
+  describe('Similar names', function() {
+    var domain = 'test';
+    var stub;
+    var phrases = [{
+      url: 'thematics'
+    }, {
+      url: 'back-thematics'
+    }];
+
+    //Populate regexps on the phrases
+    phrases = phrases.map(function(phrase) {
+      phrase.regexpReference = regexpGenerator.regexpReference(phrase.url);
+      return phrase;
+    });
+
+    before(function() {
+      stub = sinon.stub(phraseManager, 'getPhrases', function() {
+        return phrases;
+      })
+    });
+
+    after(function() {
+      stub.restore();
+    });
+
+    it('gets the correct phrase', function() {
+      var phrase = phraseManager.getPhraseByMatchingPath('test', 'back-thematics');
+      expect(phrase.url).to.equals('back-thematics');
+    });
+
+    it('gets the correct phrase', function() {
+      var phrase = phraseManager.getPhraseByMatchingPath('test', 'thematics');
+      expect(phrase.url).to.equals('thematics');
+    });
+
+
+  });
+
 });
