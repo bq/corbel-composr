@@ -26,6 +26,17 @@ EXPOSE  3000
 # Global config environment variable
 
 ENV COMPOSR_CONFIG ''
+ENV URL_BASE ''
+ENV RABBITMQ_HOST ''
+ENV RABBITMQ_PASSWORD ''
+ENV CLIENT_ID ''
+ENV CLIENT_SECRET ''
+ENV CREDENTIALS_SCOPES ''
+ENV LOG_LEVEL debug
+ENV LOG_FILE logs/composr.log
+ENV RABBITMQ_PORT 8200
+ENV RABBITMQ_USERNAME ''
+
 
 #Set the endpoint suffix for the environment to use
 ENV ENDPOINT_SUFFIX -qa
