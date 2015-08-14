@@ -10,13 +10,13 @@ function getCompoSR(domain){
     'apps-sandbox' : [
       {
         name : 'global:parseError',
-        code : 'var errorCode=params.err.status?params.err.status:500,errorBody=params.err.data.body&&"string"==typeof params.err.data.body&&-1!==params.err.data.body.indexOf("{")?JSON.parse(params.err.data.body):params.err;params.res.status(errorCode).send(errorBody);'
+        code : 'var errorCode=500,errorBody=params.err;"object"==typeof params.err&&params.err&&(errorCode=params.err.status?params.err.status:errorCode,params.err.data&&params.err.data.status&&(errorCode=params.err.data.status),errorBody=params.err.data?params.err.data:errorBody),params.res.status(errorCode).send(errorBody);'
       }
     ],
     'booqs:demo' : [
       {
         name : 'global:parseError',
-        code : 'var errorCode=params.err.status?params.err.status:500,errorBody=params.err.data.body&&"string"==typeof params.err.data.body&&-1!==params.err.data.body.indexOf("{")?JSON.parse(params.err.data.body):params.err;params.res.status(errorCode).send(errorBody);'
+        code : 'var errorCode=500,errorBody=params.err;"object"==typeof params.err&&params.err&&(errorCode=params.err.status?params.err.status:errorCode,params.err.data&&params.err.data.status&&(errorCode=params.err.data.status),errorBody=params.err.data?params.err.data:errorBody),params.res.status(errorCode).send(errorBody);'
       }
     ],
     'silkroad-qa' : [
