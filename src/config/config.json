@@ -22,5 +22,5 @@
 
     "logLevel": "error",
     "logFile": "logs/composr.log",
-    "syslog" : true
+    "syslog" : false
 }
