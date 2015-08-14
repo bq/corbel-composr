@@ -28,9 +28,50 @@ if (process.env.COMPOSR_CONFIG) {
     config = _.defaults(envConfig, config);
   } catch (e) {
     console.log(e);
-    console.log('warn:config:badformatedConfig' + env + ':undefined');
+    console.log('warn:config:badformatedConfig' + env + ':undefined', process.env.COMPOSR_CONFIG);
   }
 }
+
+if (process.env.CREDENTIALS_CLIENT_ID) {
+  config['corbel.composer.credentials'].clientId = process.env.CREDENTIALS_CLIENT_ID;
+}
+
+if (process.env.CREDENTIALS_CLIENT_SECRET) {
+  config['corbel.composer.credentials'].clientSecret = process.env.CREDENTIALS_CLIENT_SECRET;
+}
+
+if (process.env.CREDENTIALS_SCOPES) {
+  config['corbel.composer.credentials'].scopes = process.env.CREDENTIALS_SCOPES;
+}
+
+if (process.env.URL_BASE) {
+  config['corbel.driver.options'].urlBase = process.env.URL_BASE;
+}
+
+if (process.env.LOG_LEVEL) {
+  config.logLevel = process.env.LOG_LEVEL;
+}
+
+if (process.env.LOG_FILE) {
+  config.logFile = process.env.LOG_FILE;
+}
+
+if (process.env.RABBITMQ_HOST) {
+  config['rabbitmq.host'] = process.env.RABBITMQ_HOST;
+}
+
+if (process.env.RABBITMQ_PORT) {
+  config['rabbitmq.port'] = process.env.RABBITMQ_PORT;
+}
+
+if (process.env.RABBITMQ_USERNAME) {
+  config['rabbitmq.username'] = process.env.RABBITMQ_USERNAME;
+}
+
+if (process.env.RABBITMQ_PASSWORD) {
+  config['rabbitmq.password'] = process.env.RABBITMQ_PASSWORD;
+}
+
 
 module.exports = function(key, haltOnUndefined) {
   if (!key) {
