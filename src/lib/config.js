@@ -60,6 +60,10 @@ if (process.env.RABBITMQ_HOST) {
   config['rabbitmq.host'] = process.env.RABBITMQ_HOST;
 }
 
+if (process.env.RABBITMQ_EVENT) {
+  config['rabbitmq.event'] = process.env.RABBITMQ_EVENT;
+}
+
 if (process.env.RABBITMQ_PORT) {
   config['rabbitmq.port'] = process.env.RABBITMQ_PORT;
 }
