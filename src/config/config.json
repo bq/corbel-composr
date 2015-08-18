@@ -4,7 +4,7 @@
     "rabbitmq.username": "RABBIT_USERNAME",
     "rabbitmq.password": "RABBIT_PASSWORD",
     "rabbitmq.reconntimeout": 10000,
-    "rabbitmq.event": "eventName",
+    "rabbitmq.event": "class io.corbel.event.ResourceEvent",
 
     "bootstrap.retrytimeout": 10000,
 
