@@ -77,6 +77,11 @@ app.use(cors({
 }));
 app.options('*', cors());
 
+app.use(function(req, res, next){
+    res.header('Access-Control-Expose-Headers', 'Location');
+    next();
+});
+
 app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
     status: ERROR_CODE_SERVER_TIMEOUT
 }));
