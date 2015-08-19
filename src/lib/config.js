@@ -21,8 +21,12 @@ try {
   console.log('warn:config:' + env + ':undefined');
 }
 
+function isDefinedConfigValue(val) {
+  return val && val !==  '\'\'';
+}
+
 //Finally if it exists on the environment, use this
-if (process.env.COMPOSR_CONFIG) {
+if (isDefinedConfigValue(process.env.COMPOSR_CONFIG)) {
   try {
     var envConfig = typeof(process.env.COMPOSR_CONFIG) === 'object' ? process.env.COMPOSR_CONFIG : JSON.parse(process.env.COMPOSR_CONFIG);
     config = _.defaults(envConfig, config);
@@ -32,47 +36,47 @@ if (process.env.COMPOSR_CONFIG) {
   }
 }
 
-if (process.env.CREDENTIALS_CLIENT_ID) {
+if (isDefinedConfigValue(process.env.CREDENTIALS_CLIENT_ID)) {
   config['corbel.composer.credentials'].clientId = process.env.CREDENTIALS_CLIENT_ID;
 }
 
-if (process.env.CREDENTIALS_CLIENT_SECRET) {
+if (isDefinedConfigValue(process.env.CREDENTIALS_CLIENT_SECRET)) {
   config['corbel.composer.credentials'].clientSecret = process.env.CREDENTIALS_CLIENT_SECRET;
 }
 
-if (process.env.CREDENTIALS_SCOPES) {
+if (isDefinedConfigValue(process.env.CREDENTIALS_SCOPES)) {
   config['corbel.composer.credentials'].scopes = process.env.CREDENTIALS_SCOPES;
 }
 
-if (process.env.URL_BASE) {
+if (isDefinedConfigValue(process.env.URL_BASE)) {
   config['corbel.driver.options'].urlBase = process.env.URL_BASE;
 }
 
-if (process.env.LOG_LEVEL) {
+if (isDefinedConfigValue(process.env.LOG_LEVEL)) {
   config.logLevel = process.env.LOG_LEVEL;
 }
 
-if (process.env.LOG_FILE) {
+if (isDefinedConfigValue(process.env.LOG_FILE)) {
   config.logFile = process.env.LOG_FILE;
 }
 
-if (process.env.RABBITMQ_HOST) {
+if (isDefinedConfigValue(process.env.RABBITMQ_HOST)) {
   config['rabbitmq.host'] = process.env.RABBITMQ_HOST;
 }
 
-if (process.env.RABBITMQ_EVENT) {
+if (isDefinedConfigValue(process.env.RABBITMQ_EVENT)) {
   config['rabbitmq.event'] = process.env.RABBITMQ_EVENT;
 }
 
-if (process.env.RABBITMQ_PORT) {
+if (isDefinedConfigValue(process.env.RABBITMQ_PORT)) {
   config['rabbitmq.port'] = process.env.RABBITMQ_PORT;
 }
 
-if (process.env.RABBITMQ_USERNAME) {
+if (isDefinedConfigValue(process.env.RABBITMQ_USERNAME)) {
   config['rabbitmq.username'] = process.env.RABBITMQ_USERNAME;
 }
 
-if (process.env.RABBITMQ_PASSWORD) {
+if (isDefinedConfigValue(process.env.RABBITMQ_PASSWORD)) {
   config['rabbitmq.password'] = process.env.RABBITMQ_PASSWORD;
 }
 
