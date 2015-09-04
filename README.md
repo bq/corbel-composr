@@ -10,7 +10,6 @@
 
 ## [Homepage](http://opensource.bq.com/composr/)
 
-
 ## Overview
 
 CompoSR is a [nodeJS](https://nodejs.org/api/) middleware, built on top  of [express](http://expressjs.com/4x/api.html), for [Corbel][corbel-link]. 
