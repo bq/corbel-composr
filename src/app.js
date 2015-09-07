@@ -57,9 +57,10 @@ if(app.get('env') === 'development' || app.get('env') === 'test') {
 }
 app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({
-    extended: true
+    extended: true,
+    limit : '50mb'
 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public')));
