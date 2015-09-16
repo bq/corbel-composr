@@ -65,7 +65,8 @@
     "winston": "^1.0.0",
     "winston-syslog": "^1.1.0",
     "xregexp": "^2.0.0",
-    "yamljs": "~0.2.1"
+    "yamljs": "~0.2.1",
+    "object-sizeof": "1.0.6"
   },
   "devDependencies": {
     "chai": "^2.1.1",

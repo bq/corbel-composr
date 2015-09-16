@@ -12,6 +12,7 @@ var validate = require('./validate'),
   request = require('request'),
   logger = require('../utils/logger'),
   XRegExp = require('xregexp').XRegExp,
+  sizeof = require('object-sizeof'),
   pmx = require('pmx'),
   _ = require('lodash'),
   q = require('q');
@@ -32,13 +33,20 @@ function countPhrases() {
 var probe = pmx.probe();
 
 probe.metric({
-  name: 'Realtime phrases loaded',
+  name: 'Realtime loaded phrases count',
   agg_type: 'max', // jshint ignore : line
   value: function() {
     return countPhrases();
   }
 });
 
+probe.metric({
+  name: 'Realtime loaded phrases size',
+  agg_type: 'max', // jshint ignore : line
+  value: function() {
+    return sizeof(phrases);
+  }
+});
 
 pmx.action('get:phrases', {
   comment: 'Return all the phrases'
