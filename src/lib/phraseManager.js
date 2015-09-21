@@ -267,7 +267,8 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
       'accessToken': req.get('Authorization').replace('Bearer ', '')
     };
     corbelDriver = corbel.generateDriver({
-      iamToken: iamToken
+      iamToken: iamToken,
+      domain: domain
     });
   }
 
