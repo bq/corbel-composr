@@ -244,6 +244,7 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
     return function(options) {
       logger.debug(defaults, '-----', options);
       var generatedOptions = _.defaults(_.cloneDeep(options), defaults);
+      generatedOptions.domain = domain;
       logger.debug('phrase_manager:corbel.generateDriver', generatedOptions);
       return corbel.getDriver(generatedOptions);
     };

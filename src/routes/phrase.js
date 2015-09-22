@@ -94,14 +94,16 @@ function createOrUpdatePhrase(req, res, next) {
     });
 
     logger.debug('Storing or updating phrase', phrase.id, domain);
-
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
-      res.set('Location', 'phrase/' + phrase.id);
-      res.status(response.status).send(response.data);
-    }).catch(function(error) {
-      var errorBody = getCorbelErrorBody(error);
-      next(new ComposerError('error:phrase:create', errorBody, error.status));
-    });
+    
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id)
+      .update(phrase)
+      .then(function(response) {
+        res.set('Location', 'phrase/' + phrase.id);
+        res.status(response.status).send(response.data);
+      }).catch(function(error) {
+        var errorBody = getCorbelErrorBody(error);
+        next(new ComposerError('error:phrase:create', errorBody, error.status));
+      });
 
   }, function(error) {
     next(new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422));
