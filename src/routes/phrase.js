@@ -95,7 +95,9 @@ function createOrUpdatePhrase(req, res, next) {
 
     logger.debug('Storing or updating phrase', phrase.id, domain);
 
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id).update(phrase).then(function(response) {
+    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id)
+    .update(phrase)
+    .then(function(response) {
       res.set('Location', 'phrase/' + phrase.id);
       res.status(response.status).send(response.data);
     }).catch(function(error) {

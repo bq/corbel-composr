@@ -28,7 +28,13 @@ function regenerateDriver(){
 var onConnectPromise = regenerateDriver();
 
 var extractDomain = function(accessToken) {
-    return corbel.jwt.decode(accessToken.replace('Bearer ', '')).domainId;
+  try {
+    var decoded = corbel.jwt.decode(accessToken.replace('Bearer ', ''));
+    return decoded.domainId;
+  } catch (e) {
+    logger.error('error:invalid:token', accessToken);
+    return null;
+  }
 };
 
 var getTokenDriver = function(accessToken) {
@@ -43,6 +49,7 @@ var getTokenDriver = function(accessToken) {
 
     var corbelConfig = config('corbel.driver.options');
     corbelConfig.iamToken = iamToken;
+    corbelConfig.domain = extractDomain(accessToken);
 
     return corbel.getDriver(corbelConfig);
 };
