@@ -59,6 +59,8 @@ PhraseManager.prototype.executePhrase = function executePhrase(context, compoSR,
   tripwire.resetTripwire(config('timeout') || 10000);
 
   phraseFunction.apply(null, _.values(context).concat(compoSR));
+  
+  
 
   // clear the tripwire (in this case this code is never reached)
   var ctx = {
@@ -244,6 +246,7 @@ PhraseManager.prototype.run = function run(domain, phrasePath, req, res, next) {
     return function(options) {
       logger.debug(defaults, '-----', options);
       var generatedOptions = _.defaults(_.cloneDeep(options), defaults);
+      generatedOptions.domain = domain;
       logger.debug('phrase_manager:corbel.generateDriver', generatedOptions);
       return corbel.getDriver(generatedOptions);
     };
