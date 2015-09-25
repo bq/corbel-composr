@@ -9,9 +9,9 @@ Object.setPrototypeOf = Object.setPrototypeOf || function(obj, proto) {
 };
 
 //custom error
-var ComposerError = function(error, description, status) {
+var ComposrError = function(error, description, status) {
     var err = new Error(error);
-    Object.setPrototypeOf(err, ComposerError.prototype);
+    Object.setPrototypeOf(err, ComposrError.prototype);
 
     //set properties specific to the custom error
     err.status = status;
@@ -21,11 +21,11 @@ var ComposerError = function(error, description, status) {
     return err;
 };
 
-ComposerError.prototype = Object.create(Error.prototype, {
+ComposrError.prototype = Object.create(Error.prototype, {
     name: {
-        value: 'ComposerError',
+        value: 'ComposrError',
         enumerable: false
     }
 });
 
-module.exports = ComposerError;
+module.exports = ComposrError;

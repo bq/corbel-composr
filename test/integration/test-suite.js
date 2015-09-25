@@ -1,44 +1,35 @@
 'use strict';
 
 // Integration
-var timeoutTests = require('./specs/timeout.js'),
-    errorHandlerTests = require('./specs/errorHandlers.js'),
-    exampleTests = require('./specs/example.js'),
-    cacheTests = require('./specs/cache.js'),
-    loginTests = require('./specs/login.js'),
-    brokenPhraseTests = require('./specs/brokenPhrase.js'),
-    codehash = require('./specs/codehash.js'),
-    pathParamsTests = require('./specs/pathParams.js'),
-    queryParams = require('./specs/queryParams.js'),
-    composerErrorPhrase = require('./specs/composerErrorPhrase.js'),
-    phraseTests = require('./specs/phrase.js');
+var tests = [
+  require('./specs/timeout.test.js'),
+  require('./specs/errorHandlers.test.js'),
+  require('./specs/pathParams.test.js'),
+  require('./specs/publishPhrase.test.js'),
+  //require('./specs/unpublishPhrase.test.js'),
+  require('./specs/publishSnippet.test.js'),
+  //require('./specs/unpublishSnippet.test.js'),
+  require('./specs/cache.test.js')
+];
 
-module.exports = function(promise){
-  var application;
+module.exports = function(serverPromise) {
+  var server;
 
-  describe('setup', function(){
+  describe('setup', function() {
     this.timeout(30000);
-    before(function(done){
+    before(function(done) {
       //Wait for app initialization
-      promise.then(function(app){
-        application = app;
+      serverPromise.then(function(res) {
+        server = res;
         done();
       });
     });
 
     //This wrapping is needed because otherwise application would be an empty object
-    it('Executes the integration tests', function(){
-      pathParamsTests(application);
-      queryParams(application);
-      codehash(application);
-      cacheTests(application);
-      timeoutTests(application);
-      errorHandlerTests(application);
-      exampleTests(application);
-      brokenPhraseTests(application);
-      composerErrorPhrase(application);
-      phraseTests(application);
-      loginTests(application);
+    it('Executes the integration tests', function() {
+      tests.forEach(function(test) {
+        test(server);
+      });
     });
 
   });

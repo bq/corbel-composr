@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+
 var pmx = require('pmx');
 //Log routes and latency.
 pmx.init({
-  http : true
+  http: true
 });
 // You must do this BEFORE any require('http') 
 
@@ -11,19 +12,19 @@ var q = require('q');
 var dfd = q.defer();
 
 require('../src/app')
-  .then(function(app){
-    app.set('port', process.env.PORT || 3000);
+  .then(function(serverObjects) {
+    serverObjects.app.set('port', process.env.PORT || 3000);
 
-    var server = app.listen(app.get('port'), function() {
+    var server = serverObjects.app.listen(serverObjects.app.get('port'), function() {
       logger.debug('Express server listening on port ' + server.address().port);
 
-      logger.salute( function(){
-        dfd.resolve(app);
+      logger.salute(function() {
+        dfd.resolve(serverObjects);
       });
 
     });
   })
-  .catch(function(err){
+  .catch(function(err) {
     console.log('ERROR launching express application', err);
     dfd.reject(err);
   });

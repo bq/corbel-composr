@@ -1,24 +1,25 @@
 'use strict';
 
 var express = require('express'),
-    path = require('path'),
-    favicon = require('serve-favicon'),
-    morgan = require('morgan'),
-    helmet = require('helmet'),
-    ejslocals = require('ejs-locals'),
-    cookieParser = require('cookie-parser'),
-    bodyParser = require('body-parser'),
-    engine = require('./lib/engine'),
-    ComposerError = require('./lib/composerError'),
-    config = require('./lib/config'),
-    timeout = require('connect-timeout'),
-    responseTime = require('response-time'),
-    domain = require('express-domain-middleware'),
-    cors = require('cors'),
-    pmx = require('pmx'),
-    corbel = require('corbel-js'),
-    fs = require('fs'),
-    app = express();
+  path = require('path'),
+  favicon = require('serve-favicon'),
+  morgan = require('morgan'),
+  helmet = require('helmet'),
+  ejslocals = require('ejs-locals'),
+  cookieParser = require('cookie-parser'),
+  bodyParser = require('body-parser'),
+  engine = require('./lib/engine'),
+  worker = require('./lib/worker'),
+  ComposrError = require('./lib/ComposrError'),
+  config = require('./lib/config'),
+  timeout = require('connect-timeout'),
+  responseTime = require('response-time'),
+  domain = require('express-domain-middleware'),
+  routes = require('./routes'),
+  cors = require('cors'),
+  pmx = require('pmx'),
+  fs = require('fs'),
+  app = express();
 
 
 
@@ -33,35 +34,54 @@ var logger = require('./utils/logger');
 app.set('logger', logger);
 
 // Access log, logs http requests
-var accessLogStream = fs.createWriteStream('logs/access.log', {flags: 'a'});
-app.use(morgan('combined', {stream: accessLogStream}));
+var accessLogStream = fs.createWriteStream('logs/access.log', {
+  flags: 'a'
+});
+app.use(morgan('combined', {
+  stream: accessLogStream
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.engine('ejs', ejslocals);
 
-app.set('corbel', corbel);
-
 var env = process.env.NODE_ENV || 'development';
 app.locals.ENV = env;
 app.locals.ENV_DEVELOPMENT = env === 'development';
 
+/*******************************
+    Change powered by
+********************************/
 app.use(helmet());
-if(app.get('env') === 'development' || app.get('env') === 'test') {
-    var powered = require('./utils/powered');
-    var randomIndex = function(powered) {
-        return Math.floor((Math.random() * powered.length) + 1) - 1;
-    };
-    app.use(helmet.hidePoweredBy({ setTo: powered[randomIndex(powered)] }));
+if (app.get('env') === 'development' || app.get('env') === 'test') {
+  var powered = require('./utils/powered');
+  var randomIndex = function(powered) {
+    return Math.floor((Math.random() * powered.length) + 1) - 1;
+  };
+  app.use(helmet.hidePoweredBy({
+    setTo: powered[randomIndex(powered)]
+  }));
 }
+
 app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: true
+
+/**************************************
+  Body limit
+**************************************/
+app.use(bodyParser.json({
+  limit: config('bodylimit') || '50mb'
 }));
+
+app.use(bodyParser.urlencoded({
+  extended: true,
+  limit: config('bodylimit') || '50mb'
+}));
+
+
 app.use(cookieParser());
+
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(domain);
@@ -70,31 +90,41 @@ app.use(domain);
   Cors
 **************************************/
 app.use(cors({
-    origin: function(origin, callback) {
-        callback(null, true);
-    },
-    credentials: true
+  origin: function(origin, callback) {
+    callback(null, true);
+  },
+  credentials: true
 }));
+
 app.options('*', cors());
 
-app.use(function(req, res, next){
-    res.header('Access-Control-Expose-Headers', 'Location');
-    next();
+app.use(function(req, res, next) {
+  res.header('Access-Control-Expose-Headers', 'Location');
+  next();
 });
 
 app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
-    status: ERROR_CODE_SERVER_TIMEOUT
+  status: ERROR_CODE_SERVER_TIMEOUT
 }));
+
+
 
 /*************************************
   Engine middlewares
 **************************************/
-engine.middlewares(app);
+app.use(routes.base);
+app.use(routes.doc);
+app.use(routes.snippet);
+app.use(routes.phrase);
+
+if (app.get('env') === 'development' || app.get('env') === 'test') {
+  app.use(routes.test);
+}
 
 var haltOnTimedout = function(req, res, next) {
-    if (!req.timedout) {
-        next();
-    }
+  if (!req.timedout) {
+    next();
+  }
 };
 
 app.use(haltOnTimedout);
@@ -105,47 +135,47 @@ app.use(haltOnTimedout);
 
 /// catch 404 and forward to error handler
 var NotFundHandler = function(req, res, next) {
-    next(new ComposerError('error:not_found', 'Not Found', 404));
+  next(new ComposrError('error:not_found', 'Not Found', 404));
 };
 app.use(NotFundHandler);
 
 var errorHandler = function(err, req, res, next) {
 
-    var message = err.error || err.message || err;
-    if (message === 'Error caught by express error handler') {
-        message = 'error:internal';
-    }
+  var message = err.error || err.message || err;
+  if (message === 'Error caught by express error handler') {
+    message = 'error:internal';
+  }
 
-    logger.debug('error:handler:er', err);
-    logger.debug('error:handler:message', message);
+  logger.debug('error:handler:er', err);
+  logger.debug('error:handler:message', message);
 
-    var status = err.status || 500;
-    if (err.timeout || message === 'Blocked event loop.') {
-        message = 'error:timeout';
-        status = ERROR_CODE_SERVER_TIMEOUT;
-    }
+  var status = err.status || 500;
+  if (err.timeout || message === 'Blocked event loop.') {
+    message = 'error:timeout';
+    status = ERROR_CODE_SERVER_TIMEOUT;
+  }
 
-    if (err.domain) {
-        // usually a tripwire error
-        // release any resource...
-    }
+  if (err.domain) {
+    // usually a tripwire error
+    // release any resource...
+  }
 
-    res.status(status);
-    res.json({
-        httpStatus: status,
-        error: message,
-        errorDescription: err.errorDescription || '',
-        // development error handler
-        // will print stacktrace
-        trace: (app.get('env') === 'development' ? err.stack : '')
-    });
-    logger.error(err, err.stack);
+  res.status(status);
+  res.json({
+    status: status,
+    error: message,
+    errorDescription: err.errorDescription || '',
+    // development error handler
+    // will print stacktrace
+    trace: (app.get('env') === 'development' ? err.stack : '')
+  });
+  logger.error(err, err.stack);
 
-    next(err);
+  next(err);
 };
 
 app.use(errorHandler);
- 
+
 app.use(pmx.expressErrorHandler());
 
 process.on('uncaughtException', function(err) {
@@ -155,5 +185,8 @@ process.on('uncaughtException', function(err) {
     process.exit(1);
   }
 });
+
+//Trigger the worker execution
+worker.init();
 
 module.exports = engine.init(app);

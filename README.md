@@ -70,7 +70,7 @@ It is responsible for **composing** **phrases** of code than can be reused by mu
 {
     "url": "phraseName",
     "get": {
-        "code": "res.render('index', {title: 'hello world'});",
+        "code": "res.status(200).send({title: 'hello world'});",
         "doc": {
             "description": "Phrase description",
             "queryParameters": {
@@ -100,20 +100,15 @@ It is responsible for **composing** **phrases** of code than can be reused by mu
 All the phrases are wrapped inside this `Function` closure, meaning you can access any of it's params:
 
 ```
-function phrase(req, res, next, corbelDriver, corbel, ComposerError, domain, _, q, request, compoSR){
+function phrase(req, res, next, corbelDriver, domain, require){
   //Your phrase code
 }
 ```
 
-- [q](https://www.npmjs.com/package/q) : A library for promises
-- [_](https://www.npmjs.com/package/lodash): Lodash, a library for modular utilities
-- [request](https://www.npmjs.com/package/request): Simplified HTTP request client
-- ComposerError: Our custom error manager. `new ComposerError('error:undefined:name', 'Please insert a name', 400)`
-- domain : Your domain name 
 - req, res, next : [express](https://www.npmjs.com/package/express) request parameters
 - [corbel](https://www.npmjs.com/package/corbel-js): Corbel JavaScript SDK with an extended `corbel.generateDriver` function that generates `corbelDriver` instances with the correct `urlBase`.
 - corbelDriver : An instance of corbelDriver provided by corbel, instantiated with your `Authorization` header if provided
-- compoSR : A snippet runner
+- require : A package and snippet requirer
 
 ### `count` value in collections query
 
