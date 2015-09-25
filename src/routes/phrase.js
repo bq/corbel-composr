@@ -4,9 +4,8 @@ var express = require('express'),
   router = express.Router(),
   pmx = require('pmx'),
   connection = require('../lib/corbelConnection'),
-  phraseManager = require('../lib/phraseManager'),
-  phraseValidator = require('../lib/phraseValidator'),
-  ComposerError = require('../lib/composerError'),
+  engine = require('../lib/engine'),
+  ComposrError = require('../lib/ComposrError'),
   logger = require('../utils/logger'),
   auth = require('../lib/auth');
 
@@ -84,30 +83,33 @@ function createOrUpdatePhrase(req, res, next) {
 
   var domain = connection.extractDomain(authorization);
 
-  phraseValidator.validate(domain, phrase).then(function() {
+  engine.composr.Phrases.validate(phrase)
+    .then(function() {
+      phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
+      pmx.emit('phrase:updated_created', {
+        domain: domain,
+        id: phrase.id
+      });
 
-    phrase.id = domain + '!' + phrase.url.replace(/\//g, '!');
+      logger.debug('Storing or updating phrase', phrase.id, domain);
 
-    pmx.emit('phrase:updated_created', {
-      domain: domain,
-      id: phrase.id
+      corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id)
+        .update(phrase)
+        .then(function(response) {
+          res.set('Location', 'phrase/' + phrase.id);
+          res.status(response.status).send(response.data);
+        }).catch(function(error) {
+          var errorBody = getCorbelErrorBody(error);
+          next(new ComposrError('error:phrase:create', errorBody, error.status));
+        });
+    })
+    .catch(function(result) {
+      var errors = result.errors;
+      logger.warn('SERVER', 'invalid:phrase', phrase.id, result.errors);
+      next(new ComposrError('error:phrase:validation', 'Error validating phrase: ' +
+        JSON.stringify(errors, null, 2), 422));
     });
 
-    logger.debug('Storing or updating phrase', phrase.id, domain);
-
-    corbelDriver.resources.resource(process.env.PHRASES_COLLECTION, phrase.id)
-    .update(phrase)
-    .then(function(response) {
-      res.set('Location', 'phrase/' + phrase.id);
-      res.status(response.status).send(response.data);
-    }).catch(function(error) {
-      var errorBody = getCorbelErrorBody(error);
-      next(new ComposerError('error:phrase:create', errorBody, error.status));
-    });
-
-  }, function(error) {
-    next(new ComposerError('error:phrase:validation', 'Error validating phrase: ' + error, 422));
-  });
 }
 
 router.put('/phrase', function(req, res, next) {
@@ -125,6 +127,7 @@ router.put('/v1.0/phrase', function(req, res, next) {
  * @param  {[type]}   res  [description]
  * @param  {Function} next [description]
  * @return {[type]}        [description]
+ * TODO: unregister phrase on core, 
  */
 function deletePhrase(req, res, next) {
   var authorization = auth.getAuth(req);
@@ -137,7 +140,7 @@ function deletePhrase(req, res, next) {
     logger.debug('phrase:deleted');
     res.status(response.status).send(response.data);
   }).catch(function(error) {
-    next(new ComposerError('error:phrase:delete', error.message, error.status));
+    next(new ComposrError('error:phrase:delete', error.message, error.status));
   });
 
 }
@@ -171,7 +174,7 @@ function getPhrase(req, res, next) {
     res.send(response.status, response.data);
   }).catch(function(error) {
     var errorBody = getCorbelErrorBody(error);
-    next(new ComposerError('error:phrase:get', errorBody, error.status));
+    next(new ComposrError('error:phrase:get', errorBody, error.status));
   });
 }
 
@@ -192,7 +195,7 @@ router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
  */
 function getPhrases(req, res) {
   var authorization = auth.getAuth(req);
-  var phrases = phraseManager.getPhrases(connection.extractDomain(authorization));
+  var phrases = engine.composr.Phrases.getPhrases(connection.extractDomain(authorization));
   res.json(phrases || []);
 }
 
@@ -228,7 +231,15 @@ function executePhrase(endpointPath, req, res, next) {
     return next();
   }
 
-  return phraseManager.run(domain, phrasePath, req, res, next);
+  var method = req.method.toLowerCase();
+
+  var params = {
+    req : req, 
+    res : res,
+    next : next
+  };
+
+  return engine.composr.Phrases.runByPath(domain, phrasePath, method, params);
 }
 
 router.all('/v1.0/*', function(req, res, next) {

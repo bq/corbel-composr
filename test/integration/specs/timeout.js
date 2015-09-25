@@ -43,7 +43,7 @@ function test(app){
           });
       });
 
-      it('it fails with a 503 error on t2phrase', function(done) {
+      it.skip('it fails with a 503 error on t2phrase', function(done) {
 
           this.timeout(30000);
 

@@ -1,39 +1,55 @@
 'use strict';
 
-var bootstrap = require('./bootstrap'),
-  worker = require('./worker'),
-  routes = require('../routes'),
-  logger = require('../utils/logger'),
-  q = require('q');
+var logger = require('../utils/logger'),
+  composr = require('composr-core'),
+  config = require('./config');
 
-//Add necesary middlewares to express
-function middlewares(app) {
-  app.use(routes.base);
-  app.use(routes.phrase);
-  app.use(routes.doc);
+function suscribeLogger() {
+  composr.events.on('debug', 'CorbelComposr', function() {
+    //TODO change to log all, but change core to send less info
+    logger.debug(Array.prototype.slice.call(arguments)[0]);
+  });
 
-  if (app.get('env') === 'development' || app.get('env') === 'test') {
-    app.use(routes.test);
-  }
+  composr.events.on('error', 'CorbelComposr', function() {
+    logger.error.apply(logger, arguments);
+  });
+
+  composr.events.on('warn', 'CorbelComposr', function() {
+    logger.warn.apply(logger, arguments);
+  });
+
+  composr.events.on('info', 'CorbelComposr', function() {
+    logger.info.apply(logger, arguments);
+  });
 }
 
-//Call necesary init functions
+/**
+ * Launches the bootstrap of data, worker and logger
+ * @param  {[type]} app [description]
+ * @return promise
+ */
 function init(app) {
-  var dfd = q.defer();
 
-  worker.init();
+  suscribeLogger();
 
-  q.all([bootstrap.phrases(), bootstrap.snippets()])
+  var coreOptions = {
+    credentials: {
+      clientId: config('corbel.composer.credentials').clientId,
+      clientSecret: config('corbel.composer.credentials').clientSecret,
+      scopes: config('corbel.composer.credentials').scopes,
+    },
+    urlBase: config('corbel.driver.options').urlBase
+  };
+
+  return composr.init(coreOptions)
     .then(function() {
       logger.info('Engine initialized, all data is loaded :)');
-      dfd.resolve(app);
-    })
-    .catch(dfd.reject);
+      return app;
+    });
 
-  return dfd.promise;
 }
 
 module.exports = {
   init: init,
-  middlewares: middlewares
+  composr : composr
 };
