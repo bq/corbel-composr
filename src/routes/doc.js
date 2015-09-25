@@ -1,24 +1,25 @@
 'use strict';
 
 var express = require('express'),
-    router = express.Router(),
-    phraseManager = require('../lib/phraseManager'),
-    docBuilder = require('../lib/docBuilder'),
-    ComposerError = require('../lib/composerError'),
-    raml2html = require('raml2html');
+  router = express.Router(),
+  engine = require('../lib/engine'),
+  ComposrError = require('../lib/ComposrError');
 
 router.get('/doc/:domain', function(req, res, next) {
 
-    var domain = req.params.domain || '';
-    var phrases = phraseManager.getPhrases(domain);
+  var domain = req.params.domain || '';
+  //TODO move to core
+  var rawPhrases = engine.composr.data.phrases;
+  var domainPhrases = rawPhrases.filter(function(item) {
+    return item.id.split('!')[0] === domain;
+  });
 
-    var source = docBuilder.buildDefinition(domain, phrases);
-    var config = raml2html.getDefaultConfig(true);
-
-    raml2html.render(source, config, function(result) {
-        res.send(result);
-    }, function(error) {
-        next(new ComposerError('error:phrase:doc', 'Error generating doc: ' + error, 422));
+  engine.composr.documentation(domainPhrases, domain)
+    .then(function(result) {
+      res.send(result);
+    }).catch(function(err) {
+      console.log('asd22asd');
+      next(new ComposrError('error:phrase:doc', 'Error generating doc: ' + err, 422));
     });
 });
 

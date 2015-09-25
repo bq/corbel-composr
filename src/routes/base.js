@@ -3,7 +3,7 @@
 var express = require('express'),
   router = express.Router(),
   config = require('../lib/config'),
-  phraseManager = require('../lib/phraseManager'),
+  engine = require('../lib/engine'),
   q = require('q'),
   https = require('https'),
   packageJSON = require('../../package.json');
@@ -21,7 +21,7 @@ router.get('/version', function(req, res) {
 
 function status(req, res) {
 
-  var phrasesLoaded = phraseManager.getAmountOfPhrasesLoaded();
+  var phrasesLoaded = engine.composr.Phrases.count();
 
   var statuses = [{
     title: 'Phrases Loaded',
