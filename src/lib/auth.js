@@ -1,7 +1,7 @@
 'use strict';
 
 var validator = require('./validate'),
-    ComposerError = require('./composerError');
+    ComposrError = require('./ComposrError');
 
 var getAuth = function(req) {
 	validator.isValue(req, 'undefined:req');
@@ -9,7 +9,7 @@ var getAuth = function(req) {
     var auth = req.get('Authorization');
 
     if (!auth) {
-        throw new ComposerError('missing:header:authorization', 'Authorization header not found', 401);
+        throw new ComposrError('missing:header:authorization', 'Authorization header not found', 401);
     } 
 
     return auth;

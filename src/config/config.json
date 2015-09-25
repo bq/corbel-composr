@@ -22,5 +22,6 @@
 
     "logLevel": "error",
     "logFile": "logs/composr.log",
-    "syslog" : false
+    "syslog" : false,
+    "bodylimit" : "50mb"
 }

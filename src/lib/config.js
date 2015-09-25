@@ -2,7 +2,7 @@
 
 var _ = require('lodash'),
   fs = require('fs'),
-  ComposerError = require('./composerError');
+  ComposrError = require('./ComposrError');
 
 var env = process.env.NODE_ENV || 'development';
 var config = require('../config/config.json');
@@ -81,7 +81,7 @@ module.exports = function(key, haltOnUndefined) {
   if (!key) {
     return _.cloneDeep(config);
   } else if (typeof(config[key]) === 'undefined' && haltOnUndefined) {
-    throw new ComposerError('error:composr:config:undefined', '', 500);
+    throw new ComposrError('error:composr:config:undefined', '', 500);
   } else {
     return _.cloneDeep(config[key]);
   }
