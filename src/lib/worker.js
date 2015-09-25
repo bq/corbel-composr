@@ -1,11 +1,11 @@
 'use strict';
 
-var phraseManager = require('./phraseManager'),
+var engine = require('./engine'),
   connection = require('./corbelConnection'),
   amqp = require('amqplib'),
   uuid = require('uuid'),
   q = require('q'),
-  ComposerError = require('./composerError'),
+  ComposrError = require('./ComposrError'),
   config = require('./config'),
   logger = require('../utils/logger');
 
@@ -29,18 +29,17 @@ var worker = function() {
           message = JSON.parse(msg.content.toString('utf8'));
         } catch (error) {
           //ch.nack(error, false, false);
-          throw new ComposerError('error:worker:message', 'Error parsing message: ' + error, 422);
+          throw new ComposrError('error:worker:message', 'Error parsing message: ' + error, 422);
         }
 
         if (message.type === connection.PHRASES_COLLECTION) {
           logger.debug('WORKER mesage', message);
           switch (message.action) {
             case 'DELETE':
-
-              phraseManager.unregisterPhrase({
-                id: message.resourceId
-              });
-
+              var id = message.resourceId;
+              var domain = id.split('!')[0];
+              engine.composr.Phrases.unregister(domain, id);
+              
               //ch.ack(msg);
               break;
 
@@ -50,13 +49,14 @@ var worker = function() {
               connection.driver.then(function(driver) {
                   return driver.resources.resource(connection.PHRASES_COLLECTION, message.resourceId).get();
                 }).then(function(response) {
-                  phraseManager.registerPhrase(response.data);
+                  var domain = response.data.id.split('!', [0]);
+                  engine.composr.Phrases.register(domain, response.data);
                   //ch.ack(msg);
                 })
                 .catch(function(err) {
                   logger.error('WORKER error: ', err);
                   connection.regenerateDriver();
-                  throw new ComposerError('error:worker:phrase', 'Error registering phrase: ' + err, 422);
+                  throw new ComposrError('error:worker:phrase', 'Error registering phrase: ' + err, 422);
                   //ch.nack(err, false, false);
                 });
 

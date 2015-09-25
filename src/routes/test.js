@@ -3,17 +3,15 @@
 var express = require('express'),
   router = express.Router(),
   corbel = require('corbel-js'),
-  ComposerError = require('../lib/composerError'),
-  compoSRBuilder = require('../lib/compoSRBuilder'),
-  config = require('../lib/config'),
-  phraseManager = require('../lib/phraseManager');
+  ComposrError = require('../lib/ComposrError'),
+  config = require('../lib/config');
 
 router.get('/e1', function(res) {
   res.undefinedFunction();
 });
 
 router.get('/e2', function() {
-  throw new ComposerError('error:custom', '', 555);
+  throw new ComposrError('error:custom', '', 555);
 });
 
 router.get('/t1', function(req, res) {
@@ -80,7 +78,7 @@ router.get('/t3', function(req, res) {
 router.get('/t4', function() {
 
  setTimeout(function() {
-  throw new ComposerError('custom:error', 'description', 555);
+  throw new ComposrError('custom:error', 'description', 555);
  }, 1500);
 
 });
@@ -110,11 +108,12 @@ router.post('/token', function(req, res, next) {
     corbelDriver.iam.token().create().then(function(response) {
         res.send(response);
     }).catch(function(error) {
-        next(new ComposerError('error:token', error, error.status));
+        next(new ComposrError('error:token', error, error.status));
     });
 
 });
 
+/*
 router.get('/t2phrase', function(req, res, next) {
 
 
@@ -144,7 +143,7 @@ router.get('/t2phrase', function(req, res, next) {
     next: next
   };
 
-  var result = phraseManager.evaluateCode(body);
+  var result = engine.composr.Phrases.evaluateCode(body);
   phraseManager.executePhrase(context, null, result.fn);
 
 });
@@ -169,20 +168,7 @@ router.get('/t3phrase', function(req, res) {
   phraseManager.executePhrase(context, null, result.fn);
 });
 
-router.get('/t4snippet', function(req, res) {
-
-  var phraseBody = 'compoSR.run("sendJson", {res: res, "message" : "yes"});';
-  var compoSR = compoSRBuilder.getCompoSR('silkroad-qa');
-  var context = {
-    req: req,
-    res: res
-  };
-
-  var result = phraseManager.evaluateCode(phraseBody, ['req', 'res', 'compoSR']);
-  phraseManager.executePhrase(context, compoSR, result.fn);
-});
-
-
+*/
 router.get('/cache', function(req, res) {
   res.set('Cache-Control', 'public, max-age=31536000');
   res.json({

@@ -3,15 +3,15 @@
 // Integration
 var timeoutTests = require('./specs/timeout.js'),
     errorHandlerTests = require('./specs/errorHandlers.js'),
-    exampleTests = require('./specs/example.js'),
+    //exampleTests = require('./specs/example.js'),
     cacheTests = require('./specs/cache.js'),
-    loginTests = require('./specs/login.js'),
-    brokenPhraseTests = require('./specs/brokenPhrase.js'),
-    codehash = require('./specs/codehash.js'),
-    pathParamsTests = require('./specs/pathParams.js'),
-    queryParams = require('./specs/queryParams.js'),
-    composerErrorPhrase = require('./specs/composerErrorPhrase.js'),
-    phraseTests = require('./specs/phrase.js');
+    loginTests = require('./specs/login.js');
+    //brokenPhraseTests = require('./specs/brokenPhrase.js'),
+    //codehash = require('./specs/codehash.js'),
+    //pathParamsTests = require('./specs/pathParams.js'),
+    //queryParams = require('./specs/queryParams.js'),
+    //composerErrorPhrase = require('./specs/composerErrorPhrase.js'),
+    //phraseTests = require('./specs/phrase.js');
 
 module.exports = function(promise){
   var application;
@@ -28,16 +28,16 @@ module.exports = function(promise){
 
     //This wrapping is needed because otherwise application would be an empty object
     it('Executes the integration tests', function(){
-      pathParamsTests(application);
-      queryParams(application);
-      codehash(application);
+      //pathParamsTests(application);
+      //queryParams(application);
+      //codehash(application);
       cacheTests(application);
       timeoutTests(application);
       errorHandlerTests(application);
-      exampleTests(application);
-      brokenPhraseTests(application);
-      composerErrorPhrase(application);
-      phraseTests(application);
+      //exampleTests(application);
+      //brokenPhraseTests(application);
+      //composerErrorPhrase(application);
+      //phraseTests(application);
       loginTests(application);
     });
 

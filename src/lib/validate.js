@@ -1,8 +1,6 @@
 'use strict';
 
-var ComposerError = require('./composerError'),
-  regexpGenerator = require('./regexpGenerator'),
-  XRegExp = require('xregexp').XRegExp;
+var ComposrError = require('./ComposrError');
 /**
  * Checks if some value is not undefined
  * @param  {Mixed}  value
@@ -14,7 +12,7 @@ var isDefined = function(value, errorCode) {
   var isUndefined = value === undefined;
 
   if (isUndefined && errorCode) {
-    throw new ComposerError(errorCode, 'isDefined undefined: ' + value, 422);
+    throw new ComposrError(errorCode, 'isDefined undefined: ' + value, 422);
   }
   return !isUndefined;
 };
@@ -30,7 +28,7 @@ var failIfIsDefined = function(value, errorCode) {
   var isDefined = value !== undefined;
 
   if (isDefined && errorCode) {
-    throw new ComposerError(errorCode, 'failIfIsDefined undefined: ' + value, 422);
+    throw new ComposrError(errorCode, 'failIfIsDefined undefined: ' + value, 422);
   }
   return !isDefined;
 };
@@ -46,7 +44,7 @@ var isNotNull = function(value, errorCode) {
   var isNull = value === null;
 
   if (isNull && errorCode) {
-    throw new ComposerError(errorCode, 'isNotNull undefined: ' + value, 422);
+    throw new ComposrError(errorCode, 'isNotNull undefined: ' + value, 422);
   }
   return !isNull;
 };
@@ -74,7 +72,7 @@ var isGreaterThan = function(value, greaterThan, errorCode) {
   var gt = this.isValue(value) && value > greaterThan;
 
   if (!gt && errorCode) {
-    throw new ComposerError(errorCode, 'isGreaterThan undefined: ' + value, 422);
+    throw new ComposrError(errorCode, 'isGreaterThan undefined: ' + value, 422);
   }
   return gt;
 };
@@ -91,29 +89,9 @@ var isGreaterThanOrEqual = function(value, isGreaterThanOrEqual, errorCode) {
   var gte = this.isValue(value) && value >= isGreaterThanOrEqual;
 
   if (!gte && errorCode) {
-    throw new ComposerError(errorCode, 'isGreaterThanOrEqual undefined: ' + value, 422);
+    throw new ComposrError(errorCode, 'isGreaterThanOrEqual undefined: ' + value, 422);
   }
   return gte;
-};
-
-/**
- * Checks whenever a phrase url is well formed
- * @param  {String}  url
- * @param  {String}  [errorCode]
- * @throws {Error} If return value is false and errorCode are defined
- * @return {XRegExp}
- */
-var isValidUrl = function(url, errorCode) {
-  var regexp;
-  try {
-    var regexp = XRegExp(regexpGenerator.regexpUrl(url)); //jshint ignore : line
-    XRegExp.test('test', regexp);
-  } catch (e) {
-    if (errorCode) {
-      throw new ComposerError(errorCode, 'malformedUrl: ' + url, 422);
-    }
-  }
-  return regexp;
 };
 
 /**
@@ -127,7 +105,7 @@ var isValidBase64 = function(codehash, errorCode) {
   var isValid = base64.test(codehash);
 
   if (!isValid && errorCode) {
-    throw new ComposerError(errorCode, 'isValidBase64 undefined: ' + codehash, 422);
+    throw new ComposrError(errorCode, 'isValidBase64 undefined: ' + codehash, 422);
   }
   return isValid;
 };
@@ -138,5 +116,4 @@ module.exports.isNotNull = isNotNull;
 module.exports.isValue = isValue;
 module.exports.isGreaterThan = isGreaterThan;
 module.exports.isGreaterThanOrEqual = isGreaterThanOrEqual;
-module.exports.isValidUrl = isValidUrl;
 module.exports.isValidBase64 = isValidBase64;
