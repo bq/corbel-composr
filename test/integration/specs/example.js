@@ -5,7 +5,7 @@ var request = require('supertest'),
     expect = chai.expect;
 
 function test(app){
-  describe('Working:', function() {
+  describe.skip('Working:', function() {
 
       it('calling a working composer', function(done) {
 

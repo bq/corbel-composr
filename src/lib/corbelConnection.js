@@ -4,7 +4,7 @@ var corbel = require('corbel-js'),
     config = require('./config'),
     _ = require('lodash'),
     pmx = require('pmx'),
-    ComposerError = require('./composerError'),
+    ComposrError = require('./ComposrError'),
     logger = require('../utils/logger');
 
 var PHRASES_COLLECTION = 'composr:Phrase';
@@ -21,7 +21,7 @@ function regenerateDriver(){
     }).catch(function(error) {
         logger.error('error:composer:corbel:token', error.response.body);
         pmx.notify('error:composer:corbel:token',  error.response.body);
-        throw new ComposerError('error:composer:corbel:token', '', 401);
+        throw new ComposrError('error:composer:corbel:token', '', 401);
     });
 }
 
@@ -40,7 +40,7 @@ var extractDomain = function(accessToken) {
 var getTokenDriver = function(accessToken) {
 
     if (!accessToken) {
-        throw new ComposerError('error:connection:undefiend:accessToken');
+        throw new ComposrError('error:connection:undefiend:accessToken');
     }
 
     var iamToken = {
