@@ -3,7 +3,7 @@
 // Unit
 require('./unit/test-suite.js');
 
-var app = require('../bin/composer');
+//var app = require('../bin/composer');
 
 // Integration
-require('./integration/test-suite.js')(app);
+//require('./integration/test-suite.js')(app);
