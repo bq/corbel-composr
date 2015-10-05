@@ -114,8 +114,8 @@ app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
 **************************************/
 app.use(routes.base);
 app.use(routes.doc);
-app.use(routes.snippet);
 app.use(routes.phrase);
+app.use(routes.snippet);
 
 if (app.get('env') === 'development' || app.get('env') === 'test') {
   app.use(routes.test);
