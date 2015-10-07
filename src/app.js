@@ -54,15 +54,13 @@ app.locals.ENV_DEVELOPMENT = env === 'development';
     Change powered by
 ********************************/
 app.use(helmet());
-if (app.get('env') === 'development' || app.get('env') === 'test') {
   var powered = require('./utils/powered');
   var randomIndex = function(powered) {
-    return Math.floor((Math.random() * powered.length) + 1) - 1;
+    return Math.floor(Math.random() * powered.length );
   };
   app.use(helmet.hidePoweredBy({
     setTo: powered[randomIndex(powered)]
   }));
-}
 
 app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
