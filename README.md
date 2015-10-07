@@ -12,7 +12,7 @@
 
 ## Overview
 
-CompoSR is a [nodeJS](https://nodejs.org/api/) middleware, built on top  of [express](http://expressjs.com/4x/api.html), for [Corbel][corbel-link]. 
+CompoSR is a [nodeJS](https://nodejs.org/api/) middleware, built on top  of [express](http://expressjs.com/4x/api.html), for [Corbel][corbel-link].
 
 It offers developers the ability to make their own specific application API based in [corbel-js](https://github.com/bq/corbel-js)
 
@@ -296,7 +296,7 @@ var jwt = generateAssertion(claims, credentials.clientSecret);
 
 ```javascript
 if (!req.body || !req.body.jwt) {
-  res.status(401).send(new ComposerError('error:jwt:undefined', '', 401));
+  res.status(401).send(new ComposrError('error:jwt:undefined', '', 401));
 }
 var corbelDriver = corbel.generateDriver({iamToken: ''});
 
@@ -365,7 +365,7 @@ var jwt = generateAssertion(claims, appCredentials.clientSecret);
 
 ```javascript
 if (!req.body || !req.body.jwt) {
-  return res.status(401).send(new ComposerError('error:jwt:undefined', '', 401));
+  return res.status(401).send(new ComposrError('error:jwt:undefined', '', 401));
 }
 var corbelDriver = corbel.generateDriver({iamToken: ''});
 
@@ -386,7 +386,7 @@ return corbelDriver.iam.token().create({
 }).then(function(response){
   //Enable assets access (only for users)
   corbelDriver.assets().access();
-  
+
   //Tenemos el token de usuario, asimismo tambien el refresh y el expires
   tokenObject = response.data;
 
@@ -447,22 +447,22 @@ var jwt = generateAssertion(claims, appCredentials.clientSecret);
 
 ```javascript
 if (!req.body || !req.body.jwt) {
-  res.status(400).send(new ComposerError('error:jwt:undefined', 'JWT is missing', 400));
+  res.status(400).send(new ComposrError('error:jwt:undefined', 'JWT is missing', 400));
   return false;
 }
 var decoded = corbel.jwt.decode(req.body.jwt);
 if(Object.keys(decoded).length === 0){
-  res.status(400).send(new ComposerError('error:jwt:malformed', 'Your JWT is malformed', 400));
+  res.status(400).send(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400));
   return false;
 }
 
 if(!decoded.refresh_token){
-  res.status(400).send(new ComposerError('error:jwt:refresh_token:missing', 'Add the refresh_token property', 400));
+  res.status(400).send(new ComposrError('error:jwt:refresh_token:missing', 'Add the refresh_token property', 400));
   return false;
 }else{
  var refreshTokenDecoded = corbel.jwt.decode(decoded.refresh_token);
  if(Object.keys(refreshTokenDecoded).length === 0){
-   res.status(400).send(new ComposerError('error:jwt:refresh_token:malformed', 'Your refresh_token is malformed', 400));
+   res.status(400).send(new ComposrError('error:jwt:refresh_token:malformed', 'Your refresh_token is malformed', 400));
   return false;
  }
 }
@@ -521,7 +521,7 @@ http.request(post_options, function(res) {
 
 ```javascript
 if (!req.get('Authorization')) {
-  res.status(401).send(new ComposerError('error:unauthorized', 'Authorization missing', 401));
+  res.status(401).send(new ComposrError('error:unauthorized', 'Authorization missing', 401));
 }
 
 var method =  req.params.type && req.params.type === 'all' ? 'disconnect' : 'signOut';
@@ -540,7 +540,7 @@ corbelDriver.iam.user('me')[method]()
 ### Logout a user from all devices:
 ```javascript
 if (!req.get('Authorization')) {
-  throw new ComposerError('error:unauthorized', 'Authorization missing', 401);
+  throw new ComposrError('error:unauthorized', 'Authorization missing', 401);
 }
 
 /*
@@ -568,7 +568,7 @@ corbelDriver.iam.user('me').get();
 
 ```javascript
 if (!req.get('Authorization')) {
-  throw new ComposerError('error:authorization:undefined', '', 401);
+  throw new ComposrError('error:authorization:undefined', '', 401);
 }
 
 var books = [];
