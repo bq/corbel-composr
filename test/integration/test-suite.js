@@ -9,7 +9,8 @@ var tests = [
   //require('./specs/unpublishPhrase.test.js'),
   require('./specs/publishSnippet.test.js'),
   //require('./specs/unpublishSnippet.test.js'),
-  require('./specs/cache.test.js')
+  require('./specs/cache.test.js'),
+  require('./specs/getToPhraseEndpoint.test.js')
 ];
 
 module.exports = function(serverPromise) {
