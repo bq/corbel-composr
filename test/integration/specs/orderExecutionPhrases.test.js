@@ -60,7 +60,6 @@ function test(server) {
       .get('/testDomainComposr/user/juan/surname')
       .expect(200)
       .end(function(err, response) {
-        console.log(response.body);
         expect(response).to.be.an('object');
         expect(response.body.name).to.equals('juan');
         expect(response.body.surname).to.equals('constant');
@@ -73,7 +72,6 @@ function test(server) {
       .get('/testDomainComposr/user/juan')
       .expect(201)
       .end(function(err, response) {
-        console.log(response.body);
         expect(response).to.be.an('object');
         expect(response.body.name).to.equals('juan');
         done(err);
@@ -85,7 +83,6 @@ function test(server) {
       .get('/testDomainComposr/user/name')
       .expect(200)
       .end(function(err, response) {
-        console.log(response.body);
         expect(response).to.be.an('object');
         expect(response.body.name).to.equals('constant');
         done(err);
