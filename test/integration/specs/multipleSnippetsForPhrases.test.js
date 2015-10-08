@@ -91,7 +91,6 @@ function test(server) {
       .get('/testDomainComposr/snippet-test/awesome/juan')
       .expect(200)
       .end(function(err, response) {
-        console.log(response);
         expect(response).to.be.an('object');
         expect(response.text).to.equals('JUAN IS AWESOME!');
         done(err);

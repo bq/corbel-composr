@@ -144,9 +144,6 @@ var errorHandler = function(err, req, res, next) {
     message = 'error:internal';
   }
 
-  logger.debug('error:handler:er', err);
-  logger.debug('error:handler:message', message);
-
   var status = err.status || 500;
   if (err.timeout || message === 'Blocked event loop.') {
     message = 'error:timeout';
@@ -157,17 +154,17 @@ var errorHandler = function(err, req, res, next) {
     // usually a tripwire error
     // release any resource...
   }
-
-  res.status(status);
-  res.json({
+  var errorLogged = {
     status: status,
     error: message,
     errorDescription: err.errorDescription || '',
     // development error handler
     // will print stacktrace
     trace: (app.get('env') === 'development' ? err.stack : '')
-  });
-  logger.error(err, err.stack);
+  };
+  logger.error(errorLogged);
+  res.status(status);
+  res.json(errorLogged);
 
   next(err);
 };
