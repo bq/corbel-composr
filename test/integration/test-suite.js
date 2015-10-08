@@ -6,6 +6,7 @@ var tests = [
   require('./specs/errorHandlers.test.js'),
   require('./specs/pathParams.test.js'),
   require('./specs/publishPhrase.test.js'),
+  require('./specs/multipleSnippetsForPhrases.test.js'),
   //require('./specs/unpublishPhrase.test.js'),
   require('./specs/publishSnippet.test.js'),
   //require('./specs/unpublishSnippet.test.js'),
