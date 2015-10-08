@@ -12,7 +12,8 @@ var tests = [
   //require('./specs/unpublishSnippet.test.js'),
   require('./specs/cache.test.js'),
   require('./specs/getToPhraseEndpoint.test.js'),
-  require('./specs/domainUserReturnsNotFound.test.js')
+  require('./specs/domainUserReturnsNotFound.test.js'),
+  require('./specs/orderExecutionPhrases.test.js')
 ];
 
 module.exports = function(serverPromise) {
