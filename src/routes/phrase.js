@@ -195,8 +195,14 @@ router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
  */
 function getPhrases(req, res) {
   var authorization = auth.getAuth(req);
-  var phrases = engine.composr.Phrases.getPhrases(connection.extractDomain(authorization));
-  res.json(phrases || []);
+  var domainExtracted = connection.extractDomain(authorization);
+  if (domainExtracted){
+      var phrases = engine.composr.Phrases.getPhrases(domainExtracted);
+      res.json(phrases || []);
+  }
+  else{
+      res.status(401).send(new ComposrError('error:domain:undefined', '', 401));
+  }
 }
 
 router.get('/phrase', function(req, res) {
