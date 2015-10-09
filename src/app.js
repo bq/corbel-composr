@@ -184,4 +184,6 @@ process.on('uncaughtException', function(err) {
 //Trigger the worker execution
 worker.init();
 
+//TODO : only trigger the worker and the driver connection after the data is loaded
+
 module.exports = engine.init(app);
