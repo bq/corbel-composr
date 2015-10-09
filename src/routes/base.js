@@ -23,10 +23,10 @@ function status(req, res) {
 
   var phrasesLoaded = engine.composr.Phrases.count();
 
-  var statuses = [{
-    title: 'Phrases Loaded',
-    ok: phrasesLoaded > 0 ? true : false
-  }];
+  var statuses = {
+    'phrases': phrasesLoaded > 0 ? true : false,
+    'phrasesLoaded' : phrasesLoaded
+  };
 
 
   var modules = ['iam', 'resources'];
@@ -35,17 +35,11 @@ function status(req, res) {
     var deferred = q.defer();
 
     https.get(path.replace('{{module}}', module) + '/version', function() {
-      statuses.push({
-        title: module,
-        ok: true
-      });
+      statuses[module] = true;
       deferred.resolve();
     })
       .on('error', function() {
-        statuses.push({
-          title: module,
-          ok: false
-        });
+        statuses[module] = false;
 
         deferred.resolve();
       });
