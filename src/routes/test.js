@@ -23,6 +23,13 @@ router.post('/jwt', function(req, res) {
 
 });
 
+
+function getCorbelErrorBody(corbelErrResponse) {
+  var errorBody = typeof(corbelErrResponse.data) !== 'undefined' && typeof(corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse;
+  return errorBody;
+}
+
+
 router.post('/token', function(req, res, next) {
 
     var data = req.body || {};
@@ -38,7 +45,8 @@ router.post('/token', function(req, res, next) {
     corbelDriver.iam.token().create().then(function(response) {
         res.send(response);
     }).catch(function(error) {
-        next(new ComposrError('error:token', error, error.status));
+      var errorBody = getCorbelErrorBody(error);
+        next(new ComposrError('error:token', errorBody, error.status));
     });
 
 });
