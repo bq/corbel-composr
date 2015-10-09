@@ -12,8 +12,7 @@ var initialized = false;
 
 function suscribeLogger() {
   composr.events.on('debug', 'CorbelComposr', function() {
-    //TODO change to log all, but change core to send less info
-    logger.debug(Array.prototype.slice.call(arguments)[0]);
+    logger.debug.apply(logger, arguments);
   });
 
   composr.events.on('error', 'CorbelComposr', function() {
