@@ -2,21 +2,23 @@
 
 // Integration
 var tests = [
-  require('./specs/timeout.test.js'),
+/*require('./specs/timeout.test.js'),
   require('./specs/errorHandlers.test.js'),
   require('./specs/queryParams.test.js'),
   require('./specs/pathParams.test.js'),
   require('./specs/docField.test.js'),
   require('./specs/publishPhrase.test.js'),
   require('./specs/multipleSnippetsForPhrases.test.js'),
-  require('./specs/unregisterPhrases.test.js'),
-  //require('./specs/unpublishPhrase.test.js'),
-  require('./specs/publishSnippet.test.js'),
-  //require('./specs/unpublishSnippet.test.js'),
+  require('./specs/unregisterPhrases.test.js'),*/
+  require('./specs/unregisterSnippets.test.js'),
+  /*require('./specs/publishSnippet.test.js'),
   require('./specs/cache.test.js'),
   require('./specs/getToPhraseEndpoint.test.js'),
   require('./specs/domainUserReturnsNotFound.test.js'),
   require('./specs/orderExecutionPhrases.test.js')
+  */
+  //require('./specs/unpublishSnippet.test.js'),
+  //require('./specs/unpublishPhrase.test.js'),
 ];
 
 module.exports = function(serverPromise) {
