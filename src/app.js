@@ -65,6 +65,11 @@ app.use(helmet());
 app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
 
+/*************************************
+  Cache
+**************************************/
+app.disable('etag');
+
 /**************************************
   Body limit
 **************************************/
@@ -76,7 +81,6 @@ app.use(bodyParser.urlencoded({
   extended: true,
   limit: config('bodylimit') || '50mb'
 }));
-
 
 app.use(cookieParser());
 
@@ -104,7 +108,6 @@ app.use(function(req, res, next) {
 app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
   status: ERROR_CODE_SERVER_TIMEOUT
 }));
-
 
 
 /*************************************
