@@ -100,6 +100,11 @@ var haltOnTimedout = function(req, res, next) {
 app.use(haltOnTimedout);
 
 /*************************************
+  Cache
+**************************************/
+app.disable('etag');
+
+/*************************************
   Error handlers
 **************************************/
 
