@@ -7,6 +7,7 @@ var corbel = require('corbel-js'),
     logger = require('../utils/logger');
 
 var PHRASES_COLLECTION = 'composr:Phrase';
+var SNIPPETS_COLLECTION = 'composr:Snippet';
 
 var corbelConfig = config('corbel.driver.options');
 corbelConfig = _.extend(corbelConfig, config('corbel.composer.credentials'));
@@ -39,6 +40,7 @@ var getTokenDriver = function(accessToken) {
     return corbel.getDriver(corbelConfig);
 };
 
+module.exports.SNIPPETS_COLLECTION = SNIPPETS_COLLECTION;
 module.exports.PHRASES_COLLECTION = PHRASES_COLLECTION;
 module.exports.extractDomain = extractDomain;
 module.exports.getTokenDriver = getTokenDriver;

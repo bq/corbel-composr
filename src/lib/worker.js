@@ -1,12 +1,16 @@
 'use strict';
 
 var engine = require('./engine'),
-  corbelConnection = require('./corbelConnection'),
-  amqp = require('amqplib'),
-  uuid = require('uuid'),
-  ComposrError = require('./ComposrError'),
-  config = require('./config'),
-  logger = require('../utils/logger');
+corbelConnection = require('./corbelConnection'),
+amqp = require('amqplib'),
+uuid = require('uuid'),
+ComposrError = require('./ComposrError'),
+config = require('./config'),
+logger = require('../utils/logger');
+
+function phraseOrSnippet(type) {
+  return type === corbelConnection.PHRASES_COLLECTION ? true : false;
+}
 
 function doWork(ch, msg) {
   if (msg.fields.routingKey === config('rabbitmq.event')) {
@@ -18,37 +22,52 @@ function doWork(ch, msg) {
       //ch.nack(error, false, false);
       throw new ComposrError('error:worker:message', 'Error parsing message: ' + error, 422);
     }
-
-    if (message.type === corbelConnection.PHRASES_COLLECTION) {
-      logger.debug('WORKER phrases event:', message);
+    var type = message.type;
+    if ((type === corbelConnection.PHRASES_COLLECTION) ||
+        (type === corbelConnection.SNIPPETS_COLLECTION)) {
+      var isPhrase = phraseOrSnippet(type);
+      logger.debug('WORKER ' + isPhrase? 'phrases':'snippet' + ' event:', message);
+      var id = message.resourceId;
+      var domain = id.split('!')[0];
       switch (message.action) {
-        case 'DELETE':
-          var id = message.resourceId;
-          var domain = id.split('!')[0];
-          engine.composr.Phrases.unregister(domain, id);
 
-          //ch.ack(msg);
-          break;
+        case 'DELETE':
+          if (isPhrase){
+            engine.composr.Phrases.unregister(domain, id);
+          }
+          else{
+            engine.composr.Snippets.unregister(domain, id);
+          }
+        //ch.ack(msg);
+        break;
 
         default: // 'CREATE' or 'UPDATE'
-          var idPhrase = message.resourceId;
-          var domainPhrase = idPhrase.split('!')[0];
-          logger.debug('WORKER triggered create or update event', idPhrase, 'domain:' + domainPhrase);
-          engine.composr.loadPhrase(idPhrase)
-            .then(function(phrase) {
-              console.log(phrase);
-              return engine.composr.Phrases.register(domainPhrase, phrase);
-            })
-            .then(function(result) {
-              console.log(result);
-            })
-            .catch(function(err) {
-              logger.error('WORKER error: ', err);
-            });
-          break;
+        logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
+        var promise;
 
+        if(isPhrase){
+          promise = engine.composr.loadPhrase(id);
+        }else{
+          promise = engine.composr.loadSnippet(id);
+        }
+        promise
+        .then(function(item) {
+          logger.debug('worker item fetched', item.id);
+          if (isPhrase){
+            return engine.composr.Phrases.register(domain, item);
+          }
+          else{
+            return engine.composr.Snippets.register(domain, item);
+          }
+        })
+        .then(function(result) {
+          logger.debug('worker item registered', id, result.registered);
+        })
+        .catch(function(err) {
+          logger.error('WORKER error: ', err.data.error, err.data.errorDescription, err.status);
+        });
+        break;
       }
-
     }
   }
 
@@ -56,27 +75,27 @@ function doWork(ch, msg) {
 
 function createChannel(conn) {
   var queue = 'composer-' + uuid.v4(),
-    exchange = 'eventbus.exchange',
-    pattern = '';
+  exchange = 'eventbus.exchange',
+  pattern = '';
 
   return conn.createChannel()
-    .then(function(ch) {
-      return ch.assertQueue(queue, {
-          durable: false,
-          autoDelete: true
-        }).then(function() {
-          return ch.bindQueue(queue, exchange, pattern);
-        })
-        .then(function() {
-          ch.consume(queue, function(message) {
-              //Added callback function in case we need to do manual ack of the messages
-              doWork(ch, message);
-            },
-            Object.create({
-              noAck: true
-            }));
-        });
+  .then(function(ch) {
+    return ch.assertQueue(queue, {
+      durable: false,
+      autoDelete: true
+    }).then(function() {
+      return ch.bindQueue(queue, exchange, pattern);
+    })
+    .then(function() {
+      ch.consume(queue, function(message) {
+        //Added callback function in case we need to do manual ack of the messages
+        doWork(ch, message);
+      },
+      Object.create({
+        noAck: true
+      }));
     });
+  });
 }
 
 
@@ -89,31 +108,31 @@ function init() {
   logger.info('Creating worker with ID', workerID);
 
   amqp.connect(connUrl)
-    .then(function(connection) {
-      conn = connection;
-      //Close conection on SIGINT
-      process.once('SIGINT', function() {
-        connection.close();
-        process.exit();
-      });
-
-      createChannel(connection)
-        .then(function() {
-          logger.info('Worker up, with ID', workerID);
-        })
-        .catch(function(error) {
-          logger.error('WORKER error ', error, 'with ID', workerID);
-          if (conn) {
-            conn.close(function() {
-              process.exit(1);
-            });
-          }
-        });
-    })
-    .then(null, function(err) {
-      logger.error('Worker error %s with ID : %s', err, workerID);
-      setTimeout(init, config('rabbitmq.reconntimeout'));
+  .then(function(connection) {
+    conn = connection;
+    //Close conection on SIGINT
+    process.once('SIGINT', function() {
+      connection.close();
+      process.exit();
     });
+
+    createChannel(connection)
+    .then(function() {
+      logger.info('Worker up, with ID', workerID);
+    })
+    .catch(function(error) {
+      logger.error('WORKER error ', error, 'with ID', workerID);
+      if (conn) {
+        conn.close(function() {
+          process.exit(1);
+        });
+      }
+    });
+  })
+  .then(null, function(err) {
+    logger.error('Worker error %s with ID : %s', err, workerID);
+    setTimeout(init, config('rabbitmq.reconntimeout'));
+  });
 }
 
 module.exports = {
