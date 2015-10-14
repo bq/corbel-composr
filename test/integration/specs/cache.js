@@ -7,7 +7,7 @@ var request = require('supertest'),
 function test(app){
   describe('Cache:', function() {
 
-      it('works', function(done) {
+      it('is disabled', function(done) {
 
           request(app)
             .get('/cache')
@@ -21,10 +21,10 @@ function test(app){
                     .set('Authorization', 'other_token')
                     .set('Cache-Control', 'max-age=0')
                     .set('If-None-Match', 'W/"d-9dc66274"')
-                    .expect(304)
+                    .expect(200)
                     .end(function(error, response) {
                       expect(response).to.be.an('object');
-                      if (!error && response.statusCode === 304) {
+                      if (!error && response.statusCode === 200) {
                           return done();
                       } else {
                           return done(error || response);
