@@ -12,9 +12,56 @@ function phraseOrSnippet(type) {
   return type === corbelConnection.PHRASES_COLLECTION ? true : false;
 }
 
+function _doWorkWithPhraseOrSnippet(isPhrase, id, action, engineCustom){
+  engine = engineCustom ? engineCustom : engine;
+  var domain = id.split('!')[0];
+  switch (action) {
+    case 'DELETE':
+      if (isPhrase){
+        engine.composr.Phrases.unregister(domain, id);
+      }
+      else{
+        engine.composr.Snippets.unregister(domain, id);
+      }
+    //ch.ack(msg);
+    break;
+
+    case 'CREATE':
+    case 'UPDATE':
+    logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
+    var promise;
+
+    if(isPhrase){
+      promise = engine.composr.loadPhrase(id);
+    }else{
+      promise = engine.composr.loadSnippet(id);
+    }
+    promise
+    .then(function(item) {
+      logger.debug('worker item fetched', item.id);
+      if (isPhrase){
+        return engine.composr.Phrases.register(domain, item);
+      }
+      else{
+        return engine.composr.Snippets.register(domain, item);
+      }
+    })
+    .then(function(result) {
+      logger.debug('worker item registered', id, result.registered);
+    })
+    .catch(function(err) {
+      logger.error('WORKER error: ', err.data.error, err.data.errorDescription, err.status);
+    });
+    break;
+
+    default:
+      logger.warn('WORKER error: wrong action ', action);
+  }
+}
+
+
 function doWork(ch, msg) {
   if (msg.fields.routingKey === config('rabbitmq.event')) {
-
     var message;
     try {
       message = JSON.parse(msg.content.toString('utf8'));
@@ -25,52 +72,11 @@ function doWork(ch, msg) {
     var type = message.type;
     if ((type === corbelConnection.PHRASES_COLLECTION) ||
         (type === corbelConnection.SNIPPETS_COLLECTION)) {
-      var isPhrase = phraseOrSnippet(type);
-      logger.debug('WORKER ' + isPhrase? 'phrases':'snippet' + ' event:', message);
-      var id = message.resourceId;
-      var domain = id.split('!')[0];
-      switch (message.action) {
-
-        case 'DELETE':
-          if (isPhrase){
-            engine.composr.Phrases.unregister(domain, id);
-          }
-          else{
-            engine.composr.Snippets.unregister(domain, id);
-          }
-        //ch.ack(msg);
-        break;
-
-        default: // 'CREATE' or 'UPDATE'
-        logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
-        var promise;
-
-        if(isPhrase){
-          promise = engine.composr.loadPhrase(id);
-        }else{
-          promise = engine.composr.loadSnippet(id);
-        }
-        promise
-        .then(function(item) {
-          logger.debug('worker item fetched', item.id);
-          if (isPhrase){
-            return engine.composr.Phrases.register(domain, item);
-          }
-          else{
-            return engine.composr.Snippets.register(domain, item);
-          }
-        })
-        .then(function(result) {
-          logger.debug('worker item registered', id, result.registered);
-        })
-        .catch(function(err) {
-          logger.error('WORKER error: ', err.data.error, err.data.errorDescription, err.status);
-        });
-        break;
-      }
+          var isPhrase = phraseOrSnippet(type);
+          logger.debug('WORKER ' + isPhrase? 'phrases':'snippet' + ' event:', message);
+          _doWorkWithPhraseOrSnippet(isPhrase,message.resourceId, message.action);
     }
   }
-
 }
 
 function createChannel(conn) {
@@ -136,5 +142,6 @@ function init() {
 }
 
 module.exports = {
-  init: init
+  init: init,
+  _doWorkWithPhraseOrSnippet: _doWorkWithPhraseOrSnippet
 };
