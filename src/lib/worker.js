@@ -8,11 +8,18 @@ ComposrError = require('./ComposrError'),
 config = require('./config'),
 logger = require('../utils/logger');
 
-function phraseOrSnippet(type) {
-  return type === corbelConnection.PHRASES_COLLECTION ? true : false;
+
+function Worker(){
+  this.connUrl =  'amqp://' + config('rabbitmq.username') + ':' + config('rabbitmq.password') + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
+  this.workerID = uuid.v4();
+
 }
 
-function _doWorkWithPhraseOrSnippet(isPhrase, id, action, engine){
+Worker.prototype.phraseOrSnippet = function(type){
+  return type === corbelConnection.PHRASES_COLLECTION ? true : false;
+};
+
+Worker.prototype._doWorkWithPhraseOrSnippet = function(isPhrase, id, action, engine){
   var domain = id.split('!')[0];
   switch (action) {
     case 'DELETE':
@@ -56,10 +63,9 @@ function _doWorkWithPhraseOrSnippet(isPhrase, id, action, engine){
     default:
     logger.warn('WORKER error: wrong action ', action);
   }
-}
+};
 
-
-function doWork(ch, msg) {
+Worker.prototype.doWork = function(ch, msg){
   if (msg.fields.routingKey === config('rabbitmq.event')) {
     var message;
     try {
@@ -71,15 +77,16 @@ function doWork(ch, msg) {
     var type = message.type;
     if ((type === corbelConnection.PHRASES_COLLECTION) ||
     (type === corbelConnection.SNIPPETS_COLLECTION)) {
-      var isPhrase = phraseOrSnippet(type);
+      var isPhrase = this.phraseOrSnippet(type);
       logger.debug('WORKER ' + isPhrase? 'phrases':'snippet' + ' event:', message);
-      _doWorkWithPhraseOrSnippet(isPhrase,message.resourceId, message.action, engine);
+      this._doWorkWithPhraseOrSnippet(isPhrase,message.resourceId, message.action, engine);
     }
   }
-}
+};
 
-function createChannel(conn) {
-  var queue = 'composer-' + uuid.v4(),
+Worker.prototype.createChannel = function(conn){
+  var that = this;
+  var queue = 'composer-' + that.workerID,
   exchange = 'eventbus.exchange',
   pattern = '';
 
@@ -94,53 +101,58 @@ function createChannel(conn) {
     .then(function() {
       ch.consume(queue, function(message) {
         //Added callback function in case we need to do manual ack of the messages
-        doWork(ch, message);
+        that.doWork(ch, message);
       },
       Object.create({
         noAck: true
       }));
     });
   });
-}
+};
+Worker.prototype._closeConnectionSIGINT = function(connection){
+  process.once('SIGINT', function() {
+    connection.close();
+    process.exit();
+  });
+};
 
+Worker.prototype._closeConnection = function(connection){
+  connection.close(function() {
+    process.exit(1);
+  });
+};
 
-function init() {
-  var connUrl = 'amqp://' + config('rabbitmq.username') + ':' + config('rabbitmq.password') + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
+Worker.prototype._connect = function(){
+  return amqp.connect(this.connUrl);
+};
+
+Worker.prototype.retryInit = function(){
+  return setTimeout(this.init, config('rabbitmq.reconntimeout'));
+};
+
+Worker.prototype.init = function(){
   var conn;
-
-  var workerID = uuid.v4();
-
-  logger.info('Creating worker with ID', workerID);
-
-  amqp.connect(connUrl)
+  var that = this;
+  logger.info('Creating worker with ID', that.workerID);
+  that._connect()
   .then(function(connection) {
     conn = connection;
-    //Close conection on SIGINT
-    process.once('SIGINT', function() {
-      connection.close();
-      process.exit();
-    });
-
-    createChannel(connection)
+    that._closeConnectionSIGINT(connection);
+    that.createChannel(connection)
     .then(function() {
-      logger.info('Worker up, with ID', workerID);
+      logger.info('Worker up, with ID', that.workerID);
     })
     .catch(function(error) {
-      logger.error('WORKER error ', error, 'with ID', workerID);
+      logger.error('WORKER error ', error, 'with ID', that.workerID);
       if (conn) {
-        conn.close(function() {
-          process.exit(1);
-        });
+        that._closeConnection(conn);
       }
     });
   })
   .then(null, function(err) {
-    logger.error('Worker error %s with ID : %s', err, workerID);
-    setTimeout(init, config('rabbitmq.reconntimeout'));
+    logger.error('Worker error %s with ID : %s', err, that.workerID);
+    that.retryInit();
   });
-}
-
-module.exports = {
-  init: init,
-  _doWorkWithPhraseOrSnippet: _doWorkWithPhraseOrSnippet
 };
+
+module.exports = Worker;
