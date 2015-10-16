@@ -5,7 +5,9 @@ var chai = require('chai'),
   expect = chai.expect,
   chaiAsPromised = require('chai-as-promised'),
   should = chai.should(),
-  worker = require('../../../src/lib/worker.js');
+  WorkerClass = require('../../../src/lib/worker.js');
+
+var worker =  new WorkerClass();
 
 chai.use(chaiAsPromised);
 
@@ -71,7 +73,7 @@ describe('Rabbit worker', function() {
 
     expect(engineCustom.composr.Phrases.unregister.callCount).to.equals(0);
     expect(engineCustom.composr.Phrases.unregister.calledWith('domain', id)).to.equals(false);
-    
+
     expect(engineCustom.composr.Snippets.unregister.callCount).to.equals(1);
     expect(engineCustom.composr.Snippets.unregister.calledWith('domain', id)).to.equals(true);
   });
@@ -154,6 +156,38 @@ describe('Rabbit worker', function() {
       expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(false);
     })
     .should.notify(done);
+  });
+
+  it ('basic init flow should go well', function(done){
+    var promiseCreateChannel;
+    var stubCreateChannel;
+    var connection = 'connection';
+
+    worker.connUrl =  'amqp://username:password@host:port';
+    worker.workerID = 1234;
+    worker._closeConnectionSIGINT = function(){};
+    worker.createChannel = function(){};
+    worker._closeConnection = function(){};
+    worker.retryInit = function(){};
+    worker._connect = sinon.stub().returns(Promise.resolve(connection));
+    worker.createChannel = function(){};
+
+    promiseCreateChannel = new Promise(function(resolve){
+      stubCreateChannel = sinon.stub(worker, 'createChannel', function(data){
+        resolve(data);
+      });
+    });
+
+    worker.init(); // subject under test
+
+    promiseCreateChannel.then(function(){
+      expect(worker._connect.callCount).to.equals(1);
+      expect(worker._connect.calledWith()).to.equals(true);
+      expect(stubCreateChannel.callCount).to.equals(1);
+      expect(stubCreateChannel.calledWith(connection)).to.equals(true);
+    })
+    .should.notify(done);
+
   });
 
   //TODO add test for :
