@@ -9,7 +9,7 @@ var express = require('express'),
   cookieParser = require('cookie-parser'),
   bodyParser = require('body-parser'),
   engine = require('./lib/engine'),
-  worker = require('./lib/worker'),
+  WorkerClass = require('./lib/worker'),
   ComposrError = require('./lib/ComposrError'),
   config = require('./lib/config'),
   timeout = require('connect-timeout'),
@@ -21,7 +21,7 @@ var express = require('express'),
   fs = require('fs'),
   app = express();
 
-
+var worker =  new WorkerClass();
 
 var ERROR_CODE_SERVER_TIMEOUT = 503;
 var DEFAULT_TIMEOUT = 10000;
