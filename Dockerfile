@@ -1,4 +1,4 @@
-FROM node:0.12.3
+FROM node:4.2.1
 # Author / Maintainer
 MAINTAINER Silkroad Team <support-silkroad@bq.com>
 
