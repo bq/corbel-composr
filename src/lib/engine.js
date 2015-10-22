@@ -95,7 +95,7 @@ function init(app) {
       logger.error('Services where unaccesible after ' + retries + ' retries');
       dfd.reject('error:accessing:services');
     } else {
-      composr.init(coreOptions)
+      composr.init(coreOptions, true)
         .then(function() {
           initialized = true;
           logger.info('Engine initialized, all data is loaded :)');
