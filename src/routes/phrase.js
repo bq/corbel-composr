@@ -239,10 +239,15 @@ function executePhrase(endpointPath, req, res, next) {
 
   var method = req.method.toLowerCase();
 
+  var authorization = auth.getAuth(req);
+
+  var corbelDriver = connection.getTokenDriver(authorization, true);
+
   var params = {
     req: req,
     res: res,
     next: next,
+    corbelDriver : corbelDriver,
     timeout: 10000 //TODO: load from config
   };
 
