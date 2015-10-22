@@ -1,10 +1,10 @@
 'use strict';
 
 var corbel = require('corbel-js'),
-    config = require('./config'),
-    _ = require('lodash'),
-    ComposrError = require('./ComposrError'),
-    logger = require('../utils/logger');
+  config = require('./config'),
+  _ = require('lodash'),
+  ComposrError = require('./ComposrError'),
+  logger = require('../utils/logger');
 
 var PHRASES_COLLECTION = 'composr:Phrase';
 var SNIPPETS_COLLECTION = 'composr:Snippet';
@@ -23,21 +23,30 @@ var extractDomain = function(accessToken) {
   }
 };
 
-var getTokenDriver = function(accessToken) {
+var getTokenDriver = function(accessToken, emptyIfNotAuth) {
 
-    if (!accessToken) {
-        throw new ComposrError('error:connection:undefiend:accessToken');
-    }
-
+  if (!accessToken && !emptyIfNotAuth) {
+    throw new ComposrError('error:connection:undefined:accessToken');
+  } else if (accessToken) {
     var iamToken = {
-        'accessToken': accessToken.replace('Bearer ', '')
+      'accessToken': accessToken.replace('Bearer ', '')
     };
 
-    var corbelConfig = config('corbel.driver.options');
+    var corbelConfig = {
+      urlBase: config('corbel.driver.options').urlBase
+    };
+
     corbelConfig.iamToken = iamToken;
     corbelConfig.domain = extractDomain(accessToken);
 
     return corbel.getDriver(corbelConfig);
+  } else {
+    return corbel.getDriver({
+      urlBase: config('corbel.driver.options').urlBase,
+      iamToken: ''
+    });
+  }
+
 };
 
 module.exports.SNIPPETS_COLLECTION = SNIPPETS_COLLECTION;
