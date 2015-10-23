@@ -19,49 +19,58 @@ Worker.prototype.phraseOrSnippet = function(type){
   return type === corbelConnection.PHRASES_COLLECTION ? true : false;
 };
 
-Worker.prototype._doWorkWithPhraseOrSnippet = function(isPhrase, id, action, engine){
+Worker.prototype.isPhrase = function(type){
+  return type === corbelConnection.PHRASES_COLLECTION;
+};
+
+Worker.prototype.isSnippet = function(type){
+  return type === corbelConnection.SNIPPETS_COLLECTION;
+};
+
+
+Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action, engine){
   var domain = id.split('!')[0];
   switch (action) {
     case 'DELETE':
-    if (isPhrase){
-      engine.composr.Phrases.unregister(domain, id);
-    }
-    else{
-      engine.composr.Snippets.unregister(domain, id);
-    }
-    //ch.ack(msg);
-    break;
+      if (itemIsPhrase) {
+        engine.composr.Phrases.unregister(domain, id);
+      } else {
+        engine.composr.Snippets.unregister(domain, id);
+      }
+      //ch.ack(msg);
+      break;
 
     case 'CREATE':
     case 'UPDATE':
-    logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
-    var promise;
+      logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
+      var promise;
 
-    if(isPhrase){
-      promise = engine.composr.loadPhrase(id);
-    }else{
-      promise = engine.composr.loadSnippet(id);
-    }
-    promise
-    .then(function(item) {
-      logger.debug('worker item fetched', item.id);
-      if (isPhrase){
-        return engine.composr.Phrases.register(domain, item);
+      if (itemIsPhrase) {
+        promise = engine.composr.loadPhrase(id);
+      } else {
+        promise = engine.composr.loadSnippet(id);
       }
-      else{
-        return engine.composr.Snippets.register(domain, item);
-      }
-    })
-    .then(function(result) {
-      logger.debug('worker item registered', id, result.registered);
-    })
-    .catch(function(err) {
-      logger.error('WORKER error: ', err.data.error, err.data.errorDescription, err.status);
-    });
-    break;
+      promise
+        .then(function(item) {
+          logger.debug('worker item fetched', item.id);
+          if (itemIsPhrase) {
+            return engine.composr.Phrases.register(domain, item);
+          } else {
+            return engine.composr.Snippets.register(domain, item);
+          }
+        })
+        .then(function(result) {
+          //TODO: include the phrase in the DOC , for that 
+          //include the phrase in engine.composr.data.phrases
+          logger.debug('worker item registered', id, result.registered);
+        })
+        .catch(function(err) {
+          logger.error('WORKER error: ', err.data.error, err.data.errorDescription, err.status);
+        });
+      break;
 
     default:
-    logger.warn('WORKER error: wrong action ', action);
+      logger.warn('WORKER error: wrong action ', action);
   }
 };
 
@@ -75,11 +84,10 @@ Worker.prototype.doWork = function(ch, msg){
       throw new ComposrError('error:worker:message', 'Error parsing message: ' + error, 422);
     }
     var type = message.type;
-    if ((type === corbelConnection.PHRASES_COLLECTION) ||
-    (type === corbelConnection.SNIPPETS_COLLECTION)) {
-      var isPhrase = this.phraseOrSnippet(type);
-      logger.debug('WORKER ' + isPhrase? 'phrases':'snippet' + ' event:', message);
-      this._doWorkWithPhraseOrSnippet(isPhrase,message.resourceId, message.action, engine);
+    if (this.isPhrase(type) || this.isSnippet(type)) {
+      var itemIsPhrase = this.isPhrase(type);
+      logger.debug('WORKER ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message);
+      this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action, engine);
     }
   }
 };
@@ -109,6 +117,7 @@ Worker.prototype.createChannel = function(conn){
     });
   });
 };
+
 Worker.prototype._closeConnectionSIGINT = function(connection){
   process.once('SIGINT', function() {
     connection.close();
