@@ -60,8 +60,11 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
           }
         })
         .then(function(result) {
-          //TODO: include the phrase in the DOC , for that 
-          //include the phrase in engine.composr.data.phrases
+          if (itemIsPhrase) {
+            return engine.composr.addPhrasesToDataStructure(result);
+          } else {
+            return engine.composr.addSnippetsToDataStructure(result);
+          }
           logger.debug('worker item registered', id, result.registered);
         })
         .catch(function(err) {
