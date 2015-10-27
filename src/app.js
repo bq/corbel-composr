@@ -24,7 +24,7 @@ var express = require('express'),
 var worker =  new WorkerClass();
 
 var ERROR_CODE_SERVER_TIMEOUT = 503;
-var DEFAULT_TIMEOUT = 10000;
+var DEFAULT_TIMEOUT = '10s';
 
 /*************************************
   Logs
@@ -105,8 +105,9 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use(timeout(config('timeout') || DEFAULT_TIMEOUT, {
-  status: ERROR_CODE_SERVER_TIMEOUT
+app.use(timeout(DEFAULT_TIMEOUT, {
+  status: ERROR_CODE_SERVER_TIMEOUT,
+  respond : true
 }));
 
 
