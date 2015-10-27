@@ -44,6 +44,7 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
     case 'UPDATE':
       logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
       var promise;
+      var itemToAdd;
 
       if (itemIsPhrase) {
         promise = engine.composr.loadPhrase(id);
@@ -53,6 +54,7 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
       promise
         .then(function(item) {
           logger.debug('worker item fetched', item.id);
+          itemToAdd = item;
           if (itemIsPhrase) {
             return engine.composr.Phrases.register(domain, item);
           } else {
@@ -60,8 +62,11 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
           }
         })
         .then(function(result) {
-          //TODO: include the phrase in the DOC , for that 
-          //include the phrase in engine.composr.data.phrases
+          if (itemIsPhrase) {
+            return engine.composr.addPhrasesToDataStructure(itemToAdd);
+          } else {
+            return engine.composr.addSnippetsToDataStructure(itemToAdd);
+          }
           logger.debug('worker item registered', id, result.registered);
         })
         .catch(function(err) {
