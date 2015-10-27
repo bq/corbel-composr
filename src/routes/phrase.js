@@ -252,6 +252,13 @@ function executePhrase(endpointPath, req, res, next) {
   };
 
   engine.composr.Phrases.runByPath(domain, phrasePath, method, params)
+    .then(function(){
+      delete params.req;
+      delete params.res;
+      delete params.next;
+      params = null;
+      corbelDriver = null;
+    })
     .catch(function(err){
       logger.error(err);
       res.status(404).send(new ComposrError('endpoint:not:found', 'Not found', 404));
