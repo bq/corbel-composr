@@ -248,6 +248,7 @@ function executePhrase(endpointPath, req, res, next) {
     res: res,
     next: next,
     corbelDriver : corbelDriver,
+    browser: true,
     timeout: 10000 //TODO: load from config
   };
 

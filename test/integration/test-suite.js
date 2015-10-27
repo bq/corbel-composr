@@ -2,7 +2,7 @@
 
 // Integration
 var tests = [
-  require('./specs/timeout.test.js'),
+  //require('./specs/timeout.test.js'),
   require('./specs/errorHandlers.test.js'),
   require('./specs/queryParams.test.js'),
   require('./specs/pathParams.test.js'),
