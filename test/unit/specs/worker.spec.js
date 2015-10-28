@@ -28,8 +28,10 @@ describe('Rabbit worker', function() {
     engineCustom.composr = {};
     engineCustom.composr.Phrases = {};
     engineCustom.composr.Phrases.unregister = sinon.stub();
+    engineCustom.composr.removePhrasesFromDataStructure = sinon.stub();
     engineCustom.composr.Snippets = {};
     engineCustom.composr.Snippets.unregister = sinon.stub();
+    engineCustom.composr.removeSnippetsFromDataStructure = sinon.stub();
     engineCustom.composr.loadPhrase = sinon.stub().returns(Promise.resolve(item));
     engineCustom.composr.Phrases.register = function() {};
     engineCustom.composr.loadSnippet = sinon.stub().returns(Promise.resolve(item));
@@ -65,6 +67,12 @@ describe('Rabbit worker', function() {
 
     expect(engineCustom.composr.Snippets.unregister.callCount).to.equals(0);
     expect(engineCustom.composr.Snippets.unregister.calledWith(domain, id)).to.equals(false);
+
+    expect(engineCustom.composr.removePhrasesFromDataStructure.callCount).to.equals(1);
+    expect(engineCustom.composr.removePhrasesFromDataStructure.calledWith(id)).to.equals(true);
+
+    expect(engineCustom.composr.removeSnippetsFromDataStructure.callCount).to.equals(0);
+    expect(engineCustom.composr.removeSnippetsFromDataStructure.calledWith(id)).to.equals(false);
   });
 
   it('should call correct method in engine when a delete is requested for a snippet', function() {
@@ -78,6 +86,12 @@ describe('Rabbit worker', function() {
 
     expect(engineCustom.composr.Snippets.unregister.callCount).to.equals(1);
     expect(engineCustom.composr.Snippets.unregister.calledWith('domain', id)).to.equals(true);
+
+    expect(engineCustom.composr.removePhrasesFromDataStructure.callCount).to.equals(0);
+    expect(engineCustom.composr.removePhrasesFromDataStructure.calledWith(id)).to.equals(false);
+    
+    expect(engineCustom.composr.removeSnippetsFromDataStructure.callCount).to.equals(1);
+    expect(engineCustom.composr.removeSnippetsFromDataStructure.calledWith(id)).to.equals(true);
   });
 
   it('should call correct method in engine when a create is requested for a phrase', function(done) {
