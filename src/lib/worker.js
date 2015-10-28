@@ -34,8 +34,10 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
     case 'DELETE':
       if (itemIsPhrase) {
         engine.composr.Phrases.unregister(domain, id);
+        engine.composr.removePhrasesFromDataStructure(id);
       } else {
         engine.composr.Snippets.unregister(domain, id);
+        engine.composr.removeSnippetsFromDataStructure(id);
       }
       //ch.ack(msg);
       break;

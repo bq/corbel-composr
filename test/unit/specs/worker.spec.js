@@ -28,8 +28,10 @@ describe('Rabbit worker', function() {
     engineCustom.composr = {};
     engineCustom.composr.Phrases = {};
     engineCustom.composr.Phrases.unregister = sinon.stub();
+    engineCustom.composr.removePhrasesFromDataStructure = sinon.stub();
     engineCustom.composr.Snippets = {};
     engineCustom.composr.Snippets.unregister = sinon.stub();
+    engineCustom.composr.removeSnippetsFromDataStructure = sinon.stub();
     engineCustom.composr.loadPhrase = sinon.stub().returns(Promise.resolve(item));
     engineCustom.composr.Phrases.register = function() {};
     engineCustom.composr.loadSnippet = sinon.stub().returns(Promise.resolve(item));
