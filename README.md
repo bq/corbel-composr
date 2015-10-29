@@ -295,27 +295,45 @@ var jwt = generateAssertion(claims, credentials.clientSecret);
 ### Login client/application phrase code
 
 ```javascript
-if (!req.body || !req.body.jwt) {
-  res.status(401).send(new ComposrError('error:jwt:undefined', '', 401));
-}
-var corbelDriver = corbel.generateDriver({iamToken: ''});
+var corbel = require('corbel-js');
+var ComposrError = require('ComposrError');
+var utils = require('composrUtils');
 
-/*
- * Required claims:
- * iss: CLIENT_ID
- * aud: 'http://iam.bqws.io'
- * scope: 'scope1 scope2'
- * exp: epoch + 1h
- */
-corbelDriver.iam.token().create({
-  jwt: req.body.jwt
-}).then(function(response) {
-  //Enable assets access
-  corbelDriver.assets().access();
-  res.send(response.data);
-}).catch(function(err){
-  compoSR.run('global:parseError', { err : err, res : res});
-});
+function validateParams(){
+  return Promise.resolve()
+    .then(function(){
+      if (!req.body || !req.body.jwt) {
+        throw new ComposrError('error:jwt:undefined', '', 401);
+      }
+    });
+}
+
+function loginClient(){
+  var corbelDriver = corbel.generateDriver({
+    iamToken: '',
+    domain : domain
+  });
+  /*
+   - Required claims:
+   - iss: CLIENT_ID
+   - aud: 'http://iam.bqws.io'
+   - scope: 'scope1 scope2'
+   - exp: epoch + 1h
+   */
+  return corbelDriver.iam.token().create({
+    jwt: req.body.jwt
+  });
+}
+
+
+validateParams()
+  .then(loginClient)
+  .then(function(response){
+    res.status(200).send(response.data);
+  })
+  .catch(function(err){
+    res.status(err.status).send(err);
+  });
 ```
 
 ## Login a user
@@ -562,59 +580,15 @@ corbelDriver.iam.user('me')
 corbelDriver.iam.user('me').get();
 ```
 
-## Library
-
-### Get library phrase code
-
-```javascript
-if (!req.get('Authorization')) {
-  throw new ComposrError('error:authorization:undefined', '', 401);
-}
-
-var books = [];
-
-for( var i = 0; i < 20; i++){
-  books.push({
-     _id: Date.now(),
-     _createdAt: new Date("2015-05-08T14:37:37.628Z"),
-     _src_id: "Libranda",
-     _dst_id: "books:Book/7004c092",
-     isbn: "9788415564430",
-     distributorId: "LIBR",
-     title: "Remedio: la geografía",
-     synopsis: "",
-     authors: [
-         {
-             name: "Luigi Pirandello",
-             biographicalNote: ""
-         }
-     ],
-     rawCategories: [
-         "FA"
-     ],
-     storeCategories: [
-         "F",
-         "FA"
-     ],
-     cover: "http://www.nordicalibros.com/upload/fgr02102012145613.jpg",
-     format: "epub",
-     language: "spa",
-     publisherGroupName: "Nordica Libros",
-     publishingTime: 1347753600000,
-     _updatedAt: new Date("2015-05-08T14:37:37.628Z"),
-     _order: 1
-  });
-}
-
-res.send({
-  data : books,
-  count : books.length
-});
-```
-
 # Code snippets
 
-Code snippets are a minor form of `phrases`, they are accesible through the `compoSR` object on your phrases.
+Code snippets are a minor form of `phrases`, they are accesible through the `require` function on your phrases.
+
+```javascript
+var mySnippet = require('snippet-mySnippet');
+
+//DO whatever you want with that snippet
+```
 
 You can run your code snippets by executing `compoSR.run('snippetName', params);` where `params` is anything you want it to be. From your snippets you will be allowed to access to the `params` variable and the `compoSR` object itself.
 
