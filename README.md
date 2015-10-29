@@ -14,7 +14,7 @@
 
 CompoSR is a [nodeJS](https://nodejs.org/api/) middleware, built on top  of [express](http://expressjs.com/4x/api.html), for [Corbel][corbel-link].
 
-It offers developers the ability to make their own specific application API based in [corbel-js](https://github.com/bq/corbel-js)
+It offers developers the ability to make their own specific application API based in [corbel-js](https://github.com/bq/corbel-js), allowing for multiple dinamic endpoints to be toggled on/off.
 
 It is responsible for **composing** **phrases** of code than can be reused by multiple applications. This way you can keep your code reusable and simplify your API.
 
@@ -42,35 +42,65 @@ It is responsible for **composing** **phrases** of code than can be reused by mu
   corbel-composer
   ```
 
+## Configuration
 
-## Postman Playground
+You can send the following environment variables (or define a environment config file under `src/config/[ENV].json`).
 
-1. Get [postman](https://www.getpostman.com/)
-2. Import corbel-composer collection:
-
-  ```
-  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/postman.json
-  ```
-3. Import evironment example:
-
-  ```
-  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/environment.example.json
-  ```
-4. Import globals:
-
-  ```
-  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/globals.example.json
-  ```
-5. Enjoy!
-
-
-## Phrase Model
+### Default config file
 
 ```
 {
-    "url": "phraseName",
+    "rabbitmq.host": "RABBIT_HOST",
+    "rabbitmq.port": "RABBIT_PORT",
+    "rabbitmq.username": "RABBIT_USERNAME",
+    "rabbitmq.password": "RABBIT_PASSWORD",
+    "rabbitmq.reconntimeout": 10000,
+    "rabbitmq.event": "class io.corbel.event.ResourceEvent",
+    "bootstrap.retrytimeout": 10000,
+    "timeout": 2000,
+    "corbel.composer.credentials": {
+        "clientId": "CLIENT_ID",
+        "clientSecret": "CLIENT_SECRET",
+        "scopes": "composr:comp:base"
+    },
+    "corbel.driver.options": {
+        "urlBase": "https://{{module}}corbel-domain.io/"
+    },
+    "logLevel": "error",
+    "logFile": "logs/composr.log",
+    "syslog" : false,
+    "bodylimit" : "50mb"
+}
+```
+
+### Environment variables
+
+```
+CREDENTIALS_CLIENT_ID
+CREDENTIALS_CLIENT_SECRET
+CREDENTIALS_SCOPES
+URL_BASE
+LOG_LEVEL
+LOG_FILE
+RABBITMQ_HOST
+RABBITMQ_PORT
+RABBITMQ_USERNAME
+RABBITMQ_PASSWORD
+```
+
+## Phrases
+
+Phrases is one of the CompoSR strongest capabilities, they are JSON models that can define a dinamic endpoint. 
+
+Each Phrase has an endpoint and the list of HTTP verbs it can handle (POST, PUT, GET, DELETE) with their code associated.
+
+See the following Phrase model.
+
+```
+{
+    "url": "user/:userID",
     "get": {
-        "code": "res.status(200).send({title: 'hello world'});",
+        "code": "res.status(200).send({title: 'hello world', user: req.params.userID});",
         "doc": {
             "description": "Phrase description",
             "queryParameters": {
@@ -94,10 +124,37 @@ It is responsible for **composing** **phrases** of code than can be reused by mu
 }
 ```
 
+### Routing
+
+Composr Phrases have a similar routing mechanism than expressJS. You can define optional and fixed parameters on the urls by following this conventions:
+
+- `:param` : Mandatory parameter
+- `:param?` : Optional parameter
+
+Some examples
+
+- `user/:userId`
+- `user/status/:optionalParam?`
+- `thing/one`
+
+```json
+{
+    "url": "paramsExample/:pathparam",
+    "get": {
+        "code": "res.status(200).send('path param: ' + req.params.pathparam + ',  query param: ' + req.query.queryparam);"
+    },
+    "post": {
+       /*...*/
+    },
+    "put": {
+       /*...*/
+    }
+}
+```
 
 ## Writting CompoSR phrases
 
-All the phrases are wrapped inside this `Function` closure, meaning you can access any of it's params:
+On execution time all the phrases are wrapped inside this `Function` closure, meaning you can access any of it's params:
 
 ```
 function phrase(req, res, next, corbelDriver, domain, require){
@@ -110,46 +167,112 @@ function phrase(req, res, next, corbelDriver, domain, require){
 - corbelDriver : An instance of corbelDriver provided by corbel, instantiated with your `Authorization` header if provided
 - require : A package and snippet requirer
 
+## Phrases examples:
+
 ### `count` value in collections query
 
 ```json
 {
     "url": "countExample",
     "get": {
-        "code": "CORBEL-JS_SNIPPET"
+        "code": /*...*/
     }
 }
 ```
 
-where `code` should be a string with this [corbel-js](https://github.com/bq/corbel-js) snippet:
+where `code` should be a string with, this [corbel-js](https://github.com/bq/corbel-js) code snippet:
 
 ```javascript
-var count;
+//Example endpoint code
 corbelDriver.resources.collection('test:ComposrTest').get(undefined, {
     aggregation: {
         $count: '*'
     }
 }).then(function(response) {
-    count = response.data.count;
-    return corbelDriver.resources.collection('test:ComposrTest').get();
-}).then(function(response) {
-    res.send({
-        data: response.data,
-        'count': count
-    });
-}).catch(function(error) {
-    res.send(error);
+    res.status(200).send(response.data.count);
+.catch(function(error) {
+    res.status(500).send(error);
 });
 ```
 
-### Path & query parameters
+### Login a client 
+
+Phrase code : 
+
+```javascript
+var corbel = require('corbel-js');
+var ComposrError = require('ComposrError');
+var utils = require('composrUtils');
+
+function validateParams(){
+  return Promise.resolve()
+    .then(function(){
+      if (!req.body || !req.body.jwt) {
+        throw new ComposrError('error:jwt:undefined', '', 401);
+      }
+    });
+}
+
+function loginClient(){
+  var corbelDriver = corbel.generateDriver({
+    iamToken: '',
+    domain : domain
+  });
+  /*
+   - Required claims:
+   - iss: CLIENT_ID
+   - aud: 'http://iam.bqws.io'
+   - scope: 'scope1 scope2'
+   - exp: epoch + 1h
+   */
+  return corbelDriver.iam.token().create({
+    jwt: req.body.jwt
+  });
+}
+
+
+validateParams()
+  .then(loginClient)
+  .then(function(response){
+    res.status(200).send(response.data);
+  })
+  .catch(function(err){
+    res.status(err.status).send(err);
+  });
+```
+
+## How can I generate Phrase models ? 
+
+> we are developing some cool tools that you will be able to use in order to avoid thinking about phrase models, and just worry about the code.
+
+## Code snippets
+
+Code snippets are a minor form of `phrases`, they are accesible through the `require` function on your phrases.
+
+```javascript
+var mySnippet = require('snippet-mySnippet');
+
+//Do whatever you want with that snippet
+```
+
+Corbel `domains` can only access it's own snippets, the Snippet syntax is the following one:
+
+```javascript
+//Random thing
+var myModel = function(options){
+  this.options = options;
+}
+
+//Mandatory exports
+exports(myModel);
+```
+
+Those snippets are also stored in Corbel as JSON models.
 
 ```json
 {
-    "url": "paramsExample/:pathparam",
-    "get": {
-        "code": "res.status(200).send('path param: ' + req.params.pathparam + ',  query param: ' + req.query.queryparam);"
-    }
+  "id": "domain:myModelSnippet",
+  "codehash": "BASE64CodeHash"
 }
 ```
 
@@ -257,408 +380,6 @@ npm install -g node-inspector
   npm run test:debug
   ```
 
-# Example code for phrases
-
-
-## Login a client/application
-
-### Prerequisites for login a client/application: Generate a jwt
-
-**NodeJS** example
-
-```javascript
-var corbel = require('corbel-js');
-
-function generateAssertion(claims, clientSecret) {
-  claims.aud = corbel.Iam.AUD;
-  return corbel.jwt.generate(claims, clientSecret);
-}
-
-var claims = {
-  iss: credentials.clientId,
-  scope: credentials.scopes
-};
-
-var jwt = generateAssertion(claims, credentials.clientSecret);
-
-//Make a POST request to the login client phrase with jwt in the body
-/*
- Expect an object containing
-  {
-    accessToken : '',
-    expiresAt : ''
-  }
-*/
-```
-------
-
-### Login client/application phrase code
-
-```javascript
-if (!req.body || !req.body.jwt) {
-  res.status(401).send(new ComposrError('error:jwt:undefined', '', 401));
-}
-var corbelDriver = corbel.generateDriver({iamToken: ''});
-
-/*
- * Required claims:
- * iss: CLIENT_ID
- * aud: 'http://iam.bqws.io'
- * scope: 'scope1 scope2'
- * exp: epoch + 1h
- */
-corbelDriver.iam.token().create({
-  jwt: req.body.jwt
-}).then(function(response) {
-  //Enable assets access
-  corbelDriver.assets().access();
-  res.send(response.data);
-}).catch(function(err){
-  compoSR.run('global:parseError', { err : err, res : res});
-});
-```
-
-## Login a user
-
-### Prerequisites for login a user: Generate a jwt
-
-**NodeJS** example
-
-```javascript
-var corbel = require('corbel-js');
-
-function generateAssertion(claims, clientSecret) {
-  claims.aud = corbel.Iam.AUD;
-  return corbel.jwt.generate(claims, clientSecret);
-}
-
-//Note that appCredentials contains the credentials of the client app
-
-var claims = {
-  iss: appCredentials.clientId,
-  'basic_auth.username': userCredentials.username,
-  'basic_auth.password': userCredentials.password,
-  scope: userCredentials.scopes
-};
-
-var jwt = generateAssertion(claims, appCredentials.clientSecret);
-
-//Make a POST request to the login user phrase with jwt in the body
-
-/*
- Expect an object containing
-  {
-    tokenObject: {
-      accessToken : '',
-      expiresAt : '',
-      refreshToken : ''
-    },
-    user: {
-      ...
-    }
-  }
-*/
-```
-------
-
-### Login user phrase code
-
-```javascript
-if (!req.body || !req.body.jwt) {
-  return res.status(401).send(new ComposrError('error:jwt:undefined', '', 401));
-}
-var corbelDriver = corbel.generateDriver({iamToken: ''});
-
-var tokenObject;
-
-/*
- * Request a session token for the user
- * Required claims:
- * iss: CLIENT_ID
- * basic_auth.username: USERNAME
- * basic_auth.password: PASSWORD
- * aud: 'http://iam.bqws.io'
- * scope: 'scope1 scope2'
- * exp: epoch + 1h
- */
-return corbelDriver.iam.token().create({
-  jwt : req.body.jwt
-}).then(function(response){
-  //Enable assets access (only for users)
-  corbelDriver.assets().access();
-
-  //Tenemos el token de usuario, asimismo tambien el refresh y el expires
-  tokenObject = response.data;
-
-  //Recreamos el corbelDriver con los settings del usuario
-  corbelDriver = corbel.generateDriver({
-    iamToken : tokenObject
-  });
-
-  //Obtain the logged user data
-  return corbelDriver.iam.user('me').get();
-}).then(function(response){
-  return res.send({
-    tokenObject: tokenObject,
-    user: response.data
-  });
-}).catch(function(err){
-  return compoSR.run('global:parseError', { err : err, res : res});
-});
-```
-## Refresh a token
-
-### Prerequisites for refreshing a user token: Generate a jwt with the refresh token
-
-**NodeJS** example
-
-```javascript
-var corbel = require('corbel-js');
-
-function generateAssertion(claims, clientSecret) {
-  claims.aud = corbel.Iam.AUD;
-  return corbel.jwt.generate(claims, clientSecret);
-}
-
-//Note that appCredentials contains the credentials of the client app
-
-var claims = {
-  iss: appCredentials.clientId,
-  'refresh_token': refresh_token,
-  scope: userCredentials.scopes
-};
-
-var jwt = generateAssertion(claims, appCredentials.clientSecret);
-
-//Make a POST request to the refresh token phrase with jwt in the body
-
-/*
- Expect an object containing
- {
-   accessToken : '',
-   expiresAt : '',
-   refreshToken : ''
- }
-*/
-```
-------
-
-### Refresh token phrase code
-
-```javascript
-if (!req.body || !req.body.jwt) {
-  res.status(400).send(new ComposrError('error:jwt:undefined', 'JWT is missing', 400));
-  return false;
-}
-var decoded = corbel.jwt.decode(req.body.jwt);
-if(Object.keys(decoded).length === 0){
-  res.status(400).send(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400));
-  return false;
-}
-
-if(!decoded.refresh_token){
-  res.status(400).send(new ComposrError('error:jwt:refresh_token:missing', 'Add the refresh_token property', 400));
-  return false;
-}else{
- var refreshTokenDecoded = corbel.jwt.decode(decoded.refresh_token);
- if(Object.keys(refreshTokenDecoded).length === 0){
-   res.status(400).send(new ComposrError('error:jwt:refresh_token:malformed', 'Your refresh_token is malformed', 400));
-  return false;
- }
-}
-var corbelDriver = corbel.generateDriver({iamToken: ''});
-
-/*
- * Required claims:
- * iss: CLIENT_ID
- * refresh_token: REFRESH_TOKEN
- * aud: 'http://iam.bqws.io'
- * scope: 'scope1 scope2'
- * exp: epoch + 1h
- */
-corbelDriver.iam.token().create({
-    jwt : req.body.jwt
-  })
-  .then(function(response){
-    res.send(response.data);
-  })
-  .catch(function(err){
-    compoSR.run('global:parseError', { err : err, res : res});
-  });
-```
-
-## Logout a user
-
-
-### Prerequisites for login out a user: *have an accessToken*
-
-**NodeJS** example
-
-```javascript
-var http = require('http');
-
-var accessToken = "xxxxx":
-
-var post_options = {
-  host: 'composrendpoint.composr',
-  path: '/logoutuser',
-  method: 'POST',
-  headers: {
-    'Authorization': accessToken
-  }
-};
-
-
-//Make a POST request to the logout user phrase with an Authorization header
-http.request(post_options, function(res) {
-  //Expect 204 for a good logout, 401 for unauthorized
-});
-
-```
-------
-
-### Logout user phrase code
-
-```javascript
-if (!req.get('Authorization')) {
-  res.status(401).send(new ComposrError('error:unauthorized', 'Authorization missing', 401));
-}
-
-var method =  req.params.type && req.params.type === 'all' ? 'disconnect' : 'signOut';
-
-/*
- * Disconnects a user session
- */
-corbelDriver.iam.user('me')[method]()
-  .then(function(response){
-    res.send(response.data);
-  }).catch(function(err){
-    compoSR.run('global:parseError', { err : err, res : res});
-  });
-```
-
-### Logout a user from all devices:
-```javascript
-if (!req.get('Authorization')) {
-  throw new ComposrError('error:unauthorized', 'Authorization missing', 401);
-}
-
-/*
- * Disconnects a user session
- */
-
-corbelDriver.iam.user('me')
-  .disconnect()
-  .then(function(response){
-    res.send(response.data);
-  }).catch(function(err){
-    compoSR.run('global:parseError', { err : err, res : res});
-  });
-```
-
-## Return current user info
-
-```javascript
-corbelDriver.iam.user('me').get();
-```
-
-## Library
-
-### Get library phrase code
-
-```javascript
-if (!req.get('Authorization')) {
-  throw new ComposrError('error:authorization:undefined', '', 401);
-}
-
-var books = [];
-
-for( var i = 0; i < 20; i++){
-  books.push({
-     _id: Date.now(),
-     _createdAt: new Date("2015-05-08T14:37:37.628Z"),
-     _src_id: "Libranda",
-     _dst_id: "books:Book/7004c092",
-     isbn: "9788415564430",
-     distributorId: "LIBR",
-     title: "Remedio: la geografía",
-     synopsis: "",
-     authors: [
-         {
-             name: "Luigi Pirandello",
-             biographicalNote: ""
-         }
-     ],
-     rawCategories: [
-         "FA"
-     ],
-     storeCategories: [
-         "F",
-         "FA"
-     ],
-     cover: "http://www.nordicalibros.com/upload/fgr02102012145613.jpg",
-     format: "epub",
-     language: "spa",
-     publisherGroupName: "Nordica Libros",
-     publishingTime: 1347753600000,
-     _updatedAt: new Date("2015-05-08T14:37:37.628Z"),
-     _order: 1
-  });
-}
-
-res.send({
-  data : books,
-  count : books.length
-});
-```
-
-# Code snippets
-
-Code snippets are a minor form of `phrases`, they are accesible through the `compoSR` object on your phrases.
-
-You can run your code snippets by executing `compoSR.run('snippetName', params);` where `params` is anything you want it to be. From your snippets you will be allowed to access to the `params` variable and the `compoSR` object itself.
-
-`compoSR` will be allowed to access any snippets defined in your domain and your parent domains.
-
-For example, `_silkroad:composer` will be able to access all the `_silkroad:composer` snippets and all the `_silkroad` snippets. If a snippet has the same name on both of the domains, the one with a deepest hierarchy will overwrite the first one.
-
-Let's take a look at it:
-  - Given this snippets:
-
-```javascript
-var snippets = {
-  'domainName' : [
-    {
-      name : 'myFunction',
-      code : 'compoSR.run("hello", "world")'
-    },
-    {
-      name : 'hello',
-      code: 'console.log(params);'
-    }
-  ],
-  'domainName:childDomain' : [
-    {
-      name : 'hello',
-      code: 'console.log("I am the child: ", params);'
-    }
-  ],
-}
-```
-
-  - If we run the `myFunction` snippet, accesing from a client that belongs to the domain named `domainName:childDomain` it will show this:
-
-```javascript
-compoSR.run('myFunction');
-//=> I am the child: world
-```
-
-  - If the client or user belongs to the domain named `domainName` and we execute the same function we'll get:
-
-```javascript
-compoSR.run('myFunction');
-//=> hello world
-```
 
 # Logs
 
@@ -673,6 +394,28 @@ Available log levels can be found at [winston's npm page](https://www.npmjs.com/
 - error
 
 You can disable syslog by setting `syslog` property to `false` in the config file.
+
+
+
+## Postman Playground
+
+1. Get [postman](https://www.getpostman.com/)
+2. Import corbel-composer collection:
+
+  ```
+  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/postman.json
+  ```
+3. Import evironment example:
+
+  ```
+  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/environment.example.json
+  ```
+4. Import globals:
+
+  ```
+  https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman/globals.example.json
+  ```
+5. Enjoy!
 
 
 [corbel-link]: https://github.com/bq/corbel

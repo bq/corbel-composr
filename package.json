@@ -24,10 +24,10 @@
   },
   "scripts": {
     "test:debug": "node-debug $(which grunt) test",
-    "start": "node node_modules/pm2/bin/pm2 start bin/composer -i 0 --max-memory-restart 900M",
-    "stop": "node node_modules/pm2/bin/pm2 stop composer",
-    "restart": "node node_modules/pm2/bin/pm2 restart composer",
-    "debug": "node-debug bin/composer",
+    "start": "node node_modules/pm2/bin/pm2 start bin/composr -i 0 --max-memory-restart 900M",
+    "stop": "node node_modules/pm2/bin/pm2 stop composercomposr",
+    "restart": "node node_modules/pm2/bin/pm2 restart composr",
+    "debug": "node-debug bin/composr",
     "clean": "rm -rf node_modules",
     "logs": "node node_modules/pm2/bin/pm2 logs",
     "test": "grunt test"
