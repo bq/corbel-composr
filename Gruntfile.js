@@ -66,7 +66,7 @@ module.exports = function(grunt) {
 
     develop: {
       server: {
-        file: 'bin/composer'
+        file: 'bin/composr'
       }
     },
 
@@ -87,7 +87,7 @@ module.exports = function(grunt) {
       },
       server: {
         files: [
-          'bin/composer',
+          'bin/composr',
           'src/**/*.js'
         ],
         tasks: ['develop', 'delayed-livereload']
@@ -161,21 +161,21 @@ module.exports = function(grunt) {
     },
 
     express: {
-      composer: {
+      composr: {
         options: {
-          script: 'bin/composer',
+          script: 'bin/composr',
           logs: {
-            out: 'composer.out.log',
-            err: 'composer.err.log'
+            out: 'composr.out.log',
+            err: 'composr.err.log'
           }
         }
       },
       /*coverage: {
                 options: {
-                    script: 'bin/composer.coverage',
+                    script: 'bin/composr.coverage',
                     logs: {
-                        out: 'composer.out.log',
-                        err: 'composer.err.log'
+                        out: 'composr.out.log',
+                        err: 'composr.err.log'
                     }
                 }
             }*/
