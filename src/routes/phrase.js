@@ -224,6 +224,13 @@ function executePhrase(endpointPath, req, res, next) {
   //Metrics for phrases being executed at this moment
   counterPhrasesBeingExecuted.inc();
   counterPhrasesExecuted.inc();
+  
+  pmx.emit('phrase:executed', {
+    url: endpointPath,
+    query : req.query
+  });
+
+  logger.debug('request:phrase', endpointPath, req.query);
 
   res.on('finish', function() {
     counterPhrasesBeingExecuted.dec();
