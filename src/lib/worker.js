@@ -10,7 +10,7 @@ logger = require('../utils/logger');
 
 
 function Worker(){
-  this.connUrl =  'amqp://' + config('rabbitmq.username') + ':' + config('rabbitmq.password') + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
+  this.connUrl =  'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
   this.workerID = uuid.v4();
 
 }
