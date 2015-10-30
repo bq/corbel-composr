@@ -10,7 +10,7 @@ var PHRASES_COLLECTION = 'composr:Phrase';
 var SNIPPETS_COLLECTION = 'composr:Snippet';
 
 var corbelConfig = config('corbel.driver.options');
-corbelConfig = _.extend(corbelConfig, config('corbel.composer.credentials'));
+corbelConfig = _.extend(corbelConfig, config('corbel.composr.credentials'));
 
 
 var extractDomain = function(accessToken) {

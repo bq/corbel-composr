@@ -37,15 +37,15 @@ if (isDefinedConfigValue(process.env.COMPOSR_CONFIG)) {
 }
 
 if (isDefinedConfigValue(process.env.CREDENTIALS_CLIENT_ID)) {
-  config['corbel.composer.credentials'].clientId = process.env.CREDENTIALS_CLIENT_ID;
+  config['corbel.composr.credentials'].clientId = process.env.CREDENTIALS_CLIENT_ID;
 }
 
 if (isDefinedConfigValue(process.env.CREDENTIALS_CLIENT_SECRET)) {
-  config['corbel.composer.credentials'].clientSecret = process.env.CREDENTIALS_CLIENT_SECRET;
+  config['corbel.composr.credentials'].clientSecret = process.env.CREDENTIALS_CLIENT_SECRET;
 }
 
 if (isDefinedConfigValue(process.env.CREDENTIALS_SCOPES)) {
-  config['corbel.composer.credentials'].scopes = process.env.CREDENTIALS_SCOPES;
+  config['corbel.composr.credentials'].scopes = process.env.CREDENTIALS_SCOPES;
 }
 
 if (isDefinedConfigValue(process.env.URL_BASE)) {

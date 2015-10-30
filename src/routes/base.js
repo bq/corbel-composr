@@ -28,7 +28,6 @@ function status(req, res) {
     'phrasesLoaded' : phrasesLoaded
   };
 
-
   var modules = ['iam', 'resources'];
   var path = config('corbel.driver.options').urlBase;
   var promises = modules.map(function(module) {

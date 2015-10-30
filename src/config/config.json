@@ -10,7 +10,7 @@
 
     "timeout": 2000,
 
-    "corbel.composer.credentials": {
+    "corbel.composr.credentials": {
         "clientId": "CLIENT_ID",
         "clientSecret": "CLIENT_SECRET",
         "scopes": "composr:comp:base"
