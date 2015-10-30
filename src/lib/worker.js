@@ -12,7 +12,7 @@ var phraseManager = require('./phraseManager'),
 var worker = function() {
   var dfd = q.defer();
 
-  var connUrl = 'amqp://' + config('rabbitmq.username') + ':' + config('rabbitmq.password') + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
+  var connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
 
   var id = Date.now();
 
