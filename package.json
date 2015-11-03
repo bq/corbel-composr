@@ -17,7 +17,7 @@
   "homepage": "http://opensource.bq.com/corbel-composr",
   "repository": {
     "type": "git",
-    "url": "git@github.com:bq/corbel-composr.git"
+    "url": "git@github.com:corbel-platform/corbel-composr.git"
   },
   "engines": {
     "node": "4.2.1",

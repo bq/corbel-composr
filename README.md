@@ -1,11 +1,11 @@
-![composr](https://raw.githubusercontent.com/bq/corbel-composr/master/public/img/composr_medium.png)
+![composr](https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/public/img/composr_medium.png)
 
 
-[![Build Status](https://api.travis-ci.org/bq/corbel-composr.png?branch=master)](http://travis-ci.org/bq/corbel-composr)
+[![Build Status](https://api.travis-ci.org/corbel-platform/corbel-composr.png?branch=master)](http://travis-ci.org/corbel-platform/corbel-composr)
 [![npm version](https://badge.fury.io/js/corbel-composr.svg)](http://badge.fury.io/js/corbel-composr)
-[![Dependency status](https://david-dm.org/bq/corbel-composr/status.png)](https://david-dm.org/bq/corbel-composr#info=dependencies&view=table)
-[![Dev Dependency Status](https://david-dm.org/bq/corbel-composr/dev-status.png)](https://david-dm.org/bq/corbel-composr#info=devDependencies&view=table)
-[![Coverage Status](https://coveralls.io/repos/bq/corbel-composr/badge.svg?branch=master)](https://coveralls.io/r/bq/corbel-composr?branch=master)
+[![Dependency status](https://david-dm.org/corbel-platform/corbel-composr/status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=dependencies&view=table)
+[![Dev Dependency Status](https://david-dm.org/corbel-platform/corbel-composr/dev-status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=devDependencies&view=table)
+[![Coverage Status](https://coveralls.io/repos/corbel-platform/corbel-composr/badge.svg?branch=master)](https://coveralls.io/r/corbel-platform/corbel-composr?branch=master)
 
 
 ## [Homepage](http://opensource.bq.com/composr/)
@@ -25,7 +25,7 @@ It is responsible for **composing** **phrases** of code than can be reused by mu
 
 ### Diagram
 
-![diagram](https://raw.githubusercontent.com/bq/corbel-composr/master/public/img/diagram.png)
+![diagram](https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/public/img/diagram.png)
 
 
 ## QuickStart
@@ -33,7 +33,7 @@ It is responsible for **composing** **phrases** of code than can be reused by mu
 - install
 
   ```
-  npm install -g bq/corbel-composr
+  npm install -g corbel-platform/corbel-composr
   ```
 
 - run server
@@ -403,17 +403,17 @@ You can disable syslog by setting `syslog` property to `false` in the config fil
 2. Import corbel-composr collection:
 
   ```
-  https://raw.githubusercontent.com/bq/corbel-composr/master/doc/postman/postman.json
+  https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/doc/postman/postman.json
   ```
 3. Import evironment example:
 
   ```
-  https://raw.githubusercontent.com/bq/corbel-composr/master/doc/postman/environment.example.json
+  https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/doc/postman/environment.example.json
   ```
 4. Import globals:
 
   ```
-  https://raw.githubusercontent.com/bq/corbel-composr/master/doc/postman/globals.example.json
+  https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/doc/postman/globals.example.json
   ```
 5. Enjoy!
 
