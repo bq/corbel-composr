@@ -22,7 +22,7 @@ try {
 }
 
 function isDefinedConfigValue(val) {
-  return val && val !==  '\'\'';
+  return typeof(val) !== 'undefined' && val !==  '\'\'';
 }
 
 //Finally if it exists on the environment, use this
