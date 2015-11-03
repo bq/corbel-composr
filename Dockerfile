@@ -1,4 +1,4 @@
-FROM node:0.12.3
+FROM node:4.2.1
 # Author / Maintainer
 MAINTAINER Silkroad Team <support-silkroad@bq.com>
 
@@ -41,7 +41,7 @@ ENV RABBITMQ_USERNAME ''
 #Set the endpoint suffix for the environment to use
 ENV ENDPOINT_SUFFIX -qa
 
-# Enable corbel-composer
+# Enable corbel-composr
 CMD STATUS=0; \
     while [ "$STATUS" != 200 ]; \
     do STATUS=`curl -s -o /dev/null -w "%{http_code}" https://iam$ENDPOINT_SUFFIX.bqws.io/version`; \

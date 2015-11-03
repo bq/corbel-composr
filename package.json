@@ -1,33 +1,34 @@
 {
-  "name": "corbel-composer",
-  "description": "A corbel composer is a middleware based in nodeJS with express, to offer developers to make his own specific application API.",
+  "name": "corbel-composr",
+  "description": "A corbel composr is a middleware based in nodeJS with express, to offer developers to make his own specific application API.",
   "version": "0.0.24",
   "build.version": "latest",
   "build.date": "Mon, 22 Jun 2015 08:24:25 GMT",
-  "bin": "bin/composer",
+  "bin": "bin/composr",
   "license": "Apache-2.0",
   "keywords": "corbel nodejs express middleware",
   "authors": [
     "Daniel García González <daniel.garcia@bq.com>",
     "Anthan Pham Trinh <@antaipt>",
     "Rafael Pedrola <@rafinskipg>",
-    "Silkroad Team <silkroad-dev@bq.com>"
+    "Silkroad Team <silkroad-dev@bq.com>",
+    "Samuel Martín <@samuelmartingc>"
   ],
-  "homepage": "http://opensource.bq.com/corbel-composer",
+  "homepage": "http://opensource.bq.com/corbel-composr",
   "repository": {
     "type": "git",
-    "url": "git@github.com:bq/corbel-composer.git"
+    "url": "git@github.com:bq/corbel-composr.git"
   },
   "engines": {
-    "node": "0.12.2",
-    "npm": "~2.1.9"
+    "node": "4.2.1",
+    "npm": "~3.3.6"
   },
   "scripts": {
     "test:debug": "node-debug $(which grunt) test",
-    "start": "node node_modules/pm2/bin/pm2 start bin/composer -i max",
-    "stop": "node node_modules/pm2/bin/pm2 stop composer",
-    "restart": "node node_modules/pm2/bin/pm2 restart composer",
-    "debug": "node-debug bin/composer",
+    "start": "node node_modules/pm2/bin/pm2 start bin/composr -i 0 --max-memory-restart 900M",
+    "stop": "node node_modules/pm2/bin/pm2 stop composr",
+    "restart": "node node_modules/pm2/bin/pm2 restart composr",
+    "debug": "node-debug bin/composr",
     "clean": "rm -rf node_modules",
     "logs": "node node_modules/pm2/bin/pm2 logs",
     "test": "grunt test"
@@ -36,10 +37,11 @@
     "amqplib": "^0.3.2",
     "ascii-art": "0.0.2-alpha",
     "atob": "^1.1.2",
-    "body-parser": "~1.12.0",
+    "body-parser": "^1.12.0",
+    "composr-core": "^0.0.21",
     "connect-timeout": "^1.6.1",
     "cookie-parser": "~1.3.3",
-    "corbel-js": "^0.2.1",
+    "corbel-js": "^0.2.6",
     "cors": "^2.5.3",
     "debug": "~2.1.0",
     "ejs": "~2.3.1",
@@ -52,24 +54,21 @@
     "mkdirp": "^0.5.1",
     "morgan": "^1.5.2",
     "node-localstorage": "~0.5.0",
-    "pm2": "^0.14.1",
+    "object-sizeof": "1.0.6",
+    "pm2": "^0.15.7",
     "pmx": "^0.3.18",
     "q": "^1.2.0",
     "raml-parser": "~0.8.10",
     "raml2html": "~1.6.0",
     "response-time": "^2.3.0",
     "serve-favicon": "^2.2.0",
-    "syntax-error": "~1.1.3",
-    "tripwire": "^0.10.0",
     "uuid": "~2.0.1",
     "winston": "^1.0.0",
-    "winston-syslog": "^1.1.0",
-    "xregexp": "^2.0.0",
-    "yamljs": "~0.2.1",
-    "object-sizeof": "1.0.6"
+    "winston-syslog": "^1.1.0"
   },
   "devDependencies": {
     "chai": "^2.1.1",
+    "chai-as-promised": "^5.1.0",
     "grunt": "~0.4.5",
     "grunt-blanket": "0.0.8",
     "grunt-cli": "^0.1.13",

@@ -2,7 +2,7 @@
 
 var _ = require('lodash'),
   fs = require('fs'),
-  ComposerError = require('./composerError');
+  ComposrError = require('./ComposrError');
 
 var env = process.env.NODE_ENV || 'development';
 var config = require('../config/config.json');
@@ -37,15 +37,15 @@ if (isDefinedConfigValue(process.env.COMPOSR_CONFIG)) {
 }
 
 if (isDefinedConfigValue(process.env.CREDENTIALS_CLIENT_ID)) {
-  config['corbel.composer.credentials'].clientId = process.env.CREDENTIALS_CLIENT_ID;
+  config['corbel.composr.credentials'].clientId = process.env.CREDENTIALS_CLIENT_ID;
 }
 
 if (isDefinedConfigValue(process.env.CREDENTIALS_CLIENT_SECRET)) {
-  config['corbel.composer.credentials'].clientSecret = process.env.CREDENTIALS_CLIENT_SECRET;
+  config['corbel.composr.credentials'].clientSecret = process.env.CREDENTIALS_CLIENT_SECRET;
 }
 
 if (isDefinedConfigValue(process.env.CREDENTIALS_SCOPES)) {
-  config['corbel.composer.credentials'].scopes = process.env.CREDENTIALS_SCOPES;
+  config['corbel.composr.credentials'].scopes = process.env.CREDENTIALS_SCOPES;
 }
 
 if (isDefinedConfigValue(process.env.URL_BASE)) {
@@ -81,7 +81,7 @@ module.exports = function(key, haltOnUndefined) {
   if (!key) {
     return _.cloneDeep(config);
   } else if (typeof(config[key]) === 'undefined' && haltOnUndefined) {
-    throw new ComposerError('error:composr:config:undefined', '', 500);
+    throw new ComposrError('error:composr:config:undefined', '', 500);
   } else {
     return _.cloneDeep(config[key]);
   }

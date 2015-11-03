@@ -1,30 +1,43 @@
 'use strict';
 
-// Integration
-var cacheTests = require('./specs/cache.js'),
-  codehash = require('./specs/codehash.js'),
-  pathParamsTests = require('./specs/pathParams.js'),
-  queryParams = require('./specs/queryParams.js');
 
-module.exports = function(promise) {
-  var application;
+var tests = [
+  //require('./specs/timeout.test.js'),
+  require('./specs/errorHandlers.test.js'),
+  require('./specs/queryParams.test.js'),
+  require('./specs/pathParams.test.js'),
+  require('./specs/docField.test.js'),
+  require('./specs/publishPhrase.test.js'),
+  require('./specs/multipleSnippetsForPhrases.test.js'),
+  require('./specs/unregisterPhrases.test.js'),
+  require('./specs/unregisterSnippets.test.js'),
+  require('./specs/publishSnippet.test.js'),
+  require('./specs/cache.test.js'),
+  require('./specs/getToPhraseEndpoint.test.js'),
+  require('./specs/domainUserReturnsNotFound.test.js'),
+  require('./specs/orderExecutionPhrases.test.js')
+  //require('./specs/unpublishSnippet.test.js'),
+  //require('./specs/unpublishPhrase.test.js'),
+];
+
+module.exports = function(serverPromise) {
+  var server;
 
   describe('setup', function() {
     this.timeout(30000);
     before(function(done) {
       //Wait for app initialization
-      promise.then(function(app) {
-        application = app;
+      serverPromise.then(function(res) {
+        server = res;
         done();
       });
     });
 
     //This wrapping is needed because otherwise application would be an empty object
     it('Executes the integration tests', function() {
-      pathParamsTests(application);
-      queryParams(application);
-      codehash(application);
-      cacheTests(application);
+      tests.forEach(function(test) {
+        test(server);
+      });
     });
 
   });

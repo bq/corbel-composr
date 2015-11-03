@@ -10,7 +10,7 @@
 
     "timeout": 2000,
 
-    "corbel.composer.credentials": {
+    "corbel.composr.credentials": {
         "clientId": "CLIENT_ID",
         "clientSecret": "CLIENT_SECRET",
         "scopes": "composr:comp:base"
@@ -22,5 +22,6 @@
 
     "logLevel": "error",
     "logFile": "logs/composr.log",
-    "syslog" : false
+    "syslog" : false,
+    "bodylimit" : "50mb"
 }

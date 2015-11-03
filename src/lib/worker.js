@@ -1,127 +1,176 @@
 'use strict';
 
-var phraseManager = require('./phraseManager'),
-  connection = require('./corbelConnection'),
-  amqp = require('amqplib'),
-  uuid = require('uuid'),
-  q = require('q'),
-  ComposerError = require('./composerError'),
-  config = require('./config'),
-  logger = require('../utils/logger');
+var engine = require('./engine'),
+corbelConnection = require('./corbelConnection'),
+amqp = require('amqplib'),
+uuid = require('uuid'),
+ComposrError = require('./ComposrError'),
+config = require('./config'),
+logger = require('../utils/logger');
 
-var worker = function() {
-  var dfd = q.defer();
 
-  var connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
+function Worker(){
+  this.connUrl =  'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
+  this.workerID = uuid.v4();
+}
 
-  var id = Date.now();
+Worker.prototype.phraseOrSnippet = function(type){
+  return type === corbelConnection.PHRASES_COLLECTION ? true : false;
+};
 
-  logger.debug('WORKER', 'created worker with id', id);
+Worker.prototype.isPhrase = function(type){
+  return type === corbelConnection.PHRASES_COLLECTION;
+};
 
-  amqp.connect(connUrl).then(function(conn) {
-    logger.debug('WORKER Connected: ', id);
+Worker.prototype.isSnippet = function(type){
+  return type === corbelConnection.SNIPPETS_COLLECTION;
+};
 
-    function doWork(ch, msg) {
-      if (msg.fields.routingKey === config('rabbitmq.event')) {
 
-        var message;
-        try {
-          message = JSON.parse(msg.content.toString('utf8'));
-        } catch (error) {
-          //ch.nack(error, false, false);
-          throw new ComposerError('error:worker:message', 'Error parsing message: ' + error, 422);
-        }
+Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action, engine){
+  var domain = id.split('!')[0];
+  switch (action) {
+    case 'DELETE':
+      if (itemIsPhrase) {
+        engine.composr.Phrases.unregister(domain, id);
+        engine.composr.removePhrasesFromDataStructure(id);
+      } else {
+        engine.composr.Snippets.unregister(domain, id);
+        engine.composr.removeSnippetsFromDataStructure(id);
+      }
+      //ch.ack(msg);
+      break;
 
-        if (message.type === connection.PHRASES_COLLECTION) {
-          logger.debug('WORKER mesage', message);
-          switch (message.action) {
-            case 'DELETE':
+    case 'CREATE':
+    case 'UPDATE':
+      logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
+      var promise;
+      var itemToAdd;
 
-              phraseManager.unregisterPhrase({
-                id: message.resourceId
-              });
-
-              //ch.ack(msg);
-              break;
-
-            default: // 'CREATE' or 'UPDATE'
-              logger.debug('WORKER triggered create or update event', message.resourceId);
-
-              connection.driver.then(function(driver) {
-                  return driver.resources.resource(connection.PHRASES_COLLECTION, message.resourceId).get();
-                }).then(function(response) {
-                  phraseManager.registerPhrase(response.data);
-                  //ch.ack(msg);
-                })
-                .catch(function(err) {
-                  logger.error('WORKER error: ', err);
-                  connection.regenerateDriver();
-                  throw new ComposerError('error:worker:phrase', 'Error registering phrase: ' + err, 422);
-                  //ch.nack(err, false, false);
-                });
-
-              break;
-
+      if (itemIsPhrase) {
+        promise = engine.composr.loadPhrase(id);
+      } else {
+        promise = engine.composr.loadSnippet(id);
+      }
+      promise
+        .then(function(item) {
+          logger.debug('worker item fetched', item.id);
+          itemToAdd = item;
+          if (itemIsPhrase) {
+            return engine.composr.Phrases.register(domain, item);
+          } else {
+            return engine.composr.Snippets.register(domain, item);
           }
-
-        }
-
-      }
-    }
-
-    return conn.createChannel().then(function(ch) {
-      process.once('SIGINT', function() {
-        conn.close();
-        process.exit();
-      });
-
-      var queue = 'composer-' + uuid.v4(),
-        exchange = 'eventbus.exchange',
-        pattern = '';
-
-      var ok = ch.assertQueue(queue, {
-        durable: false,
-        autoDelete: true
-      }).then(function() {
-
-        return ch.bindQueue(queue, exchange, pattern);
-
-      }).then(function() {
-
-        ch.consume(queue, function(message) {
-            //Added callback function in case we need to do manual ack of the messages
-            doWork(ch, message);
-          },
-          Object.create({
-            noAck: true
-          }));
-
-        logger.debug('Worker up');
-        dfd.resolve();
-      });
-
-      return ok;
-
-    }).catch(function(err) {
-
-      logger.error('WORKER: error creating channel', err);
-      dfd.reject(err);
-      if (conn) {
-        conn.close(function() {
-          process.exit(1);
+        })
+        .then(function(result) {
+          if (result.registered === true){
+            if (itemIsPhrase) {
+              engine.composr.addPhrasesToDataStructure(itemToAdd);
+            } else {
+              engine.composr.addSnippetsToDataStructure(itemToAdd);
+            }
+          }
+          logger.debug('worker item registered', id, result.registered);
+        })
+        .catch(function(err) {
+          logger.error('WORKER error: ', err.data.error, err.data.errorDescription, err.status);
         });
-      }
+      break;
 
+    default:
+      logger.warn('WORKER error: wrong action ', action);
+  }
+};
+
+Worker.prototype.doWork = function(ch, msg){
+  if (msg.fields.routingKey === config('rabbitmq.event')) {
+    var message;
+    try {
+      message = JSON.parse(msg.content.toString('utf8'));
+    } catch (error) {
+      //ch.nack(error, false, false);
+      throw new ComposrError('error:worker:message', 'Error parsing message: ' + error, 422);
+    }
+    var type = message.type;
+    if (this.isPhrase(type) || this.isSnippet(type)) {
+      var itemIsPhrase = this.isPhrase(type);
+      logger.debug('WORKER ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message);
+      this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action, engine);
+    }
+  }
+};
+
+Worker.prototype.createChannel = function(conn){
+  var that = this;
+  var queue = 'composer-' + that.workerID,
+  exchange = 'eventbus.exchange',
+  pattern = '';
+
+  return conn.createChannel()
+  .then(function(ch) {
+    return ch.assertQueue(queue, {
+      durable: false,
+      autoDelete: true
+    }).then(function() {
+      return ch.bindQueue(queue, exchange, pattern);
+    })
+    .then(function() {
+      ch.consume(queue, function(message) {
+        //Added callback function in case we need to do manual ack of the messages
+        that.doWork(ch, message);
+      },
+      Object.create({
+        noAck: true
+      }));
     });
-
-  }).then(null, function(err) {
-    logger.error('Worker error %s', err);
-    setTimeout(worker, config('rabbitmq.reconntimeout'));
   });
-
-  return dfd.promise;
 };
 
-module.exports = {
-  init: worker
+Worker.prototype._closeConnectionSIGINT = function(connection){
+  process.once('SIGINT', function() {
+    connection.close();
+    process.exit();
+  });
 };
+
+Worker.prototype._closeConnection = function(connection){
+  connection.close(function() {
+    process.exit(1);
+  });
+};
+
+Worker.prototype._connect = function(){
+  return amqp.connect(this.connUrl);
+};
+
+Worker.prototype.retryInit = function(){
+  var that = this;
+  return setTimeout(function(){ that.init();}, config('rabbitmq.reconntimeout'));
+};
+
+Worker.prototype.init = function(){
+  var conn;
+  var that = this;
+  logger.info('Creating worker with ID', that.workerID);
+  that._connect()
+  .then(function(connection) {
+    conn = connection;
+    that._closeConnectionSIGINT(connection);
+    that.createChannel(connection)
+    .then(function() {
+      logger.info('Worker up, with ID', that.workerID);
+    })
+    .catch(function(error) {
+      logger.error('WORKER error ', error, 'with ID', that.workerID);
+      if (conn) {
+        that._closeConnection(conn);
+      }
+    });
+  })
+  .then(null, function(err) {
+    logger.error('Worker error %s with ID : %s', err, that.workerID);
+    that.retryInit();
+  });
+};
+
+module.exports = Worker;
