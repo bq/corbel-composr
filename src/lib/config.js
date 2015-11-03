@@ -52,6 +52,18 @@ if (isDefinedConfigValue(process.env.URL_BASE)) {
   config['corbel.driver.options'].urlBase = process.env.URL_BASE;
 }
 
+if (isDefinedConfigValue(process.env.ACCESS_LOG)) {
+  config.accessLog = process.env.ACCESS_LOG;
+}
+
+if (isDefinedConfigValue(process.env.ACCESS_LOG_FILE)) {
+  config.accessLogFile = process.env.ACCESS_LOG_FILE;
+}
+
+if (isDefinedConfigValue(process.env.LOG_FILE)) {
+  config.logFile = process.env.LOG_FILE;
+}
+
 if (isDefinedConfigValue(process.env.LOG_LEVEL)) {
   config.logLevel = process.env.LOG_LEVEL;
 }

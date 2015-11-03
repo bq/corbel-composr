@@ -33,13 +33,16 @@ var logger = require('./utils/logger');
 //Custom log
 app.set('logger', logger);
 
-// Access log, logs http requests
-var accessLogStream = fs.createWriteStream('logs/access.log', {
-  flags: 'a'
-});
-app.use(morgan('combined', {
-  stream: accessLogStream
-}));
+if(config('accessLog')){
+  // Access log, logs http requests
+  var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
+    flags: 'a'
+  });
+
+  app.use(morgan('combined', {
+    stream: accessLogStream
+  }));
+}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
