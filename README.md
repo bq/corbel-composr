@@ -14,9 +14,9 @@
 
 CompoSR is a [nodeJS](https://nodejs.org/api/) middleware, built on top  of [express](http://expressjs.com/4x/api.html), for [Corbel][corbel-link].
 
-It offers developers the ability to make their own specific application API based in [corbel-js](https://github.com/bq/corbel-js), allowing for multiple dinamic endpoints to be toggled on/off.
+It uses the [composr-core](https://github.com/bq/composr-core) capabilities and offers developers the ability to make their own specific application API with a Corbel generic backend.
 
-It is responsible for **composing** **phrases** of code than can be reused by multiple applications. This way you can keep your code reusable and simplify your API.
+Composr is responsible for **composing** **phrases** of code than can be reused by multiple applications. Those phrases can use all the methods exposed by [corbel-js](https://github.com/bq/corbel-js) and some extra useful libraries.
 
 > wiki: A composer (Latin com+ponere, literally "one who puts together") is a person who creates music.
 
