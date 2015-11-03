@@ -20,6 +20,8 @@
         "urlBase": "https://{{module}}corbel-domain.io/"
     },
 
+    "accessLog" : true,
+    "accessLogFile" : "logs/access.log",
     "logLevel": "error",
     "logFile": "logs/composr.log",
     "syslog" : false,
