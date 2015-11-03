@@ -6,7 +6,6 @@ var art = require('ascii-art');
 var config = require('../lib/config');
 var logLevel = config('logLevel') ? config('logLevel') : false;
 var logFile = config('logFile') ? config('logFile') : false;
-var useSyslog = config('syslog');
 
 var loggerEnabled = logLevel ? true : false;
 var logger;
@@ -32,22 +31,6 @@ if (loggerEnabled) {
       filename: logFile,
       level: logLevel
     }));
-  }
-
-  if (useSyslog) {
-    //TODO: check whether is needed to use systlog
-    /*
-    
-    require('winston-syslog').Syslog;
-    var syslogOptions = {
-      app_name: 'composr', // jshint ignore:line
-      protocol: 'unix',
-      path: '/dev/log',
-      level: logLevel
-    };
-
-    transports.push(new(winston.transports.Syslog)(syslogOptions));
-    */
   }
 
   //Initialize logger
