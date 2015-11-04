@@ -1,6 +1,6 @@
 'use strict';
 // Newrelic logger & metrics
-if(process.env.NRACTIVE){
+if (process.env.NRACTIVE) {
   require('newrelic');
 }
 
@@ -26,7 +26,7 @@ var express = require('express'),
   fs = require('fs'),
   app = express();
 
-var worker =  new WorkerClass();
+var worker = new WorkerClass();
 
 var ERROR_CODE_SERVER_TIMEOUT = 503;
 var DEFAULT_TIMEOUT = '10s';
@@ -38,7 +38,7 @@ var logger = require('./utils/logger');
 //Custom log
 app.set('logger', logger);
 
-if(config('accessLog')){
+if (config('accessLog')) {
   // Access log, logs http requests
   var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
     flags: 'a'
@@ -62,13 +62,13 @@ app.locals.ENV_DEVELOPMENT = env === 'development';
     Change powered by
 ********************************/
 app.use(helmet());
-  var powered = require('./utils/powered');
-  var randomIndex = function(powered) {
-    return Math.floor(Math.random() * powered.length );
-  };
-  app.use(helmet.hidePoweredBy({
-    setTo: powered[randomIndex(powered)]
-  }));
+var powered = require('./utils/powered');
+var randomIndex = function(powered) {
+  return Math.floor(Math.random() * powered.length);
+};
+app.use(helmet.hidePoweredBy({
+  setTo: powered[randomIndex(powered)]
+}));
 
 app.use(responseTime());
 app.use(favicon(__dirname + '/../public/img/favicon.ico'));
@@ -115,7 +115,7 @@ app.use(function(req, res, next) {
 
 app.use(timeout(DEFAULT_TIMEOUT, {
   status: ERROR_CODE_SERVER_TIMEOUT,
-  respond : true
+  respond: true
 }));
 
 
@@ -131,6 +131,9 @@ if (app.get('env') === 'development' || app.get('env') === 'test') {
   app.use(routes.test);
 }
 
+/*************************************
+  Timeout
+**************************************/
 var haltOnTimedout = function(req, res, next) {
   if (!req.timedout) {
     next();
@@ -149,10 +152,11 @@ app.disable('etag');
 **************************************/
 
 /// catch 404 and forward to error handler
-var NotFundHandler = function(req, res, next) {
+var NotFoundHandler = function(req, res, next) {
   next(new ComposrError('error:not_found', 'Not Found', 404));
 };
-app.use(NotFundHandler);
+
+app.use(NotFoundHandler);
 
 var errorHandler = function(err, req, res, next) {
 
@@ -167,10 +171,6 @@ var errorHandler = function(err, req, res, next) {
     status = ERROR_CODE_SERVER_TIMEOUT;
   }
 
-  if (err.domain) {
-    // usually a tripwire error
-    // release any resource...
-  }
   var errorLogged = {
     status: status,
     error: message,
@@ -179,6 +179,7 @@ var errorHandler = function(err, req, res, next) {
     // will print stacktrace
     trace: (app.get('env') === 'development' ? err.stack : '')
   };
+
   logger.error(errorLogged);
   res.status(status);
   res.json(errorLogged);
@@ -200,7 +201,5 @@ process.on('uncaughtException', function(err) {
 
 //Trigger the worker execution
 worker.init();
-
-//TODO : only trigger the worker and the driver connection after the data is loaded
 
 module.exports = engine.init(app);
