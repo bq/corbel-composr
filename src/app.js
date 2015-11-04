@@ -35,9 +35,10 @@ var DEFAULT_TIMEOUT = '10s';
   Logs
 **************************************/
 var logger = require('./utils/logger');
+var envConfigChecker = require('./utils/envConfigChecker');
 //Custom log
 app.set('logger', logger);
-
+envConfigChecker.checkConfig();
 if (config('accessLog')) {
   // Access log, logs http requests
   var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
