@@ -9,6 +9,7 @@ var logger = require('../utils/logger'),
 var phrasesCollection = 'composr:Phrase';
 var snippetsCollection = 'composr:Snippet';
 var initialized = false;
+var workerStatus = false;
 
 function suscribeLogger() {
   composr.events.on('debug', 'CorbelComposr', function() {
@@ -155,11 +156,20 @@ function init(app) {
   return dfd.promise;
 }
 
+function setWorkerStatus(bool){
+  workerStatus = bool;
+}
+
+function getWorkerStatus(){
+  return workerStatus;
+}
 
 module.exports = {
   init: init,
   composr: composr,
   initialized: initialized,
   phrasesCollection: phrasesCollection,
-  snippetsCollection: snippetsCollection
+  snippetsCollection: snippetsCollection,
+  setWorkerStatus : setWorkerStatus,
+  getWorkerStatus : getWorkerStatus
 };

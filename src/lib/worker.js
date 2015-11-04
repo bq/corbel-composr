@@ -26,7 +26,6 @@ Worker.prototype.isSnippet = function(type){
   return type === corbelConnection.SNIPPETS_COLLECTION;
 };
 
-
 Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action, engine){
   var domain = id.split('!')[0];
   switch (action) {
@@ -130,12 +129,14 @@ Worker.prototype._closeConnectionSIGINT = function(connection){
   process.once('SIGINT', function() {
     connection.close();
     process.exit();
+    engine.setWorkerStatus(false);
   });
 };
 
 Worker.prototype._closeConnection = function(connection){
   connection.close(function() {
     process.exit(1);
+    engine.setWorkerStatus(false);
   });
 };
 
@@ -158,6 +159,7 @@ Worker.prototype.init = function(){
     that._closeConnectionSIGINT(connection);
     that.createChannel(connection)
     .then(function() {
+      engine.setWorkerStatus(true);
       logger.info('Worker up, with ID', that.workerID);
     })
     .catch(function(error) {
