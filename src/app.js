@@ -27,6 +27,7 @@ var express = require('express'),
   app = express();
 
 var worker =  new WorkerClass();
+app.set('worker', worker);
 
 var ERROR_CODE_SERVER_TIMEOUT = 503;
 var DEFAULT_TIMEOUT = '10s';
@@ -131,6 +132,9 @@ if (app.get('env') === 'development' || app.get('env') === 'test') {
   app.use(routes.test);
 }
 
+/*************************************
+  Timeout
+**************************************/
 var haltOnTimedout = function(req, res, next) {
   if (!req.timedout) {
     next();
@@ -149,10 +153,11 @@ app.disable('etag');
 **************************************/
 
 /// catch 404 and forward to error handler
-var NotFundHandler = function(req, res, next) {
+var NotFoundHandler = function(req, res, next) {
   next(new ComposrError('error:not_found', 'Not Found', 404));
 };
-app.use(NotFundHandler);
+
+app.use(NotFoundHandler);
 
 var errorHandler = function(err, req, res, next) {
 
@@ -167,10 +172,6 @@ var errorHandler = function(err, req, res, next) {
     status = ERROR_CODE_SERVER_TIMEOUT;
   }
 
-  if (err.domain) {
-    // usually a tripwire error
-    // release any resource...
-  }
   var errorLogged = {
     status: status,
     error: message,
@@ -179,6 +180,7 @@ var errorHandler = function(err, req, res, next) {
     // will print stacktrace
     trace: (app.get('env') === 'development' ? err.stack : '')
   };
+
   logger.error(errorLogged);
   res.status(status);
   res.json(errorLogged);
@@ -200,7 +202,5 @@ process.on('uncaughtException', function(err) {
 
 //Trigger the worker execution
 worker.init();
-
-//TODO : only trigger the worker and the driver connection after the data is loaded
 
 module.exports = engine.init(app);

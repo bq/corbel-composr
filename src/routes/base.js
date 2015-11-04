@@ -25,7 +25,8 @@ function status(req, res) {
 
   var statuses = {
     'phrases': phrasesLoaded > 0 ? true : false,
-    'phrasesLoaded' : phrasesLoaded
+    'phrasesLoaded' : phrasesLoaded,
+    'worker' : engine.getWorkerStatus()
   };
 
   var modules = ['iam', 'resources'];
