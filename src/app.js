@@ -1,6 +1,9 @@
 'use strict';
 // Newrelic logger & metrics
-require('newrelic');
+if(process.env.NRACTIVE){
+  require('newrelic');
+}
+
 
 var express = require('express'),
   path = require('path'),

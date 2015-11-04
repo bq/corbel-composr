@@ -8,11 +8,11 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['Corbel-Composr'],
+  app_name: [process.env.NRAPPNAME],
   /**
    * Your New Relic license key.
    */
-  license_key: '32b4a2781ae90d15a8877848eae17b3cc6e1079d',
+  license_key: process.env.NRAPIKEY,
   logging: {
     /**
      * Level at which to log. 'trace' is most useful to New Relic when diagnosing
