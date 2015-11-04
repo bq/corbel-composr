@@ -1,3 +1,4 @@
+var config = require('./src/lib/config');
 /**
  * New Relic agent configuration.
  *
@@ -8,11 +9,11 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: [process.env.NRAPPNAME],
+  app_name: [config('newrelic.name')],
   /**
    * Your New Relic license key.
    */
-  license_key: process.env.NRAPIKEY,
+  license_key: config('newrelic.key'),
   logging: {
     /**
      * Level at which to log. 'trace' is most useful to New Relic when diagnosing

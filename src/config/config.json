@@ -25,5 +25,8 @@
     "logLevel": "error",
     "logFile": "logs/composr.log",
     "syslog" : false,
-    "bodylimit" : "50mb"
+    "bodylimit" : "50mb",
+    "newrelic" : false,
+    "newrelic.name": "",
+    "newrelic.key": ""
 }

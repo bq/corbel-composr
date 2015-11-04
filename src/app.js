@@ -1,9 +1,4 @@
 'use strict';
-// Newrelic logger & metrics
-if (process.env.NRACTIVE) {
-  require('newrelic');
-}
-
 
 var express = require('express'),
   path = require('path'),
@@ -24,7 +19,8 @@ var express = require('express'),
   cors = require('cors'),
   pmx = require('pmx'),
   fs = require('fs'),
-  app = express();
+  app = express(),
+  configChecker = require('./utils/envConfigChecker');
 
 var worker = new WorkerClass();
 
@@ -38,7 +34,7 @@ var logger = require('./utils/logger');
 //Custom log
 app.set('logger', logger);
 
-if (config('accessLog')) {
+if (config('accessLog') === true || config('accessLog') === 'true') {
   // Access log, logs http requests
   var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
     flags: 'a'
@@ -49,14 +45,32 @@ if (config('accessLog')) {
   }));
 }
 
-// view engine setup
+
+/*************************************
+  New Relic
+**************************************/
+if (config('newrelic') === true || config('newrelic') === 'true') {
+  require('newrelic');
+}
+
+
+/*************************************
+  Views engine
+**************************************/
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.engine('ejs', ejslocals);
 
+
+/*************************************
+  Configuration check
+**************************************/
 var env = process.env.NODE_ENV || 'development';
 app.locals.ENV = env;
 app.locals.ENV_DEVELOPMENT = env === 'development';
+
+configChecker.checkConfig(env);
+
 
 /*******************************
     Change powered by
