@@ -22,7 +22,7 @@
 
     "accessLog" : true,
     "accessLogFile" : "logs/access.log",
-    "logLevel": "error",
+    "logLevel": "warn",
     "logFile": "logs/composr.log",
     "syslog" : false,
     "bodylimit" : "50mb"
