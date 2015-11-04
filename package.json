@@ -53,6 +53,7 @@
     "lodash": "^3.8.0",
     "mkdirp": "^0.5.1",
     "morgan": "^1.5.2",
+    "newrelic": "^1.23.0",
     "node-localstorage": "~0.6.0",
     "object-sizeof": "1.0.6",
     "pm2": "^0.15.7",

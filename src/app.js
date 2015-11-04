@@ -1,4 +1,6 @@
 'use strict';
+// Newrelic logger & metrics
+require('newrelic');
 
 var express = require('express'),
   path = require('path'),
