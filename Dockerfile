@@ -36,6 +36,11 @@ ENV LOG_LEVEL debug
 ENV LOG_FILE logs/composr.log
 ENV RABBITMQ_PORT ''
 ENV RABBITMQ_USERNAME ''
+ENV ACCESS_LOG true
+ENV NRACTIVE true
+ENV NRAPPNAME ''
+ENV NRAPIKEY ''
+ENV NODE_ENV production
 
 
 #Set the endpoint suffix for the environment to use
