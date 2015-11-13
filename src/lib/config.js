@@ -117,6 +117,17 @@ if (isDefinedConfigValue(process.env.NRAPIKEY)) {
   initialConfig['newrelic.key'] = process.env.NRAPIKEY;
 }
 
+if (isDefinedConfigValue(process.env.SERVICES_CHECKING_TIMEOUT)) {
+  config['services.timeout'] = process.env.SERVICES_TIMEOUT;
+}
+
+if (isDefinedConfigValue(process.env.SERVICES_RETRIES)) {
+  config['services.retries'] = process.env.SERVICES_RETRIES;
+}
+
+if (isDefinedConfigValue(process.env.SERVICES_TIME)) {
+  config['services.time'] = process.env.SERVICES_TIME;
+}
 
 module.exports = function(key, haltOnUndefined) {
   if (!key) {
