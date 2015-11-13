@@ -141,7 +141,7 @@ app.use(routes.doc);
 app.use(routes.snippet);
 app.use(routes.phrase);
 
-if (app.get('env') === 'development' || app.get('env') === 'test') {
+if (app.get('env') === 'development' || app.get('env') === 'test' || app.get('env') === 'qa') {
   app.use(routes.test);
 }
 
