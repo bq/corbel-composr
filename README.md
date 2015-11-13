@@ -57,6 +57,9 @@ You can send the following environment variables (or define a environment config
     "rabbitmq.reconntimeout": 10000,
     "rabbitmq.event": "class io.corbel.event.ResourceEvent",
     "bootstrap.retrytimeout": 10000,
+    "services.timeout": 3000,
+    "services.retries": 3,
+    "services.time": 100,
     "timeout": 2000,
     "corbel.composr.credentials": {
         "clientId": "CLIENT_ID",
@@ -87,6 +90,9 @@ RABBITMQ_HOST
 RABBITMQ_PORT
 RABBITMQ_USERNAME
 RABBITMQ_PASSWORD
+SERVICES_TIMEOUT
+SERVIES_RETRIES
+SERVICES_TIME 
 ```
 
 ## Phrases
