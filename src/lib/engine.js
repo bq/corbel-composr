@@ -6,12 +6,42 @@ var logger = require('../utils/logger'),
   https = require('https'),
   config = require('./config');
 
-var phrasesCollection = 'composr:Phrase';
-var snippetsCollection = 'composr:Snippet';
-var initialized = false;
-var workerStatus = false;
+var initialized, 
+  workerStatus,
+  initComposrCore,
+  suscribeLogger,
+  resolveOrRejectServiceCheckingRequest,
+  initServiceCheckingRequests,
+  waitTilServicesUp,
+  getComposrCoreCredentials,
+  launchTries,
+  init,
+  setWorkerStatus,
+  getWorkerStatus,
+  suscribeLogger,
+  phrasesCollection,
+  snippetsCollection,
+  composr;
 
-function suscribeLogger() {
+function initLocalFunctionsAliases() {
+  initComposrCore = module.exports.initComposrCore;
+  suscribeLogger = module.exports.suscribeLogger;
+  resolveOrRejectServiceCheckingRequest = module.exports.resolveOrRejectServiceCheckingRequest;
+  initServiceCheckingRequests = module.exports.initServiceCheckingRequests;
+  waitTilServicesUp = module.exports.waitTilServicesUp;
+  getComposrCoreCredentials = module.exports.getComposrCoreCredentials;
+  launchTries = module.exports.launchTries;
+  init = module.exports.init;
+  setWorkerStatus = module.exports.setWorkerStatus;
+  getWorkerStatus = module.exports.getWorkerStatus;
+  initialized = module.exports.initialized = false;
+  workerStatus = module.exports.workerStatus = false;
+  phrasesCollection = module.exports.phrasesCollection = 'composr:Phrase';
+  snippetsCollection = module.exports.snippetsCollection = 'composr:Snippet';
+  module.exports.composr = composr;
+}
+
+module.exports.suscribeLogger = function() {
   composr.events.on('debug', 'CorbelComposr', function() {
     logger.debug.apply(logger, arguments);
   });
@@ -27,51 +57,76 @@ function suscribeLogger() {
   composr.events.on('info', 'CorbelComposr', function() {
     logger.info.apply(logger, arguments);
   });
-}
+};
 
+/************************************************************
+ * - Deletes timeout handler
+ * - Resolves service checking request if response from server
+ * - Rejects service checking request if 'error' evt or timeout while waiting for response
+ * @param  {Function} resolve Services to check
+ * @param  {Function} reject Timeout before reject promise
+ * @param  {String} module service currently checking
+ * @param  {Object} promiseTimeoutHandler Timeout handler
+ * @return nothing
+ *************************************************************/
+
+module.exports.resolveOrRejectServiceCheckingRequest = function(resolve, reject, request, module, promiseTimeoutHandler) {
+  if (promiseTimeoutHandler) {
+    clearTimeout(promiseTimeoutHandler);
+  }
+  if (resolve) {
+    logger.info('External service', module, 'is UP');
+    resolve();
+  } else if (reject) {
+    logger.error('External service', module, 'is DOWN');
+    request.abort();
+    reject();
+  }
+};
+
+/************************************************************
+ * - Launches services checking requests
+ * @param  {Array} modules Services to check
+ * @param  {integer} serviceCheckingRequestTimeout Timeout before reject promise
+ * @return {Array} promises
+ *************************************************************/
+
+module.exports.initServiceCheckingRequests = function(modules, serviceCheckingRequestTimeout) {
+  var path = config('corbel.driver.options').urlBase;
+  var promises = modules.map(function(module) {
+    var url;
+    logger.info('Checking for external service', module);
+    return new Promise(function(resolve, reject) {
+      var promiseTimeoutHandler;
+      url = path.replace('{{module}}', module) + 'version';
+      var request = https.get(url, function() {
+          // resolveOrRejectServiceCheckingRequest === undefined -> Promises rejected 
+          if (resolveOrRejectServiceCheckingRequest) {
+            resolveOrRejectServiceCheckingRequest(resolve, null, request, module, promiseTimeoutHandler);
+          }
+        })
+        .on('error', function() {
+          // When a request is aborted and error is raised, so we must check that Promise who owns the request is in pending state 
+          if (resolveOrRejectServiceCheckingRequest) {
+            resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler);
+          }
+        });
+      promiseTimeoutHandler = setTimeout(resolveOrRejectServiceCheckingRequest, serviceCheckingRequestTimeout, null, reject, request, module, promiseTimeoutHandler);
+    });
+  });
+  return promises;
+};
 
 //Recursivelly wait until all the corbel services are up
-function waitTilServicesUp(cb, retries) {
+module.exports.waitTilServicesUp = function() {
   var modules = ['iam', 'resources'];
-  var path = config('corbel.driver.options').urlBase;
-  var time = 1000;
-
-  if (retries <= 0) {
-    cb(true);
-  } else {
-    var promises = modules.map(function(module) {
-      logger.info('Checking for external service', module);
-
-      return new Promise(function(resolve, reject) {
-        https.get(path.replace('{{module}}', module) + '/version', function() {
-          resolve();
-          logger.info('External service', module, 'is UP');
-        })
-          .on('error', function() {
-            logger.error('External service', module, 'is DOWN');
-            reject();
-          });
-      });
-
-    });
-
-    Promise.all(promises)
-      .then(function() {
-        logger.info('All Services up and running!');
-        cb();
-      })
-      .catch(function() {
-        logger.info('Retrying services check after', time * retries, 'milliseconds');
-        setTimeout(function() {
-          waitTilServicesUp(cb, retries - 1);
-        }, time * retries);
-      });
-  }
-
-}
+  var serviceCheckingRequestTimeout = config('services.timeout');
+  var promises = initServiceCheckingRequests(modules, serviceCheckingRequestTimeout);
+  return Promise.all(promises);
+};
 
 //Returns the credentials for the composr-core initialization
-function getComposrCoreCredentials() {
+module.exports.getComposrCoreCredentials = function() {
   return {
     credentials: {
       clientId: config('corbel.composr.credentials').clientId,
@@ -80,10 +135,10 @@ function getComposrCoreCredentials() {
     },
     urlBase: config('corbel.driver.options').urlBase
   };
-}
+};
 
 //Inits the composr-core package
-function initComposrCore(credentials, fetchData) {
+module.exports.initComposrCore = function(credentials, fetchData) {
   return new Promise(function(resolve, reject) {
     composr.init(credentials, fetchData)
       .then(function() {
@@ -95,81 +150,93 @@ function initComposrCore(credentials, fetchData) {
       .catch(function(err) {
         initialized = false;
         logger.error('ERROR launching composr, please check your credentials and network');
-        logger.error(err);
         reject(err);
       });
   });
+};
 
-}
+module.exports.launchTries = function() {
+  var retries = config('services.retries');
+  var time = config('services.time');
+  // var dfd = q.defer();
 
-function launchTemporalRetry() {
-  logger.info('The server is launched, delaying the fetch data');
-  var retries = 30;
-  waitTilServicesUp(function(err) {
-    if (err) {
-      launchTemporalRetry();
-    } else {
-      logger.info('Data is available, fetching');
-      initComposrCore(getComposrCoreCredentials(), true);
+  return new Promise(function(resolve, reject) {
+    function launch(retries) {
+      if (!retries) {
+        return reject();
+      }
+      waitTilServicesUp()
+        .then(function() {
+          logger.info('All Services up and running!');
+          resolve();
+        })
+        .catch(function() {
+          logger.info('Retrying services check after', time * retries, 'milliseconds');
+          setTimeout(function() {
+            return launch(retries - 1);
+          }, time * retries);
+        });
     }
-  }, retries);
-}
+    launch(retries);
+  });
+};
 
 /**
  * Launches the bootstrap of data, worker and logger
  * @param  {[type]} app [description]
  * @return promise
  */
-function init(app) {
+module.exports.init = function(app) {
+  initLocalFunctionsAliases();
   var dfd = q.defer();
-
-  var credentials = getComposrCoreCredentials();
-  var retries = 15;
+  var retries = config('services.retries');
+  var fetchData = true;
+  
   //Suscribe to log events
   suscribeLogger();
 
-  //Wait until services are up, and init the core
-  waitTilServicesUp(function(err) {
-    var fetchData;
-
-    if (err) {
-      //If the services were unavailable delay the retries and go on
-      logger.error('Services where unaccesible after ' + retries + ' retries');
-      launchTemporalRetry();
-      fetchData = false;
-    } else {
-      fetchData = true;
-    }
-
-    initComposrCore(credentials, fetchData)
-      .then(function() {
-        dfd.resolve({
-          app: app,
-          composr: composr,
-          initialized: initialized
+  launchTries(retries)
+    .then(function() {
+      initComposrCore(getComposrCoreCredentials(), fetchData)
+        .then(function() {
+          dfd.resolve({
+            app: app,
+            composr: composr,
+            initialized: initialized
+          });
+        })
+        .catch(dfd.reject);
+    })
+    .catch(function() {
+      initComposrCore(getComposrCoreCredentials(), !fetchData)
+        .then(function() {
+          logger.info('The server is launched, delaying the fetch data');
+        })
+        .then(function() {
+          tryAgain();
         });
+    });
+
+  function tryAgain() {
+    launchTries(retries)
+      .then(function() {
+        logger.info('Data is available, fetching');
+        initComposrCore(getComposrCoreCredentials(), fetchData); 
       })
-      .catch(dfd.reject);
-
-  }, retries);
-
+      .catch(function() {
+        //If the services were unavailable delay the retries and go on
+        logger.error('Services where unaccesible after ' + retries + ' retries');
+        tryAgain();
+      });
+  }
   return dfd.promise;
-}
+};
 
-function setWorkerStatus(bool){
+module.exports.setWorkerStatus = function(bool) {
   workerStatus = bool;
-}
+};
 
-function getWorkerStatus(){
+
+module.exports.getWorkerStatus = function() {
   return workerStatus;
-}
-
-module.exports = {
-  init: init,
-  composr: composr,
-  initialized: initialized,
-  phrasesCollection: phrasesCollection,
-  snippetsCollection: snippetsCollection,
-  setWorkerStatus : setWorkerStatus,
-  getWorkerStatus : getWorkerStatus
 };
