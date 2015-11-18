@@ -158,10 +158,6 @@ var engine = {
     var retries = config('services.retries');
     var fetchData = true;
 
-    // Check environment variables 
-    if (!config('services.retries') || !config('services.timeout') || !config('services.time')) {
-      throw new Error('Check environment variables and try again. Required: services.retries, services.timeout, services.time'); 
-    }
     // console.dir(composr.Phrases); 
     //Suscribe to log events
     engine.suscribeLogger();

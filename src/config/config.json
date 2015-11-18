@@ -10,6 +10,8 @@
 
     "timeout": 2000,
     "services.timeout": 5000, 
+    "services.retries": 30,
+    "services.time": 1000, 
     "corbel.composr.credentials": {
         "clientId": "CLIENT_ID",
         "clientSecret": "CLIENT_SECRET",

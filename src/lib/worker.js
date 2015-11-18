@@ -1,32 +1,32 @@
 'use strict';
 
 var engine = require('./engine'),
-corbelConnection = require('./corbelConnection'),
-amqp = require('amqplib'),
-uuid = require('uuid'),
-ComposrError = require('./ComposrError'),
-config = require('./config'),
-logger = require('../utils/logger');
+  corbelConnection = require('./corbelConnection'),
+  amqp = require('amqplib'),
+  uuid = require('uuid'),
+  ComposrError = require('./ComposrError'),
+  config = require('./config'),
+  logger = require('../utils/logger');
 
 
-function Worker(){
-  this.connUrl =  'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
+function Worker() {
+  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
   this.workerID = uuid.v4();
 }
 
-Worker.prototype.phraseOrSnippet = function(type){
+Worker.prototype.phraseOrSnippet = function(type) {
   return type === corbelConnection.PHRASES_COLLECTION ? true : false;
 };
 
-Worker.prototype.isPhrase = function(type){
+Worker.prototype.isPhrase = function(type) {
   return type === corbelConnection.PHRASES_COLLECTION;
 };
 
-Worker.prototype.isSnippet = function(type){
+Worker.prototype.isSnippet = function(type) {
   return type === corbelConnection.SNIPPETS_COLLECTION;
 };
 
-Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action, engine){
+Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action, engine) {
   var domain = id.split('!')[0];
   switch (action) {
     case 'DELETE':
@@ -62,7 +62,7 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
           }
         })
         .then(function(result) {
-          if (result.registered === true){
+          if (result.registered === true) {
             if (itemIsPhrase) {
               engine.composr.addPhrasesToDataStructure(itemToAdd);
             } else {
@@ -81,7 +81,7 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
   }
 };
 
-Worker.prototype.doWork = function(ch, msg){
+Worker.prototype.doWork = function(ch, msg) {
   if (msg.fields.routingKey === config('rabbitmq.event')) {
     var message;
     try {
@@ -99,33 +99,33 @@ Worker.prototype.doWork = function(ch, msg){
   }
 };
 
-Worker.prototype.createChannel = function(conn){
+Worker.prototype.createChannel = function(conn) {
   var that = this;
   var queue = 'composer-' + that.workerID,
-  exchange = 'eventbus.exchange',
-  pattern = '';
+    exchange = 'eventbus.exchange',
+    pattern = '';
 
   return conn.createChannel()
-  .then(function(ch) {
-    return ch.assertQueue(queue, {
-      durable: false,
-      autoDelete: true
-    }).then(function() {
-      return ch.bindQueue(queue, exchange, pattern);
-    })
-    .then(function() {
-      ch.consume(queue, function(message) {
-        //Added callback function in case we need to do manual ack of the messages
-        that.doWork(ch, message);
-      },
-      Object.create({
-        noAck: true
-      }));
+    .then(function(ch) {
+      return ch.assertQueue(queue, {
+          durable: false,
+          autoDelete: true
+        }).then(function() {
+          return ch.bindQueue(queue, exchange, pattern);
+        })
+        .then(function() {
+          ch.consume(queue, function(message) {
+              //Added callback function in case we need to do manual ack of the messages
+              that.doWork(ch, message);
+            },
+            Object.create({
+              noAck: true
+            }));
+        });
     });
-  });
 };
 
-Worker.prototype._closeConnectionSIGINT = function(connection){
+Worker.prototype._closeConnectionSIGINT = function(connection) {
   process.once('SIGINT', function() {
     connection.close();
     process.exit();
@@ -133,53 +133,55 @@ Worker.prototype._closeConnectionSIGINT = function(connection){
   });
 };
 
-Worker.prototype._closeConnection = function(connection){
+Worker.prototype._closeConnection = function(connection) {
   connection.close(function() {
     process.exit(1);
     engine.setWorkerStatus(false);
   });
 };
 
-Worker.prototype._connect = function(){
+Worker.prototype._connect = function() {
   return amqp.connect(this.connUrl);
 };
 
-Worker.prototype.retryInit = function(){
+Worker.prototype.retryInit = function() {
   var that = this;
-  return setTimeout(function(){ that.init();}, config('rabbitmq.reconntimeout'));
+  return setTimeout(function() {
+    that.init();
+  }, config('rabbitmq.reconntimeout'));
 };
 
-Worker.prototype.init = function(){
+Worker.prototype.init = function() {
   var conn;
   var that = this;
   logger.info('Creating worker with ID', that.workerID);
   that._connect()
-  .then(function(connection) {
-    //Bind connection errror
-    connection.on('error', function (error){
+    .then(function(connection) {
+      //Bind connection errror
+      connection.on('error', function(error) {
         logger.error('WORKER', error);
         engine.setWorkerStatus(false);
         that.init();
-    });
+      });
 
-    conn = connection;
-    that._closeConnectionSIGINT(connection);
-    that.createChannel(connection)
-    .then(function() {
-      engine.setWorkerStatus(true);
-      logger.info('Worker up, with ID', that.workerID);
+      conn = connection;
+      that._closeConnectionSIGINT(connection);
+      that.createChannel(connection)
+        .then(function() {
+          engine.setWorkerStatus(true);
+          logger.info('Worker up, with ID', that.workerID);
+        })
+        .catch(function(error) {
+          logger.error('WORKER error ', error, 'with ID', that.workerID);
+          if (conn) {
+            that._closeConnection(conn);
+          }
+        });
     })
-    .catch(function(error) {
-      logger.error('WORKER error ', error, 'with ID', that.workerID);
-      if (conn) {
-        that._closeConnection(conn);
-      }
+    .then(null, function(err) {
+      logger.error('Worker error %s with ID : %s', err, that.workerID);
+      that.retryInit();
     });
-  })
-  .then(null, function(err) {
-    logger.error('Worker error %s with ID : %s', err, that.workerID);
-    that.retryInit();
-  });
 };
 
 module.exports = Worker;
