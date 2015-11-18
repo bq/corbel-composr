@@ -178,7 +178,9 @@ describe('Rabbit worker', function() {
     var theWorker;
     var promiseCreateChannel;
     var stubCreateChannel;
-    var connection = 'connection';
+    var connection = {
+      'on' : sinon.stub()
+    };
 
     beforeEach(function() {
       theWorker = new WorkerClass();
