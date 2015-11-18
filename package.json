@@ -38,7 +38,7 @@
     "ascii-art": "0.0.2-alpha",
     "atob": "^1.1.2",
     "body-parser": "^1.12.0",
-    "composr-core": "^0.0.24",
+    "composr-core": "^0.0.25",
     "connect-timeout": "^1.6.1",
     "cookie-parser": "~1.4.0",
     "corbel-js": "^0.2.9",
