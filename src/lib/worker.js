@@ -155,6 +155,13 @@ Worker.prototype.init = function(){
   logger.info('Creating worker with ID', that.workerID);
   that._connect()
   .then(function(connection) {
+    //Bind connection errror
+    connection.on('error', function (error){
+        logger.error('WORKER', error);
+        engine.setWorkerStatus(false);
+        that.init();
+    });
+
     conn = connection;
     that._closeConnectionSIGINT(connection);
     that.createChannel(connection)
