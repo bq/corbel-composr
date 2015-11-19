@@ -10,7 +10,7 @@ var engine = require('./engine'),
 
 
 function Worker() {
-  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port');
+  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=30';
   this.workerID = uuid.v4();
 }
 
