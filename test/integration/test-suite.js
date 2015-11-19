@@ -28,6 +28,7 @@ module.exports = function(serverPromise) {
     before(function(done) {
       //Wait for app initialization
       serverPromise.then(function(res) {
+        console.dir(res); 
         server = res;
         done();
       });
@@ -36,6 +37,7 @@ module.exports = function(serverPromise) {
     //This wrapping is needed because otherwise application would be an empty object
     it('Executes the integration tests', function() {
       tests.forEach(function(test) {
+        console.dir(server); 
         test(server);
       });
     });
