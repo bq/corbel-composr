@@ -28,7 +28,7 @@ var engine = {
 
   /************************************************************
    * - Deletes timeout handler
-   * - Resolves service checking request if response from server
+   * - Resolves service checking request if response is sent from server
    * - Rejects service checking request if 'error' evt or timeout while waiting for response
    * @param  {Function} resolve Services to check
    * @param  {Function} reject Timeout before reject promise
@@ -37,7 +37,7 @@ var engine = {
    * @return nothing
    *************************************************************/
 
-  resolveOrRejectServiceCheckingRequest: function(resolve, reject, request, module, promiseTimeoutHandler) {
+  resolveOrRejectServiceCheckingRequest: function(resolve, reject, request, module, promiseTimeoutHandler, rejectMessage) {
     if (promiseTimeoutHandler) {
       clearTimeout(promiseTimeoutHandler);
     }
@@ -45,10 +45,49 @@ var engine = {
       logger.info('External service', module, 'is UP');
       resolve();
     } else if (reject) {
+      rejectMessage = rejectMessage || '';
       logger.error('External service', module, 'is DOWN');
       request.abort();
-      reject();
+      reject(rejectMessage);
     }
+  },
+
+  /************************************************************
+   * - Initializes how a request is made
+   * @param  {String} url to send request
+   * @param  {Function} to execute when request is successfully replied
+   * @param  {Function} to execute when request is not replied
+   * @param  {Object} that holds a reference to request
+   * @param  {Function} reference to timeout for this request
+   * @param  {String} data that server sends
+   *************************************************************/
+
+  setUpRequest: function(url, module, resolve, reject, serviceCheckingRequestTimeout) {
+    var request = https.get(url, function(res) {
+        var responseData = '';
+        res.on('data', function(chunk) {
+          responseData += chunk;
+        });
+        res.on('end', function() {
+          if (engine.resolveOrRejectServiceCheckingRequest) {
+            var isValidResponse = (res.statusCode === 200);
+            var bodyContainsError = (responseData.indexOf('error')>-1 || responseData.indexOf('err')>-1);
+            if (isValidResponse && !bodyContainsError) {
+              engine.resolveOrRejectServiceCheckingRequest(resolve, null, request, module, promiseTimeoutHandler, null);
+            } else {
+              engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'JSON error');
+            }
+          }
+        });
+      })
+      .on('error', function(err) {
+        // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved 
+        if (engine.resolveOrRejectServiceCheckingRequest) {
+          engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err);
+        }
+      });
+      var promiseTimeoutHandler = setTimeout(engine.resolveOrRejectServiceCheckingRequest, serviceCheckingRequestTimeout, null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired');
+      return request; 
   },
 
   /************************************************************
@@ -60,28 +99,14 @@ var engine = {
 
   initServiceCheckingRequests: function(modules, serviceCheckingRequestTimeout) {
     var path = config('corbel.driver.options').urlBase;
-    var promises = modules.map(function(module) {
+    return modules.map(function(module) {
       var url;
       logger.info('Checking for external service', module);
       return new Promise(function(resolve, reject) {
-        var promiseTimeoutHandler;
-        url = path.replace('{{module}}', module) + 'version';
-        var request = https.get(url, function() {
-            // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved 
-            if (engine.resolveOrRejectServiceCheckingRequest) {
-              engine.resolveOrRejectServiceCheckingRequest(resolve, null, request, module, promiseTimeoutHandler);
-            }
-          })
-          .on('error', function() {
-            // When a request is aborted and error is raised, so we must check that Promise who owns the request is in pending state 
-            if (engine.resolveOrRejectServiceCheckingRequest) {
-              engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler);
-            }
-          });
-        promiseTimeoutHandler = setTimeout(engine.resolveOrRejectServiceCheckingRequest, serviceCheckingRequestTimeout, null, reject, request, module, promiseTimeoutHandler);
+        url = path.replace('{{module}}', module).replace(/\/(v.+)\//,'/') + 'version';
+        engine.setUpRequest(url, module, resolve, reject, serviceCheckingRequestTimeout);
       });
     });
-    return promises;
   },
 
   //Recursivelly wait until all the corbel services are up
@@ -158,7 +183,6 @@ var engine = {
     var retries = config('services.retries');
     var fetchData = true;
 
-    // console.dir(composr.Phrases); 
     //Suscribe to log events
     engine.suscribeLogger();
 
@@ -208,9 +232,9 @@ var engine = {
   }
 };
 
-engine.initialized = false; 
-engine.workerStatus = false; 
-engine.phrasesCollection = 'composr:Phrase'; 
-engine.snippetsCollection = 'composr:Snippet'; 
-engine.composr = composr; 
+engine.initialized = false;
+engine.workerStatus = false;
+engine.phrasesCollection = 'composr:Phrase';
+engine.snippetsCollection = 'composr:Snippet';
+engine.composr = composr;
 module.exports = engine;

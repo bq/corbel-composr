@@ -25,6 +25,7 @@ describe('Engine', function() {
   var domain = baseUrl.substring(0, baseUrl.indexOf("{") - 1);
   var engineAbsPath = null;
   var mySandbox = sinon.sandbox.create();
+  var modules = ['iam', 'resources'];
 
   describe('Services checking', function() {
 
@@ -130,20 +131,117 @@ describe('Engine', function() {
 
     describe('Engine requests', function() {
 
-      it('Rejects by timeout', function(done) {
+      it('when request timeout is fired promise should be rejected', function(done) {
 
         nock(domain, options)
-          .get('/iam/v1.0/version')
+          .get('/iam/version')
           .delayConnection(time)
           .reply(200)
-          .get('/resources/v1.0/version')
+          .get('/resources/version')
           .delayConnection(time)
           .reply(200);
 
-        Promise.all(engine.initServiceCheckingRequests(['test'], 0))
+        Promise.all(engine.initServiceCheckingRequests(modules, 0))
           .should.be.rejected
           .should.notify(done);
       });
+
+      it('when connection error event is fired promise should be rejected', function(done) {
+
+        nock(domain, options)
+          .get('/iam/version')
+          .replyWithError('An awful error')
+          .get('/resources/version')
+          .replyWithError('An awful error');
+
+        Promise.all(engine.initServiceCheckingRequests(modules, 0))
+          .should.be.rejected
+          .should.notify(done);
+      });
+
+      it('when request is replied and no body exists promise should be resolved', function(done) {
+
+        nock(domain, options)
+          .get('/iam/version')
+          .reply(200)
+          .get('/resources/version')
+          .reply(200);
+
+        Promise.all(engine.initServiceCheckingRequests(modules, 5000))
+          .should.be.fulfilled
+          .should.notify(done);
+      });
+
+      it('when request is replied and JSON body without error is sent promise should be resolved', function(done) {
+
+        var jsonResponse = {'result': 'ok'}; 
+
+        nock(domain, options)
+          .get('/iam/version')
+          .times(10)
+          .reply(200, jsonResponse)
+          .get('/resources/version')
+          .times(10)
+          .reply(200, jsonResponse);
+
+        Promise.all(engine.initServiceCheckingRequests(modules, 9000))
+          .should.be.fulfilled
+          .should.notify(done);
+      });
+
+      it('when response status code is !== 200 and no body error is sent promise should be rejected', function(done) {
+
+        nock(domain, options)
+          .get('/iam/version')
+          .reply(400)
+          .get('/resources/version')
+          .reply(400);
+
+        Promise.all(engine.initServiceCheckingRequests(modules, 0))
+          .should.be.rejected
+          .should.notify(done);
+      });
+
+      it('when response status code !== 200 and response body contains a JSON error promise should be rejected', function(done) {
+
+        var bodyError = JSON.stringify({
+          err: new Error('Undefined error').toString()
+        });
+
+        nock(domain, options)
+          .get('/iam/version')
+          .reply(400, bodyError, {
+            'Content-Type': 'application/json'
+          })
+          .get('/resources/version')
+          .reply(400, bodyError, {
+            'Content-Type': 'application/json'
+          });
+
+        Promise.all(engine.initServiceCheckingRequests(modules, 0))
+          .should.be.rejected
+          .should.notify(done);
+      });
+
+      it('when response status code === 200 && response body contains an error promise should be rejected', function(done) {
+
+        var bodyError = new Error('Undefined error').toString(); 
+
+        nock(domain, options)
+          .get('/iam/version')
+          .reply(200, bodyError, {
+            'Content-Type': 'application/html'
+          })
+          .get('/resources/version')
+          .reply(200, bodyError, {
+            'Content-Type': 'application/html'
+          });
+
+        Promise.all(engine.initServiceCheckingRequests(modules, 0))
+          .should.be.rejected
+          .should.notify(done);
+      });
+
     });
   });
 });
