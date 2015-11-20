@@ -117,7 +117,7 @@ if (isDefinedConfigValue(process.env.NRAPIKEY)) {
   initialConfig['newrelic.key'] = process.env.NRAPIKEY;
 }
 
-if (isDefinedConfigValue(process.env.SERVICES_CHECKING_TIMEOUT)) {
+if (isDefinedConfigValue(process.env.SERVICES_TIMEOUT)) {
   initialConfig['services.timeout'] = process.env.SERVICES_TIMEOUT;
 }
 
