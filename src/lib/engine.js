@@ -71,7 +71,7 @@ var engine = {
         res.on('end', function() {
           if (engine.resolveOrRejectServiceCheckingRequest) {
             var isValidResponse = (res.statusCode === 200);
-            var bodyContainsError = (responseData.indexOf('error')>-1 || responseData.indexOf('err')>-1);
+            var bodyContainsError = (responseData.indexOf('error') > -1 || responseData.indexOf('err') > -1);
             if (isValidResponse && !bodyContainsError) {
               engine.resolveOrRejectServiceCheckingRequest(resolve, null, request, module, promiseTimeoutHandler, null);
             } else {
@@ -86,8 +86,8 @@ var engine = {
           engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err);
         }
       });
-      var promiseTimeoutHandler = setTimeout(engine.resolveOrRejectServiceCheckingRequest, serviceCheckingRequestTimeout, null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired');
-      return request; 
+    var promiseTimeoutHandler = setTimeout(engine.resolveOrRejectServiceCheckingRequest, serviceCheckingRequestTimeout, null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired');
+    return request;
   },
 
   /************************************************************
@@ -103,7 +103,7 @@ var engine = {
       var url;
       logger.info('Checking for external service', module);
       return new Promise(function(resolve, reject) {
-        url = path.replace('{{module}}', module).replace(/\/(v.+)\//,'/') + 'version';
+        url = path.replace('{{module}}', module).replace(/\/(v.+)\//, '/') + 'version';
         engine.setUpRequest(url, module, resolve, reject, serviceCheckingRequestTimeout);
       });
     });
@@ -147,10 +147,13 @@ var engine = {
     });
   },
 
-  launchTries: function() {
-    var retries = config('services.retries');
-    var time = config('services.time');
-    // var dfd = q.defer();
+  launchTries: function(time, retries) {
+    if (!time) {
+      time = config('services.time'); 
+    }
+    if (!retries) {
+      retries = config('services.retries');
+    } 
 
     return new Promise(function(resolve, reject) {
       function launch(retries) {
