@@ -58,7 +58,7 @@ describe('Engine', function() {
         stubOnComposrInit.returns(Promise.resolve());
         stubInitServiceChecking.returns([Promise.resolve()]);
 
-        engine.launchTries(retries)
+        engine.launchTries()
           .should.be.fulfilled
           .then(function() {
             engine.initComposrCore(null, true);
@@ -78,7 +78,7 @@ describe('Engine', function() {
         stubOnComposrInit.returns(Promise.reject());
         stubInitServiceChecking.returns([Promise.reject()])
 
-        engine.launchTries(retries)
+        engine.launchTries(50,3)
           .should.be.rejected
           .then(function() {
             engine.initComposrCore(null, false)
@@ -104,14 +104,14 @@ describe('Engine', function() {
         stubInitServiceChecking.onCall(3).returns([Promise.resolve()]);
         stubOnComposrInit.returns(Promise.resolve());
 
-        engine.launchTries(retries)
+        engine.launchTries(50,3)
           .should.be.rejected
           .then(function() {
             engine.initComposrCore(null, false)
               .should.be.fulfilled
           })
           .then(function() {
-            engine.launchTries(retries)
+            engine.launchTries(50,3)
               .should.be.fulfilled;
           })
           .then(function() {
