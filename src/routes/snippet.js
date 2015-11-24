@@ -1,8 +1,6 @@
 'use strict';
 
-var express = require('express'),
-  router = express.Router(),
-  pmx = require('pmx'),
+var pmx = require('pmx'),
   connection = require('../lib/corbelConnection'),
   engine = require('../lib/engine'),
   ComposrError = require('../lib/ComposrError'),
@@ -15,7 +13,7 @@ function getCorbelErrorBody(corbelErrResponse) {
   return errorBody;
 }
 
-function createOrUpdateSnippet(req, res, next) {
+function createOrUpdateSnippet(req, res) {
 
   var authorization = auth.getAuth(req);
 
@@ -39,28 +37,21 @@ function createOrUpdateSnippet(req, res, next) {
       corbelDriver.resources.resource(engine.snippetsCollection, snippet.id)
         .update(snippet)
         .then(function(response) {
-          res.status(response.status).send(response.data);
+          res.send(response.status,response.data);
         }).catch(function(error) {
           var errorBody = getCorbelErrorBody(error);
-          next(new ComposrError('error:snippet:create', errorBody, error.status));
+          res.send(error.status,new ComposrError('error:snippet:create', errorBody, error.status));
         });
     })
     .catch(function(result) {
       var errors = result.errors;
       logger.warn('SERVER', 'invalid:snippet', snippet.id, result);
-      next(new ComposrError('error:snippet:validation', 'Error validating snippet: ' +
+      res.send(422,new ComposrError('error:snippet:validation', 'Error validating snippet: ' +
         JSON.stringify(errors, null, 2), 422));
     });
 
 }
 
-router.put('/snippet', function(req, res, next) {
-  createOrUpdateSnippet(req, res, next);
-});
-
-router.put('/v1.0/snippet', function(req, res, next) {
-  createOrUpdateSnippet(req, res, next);
-});
 
 
 
@@ -80,14 +71,25 @@ function deleteSnippet(req, res, next) {
 
 }
 
-router.delete('/snippet/:snippetID', function(req, res, next) {
-  deleteSnippet(req, res, next);
-});
+module.exports = function(server){
 
-router.delete('/v1.0/snippet/:snippetID', function(req, res, next) {
-  deleteSnippet(req, res, next);
-});
+  server.del('/snippet/:snippetID', function(req, res, next) {
+    deleteSnippet(req, res, next);
+  });
+
+  server.del('/v1.0/snippet/:snippetID', function(req, res, next) {
+    deleteSnippet(req, res, next);
+  });
 
 
+  server.put('/snippet', function(req, res, next) {
+    createOrUpdateSnippet(req, res, next);
+  });
 
-module.exports = router;
+  server.put('/v1.0/snippet', function(req, res, next) {
+    createOrUpdateSnippet(req, res, next);
+  });
+
+};
+
+

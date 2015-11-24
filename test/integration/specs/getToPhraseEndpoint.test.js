@@ -10,7 +10,7 @@ function test(server) {
   describe('Get to phrase returns not found', function() {
     var AdminClientData = clientUtils.getAdminClient();
     var adminClientToken;
-    
+
     before(function(done) {
       request(server.app)
       .post('/token')

@@ -56,7 +56,7 @@ function test(server) {
           .expect(201)
           .end(function(err, response) {
             expect(response).to.be.an('object');
-            expect(response.text).to.equals('test');
+            expect(response.text).to.equals('"test"');
             if (err){
               reject(err);
             }else{
@@ -71,7 +71,7 @@ function test(server) {
           .expect(200)
           .end(function(err, response) {
             expect(response).to.be.an('object');
-            expect(response.text).to.equals('JUAN');
+            expect(response.text).to.equals('"JUAN"');
             if (err){
               reject(err);
             }else{
