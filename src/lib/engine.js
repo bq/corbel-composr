@@ -4,6 +4,7 @@ var logger = require('../utils/logger'),
   composr = require('composr-core'),
   q = require('q'),
   https = require('https'),
+  hub = require('./hub'),
   config = require('./config');
 
 var engine = {
@@ -81,7 +82,7 @@ var engine = {
         });
       })
       .on('error', function(err) {
-        // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved 
+        // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved
         if (engine.resolveOrRejectServiceCheckingRequest) {
           engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err);
         }
@@ -134,6 +135,9 @@ var engine = {
     return new Promise(function(resolve, reject) {
       engine.composr.init(credentials, fetchData)
         .then(function() {
+            // engine.data.phrases ---> data phrases
+            // llamar a evento de crear ruta.
+            hub.emit('create:routes',engine.composr.data.phrases);
           engine.initialized = true;
           var msg = fetchData ? 'Engine initialized with data! :)' : 'Engine initialized without data';
           logger.info(msg);
@@ -149,11 +153,11 @@ var engine = {
 
   launchTries: function(time, retries) {
     if (!time) {
-      time = config('services.time'); 
+      time = config('services.time');
     }
     if (!retries) {
       retries = config('services.retries');
-    } 
+    }
 
     return new Promise(function(resolve, reject) {
       function launch(retries) {
