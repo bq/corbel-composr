@@ -25,15 +25,15 @@ function test(server) {
         });
     });
 
-    it('it fails with a 555 error', function(done) {
+    it('it fails with a 500 error with e2', function(done) {
 
       request(server.app)
         .get('/e2')
-        .expect(555)
+        .expect(500)
         .end(function(error, response) {
-
+          console.log(error,response.statusCode);
           expect(response).to.be.an('object');
-          if (response.statusCode === 555) {
+          if (response.statusCode === 500) {
             return done();
           } else {
             return done(error || response);

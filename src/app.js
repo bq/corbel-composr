@@ -1,209 +1,154 @@
 'use strict';
+var bunyan = require('bunyan');
+/*************************************
+  Server Config and Load
+**************************************/
+var restify = require('restify'),
+  hub = require('./lib/hub'),
+  server = restify.createServer({
+    name: 'Corbel-Composr',
+    log: bunyan.createLogger({
+      name: 'Corbel-Composr',
+      streams: [{
+        level: 'debug',
+        stream: process.stdout // log INFO and above to stdout
+      }, {
+        level: 'error',
+        path: './logs/api-error.log' // log ERROR and above to a file
+      }, {
+        level: 'trace',
+        path: './logs/api.log'
+      }],
+      serializers: restify.bunyan.serializers
+    })
+  });
+require('./lib/router')(server);
 
-var express = require('express'),
-  path = require('path'),
-  favicon = require('serve-favicon'),
-  morgan = require('morgan'),
-  helmet = require('helmet'),
-  ejslocals = require('ejs-locals'),
-  cookieParser = require('cookie-parser'),
-  bodyParser = require('body-parser'),
-  engine = require('./lib/engine'),
+var engine = require('./lib/engine'),
   WorkerClass = require('./lib/worker'),
-  ComposrError = require('./lib/ComposrError'),
+  //ComposrError = require('./lib/ComposrError'),
   config = require('./lib/config'),
-  timeout = require('connect-timeout'),
-  responseTime = require('response-time'),
-  domain = require('express-domain-middleware'),
-  routes = require('./routes'),
-  cors = require('cors'),
-  pmx = require('pmx'),
-  fs = require('fs'),
-  app = express(),
   configChecker = require('./utils/envConfigChecker');
 
 var worker = new WorkerClass();
 
-var ERROR_CODE_SERVER_TIMEOUT = 503;
-var DEFAULT_TIMEOUT = '10s';
+//var ERROR_CODE_SERVER_TIMEOUT = 503;
+// var DEFAULT_TIMEOUT = '10s';
+
+/*************************************
+  Allows you to add in handlers
+  that run before routing occurs
+**************************************/
+
+// The plugin checks whether the user agent is curl.
+// If it is, it sets the Connection header to "close"
+// and removes the "Content-Length" header.
+server.pre(restify.pre.userAgentConnection());
 
 /*************************************
   Logs
 **************************************/
 var logger = require('./utils/logger');
 //Custom log
-app.set('logger', logger);
 
-if (config('accessLog') === true || config('accessLog') === 'true') {
-  // Access log, logs http requests
-  var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
-    flags: 'a'
-  });
 
-  app.use(morgan('combined', {
-    stream: accessLogStream
-  }));
-}
+// if (config('accessLog') === true || config('accessLog') === 'true') {
+//   // Access log, logs http requests
+//   var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
+//     flags: 'a'
+//   });
 
+//   /*server.use(morgan('combined', {
+//     stream: accessLogStream
+//   }));*/
+// }
+server.pre(function(request, response, next) {
+  request.log.info({
+    req: request
+  }, 'start'); // (1)
+  return next();
+});
+
+server.on('after', function(req, res, route) {
+  req.log.info({
+    res: res,
+    route: route
+  }, 'finished'); // (3)
+});
 
 /*************************************
   New Relic
 **************************************/
 if (config('newrelic') === true || config('newrelic') === 'true') {
-  require('newrelic');
+  //require('newrelic');
 }
-
-
-/*************************************
-  Views engine
-**************************************/
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-app.engine('ejs', ejslocals);
-
 
 /*************************************
   Configuration check
 **************************************/
 var env = process.env.NODE_ENV || 'development';
-app.locals.ENV = env;
-app.locals.ENV_DEVELOPMENT = env === 'development';
-
 configChecker.checkConfig(env);
 
 
-/*******************************
-    Change powered by
-********************************/
-app.use(helmet());
-var powered = require('./utils/powered');
-var randomIndex = function(powered) {
-  return Math.floor(Math.random() * powered.length);
-};
-app.use(helmet.hidePoweredBy({
-  setTo: powered[randomIndex(powered)]
-}));
-
-app.use(responseTime());
-app.use(favicon(__dirname + '/../public/img/favicon.ico'));
-
-/*************************************
-  Cache
-**************************************/
-app.disable('etag');
-
 /**************************************
-  Body limit
+  Body Parser
 **************************************/
-app.use(bodyParser.json({
-  limit: config('bodylimit') || '50mb'
+
+server.use(restify.bodyParser({
+  maxBodySize: 0,
+  mapParams: false
 }));
-
-app.use(bodyParser.urlencoded({
-  extended: true,
-  limit: config('bodylimit') || '50mb'
-}));
-
-app.use(cookieParser());
-
-app.use(express.static(path.join(__dirname, '../public')));
-
-app.use(domain);
 
 /*************************************
   Cors
 **************************************/
-app.use(cors({
-  origin: function(origin, callback) {
-    callback(null, true);
-  },
-  credentials: true
+server.use(restify.CORS());
+
+/*************************************
+  Accept Parser
+  content types the server knows how to respond to
+**************************************/
+server.use(restify.acceptParser(server.acceptable));
+
+
+/*************************************
+  Query Parser
+**************************************/
+server.use(restify.queryParser({
+  mapParams: false
 }));
 
-app.options('*', cors());
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Expose-Headers', 'Location');
-  next();
-});
-
-app.use(timeout(DEFAULT_TIMEOUT, {
-  status: ERROR_CODE_SERVER_TIMEOUT,
-  respond: true
-}));
-
-
-/*************************************
-  Engine middlewares
-**************************************/
-app.use(routes.base);
-app.use(routes.doc);
-app.use(routes.snippet);
-app.use(routes.phrase);
-
-if (app.get('env') === 'development' || app.get('env') === 'test') {
-  app.use(routes.test);
-}
-
-/*************************************
-  Timeout
-**************************************/
-var haltOnTimedout = function(req, res, next) {
-  if (!req.timedout) {
-    next();
-  }
-};
-
-app.use(haltOnTimedout);
-
-/*************************************
-  Cache
-**************************************/
-app.disable('etag');
 
 /*************************************
   Error handlers
 **************************************/
 
 /// catch 404 and forward to error handler
-var NotFoundHandler = function(req, res, next) {
-  next(new ComposrError('error:not_found', 'Not Found', 404));
-};
+// var NotFoundHandler = function(req, res, next) {
+//   next(new ComposrError('error:not_found', 'Not Found', 404));
+// };
 
-app.use(NotFoundHandler);
+// //server.use(NotFoundHandler);
 
-var errorHandler = function(err, req, res, next) {
+// var errorHandler = function(req,res, next) {
 
-  var message = err.error || err.message || err;
-  if (message === 'Error caught by express error handler') {
-    message = 'error:internal';
-  }
+//   var errorLogged = {
+//     status: res.status,
+//     error: res.message,
+//     errorDescription: res.errorDescription || '',
+//     // development error handler
+//     // will print stacktrace
+//     trace: (process.env.ENV === 'development' ? res.stack : '')
+//   };
 
-  var status = err.status || 500;
-  if (err.timeout || message === 'Blocked event loop.') {
-    message = 'error:timeout';
-    status = ERROR_CODE_SERVER_TIMEOUT;
-  }
+//   logger.error(errorLogged);
 
-  var errorLogged = {
-    status: status,
-    error: message,
-    errorDescription: err.errorDescription || '',
-    // development error handler
-    // will print stacktrace
-    trace: (app.get('env') === 'development' ? err.stack : '')
-  };
+//   next(res);
+// };
 
-  logger.error(errorLogged);
-  res.status(status);
-  res.json(errorLogged);
+// server.use(errorHandler);
 
-  next(err);
-};
-
-app.use(errorHandler);
-
-app.use(pmx.expressErrorHandler());
+//server.use(pmx.expressErrorHandler());
 
 process.on('uncaughtException', function(err) {
   logger.debug('Error caught by uncaughtException', err);
@@ -216,4 +161,7 @@ process.on('uncaughtException', function(err) {
 //Trigger the worker execution
 worker.init();
 
-module.exports = engine.init(app);
+// Trigger the static routes creation
+hub.emit('create:staticRoutes',server);
+
+module.exports = engine.init(server);

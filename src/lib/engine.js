@@ -4,11 +4,12 @@ var logger = require('../utils/logger'),
   composr = require('composr-core'),
   q = require('q'),
   https = require('https'),
+  hub = require('./hub'),
   config = require('./config');
 
 var engine = {
 
-  suscribeLogger: function() {
+  suscribeToCoreEvents: function() {
     engine.composr.events.on('debug', 'CorbelComposr', function() {
       logger.debug.apply(logger, arguments);
     });
@@ -24,6 +25,11 @@ var engine = {
     engine.composr.events.on('info', 'CorbelComposr', function() {
       logger.info.apply(logger, arguments);
     });
+
+    engine.composr.events.on('phrase:registered', 'CorbelComposr', function(phrase) {
+      hub.emit('create:routes', phrase);
+    });
+
   },
 
   /************************************************************
@@ -81,7 +87,7 @@ var engine = {
         });
       })
       .on('error', function(err) {
-        // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved 
+        // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved
         if (engine.resolveOrRejectServiceCheckingRequest) {
           engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err);
         }
@@ -149,11 +155,11 @@ var engine = {
 
   launchTries: function(time, retries) {
     if (!time) {
-      time = config('services.time'); 
+      time = config('services.time');
     }
     if (!retries) {
       retries = config('services.retries');
-    } 
+    }
 
     return new Promise(function(resolve, reject) {
       function launch(retries) {
@@ -187,7 +193,7 @@ var engine = {
     var fetchData = true;
 
     //Suscribe to log events
-    engine.suscribeLogger();
+    engine.suscribeToCoreEvents();
 
     engine.launchTries(retries)
       .then(function() {
