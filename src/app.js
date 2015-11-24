@@ -1,165 +1,103 @@
 'use strict';
-
-var express = require('express'),
-  path = require('path'),
-  favicon = require('serve-favicon'),
-  morgan = require('morgan'),
-  helmet = require('helmet'),
-  ejslocals = require('ejs-locals'),
-  cookieParser = require('cookie-parser'),
-  bodyParser = require('body-parser'),
-  engine = require('./lib/engine'),
+var bunyan = require('bunyan');
+var log = bunyan.createLogger({name: 'Corbel-Composr'});
+var restify = require('restify'),
+  server = restify.createServer({name:'Corbel-Composr',log:log});
+  require('./lib/router')(server);
+  //bunyan = require('bunyan'),
+  var engine = require('./lib/engine'),
   WorkerClass = require('./lib/worker'),
   ComposrError = require('./lib/ComposrError'),
   config = require('./lib/config'),
-  timeout = require('connect-timeout'),
-  responseTime = require('response-time'),
-  domain = require('express-domain-middleware'),
-  routes = require('./routes'),
-  cors = require('cors'),
-  pmx = require('pmx'),
-  fs = require('fs'),
-  app = express(),
   configChecker = require('./utils/envConfigChecker');
 
 var worker = new WorkerClass();
 
 var ERROR_CODE_SERVER_TIMEOUT = 503;
-var DEFAULT_TIMEOUT = '10s';
+// var DEFAULT_TIMEOUT = '10s';
+
+/*************************************
+  Allows you to add in handlers
+  that run before routing occurs
+**************************************/
+
+// The plugin checks whether the user agent is curl.
+// If it is, it sets the Connection header to "close"
+// and removes the "Content-Length" header.
+server.pre(restify.pre.userAgentConnection());
 
 /*************************************
   Logs
 **************************************/
-var logger = require('./utils/logger');
+// var logger = require('./utils/logger');
 //Custom log
-app.set('logger', logger);
 
-if (config('accessLog') === true || config('accessLog') === 'true') {
-  // Access log, logs http requests
-  var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
-    flags: 'a'
-  });
 
-  app.use(morgan('combined', {
-    stream: accessLogStream
-  }));
-}
+// if (config('accessLog') === true || config('accessLog') === 'true') {
+//   // Access log, logs http requests
+//   var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
+//     flags: 'a'
+//   });
+
+//   /*server.use(morgan('combined', {
+//     stream: accessLogStream
+//   }));*/
+// }
+server.pre(function (request, response, next) {
+  request.log.info({req: request}, 'start');        // (1)
+  return next();
+});
+
+server.on('after', function (req, res, route) {
+  req.log.info({res: res}, "finished");             // (3)
+});
+
+/*************************************
+  Load Routes
+**************************************/
+//require('./routes')(server);
 
 
 /*************************************
   New Relic
 **************************************/
 if (config('newrelic') === true || config('newrelic') === 'true') {
-  require('newrelic');
+  //require('newrelic');
 }
-
-
-/*************************************
-  Views engine
-**************************************/
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-app.engine('ejs', ejslocals);
-
 
 /*************************************
   Configuration check
 **************************************/
 var env = process.env.NODE_ENV || 'development';
-app.locals.ENV = env;
-app.locals.ENV_DEVELOPMENT = env === 'development';
-
 configChecker.checkConfig(env);
 
 
-/*******************************
-    Change powered by
-********************************/
-app.use(helmet());
-var powered = require('./utils/powered');
-var randomIndex = function(powered) {
-  return Math.floor(Math.random() * powered.length);
-};
-app.use(helmet.hidePoweredBy({
-  setTo: powered[randomIndex(powered)]
-}));
-
-app.use(responseTime());
-app.use(favicon(__dirname + '/../public/img/favicon.ico'));
-
-/*************************************
-  Cache
-**************************************/
-app.disable('etag');
-
 /**************************************
-  Body limit
+  Body Parser
 **************************************/
-app.use(bodyParser.json({
-  limit: config('bodylimit') || '50mb'
+server.use(restify.urlEncodedBodyParser());
+
+server.use(restify.bodyParser({
+    maxBodySize: 50
 }));
-
-app.use(bodyParser.urlencoded({
-  extended: true,
-  limit: config('bodylimit') || '50mb'
-}));
-
-app.use(cookieParser());
-
-app.use(express.static(path.join(__dirname, '../public')));
-
-app.use(domain);
 
 /*************************************
   Cors
 **************************************/
-app.use(cors({
-  origin: function(origin, callback) {
-    callback(null, true);
-  },
-  credentials: true
-}));
+server.use(restify.CORS());
 
-app.options('*', cors());
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Expose-Headers', 'Location');
-  next();
-});
-
-app.use(timeout(DEFAULT_TIMEOUT, {
-  status: ERROR_CODE_SERVER_TIMEOUT,
-  respond: true
-}));
+/*************************************
+  Accept Parser
+  content types the server knows how to respond to
+**************************************/
+server.use(restify.acceptParser(server.acceptable));
 
 
 /*************************************
-  Engine middlewares
+  Query Parser
 **************************************/
-app.use(routes.base);
-app.use(routes.doc);
-app.use(routes.snippet);
-app.use(routes.phrase);
+server.use(restify.queryParser());
 
-if (app.get('env') === 'development' || app.get('env') === 'test') {
-  app.use(routes.test);
-}
-
-/*************************************
-  Timeout
-**************************************/
-var haltOnTimedout = function(req, res, next) {
-  if (!req.timedout) {
-    next();
-  }
-};
-
-app.use(haltOnTimedout);
-
-/*************************************
-  Cache
-**************************************/
-app.disable('etag');
 
 /*************************************
   Error handlers
@@ -170,7 +108,7 @@ var NotFoundHandler = function(req, res, next) {
   next(new ComposrError('error:not_found', 'Not Found', 404));
 };
 
-app.use(NotFoundHandler);
+//server.use(NotFoundHandler);
 
 var errorHandler = function(err, req, res, next) {
 
@@ -191,23 +129,23 @@ var errorHandler = function(err, req, res, next) {
     errorDescription: err.errorDescription || '',
     // development error handler
     // will print stacktrace
-    trace: (app.get('env') === 'development' ? err.stack : '')
+    trace: (server.get('env') === 'development' ? err.stack : '')
   };
 
-  logger.error(errorLogged);
+  //logger.error(errorLogged);
   res.status(status);
-  res.json(errorLogged);
+  res.send(errorLogged);
 
   next(err);
 };
 
-app.use(errorHandler);
+//server.use(errorHandler);
 
-app.use(pmx.expressErrorHandler());
+//server.use(pmx.expressErrorHandler());
 
 process.on('uncaughtException', function(err) {
-  logger.debug('Error caught by uncaughtException', err);
-  logger.error(err);
+  //logger.debug('Error caught by uncaughtException', err);
+  //logger.error(err);
   if (!err || err.message !== 'Can\'t set headers after they are sent.') {
     process.exit(1);
   }
@@ -216,4 +154,4 @@ process.on('uncaughtException', function(err) {
 //Trigger the worker execution
 worker.init();
 
-module.exports = engine.init(app);
+module.exports = engine.init(server);

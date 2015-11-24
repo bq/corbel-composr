@@ -1,8 +1,6 @@
 'use strict';
 
-var express = require('express'),
-  router = express.Router(),
-  pmx = require('pmx'),
+var pmx = require('pmx'),
   connection = require('../lib/corbelConnection'),
   engine = require('../lib/engine'),
   ComposrError = require('../lib/ComposrError'),
@@ -96,7 +94,7 @@ function createOrUpdatePhrase(req, res, next) {
       corbelDriver.resources.resource(engine.phrasesCollection, phrase.id)
         .update(phrase)
         .then(function(response) {
-          res.set('Location', 'phrase/' + phrase.id);
+          res.setHeader('Location', 'phrase/' + phrase.id);
           res.status(response.status).send(response.data);
         }).catch(function(error) {
           var errorBody = getCorbelErrorBody(error);
@@ -112,13 +110,7 @@ function createOrUpdatePhrase(req, res, next) {
 
 }
 
-router.put('/phrase', function(req, res, next) {
-  createOrUpdatePhrase(req, res, next);
-});
 
-router.put('/v1.0/phrase', function(req, res, next) {
-  createOrUpdatePhrase(req, res, next);
-});
 
 
 /**
@@ -145,13 +137,7 @@ function deletePhrase(req, res, next) {
 
 }
 
-router.delete('/phrase/:phraseid', function(req, res, next) {
-  deletePhrase(req, res, next);
-});
 
-router.delete('/v1.0/phrase/:phraseid', function(req, res, next) {
-  deletePhrase(req, res, next);
-});
 
 
 /**
@@ -178,13 +164,6 @@ function getPhrase(req, res, next) {
   });
 }
 
-router.get('/phrase/:phraseid', function(req, res, next) {
-  getPhrase(req, res, next);
-});
-
-router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
-  getPhrase(req, res, next);
-});
 
 
 /**
@@ -196,27 +175,18 @@ router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
 function getPhrases(req, res) {
   var authorization = auth.getAuth(req);
   var domainExtracted = connection.extractDomain(authorization);
-  if (domainExtracted){
-      var phrases = engine.composr.Phrases.getPhrases(domainExtracted);
-      res.json(phrases || []);
-  }
-  else{
-      res.status(401).send(new ComposrError('error:domain:undefined', '', 401));
+  if (domainExtracted) {
+    var phrases = engine.composr.Phrases.getPhrases(domainExtracted);
+    res.json(phrases || []);
+  } else {
+    res.status(401).send(new ComposrError('error:domain:undefined', '', 401));
   }
 }
-
-router.get('/phrase', function(req, res) {
-  getPhrases(req, res);
-});
-
-router.get('/v1.0/phrase', function(req, res) {
-  getPhrases(req, res);
-});
 
 /**
  *
  * Meta-Endpoint for compoSR phrases
- * req.path => '/apps-sandbox/login'
+ * req.route.path => '/apps-sandbox/login'
  * domain => 'apps-sandbox'
  * phrasePath => 'login'
  */
@@ -224,10 +194,10 @@ function executePhrase(endpointPath, req, res, next) {
   //Metrics for phrases being executed at this moment
   counterPhrasesBeingExecuted.inc();
   counterPhrasesExecuted.inc();
-  
+
   pmx.emit('phrase:executed', {
     url: endpointPath,
-    query : req.query
+    query: req.query
   });
 
   logger.debug('request:phrase', endpointPath, req.query);
@@ -246,7 +216,7 @@ function executePhrase(endpointPath, req, res, next) {
 
   var method = req.method.toLowerCase();
 
-  var authorization = req.get('Authorization');
+  var authorization = req.header('Authorization');
 
   var corbelDriver = connection.getTokenDriver(authorization, true);
 
@@ -254,33 +224,70 @@ function executePhrase(endpointPath, req, res, next) {
     req: req,
     res: res,
     next: next,
-    corbelDriver : corbelDriver,
+    corbelDriver: corbelDriver,
     browser: true,
     timeout: 10000 //TODO: load from config
   };
 
   engine.composr.Phrases.runByPath(domain, phrasePath, method, params)
-    .then(function(){
+    .then(function() {
       delete params.req;
       delete params.res;
       delete params.next;
       params = null;
       corbelDriver = null;
     })
-    .catch(function(err){
+    .catch(function(err) {
       logger.error(err);
       res.status(404).send(new ComposrError('endpoint:not:found', 'Not found', 404));
     });
 }
 
-router.all('/v1.0/*', function(req, res, next) {
-  var path = req.path.replace('/v1.0', '');
-  executePhrase(path, req, res, next);
-});
 
-router.all('*', function(req, res, next) {
-  executePhrase(req.path, req, res, next);
-});
+module.exports = function(server) {
 
+  server.get('/phrase', function(req, res) {
+    getPhrases(req, res);
+  });
 
-module.exports = router;
+  server.get('/v1.0/phrase', function(req, res) {
+    getPhrases(req, res);
+  });
+
+  server.put('/phrase', function(req, res, next) {
+    createOrUpdatePhrase(req, res, next);
+  });
+
+  server.put('/v1.0/phrase', function(req, res, next) {
+    createOrUpdatePhrase(req, res, next);
+  });
+
+  server.del('/phrase/:phraseid', function(req, res, next) {
+    deletePhrase(req, res, next);
+  });
+
+  server.del('/v1.0/phrase/:phraseid', function(req, res, next) {
+    deletePhrase(req, res, next);
+  });
+
+  server.get('/phrase/:phraseid', function(req, res, next) {
+    getPhrase(req, res, next);
+  });
+
+  server.get('/v1.0/phrase/:phraseid', function(req, res, next) {
+    getPhrase(req, res, next);
+  });
+
+  /*['get', 'post', 'put', 'del'].forEach(function(verb) {
+    server[verb]('/v1.0/.*', function(req, res, next) {
+      var path = req.route.path.replace('/v1.0', '');
+      executePhrase(path, req, res, next);
+    });
+
+    server[verb]('.*', function(req, res, next) {
+      executePhrase(req.route.path, req, res, next);
+    });
+  });
+*/
+
+};

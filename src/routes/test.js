@@ -1,27 +1,9 @@
 'use strict';
 
-var express = require('express'),
-  router = express.Router(),
-  corbel = require('corbel-js'),
+var corbel = require('corbel-js'),
   ComposrError = require('../lib/ComposrError'),
   config = require('../lib/config');
 
-router.get('/e1', function(res) {
-  res.undefinedFunction();
-});
-
-router.get('/e2', function() {
-  throw new ComposrError('error:custom', '', 555);
-});
-
-router.post('/jwt', function(req, res) {
-
-  req.body = req.body || {};
-  req.body.claims.aud = corbel.Iam.AUD;
-
-  res.json(corbel.jwt.generate(req.body.claims, req.body.secret));
-
-});
 
 
 function getCorbelErrorBody(corbelErrResponse) {
@@ -29,8 +11,26 @@ function getCorbelErrorBody(corbelErrResponse) {
   return errorBody;
 }
 
+module.exports = function(server){
 
-router.post('/token', function(req, res, next) {
+  server.get('/e1', function(res) {
+    res.undefinedFunction();
+  });
+
+  server.get('/e2', function() {
+    throw new ComposrError('error:custom', '', 555);
+  });
+
+  server.post('/jwt', function(req, res) {
+
+    req.body = req.body || {};
+    req.body.claims.aud = corbel.Iam.AUD;
+
+    res.send(corbel.jwt.generate(req.body.claims, req.body.secret));
+
+  });
+
+  server.post('/token', function(req, res, next) {
 
     var data = req.body || {};
 
@@ -43,19 +43,20 @@ router.post('/token', function(req, res, next) {
     var corbelDriver = corbel.getDriver(corbelConfig);
 
     corbelDriver.iam.token().create().then(function(response) {
-        res.send(response);
+      res.send(response);
     }).catch(function(error) {
       var errorBody = getCorbelErrorBody(error);
-        next(new ComposrError('error:token', errorBody, error.status));
+      next(new ComposrError('error:token', errorBody, error.status));
     });
 
-});
-
-router.get('/cache', function(req, res) {
-  res.set('Cache-Control', 'public, max-age=31536000');
-  res.json({
-    data: true
   });
-});
 
-module.exports = router;
+  server.get('/cache', function(req, res) {
+    res.set('Cache-Control', 'public, max-age=31536000');
+    res.send({
+      data: true
+    });
+  });
+};
+
+
