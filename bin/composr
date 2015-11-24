@@ -5,28 +5,27 @@ var pmx = require('pmx');
 pmx.init({
   http: true
 });
-// You must do this BEFORE any require('http') 
+// You must do this BEFORE any require('http')
 
 var logger = require('../src/utils/logger');
-var q = require('q');
-var dfd = q.defer();
 
-require('../src/app')
-  .then(function(serverObjects) {
-    serverObjects.app.set('port', process.env.PORT || 3000);
+module.exports = new Promise(function(resolve, reject) {
 
-    var server = serverObjects.app.listen(serverObjects.app.get('port'), function() {
-      logger.debug('Express server listening on port ' + server.address().port);
+  require('../src/app')
+    .then(function(serverObjects) {
 
-      logger.salute(function() {
-        dfd.resolve(serverObjects);
+      var port = process.env.PORT || 3000;
+
+      var server = serverObjects.app.listen(port, function() {
+        logger.debug('Restify server listening on port ' + server.address().port);
+        logger.salute(function() {
+          resolve(serverObjects);
+        });
+
       });
-
+    })
+    .catch(function(err) {
+      console.log('ERROR launching Restify application', err);
+      reject(err);
     });
-  })
-  .catch(function(err) {
-    console.log('ERROR launching express application', err);
-    dfd.reject(err);
-  });
-
-module.exports = dfd.promise;
+});

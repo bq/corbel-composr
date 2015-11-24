@@ -49,7 +49,7 @@ module.exports = function(grunt) {
           'test/**',
           'src/**',
           'bin/**',
-          // express files
+          // static files
           'public/**',
           'package.json'
         ],
@@ -158,27 +158,6 @@ module.exports = function(grunt) {
         },
         src: ['test/unit/test-suite.js']
       }
-    },
-
-    express: {
-      composr: {
-        options: {
-          script: 'bin/composr',
-          logs: {
-            out: 'composr.out.log',
-            err: 'composr.err.log'
-          }
-        }
-      },
-      /*coverage: {
-                options: {
-                    script: 'bin/composr.coverage',
-                    logs: {
-                        out: 'composr.out.log',
-                        err: 'composr.err.log'
-                    }
-                }
-            }*/
     },
 
     coveralls: {
