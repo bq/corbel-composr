@@ -1,8 +1,6 @@
 'use strict';
 
-var express = require('express'),
-  router = express.Router(),
-  pmx = require('pmx'),
+var pmx = require('pmx'),
   connection = require('../lib/corbelConnection'),
   engine = require('../lib/engine'),
   ComposrError = require('../lib/ComposrError'),
@@ -14,13 +12,13 @@ var express = require('express'),
 *************************************/
 var probe = pmx.probe();
 
-var counterPhrasesBeingExecuted = probe.counter({
-  name: 'phrases_in_execution'
-});
+// var counterPhrasesBeingExecuted = probe.counter({
+//   name: 'phrases_in_execution'
+// });
 
-var counterPhrasesExecuted = probe.counter({
-  name: 'phrases_executed'
-});
+// var counterPhrasesExecuted = probe.counter({
+//   name: 'phrases_executed'
+// });
 
 var counterPhrasesUpdated = probe.counter({
   name: 'phrases_updated'
@@ -71,11 +69,11 @@ function getCorbelErrorBody(corbelErrResponse) {
  * @param  {json} phrase body
  * @return {promise}
  */
-function createOrUpdatePhrase(req, res, next) {
+function createOrUpdatePhrase(req, res) {
   //Metrics for phrases updated since last restart
   counterPhrasesUpdated.inc();
 
-  var authorization = auth.getAuth(req);
+  var authorization = auth.getAuth(req,res);
 
   var phrase = req.body || {};
 
@@ -96,29 +94,23 @@ function createOrUpdatePhrase(req, res, next) {
       corbelDriver.resources.resource(engine.phrasesCollection, phrase.id)
         .update(phrase)
         .then(function(response) {
-          res.set('Location', 'phrase/' + phrase.id);
-          res.status(response.status).send(response.data);
+          res.setHeader('Location', 'phrase/' + phrase.id);
+          res.send(response.status,response.data);
         }).catch(function(error) {
           var errorBody = getCorbelErrorBody(error);
-          next(new ComposrError('error:phrase:create', errorBody, error.status));
+          res.send(error.status,new ComposrError('error:phrase:create', errorBody, error.status));
         });
     })
     .catch(function(result) {
       var errors = result.errors;
       logger.warn('SERVER', 'invalid:phrase', phrase.id, result);
-      next(new ComposrError('error:phrase:validation', 'Error validating phrase: ' +
+      res.send(422,new ComposrError('error:phrase:validation', 'Error validating phrase: ' +
         JSON.stringify(errors, null, 2), 422));
     });
 
 }
 
-router.put('/phrase', function(req, res, next) {
-  createOrUpdatePhrase(req, res, next);
-});
 
-router.put('/v1.0/phrase', function(req, res, next) {
-  createOrUpdatePhrase(req, res, next);
-});
 
 
 /**
@@ -129,29 +121,24 @@ router.put('/v1.0/phrase', function(req, res, next) {
  * @return {[type]}        [description]
  * TODO: unregister phrase on core,
  */
-function deletePhrase(req, res, next) {
-  var authorization = auth.getAuth(req);
+function deletePhrase(req, res) {
+  var authorization = auth.getAuth(req,res);
 
   var corbelDriver = connection.getTokenDriver(authorization);
 
   var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
+
   logger.debug('phrase:delete:id', phraseId);
   corbelDriver.resources.resource(engine.phrasesCollection, phraseId).delete().then(function(response) {
     logger.debug('phrase:deleted');
-    res.status(response.status).send(response.data);
+    res.send(response.status,response.data);
   }).catch(function(error) {
-    next(new ComposrError('error:phrase:delete', error.message, error.status));
+    res.send(error.status,new ComposrError('error:phrase:delete', error.message, error.status));
   });
 
 }
 
-router.delete('/phrase/:phraseid', function(req, res, next) {
-  deletePhrase(req, res, next);
-});
 
-router.delete('/v1.0/phrase/:phraseid', function(req, res, next) {
-  deletePhrase(req, res, next);
-});
 
 
 /**
@@ -162,8 +149,7 @@ router.delete('/v1.0/phrase/:phraseid', function(req, res, next) {
  * @return {[type]}        [description]
  */
 function getPhrase(req, res, next) {
-  var authorization = auth.getAuth(req);
-
+  var authorization = auth.getAuth(req,res);
   var corbelDriver = connection.getTokenDriver(authorization);
 
   var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
@@ -178,13 +164,6 @@ function getPhrase(req, res, next) {
   });
 }
 
-router.get('/phrase/:phraseid', function(req, res, next) {
-  getPhrase(req, res, next);
-});
-
-router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
-  getPhrase(req, res, next);
-});
 
 
 /**
@@ -194,93 +173,109 @@ router.get('/v1.0/phrase/:phraseid', function(req, res, next) {
  * @return {[type]}     [description]
  */
 function getPhrases(req, res) {
-  var authorization = auth.getAuth(req);
+  var authorization = auth.getAuth(req,res);
   var domainExtracted = connection.extractDomain(authorization);
-  if (domainExtracted){
-      var phrases = engine.composr.Phrases.getPhrases(domainExtracted);
-      res.json(phrases || []);
-  }
-  else{
-      res.status(401).send(new ComposrError('error:domain:undefined', '', 401));
+  if (domainExtracted) {
+    var phrases = engine.composr.Phrases.getPhrases(domainExtracted);
+    res.json(phrases || []);
+  } else {
+    res.send(401,new ComposrError('error:domain:undefined', '', 401));
   }
 }
-
-router.get('/phrase', function(req, res) {
-  getPhrases(req, res);
-});
-
-router.get('/v1.0/phrase', function(req, res) {
-  getPhrases(req, res);
-});
 
 /**
  *
  * Meta-Endpoint for compoSR phrases
- * req.path => '/apps-sandbox/login'
+ * req.route.path => '/apps-sandbox/login'
  * domain => 'apps-sandbox'
  * phrasePath => 'login'
  */
-function executePhrase(endpointPath, req, res, next) {
-  //Metrics for phrases being executed at this moment
-  counterPhrasesBeingExecuted.inc();
-  counterPhrasesExecuted.inc();
-  
-  pmx.emit('phrase:executed', {
-    url: endpointPath,
-    query : req.query
+// function executePhrase(endpointPath, req, res, next) {
+//   //Metrics for phrases being executed at this moment
+//   counterPhrasesBeingExecuted.inc();
+//   counterPhrasesExecuted.inc();
+
+//   pmx.emit('phrase:executed', {
+//     url: endpointPath,
+//     query: req.query
+//   });
+
+//   logger.debug('request:phrase', endpointPath, req.query);
+
+//   res.on('finish', function() {
+//     counterPhrasesBeingExecuted.dec();
+//   });
+
+//   var path = endpointPath.slice(1).split('/'),
+//     domain = path[0],
+//     phrasePath = path.slice(1).join('/');
+
+//   if (!domain || !phrasePath) {
+//     return next();
+//   }
+
+//   var method = req.method.toLowerCase();
+
+//   var authorization = req.header('Authorization');
+
+//   var corbelDriver = connection.getTokenDriver(authorization, true);
+
+//   var params = {
+//     req: req,
+//     res: res,
+//     next: next,
+//     corbelDriver: corbelDriver,
+//     browser: true,
+//     timeout: 10000 //TODO: load from config
+//   };
+
+//   engine.composr.Phrases.runByPath(domain, phrasePath, method, params)
+//     .then(function() {
+//       delete params.req;
+//       delete params.res;
+//       delete params.next;
+//       params = null;
+//       corbelDriver = null;
+//     })
+//     .catch(function(err) {
+//       logger.error(err);
+//       res.status(404).send(new ComposrError('endpoint:not:found', 'Not found', 404));
+//     });
+// }
+
+
+module.exports = function(server) {
+
+  server.get('/phrase', function(req, res) {
+    getPhrases(req, res);
   });
 
-  logger.debug('request:phrase', endpointPath, req.query);
-
-  res.on('finish', function() {
-    counterPhrasesBeingExecuted.dec();
+  server.get('/v1.0/phrase', function(req, res) {
+    getPhrases(req, res);
   });
 
-  var path = endpointPath.slice(1).split('/'),
-    domain = path[0],
-    phrasePath = path.slice(1).join('/');
+  server.put('/phrase', function(req, res, next) {
+    createOrUpdatePhrase(req, res, next);
+  });
 
-  if (!domain || !phrasePath) {
-    return next();
-  }
+  server.put('/v1.0/phrase', function(req, res, next) {
+    createOrUpdatePhrase(req, res, next);
+  });
 
-  var method = req.method.toLowerCase();
+  server.del('/phrase/:phraseid', function(req, res, next) {
+    deletePhrase(req, res, next);
+  });
 
-  var authorization = req.get('Authorization');
+  server.del('/v1.0/phrase/:phraseid', function(req, res, next) {
+    deletePhrase(req, res, next);
+  });
 
-  var corbelDriver = connection.getTokenDriver(authorization, true);
+  server.get('/phrase/:phraseid', function(req, res, next) {
+    getPhrase(req, res, next);
+  });
 
-  var params = {
-    req: req,
-    res: res,
-    next: next,
-    corbelDriver : corbelDriver,
-    browser: true,
-    timeout: 10000 //TODO: load from config
-  };
+  server.get('/v1.0/phrase/:phraseid', function(req, res, next) {
+    getPhrase(req, res, next);
+  });
 
-  engine.composr.Phrases.runByPath(domain, phrasePath, method, params)
-    .then(function(){
-      delete params.req;
-      delete params.res;
-      delete params.next;
-      params = null;
-      corbelDriver = null;
-    })
-    .catch(function(err){
-      logger.error(err);
-      res.status(404).send(new ComposrError('endpoint:not:found', 'Not found', 404));
-    });
-}
-
-router.all('/v1.0/*', function(req, res, next) {
-  var path = req.path.replace('/v1.0', '');
-  executePhrase(path, req, res, next);
-});
-
-router.all('*', function(req, res, next) {
-  executePhrase(req.path, req, res, next);
-});
-
-
-module.exports = router;
+};
