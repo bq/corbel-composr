@@ -62,6 +62,20 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
           }
         })
         .then(function(result) {
+            /*item.methods
+
+            server[item.method](item.path, function(req, res, next){
+                composr.Phrases.runById(req.domain, item.id, {
+                    req : req,
+                    res : res,
+                    next : next,
+                    corbelDriver : req.corbelDriver
+                })
+                .catch(function(err){
+                    res.status(404).send('negra!!!');
+                });
+            });*/
+
           if (result.registered === true) {
             if (itemIsPhrase) {
               engine.composr.addPhrasesToDataStructure(itemToAdd);

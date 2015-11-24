@@ -1,9 +1,10 @@
 'use strict';
 
-module.exports = {
-	base : require('./base'),
-	doc : require('./doc'),
-  phrase : require('./phrase'),
-	snippet : require('./snippet'),
-	test : require('./test')
-};
+module.exports = function(server){
+    require('./base')(server);
+    require('./doc')(server);
+    require('./phrase')(server);
+    require('./snippet')(server);
+    require('./test')(server);
+}
+

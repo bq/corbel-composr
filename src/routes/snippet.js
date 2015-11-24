@@ -1,8 +1,6 @@
 'use strict';
 
-var express = require('express'),
-  router = express.Router(),
-  pmx = require('pmx'),
+var pmx = require('pmx'),
   connection = require('../lib/corbelConnection'),
   engine = require('../lib/engine'),
   ComposrError = require('../lib/ComposrError'),
@@ -54,13 +52,6 @@ function createOrUpdateSnippet(req, res, next) {
 
 }
 
-router.put('/snippet', function(req, res, next) {
-  createOrUpdateSnippet(req, res, next);
-});
-
-router.put('/v1.0/snippet', function(req, res, next) {
-  createOrUpdateSnippet(req, res, next);
-});
 
 
 
@@ -80,14 +71,25 @@ function deleteSnippet(req, res, next) {
 
 }
 
-router.delete('/snippet/:snippetID', function(req, res, next) {
-  deleteSnippet(req, res, next);
-});
+module.exports = function(server){
 
-router.delete('/v1.0/snippet/:snippetID', function(req, res, next) {
-  deleteSnippet(req, res, next);
-});
+  server.del('/snippet/:snippetID', function(req, res, next) {
+    deleteSnippet(req, res, next);
+  });
+
+  server.del('/v1.0/snippet/:snippetID', function(req, res, next) {
+    deleteSnippet(req, res, next);
+  });
 
 
+  server.put('/snippet', function(req, res, next) {
+    createOrUpdateSnippet(req, res, next);
+  });
 
-module.exports = router;
+  server.put('/v1.0/snippet', function(req, res, next) {
+    createOrUpdateSnippet(req, res, next);
+  });
+
+}
+
+
