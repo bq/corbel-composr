@@ -59,7 +59,7 @@ function test(server) {
         .expect(422)
         .end(function(err, response) {
           expect(response.statusCode).to.equals(422);
-          expect(response.body.status).to.equals(422);
+          expect(response.status).to.equals(422);
           done(err);
         });
     });

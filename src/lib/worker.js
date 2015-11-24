@@ -6,7 +6,8 @@ var engine = require('./engine'),
   uuid = require('uuid'),
   ComposrError = require('./ComposrError'),
   config = require('./config'),
-  logger = require('../utils/logger');
+  logger = require('../utils/logger'),
+  hub = require('./hub');
 
 
 function Worker() {
@@ -40,7 +41,7 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
       //ch.ack(msg);
       break;
 
-    case 'CREATE':
+    case 'CREATE': // TODO remove?
     case 'UPDATE':
       logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
       var promise;
@@ -56,6 +57,7 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
           logger.debug('worker item fetched', item.id);
           itemToAdd = item;
           if (itemIsPhrase) {
+
             return engine.composr.Phrases.register(domain, item);
           } else {
             return engine.composr.Snippets.register(domain, item);
@@ -170,6 +172,8 @@ Worker.prototype.init = function() {
         .then(function() {
           engine.setWorkerStatus(true);
           logger.info('Worker up, with ID', that.workerID);
+          // emit loaded worker
+          hub.emit('load:worker');
         })
         .catch(function(error) {
           logger.error('WORKER error ', error, 'with ID', that.workerID);
