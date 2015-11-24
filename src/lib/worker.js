@@ -6,7 +6,8 @@ var engine = require('./engine'),
   uuid = require('uuid'),
   ComposrError = require('./ComposrError'),
   config = require('./config'),
-  logger = require('../utils/logger');
+  logger = require('../utils/logger'),
+  hub = require('./hub');
 
 
 function Worker() {
@@ -31,16 +32,18 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
   switch (action) {
     case 'DELETE':
       if (itemIsPhrase) {
+        hub.emit('delete:prhase',{d : domain, i : id});
         engine.composr.Phrases.unregister(domain, id);
         engine.composr.removePhrasesFromDataStructure(id);
       } else {
+        hub.emit('delete:snippet',{d: domain, i: id});
         engine.composr.Snippets.unregister(domain, id);
         engine.composr.removeSnippetsFromDataStructure(id);
       }
       //ch.ack(msg);
       break;
 
-    case 'CREATE':
+    case 'CREATE': // TODO remove?
     case 'UPDATE':
       logger.debug('WORKER triggered create or update event', id, 'domain:' + domain);
       var promise;
@@ -56,12 +59,15 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function(itemIsPhrase, id, action,
           logger.debug('worker item fetched', item.id);
           itemToAdd = item;
           if (itemIsPhrase) {
+
             return engine.composr.Phrases.register(domain, item);
           } else {
             return engine.composr.Snippets.register(domain, item);
           }
         })
         .then(function(result) {
+
+          hub.emit('create:route',{d: domain, i: itemToAdd});
           if (result.registered === true) {
             if (itemIsPhrase) {
               engine.composr.addPhrasesToDataStructure(itemToAdd);
@@ -170,6 +176,8 @@ Worker.prototype.init = function() {
         .then(function() {
           engine.setWorkerStatus(true);
           logger.info('Worker up, with ID', that.workerID);
+          // emit loaded worker
+          hub.emit('load:worker');
         })
         .catch(function(error) {
           logger.error('WORKER error ', error, 'with ID', that.workerID);

@@ -6,11 +6,11 @@ var validator = require('./validate'),
 var getAuth = function(req) {
 	validator.isValue(req, 'undefined:req');
 
-    var auth = req.get('Authorization');
+    var auth = req.header('Authorization');
 
     if (!auth) {
         throw new ComposrError('missing:header:authorization', 'Authorization header not found', 401);
-    } 
+    }
 
     return auth;
 };
