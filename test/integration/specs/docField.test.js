@@ -58,6 +58,7 @@ function test(server) {
     };
 
     before(function() {
+      //todo: this initialization shouldnt be done
       if(!server.composr.data.phrases){
         server.composr.data.phrases = [];
       }
