@@ -58,6 +58,9 @@ function test(server) {
     };
 
     before(function() {
+      if(!server.composr.data.phrases){
+        server.composr.data.phrases = [];
+      }
       server.composr.data.phrases.push(phrase);
     });
 

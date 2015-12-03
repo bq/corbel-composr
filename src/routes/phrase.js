@@ -255,6 +255,7 @@ function executePhrase(endpointPath, req, res, next) {
     res: res,
     next: next,
     corbelDriver : corbelDriver,
+    server : 'express',
     browser: true,
     timeout: 10000 //TODO: load from config
   };
