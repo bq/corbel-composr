@@ -9,6 +9,9 @@ var _server = {
   name: config('serverName') // Server Name
 };
 
+console.log('RUNNING CONFIG LOGGER: ');
+console.log(config('requestLog'));
+
 if (config('requestLog') === true) {
   _server = {
     name: config('serverName'), // Server Name
