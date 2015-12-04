@@ -9,8 +9,6 @@ var _server = {
   name: config('serverName') // Server Name
 };
 
-
-
 if (config('requestLog')) {
   _server = {
     name: config('serverName'), // Server Name

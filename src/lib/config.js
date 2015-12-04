@@ -93,7 +93,7 @@ if (isDefinedConfigValue(process.env.LOG_FILE)) {
 }
 
 if (isDefinedConfigValue(process.env.REQUEST_LOG)) {
-  initialConfig.requestLog = process.env.REQUEST_LOG;
+  initialConfig.requestLog = JSON.parse(process.env.REQUEST_LOG);
 }
 
 if (isDefinedConfigValue(process.env.RABBITMQ_HOST)) {
