@@ -9,7 +9,7 @@ var _server = {
   name: config('serverName') // Server Name
 };
 
-if (config('requestLog')) {
+if (config('requestLog') === true) {
   _server = {
     name: config('serverName'), // Server Name
     log: bunyan.createLogger({
