@@ -1,39 +1,18 @@
-'use strict';
-var bunyan = require('bunyan');
 /*************************************
   Server Config and Load
 **************************************/
-var restify = require('restify'),
-  hub = require('./lib/hub'),
-  server = restify.createServer({
-    name: 'Corbel-Composr',
-    log: bunyan.createLogger({
-      name: 'Corbel-Composr',
-      streams: [{
-        level: 'debug',
-        stream: process.stdout // log INFO and above to stdout
-      }, {
-        level: 'error',
-        path: './logs/api-error.log' // log ERROR and above to a file
-      }, {
-        level: 'trace',
-        path: './logs/api.log'
-      }],
-      serializers: restify.bunyan.serializers
-    })
-  });
+'use strict';
+
+var restify = require('restify');
+var hub = require('./lib/hub');
+var srvConf = require('./config/server');
+var server = restify.createServer(srvConf);
 require('./lib/router')(server);
-
-var engine = require('./lib/engine'),
-  WorkerClass = require('./lib/worker'),
-  //ComposrError = require('./lib/ComposrError'),
-  config = require('./lib/config'),
-  configChecker = require('./utils/envConfigChecker');
-
+var engine = require('./lib/engine');
+var WorkerClass = require('./lib/worker');
+var  config = require('./lib/config');
+var configChecker = require('./utils/envConfigChecker');
 var worker = new WorkerClass();
-
-//var ERROR_CODE_SERVER_TIMEOUT = 503;
-// var DEFAULT_TIMEOUT = '10s';
 
 /*************************************
   Allows you to add in handlers
@@ -49,19 +28,7 @@ server.pre(restify.pre.userAgentConnection());
   Logs
 **************************************/
 var logger = require('./utils/logger');
-//Custom log
 
-
-// if (config('accessLog') === true || config('accessLog') === 'true') {
-//   // Access log, logs http requests
-//   var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
-//     flags: 'a'
-//   });
-
-//   /*server.use(morgan('combined', {
-//     stream: accessLogStream
-//   }));*/
-// }
 server.pre(function(request, response, next) {
   request.log.info({
     req: request
@@ -162,6 +129,6 @@ process.on('uncaughtException', function(err) {
 worker.init();
 
 // Trigger the static routes creation
-hub.emit('create:staticRoutes',server);
+hub.emit('create:staticRoutes', server);
 
 module.exports = engine.init(server);

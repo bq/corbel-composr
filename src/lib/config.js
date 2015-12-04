@@ -92,6 +92,10 @@ if (isDefinedConfigValue(process.env.LOG_FILE)) {
   initialConfig.logFile = process.env.LOG_FILE;
 }
 
+if (isDefinedConfigValue(process.env.REQUEST_LOG)) {
+  initialConfig.requestLog = process.env.REQUEST_LOG;
+}
+
 if (isDefinedConfigValue(process.env.RABBITMQ_HOST)) {
   initialConfig['rabbitmq.host'] = process.env.RABBITMQ_HOST;
 }

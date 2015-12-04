@@ -9,9 +9,9 @@
     "bootstrap.retrytimeout": 10000,
 
     "timeout": 2000,
-    "services.timeout": 5000, 
+    "services.timeout": 5000,
     "services.retries": 30,
-    "services.time": 1000, 
+    "services.time": 1000,
     "corbel.composr.credentials": {
         "clientId": "CLIENT_ID",
         "clientSecret": "CLIENT_SECRET",
@@ -27,8 +27,11 @@
     "logLevel": "error",
     "logFile": "logs/composr.log",
     "syslog" : false,
+    "requestLog" : true,
     "bodylimit" : "50mb",
     "newrelic" : false,
     "newrelic.name": "",
-    "newrelic.key": ""
+    "newrelic.key": "",
+
+    "serverName" : "Corbel-Composr"
 }
