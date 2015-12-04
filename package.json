@@ -1,7 +1,7 @@
 {
   "name": "corbel-composr",
   "description": "A corbel composr is a middleware based in nodeJS with restify, to offer developers to make his own specific application API.",
-  "version": "1.24.2",
+  "version": "2.0.0",
   "build.version": "latest",
   "build.date": "Mon, 22 Jun 2015 08:24:25 GMT",
   "bin": "bin/composr",
