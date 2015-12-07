@@ -21,5 +21,8 @@ exports.config = {
      * production applications.
      */
     level: 'trace'
+  },
+  transaction_tracer : {
+    enabled : true
   }
 }
