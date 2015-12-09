@@ -31,7 +31,6 @@ function test(server) {
 
     before(function(done) {
       this.timeout(30000);
-      console.log(AdminClientData);
       request(server.app)
         .post('/token')
         .send(AdminClientData)
