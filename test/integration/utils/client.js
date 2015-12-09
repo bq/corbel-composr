@@ -1,5 +1,5 @@
 function getAdminClient(){
-  var clientData = require('../../fixtures/client/_clientAdmin.json');
+  var clientData = require('../../fixtures/client/clientAdmin.json');
 
   //Use environment variables (if jenkins provided those), fixtures ones other way.
   var adminClientData = {
@@ -12,7 +12,7 @@ function getAdminClient(){
 }
 
 function getDemoClient(){
-  var clientData = require('../../fixtures/client/_clientDemo.json');
+  var clientData = require('../../fixtures/client/clientDemo.json');
 
   //Use environment variables (if jenkins provided those), fixtures ones other way.
   var demoClientData = {
