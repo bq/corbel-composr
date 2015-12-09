@@ -47,7 +47,8 @@ server.on('after', function(req, res, route) {
   New Relic
 **************************************/
 if (config('newrelic') === true || config('newrelic') === 'true') {
-  //require('newrelic');
+  logger.info('New Relic loaded!');
+  require('newrelic');
 }
 
 /*************************************
