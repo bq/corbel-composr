@@ -79,7 +79,7 @@ function fancy(text, cb) {
 }
 
 function salute(cb) {
-  art.font('compoSR', 'Basic', 'red').font('v1', 'Doom', 'magenta', function(rendered) {
+  art.font('compoSR', 'Doom', 'bright_green').font('v2', 'Doom', 'bright_cyan', function(rendered) {
     console.log(rendered);
     cb();
   });
