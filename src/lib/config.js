@@ -35,7 +35,6 @@ function getInitialConfig() {
   var config = _.defaults(environmentFileConfig, defaultConfig);
 
 
-
   //Finally if it exists on the environment, use this
   if (isDefinedConfigValue(process.env.COMPOSR_CONFIG)) {
     console.log('warn:config: DEPRECATED ENVIRONMENT VARIABLE COMPOSR_CONFIG');

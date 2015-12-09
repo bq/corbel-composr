@@ -26,6 +26,7 @@
     "accessLogFile" : "logs/access.log",
     "logLevel": "error",
     "logFile": "logs/composr.log",
+    "logStreamer": "http://localhost:4444",
     "syslog" : false,
     "requestLog" : true,
     "bodylimit" : "50mb",
