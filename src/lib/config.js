@@ -2,6 +2,7 @@
 
 var _ = require('lodash'),
   fs = require('fs'),
+  uuid = require('uuid'),
   ComposrError = require('./ComposrError');
 
 function getDefaultConfig() {
@@ -47,8 +48,12 @@ function getInitialConfig() {
       console.log('warn:config:badformatedConfig' + env + ':undefined', process.env.COMPOSR_CONFIG);
     }
   }
+
   //store environment variable
   config.env = env;
+
+  //Server UUID
+  config.serverID = uuid.v1(); 
 
   return config;
 }
