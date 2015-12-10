@@ -141,7 +141,7 @@ function deletePhrase(req, res) {
     logger.debug('phrase:deleted');
     res.send(response.status,response.data);
   }).catch(function(error) {
-    res.send(error.status,error.status,new ComposrError('error:phrase:delete', error.message, error.status));
+    res.send(error.status,new ComposrError('error:phrase:delete', error.message, error.status));
   });
 
 }
