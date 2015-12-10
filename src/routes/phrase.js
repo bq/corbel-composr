@@ -75,6 +75,10 @@ function createOrUpdatePhrase(req, res) {
 
   var authorization = auth.getAuth(req,res);
 
+  if(!authorization){
+    res.send(401, new ComposrError('error:authorization:required', {}, 401));
+  }
+
   var phrase = req.body || {};
 
   var corbelDriver = connection.getTokenDriver(authorization);
@@ -124,6 +128,10 @@ function createOrUpdatePhrase(req, res) {
 function deletePhrase(req, res) {
   var authorization = auth.getAuth(req,res);
 
+  if(!authorization){
+    res.send(401, new ComposrError('error:authorization:required', {}, 401));
+  }
+
   var corbelDriver = connection.getTokenDriver(authorization);
 
   var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
@@ -133,7 +141,7 @@ function deletePhrase(req, res) {
     logger.debug('phrase:deleted');
     res.send(response.status,response.data);
   }).catch(function(error) {
-    res.send(error.status,new ComposrError('error:phrase:delete', error.message, error.status));
+    res.send(error.status,error.status,new ComposrError('error:phrase:delete', error.message, error.status));
   });
 
 }
@@ -150,6 +158,11 @@ function deletePhrase(req, res) {
  */
 function getPhrase(req, res, next) {
   var authorization = auth.getAuth(req,res);
+
+  if(!authorization){
+    res.send(401, new ComposrError('error:authorization:required', {}, 401));
+  }
+
   var corbelDriver = connection.getTokenDriver(authorization);
 
   var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid;
@@ -160,7 +173,7 @@ function getPhrase(req, res, next) {
     res.send(response.status, response.data);
   }).catch(function(error) {
     var errorBody = getCorbelErrorBody(error);
-    next(new ComposrError('error:phrase:get', errorBody, error.status));
+    res.send(error.status,new ComposrError('error:phrase:get', errorBody, error.status));
   });
 }
 
@@ -174,6 +187,11 @@ function getPhrase(req, res, next) {
  */
 function getPhrases(req, res) {
   var authorization = auth.getAuth(req,res);
+
+  if(!authorization){
+    res.send(401, new ComposrError('error:authorization:required', {}, 401));
+  }
+
   var domainExtracted = connection.extractDomain(authorization);
   if (domainExtracted) {
     var phrases = engine.composr.Phrases.getPhrases(domainExtracted);
