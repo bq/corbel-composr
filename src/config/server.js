@@ -40,6 +40,15 @@ if (config('requestLog') === true) {
 
     socket.on('reconnect', function(){
       console.log(_server.log.streams);
+      var socketLoggerStream = ss.createStream();
+      var bunyanStreamConfig = {
+        level: 'debug',
+        stream: socketLoggerStream
+      };
+      _server.log.streams[0] = bunyanStreamConfig;
+      ss(socket).emit('log-stream', socketLoggerStream, {
+        server: config('serverID')
+      });
     });
 
     ss(socket).emit('log-stream', socketLoggerStream, {
