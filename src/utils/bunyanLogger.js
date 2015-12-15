@@ -1,28 +1,28 @@
 /*************************************
-  Server Config and Load
+  Bunyan Logger
 **************************************/
 var bunyan = require('bunyan');
-var restify = require('restify');
 var config = require('../lib/config');
-var logStreamer = config('logStreamer');
+var logStreamer = config('bunyan.streamServer');
 
+var logger = null;
 
-var _server = {
-  name: config('serverName') // Server Name
-};
-
-if (config('requestLog') === true) {
+if (config('bunyan.log') === true) {
 
   var streams = [{
-    level: 'debug', // Loggin depth
-    stream: process.stdout // log INFO and above to stdout
-  }, {
     level: 'error',
     path: './logs/api-error.log' // log ERROR and above to a file
   }, {
     level: 'trace',
     path: './logs/api.log'
   }];
+
+  if(config('bunyan.stdout') === true){
+    streams.push({
+      level: 'debug', // Loggin depth
+      stream: process.stdout // log INFO and above to stdout
+    });
+  }
 
 
   if (logStreamer) {
@@ -39,6 +39,8 @@ if (config('requestLog') === true) {
     streams.push(bunyanStreamConfig);
 
     socket.on('reconnect', function(){
+      /*
+        TODO: make it work
       console.log(_server.log.streams);
       var socketLoggerStream = ss.createStream();
       var bunyanStreamConfig = {
@@ -48,7 +50,7 @@ if (config('requestLog') === true) {
       _server.log.streams[0] = bunyanStreamConfig;
       ss(socket).emit('log-stream', socketLoggerStream, {
         server: config('serverID')
-      });
+      });*/
     });
 
     ss(socket).emit('log-stream', socketLoggerStream, {
@@ -56,15 +58,11 @@ if (config('requestLog') === true) {
     });
   }
 
-
-  _server = {
-    name: config('serverName'), // Server Name
-    log: bunyan.createLogger({
-      name: config('serverName'), // Logs server name
-      streams: streams,
-      serializers: restify.bunyan.serializers
-    })
-  };
+  logger = bunyan.createLogger({
+    name: config('serverName'), // Logs server name
+    streams: streams,
+    serializers: restify.bunyan.serializers
+  });
 }
 
-module.exports = _server;
+module.exports = logger;

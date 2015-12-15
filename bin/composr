@@ -7,18 +7,21 @@ pmx.init({
 });
 // You must do this BEFORE any require('http')
 
-var logger = require('../src/utils/logger');
+var logger = require('../src/utils/composrLogger');
+var config = require('../src/lib/config');
+var version = require('../package.json').version;
 
 module.exports = new Promise(function(resolve, reject) {
 
   require('../src/app')
     .then(function(serverObjects) {
 
-      var port = process.env.PORT || 3000;
+      var port = config('port');
 
       var server = serverObjects.app.listen(port, function() {
         logger.debug('Restify server listening on port ' + server.address().port);
-        logger.salute(function() {
+
+        logger.salute(config('serverName'), version, function() {
           resolve(serverObjects);
         });
 

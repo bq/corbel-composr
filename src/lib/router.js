@@ -3,7 +3,7 @@ var hub = require('./hub'),
   connection = require('./corbelConnection'),
   engine = require('./engine'),
   ComposrError = require('./ComposrError'),
-  logger = require('../utils/logger'),
+  logger = require('../utils/composrLogger'),
   config = require('./config');
 //restify = require('restify');
 

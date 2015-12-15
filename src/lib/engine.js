@@ -1,6 +1,6 @@
 'use strict';
 
-var logger = require('../utils/logger'),
+var logger = require('../utils/composrLogger'),
   composr = require('composr-core'),
   q = require('q'),
   https = require('https'),

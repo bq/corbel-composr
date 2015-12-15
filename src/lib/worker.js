@@ -6,7 +6,7 @@ var engine = require('./engine'),
   uuid = require('uuid'),
   ComposrError = require('./ComposrError'),
   config = require('./config'),
-  logger = require('../utils/logger'),
+  logger = require('../utils/composrLogger'),
   hub = require('./hub');
 
 
