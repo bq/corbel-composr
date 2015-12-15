@@ -80,13 +80,17 @@ You can send the following environment variables (or define a environment config
 ### Environment variables
 
 ```
+SERVER_NAME (Composr 2.0)
+PORT (3000)
 CREDENTIALS_CLIENT_ID
 CREDENTIALS_CLIENT_SECRET
 CREDENTIALS_SCOPES
 URL_BASE
 LOG_LEVEL
 LOG_FILE
-REQUEST_LOG(true) => Bunyan logs
+BUNYAN_LOG(true) => Bunyan logs
+BUNYAN_STDOUT(false) => Bunyan output in terminal
+BUNYAN_STREAM_SERVER (null) => Composr Stream Server endpoint
 RABBITMQ_HOST
 RABBITMQ_PORT
 RABBITMQ_USERNAME

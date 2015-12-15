@@ -1,6 +1,6 @@
 'use strict';
 
-var logger = require('./logger');
+var logger = require('./composrLogger');
 var _ = require('lodash');
 var config = require('../lib/config');
 

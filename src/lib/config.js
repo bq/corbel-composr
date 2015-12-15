@@ -2,6 +2,7 @@
 
 var _ = require('lodash'),
   fs = require('fs'),
+  uuid = require('uuid'),
   ComposrError = require('./ComposrError');
 
 function getDefaultConfig() {
@@ -35,7 +36,6 @@ function getInitialConfig() {
   var config = _.defaults(environmentFileConfig, defaultConfig);
 
 
-
   //Finally if it exists on the environment, use this
   if (isDefinedConfigValue(process.env.COMPOSR_CONFIG)) {
     console.log('warn:config: DEPRECATED ENVIRONMENT VARIABLE COMPOSR_CONFIG');
@@ -48,13 +48,22 @@ function getInitialConfig() {
       console.log('warn:config:badformatedConfig' + env + ':undefined', process.env.COMPOSR_CONFIG);
     }
   }
+
   //store environment variable
   config.env = env;
+
+  //Server UUID
+  config.serverID = uuid.v1(); 
 
   return config;
 }
 
 var initialConfig = getInitialConfig();
+
+
+if (isDefinedConfigValue(process.env.SERVER_NAME)) {
+  initialConfig.serverName = process.env.SERVER_NAME;
+}
 
 if (isDefinedConfigValue(process.env.CREDENTIALS_CLIENT_ID)) {
   initialConfig['corbel.composr.credentials'].clientId = process.env.CREDENTIALS_CLIENT_ID;
@@ -73,27 +82,39 @@ if (isDefinedConfigValue(process.env.URL_BASE)) {
 }
 
 if (isDefinedConfigValue(process.env.ACCESS_LOG)) {
-  initialConfig.accessLog = process.env.ACCESS_LOG;
+  initialConfig['composrLog.accessLog'] = process.env.ACCESS_LOG;
+}
+
+if (isDefinedConfigValue(process.env.PORT)) {
+  initialConfig.port = parseInt(process.env.PORT, 10);
 }
 
 if (isDefinedConfigValue(process.env.ACCESS_LOG_FILE)) {
-  initialConfig.accessLogFile = process.env.ACCESS_LOG_FILE;
+  initialConfig['composrLog.accessLogFile'] = process.env.ACCESS_LOG_FILE;
 }
 
 if (isDefinedConfigValue(process.env.LOG_FILE)) {
-  initialConfig.logFile = process.env.LOG_FILE;
+  initialConfig['composrLog.logFile'] = process.env.LOG_FILE;
 }
 
 if (isDefinedConfigValue(process.env.LOG_LEVEL)) {
-  initialConfig.logLevel = process.env.LOG_LEVEL;
+  initialConfig['composrLog.logLevel'] = process.env.LOG_LEVEL;
 }
 
 if (isDefinedConfigValue(process.env.LOG_FILE)) {
-  initialConfig.logFile = process.env.LOG_FILE;
+  initialConfig['composrLog.logFile'] = process.env.LOG_FILE;
 }
 
-if (isDefinedConfigValue(process.env.REQUEST_LOG)) {
-  initialConfig.requestLog = JSON.parse(process.env.REQUEST_LOG);
+if (isDefinedConfigValue(process.env.BUNYAN_LOG)) {
+  initialConfig['bunyan.log'] = JSON.parse(process.env.BUNYAN_LOG);
+}
+
+if (isDefinedConfigValue(process.env.BUNYAN_STDOUT)) {
+  initialConfig['bunyan.stdout'] = JSON.parse(process.env.BUNYAN_STDOUT);
+}
+
+if (isDefinedConfigValue(process.env.BUNYAN_STREAM_SERVER)) {
+  initialConfig['bunyan.streamServer'] = process.env.BUNYAN_STREAM_SERVER;
 }
 
 if (isDefinedConfigValue(process.env.RABBITMQ_HOST)) {

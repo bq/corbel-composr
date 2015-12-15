@@ -5,7 +5,7 @@
 
 var restify = require('restify');
 var hub = require('./lib/hub');
-var srvConf = require('./config/server');
+var srvConf = require('./lib/server');
 var server = restify.createServer(srvConf);
 require('./lib/router')(server);
 var engine = require('./lib/engine');
@@ -13,8 +13,7 @@ var WorkerClass = require('./lib/worker');
 var config = require('./lib/config');
 var configChecker = require('./utils/envConfigChecker');
 var worker = new WorkerClass();
-var logger = require('./utils/logger');
-
+var logger = require('./utils/composrLogger');
 
 /*************************************
   Configuration check

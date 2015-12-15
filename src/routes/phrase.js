@@ -4,7 +4,7 @@ var pmx = require('pmx'),
   connection = require('../lib/corbelConnection'),
   engine = require('../lib/engine'),
   ComposrError = require('../lib/ComposrError'),
-  logger = require('../utils/logger'),
+  logger = require('../utils/composrLogger'),
   auth = require('../lib/auth');
 
 /*************************************

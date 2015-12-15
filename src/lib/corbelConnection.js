@@ -4,7 +4,7 @@ var corbel = require('corbel-js'),
   config = require('./config'),
   _ = require('lodash'),
   ComposrError = require('./ComposrError'),
-  logger = require('../utils/logger');
+  logger = require('../utils/composrLogger');
 
 var PHRASES_COLLECTION = 'composr:Phrase';
 var SNIPPETS_COLLECTION = 'composr:Snippet';
