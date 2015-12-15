@@ -10,48 +10,10 @@ var server = restify.createServer(srvConf);
 require('./lib/router')(server);
 var engine = require('./lib/engine');
 var WorkerClass = require('./lib/worker');
-var  config = require('./lib/config');
+var config = require('./lib/config');
 var configChecker = require('./utils/envConfigChecker');
 var worker = new WorkerClass();
-
-/*************************************
-  Allows you to add in handlers
-  that run before routing occurs
-**************************************/
-
-// The plugin checks whether the user agent is curl.
-// If it is, it sets the Connection header to "close"
-// and removes the "Content-Length" header.
-server.pre(restify.pre.userAgentConnection());
-
-/*************************************
-  Logs
-**************************************/
 var logger = require('./utils/logger');
-
-server.pre(function(request, response, next) {
-  request.log.info({
-    url : request.url,
-    req: request
-  }, 'start'); // (1)
-  return next();
-});
-
-server.on('after', function(req, res, route) {
-  req.log.info({
-    url : req.url,
-    res: res,
-    route: route
-  }, 'finished'); // (3)
-});
-
-/*************************************
-  New Relic
-**************************************/
-if (config('newrelic') === true || config('newrelic') === 'true') {
-  logger.info('New Relic loaded!');
-  require('newrelic');
-}
 
 /*************************************
   Configuration check
@@ -60,34 +22,11 @@ var env = process.env.NODE_ENV || 'development';
 configChecker.checkConfig(env);
 
 
-/**************************************
-  Body Parser
-**************************************/
-
-server.use(restify.bodyParser({
-  maxBodySize: 0,
-  mapParams: false
-}));
-
 /*************************************
-  Cors
+  Error handlers
 **************************************/
-server.use(restify.CORS());
-
-/*************************************
-  Accept Parser
-  content types the server knows how to respond to
-**************************************/
-server.use(restify.acceptParser(server.acceptable));
-
-
-/*************************************
-  Query Parser
-**************************************/
-server.use(restify.queryParser({
-  mapParams: false
-}));
-
+logger.info('Loading Middlewares...');
+require('./middlewares')(restify,server,config,logger);
 
 /*************************************
   Error handlers
