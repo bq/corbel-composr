@@ -156,7 +156,7 @@ function deletePhrase(req, res) {
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-function getPhrase(req, res, next) {
+function getPhrase(req, res) {
   var authorization = auth.getAuth(req,res);
 
   if(!authorization){
@@ -173,7 +173,7 @@ function getPhrase(req, res, next) {
     res.send(response.status, response.data);
   }).catch(function(error) {
     var errorBody = getCorbelErrorBody(error);
-    res.send(error.status,new ComposrError('error:phrase:get', errorBody, error.status));
+    res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status));
   });
 }
 
