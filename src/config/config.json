@@ -30,7 +30,7 @@
 
     "bunyan.requestLog" : true,
     "bunyan.stdout": false,
-    "bunyan.streamServer": "http://localhost:4444/server",
+    "bunyan.streamServer": false,
 
     "composrLog.accessLog" : true,
     "composrLog.accessLogFile" : "logs/access.log",

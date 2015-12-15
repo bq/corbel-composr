@@ -25,7 +25,6 @@ if (config('bunyan.log') === true) {
     });
   }
 
-
   if (logStreamer) {
     var io = require('socket.io-client');
     var socket = io.connect(logStreamer);
