@@ -2,6 +2,7 @@
   Bunyan Logger
 **************************************/
 var bunyan = require('bunyan');
+var restify = require('restify');
 var config = require('../lib/config');
 var logStreamer = config('bunyan.streamServer');
 

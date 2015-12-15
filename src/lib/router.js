@@ -5,9 +5,8 @@ var hub = require('./hub'),
   ComposrError = require('./ComposrError'),
   logger = require('../utils/composrLogger'),
   config = require('./config');
-//restify = require('restify');
 
-var allowedVerbs = ['get', 'put', 'post', 'delete', 'head'];
+var allowedVerbs = ['get', 'put', 'post', 'delete'];
 
 
 /**
@@ -62,7 +61,7 @@ function executePhraseById(req, res, next, routeItem) {
     res: res,
     next: next,
     browser: true,
-    timeout: 10000,
+    timeout: config('phrases.timeout'),
     server: 'restify'
   };
 

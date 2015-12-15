@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 var pmx = require('pmx');
+
 //Log routes and latency.
+// You must do this BEFORE any require('http')
 pmx.init({
   http: true
 });
-// You must do this BEFORE any require('http')
 
 var logger = require('../src/utils/composrLogger');
 var config = require('../src/lib/config');
@@ -28,7 +29,7 @@ module.exports = new Promise(function(resolve, reject) {
       });
     })
     .catch(function(err) {
-      console.log('ERROR launching Restify application', err);
+      console.log('ERROR launching ' + config('serverName') + ' application', err);
       reject(err);
     });
 });

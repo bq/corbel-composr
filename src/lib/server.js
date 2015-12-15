@@ -1,8 +1,6 @@
 /*************************************
   Bunyan Logger
 **************************************/
-
-var restify = require('restify');
 var config = require('./config');
 var bunyanLogger = require('../utils/bunyanLogger');
 
