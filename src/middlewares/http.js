@@ -36,7 +36,9 @@ module.exports = function(restify, server, logger) {
     if (req.method.toLowerCase() === 'options') {
       var allowHeaders = ['Accept', 'Accept-Version', 'Content-Type', 'Api-Version', 'Origin', 'X-Requested-With', 'Authorization']; // added Origin & X-Requested-W$
 
-      if (res.methods.indexOf('OPTIONS') === -1) res.methods.push('OPTIONS');
+      if (res.methods.indexOf('OPTIONS') === -1) {
+        res.methods.push('OPTIONS');
+      }
 
       res.header('Access-Control-Allow-Credentials', true);
       res.header('Access-Control-Allow-Headers', allowHeaders.join(', '));
