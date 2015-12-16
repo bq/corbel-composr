@@ -14,6 +14,7 @@ var config = require('./lib/config');
 var configChecker = require('./utils/envConfigChecker');
 var worker = new WorkerClass();
 var logger = require('./utils/composrLogger');
+var ComposrError = require('./lib/ComposrError');
 
 /*************************************
   Configuration check
@@ -32,32 +33,17 @@ require('./middlewares')(restify,server,config,logger);
   Error handlers
 **************************************/
 
-/// catch 404 and forward to error handler
-// var NotFoundHandler = function(req, res, next) {
-//   next(new ComposrError('error:not_found', 'Not Found', 404));
-// };
+server.on('NotFound', function(req, res, err, next){
+  err.body = new ComposrError('error:not_found', err.message, 404);
+  res.send(404, err);
+  return next();
+});
 
-// //server.use(NotFoundHandler);
-
-// var errorHandler = function(req,res, next) {
-
-//   var errorLogged = {
-//     status: res.status,
-//     error: res.message,
-//     errorDescription: res.errorDescription || '',
-//     // development error handler
-//     // will print stacktrace
-//     trace: (process.env.ENV === 'development' ? res.stack : '')
-//   };
-
-//   logger.error(errorLogged);
-
-//   next(res);
-// };
-
-// server.use(errorHandler);
-
-//server.use(pmx.expressErrorHandler());
+server.on('InternalServer', function(req, res, err, next){
+  err.body = new ComposrError('error:internal:server:error', err.message, 500);
+  res.send(500, err);
+  return next();
+});
 
 process.on('uncaughtException', function(err) {
   logger.debug('Error caught by uncaughtException', err);
@@ -66,6 +52,11 @@ process.on('uncaughtException', function(err) {
     process.exit(1);
   }
 });
+
+
+/*************************************
+  Initialization
+**************************************/
 
 //Trigger the worker execution
 worker.init();
