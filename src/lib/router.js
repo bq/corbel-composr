@@ -153,7 +153,15 @@ function bindRoutes(server, routeObjects) {
         authCorbelHook,
         function(req, res, next) {
           executePhraseById(req, res, next, item);
-        },postExecutionHook);
+        }, postExecutionHook);
+
+      //Support also v1.0 paths for the moment
+      server[item.restifyVerb]('/v1.0' + url,
+        authCorbelHook,
+        function(req, res, next) {
+          executePhraseById(req, res, next, item);
+        }, postExecutionHook);
+
     })(routeObjects[i]);
 
   }
