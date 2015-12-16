@@ -123,6 +123,13 @@ function bindRoutes(server, routeObjects) {
         function(req, res, next) {
           executePhraseById(req, res, next, item);
         });
+
+      //Support also v1.0 paths for the moment
+      server[item.restifyVerb]('/v1.0' + url,
+        authCorbelMiddleWare,
+        function(req, res, next) {
+          executePhraseById(req, res, next, item);
+        });
     })(routeObjects[i]);
 
   }
