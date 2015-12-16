@@ -4,10 +4,23 @@ var hub = require('./hub'),
   engine = require('./engine'),
   ComposrError = require('./ComposrError'),
   logger = require('../utils/composrLogger'),
-  config = require('./config');
+  config = require('./config'),
+  pmx = require('pmx');
 
 var allowedVerbs = ['get', 'put', 'post', 'delete'];
 
+/*************************************
+  Metrics
+*************************************/
+var probe = pmx.probe();
+
+var counterPhrasesBeingExecuted = probe.counter({
+  name: 'phrases_in_execution'
+});
+
+var counterPhrasesExecuted = probe.counter({
+  name: 'phrases_executed'
+});
 
 /**
  * [extractDomainFromId description]
@@ -65,6 +78,11 @@ function executePhraseById(req, res, next, routeItem) {
     server: 'restify'
   };
 
+  // Metrics for number of phrases executed
+  counterPhrasesExecuted.inc();
+  // Metrics for number of phrases being executed
+  counterPhrasesBeingExecuted.inc();
+
   return engine.composr.Phrases.runById(routeItem.domain, routeItem.id, routeItem.verb, params)
     .catch(function(err) {
       logger.error('Failing executing Phrase', err);
@@ -85,13 +103,13 @@ function createRoutes(phrases, next) {
 }
 
 /**
- * [authCorbelMiddleWare description]
+ * [authCorbelHook description]
  * @param  {[type]}   req  [description]
  * @param  {[type]}   res  [description]
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-function authCorbelMiddleWare(req, res, next) {
+function authCorbelHook(req, res, next) {
 
   var authorization = req.headers.authorization;
 
@@ -103,6 +121,19 @@ function authCorbelMiddleWare(req, res, next) {
   req.corbelDriver = corbelDriver;
 
   return next();
+}
+
+/**
+ * [postExecutionHook description]
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+function postExecutionHook(){
+    // Metric for counterPhrasesBeingExecuted,
+    // after execution decrease number.
+    counterPhrasesBeingExecuted.dec();
 }
 
 /**
@@ -119,17 +150,18 @@ function bindRoutes(server, routeObjects) {
       var url = '/' + item.domain + '/' + item.path;
 
       server[item.restifyVerb](url,
-        authCorbelMiddleWare,
+        authCorbelHook,
         function(req, res, next) {
           executePhraseById(req, res, next, item);
-        });
+        }, postExecutionHook);
 
       //Support also v1.0 paths for the moment
       server[item.restifyVerb]('/v1.0' + url,
-        authCorbelMiddleWare,
+        authCorbelHook,
         function(req, res, next) {
           executePhraseById(req, res, next, item);
-        });
+        }, postExecutionHook);
+
     })(routeObjects[i]);
 
   }
