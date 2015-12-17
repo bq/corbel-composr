@@ -14,7 +14,7 @@ module.exports = function (grunt) {
 
   function jsdocTask () {
     var exec = require('child_process').exec
-    /* jshint validthis:true */
+
     var done = this.async()
 
     var jsdocCmd = './node_modules/jsdoc/jsdoc'
@@ -68,16 +68,6 @@ module.exports = function (grunt) {
       }
     },
 
-    jshint: {
-      options: {
-        jshintrc: '.jshintrc',
-        reporter: require('jshint-stylish')
-      },
-      all: [
-        'src/**/*.js'
-      ]
-    },
-
     standard: {
       lint: {
         src: [
@@ -88,7 +78,7 @@ module.exports = function (grunt) {
       format: {
         options: {
           format: true,
-          lint: false
+          lint: true
         },
         src: [
           '{bin/,src/}**/**.js',
@@ -233,8 +223,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'clean',
-    'jshint',
-    'standard',
+    'standard:lint',
     'test',
     'develop',
     'watch'
@@ -242,7 +231,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:coverage', [
     'clean',
-    'jshint',
+    'standard:lint',
     'madge',
     'copy:coverage',
     'blanket',
@@ -254,8 +243,6 @@ module.exports = function (grunt) {
   ])
 
   grunt.registerTask('test', [
-    'jshint',
-    'standard:lint',
     'standard:format',
     'madge',
     'mochaTest:ci'
