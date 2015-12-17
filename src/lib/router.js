@@ -194,6 +194,8 @@ module.exports = function (server) {
       phrases = [phrases]
     }
 
+    console.log('route')
+
     createRoutes(phrases, function (routeObjects) {
       bindRoutes(server, routeObjects)
       if (config('env') === 'development') {

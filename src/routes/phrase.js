@@ -136,9 +136,10 @@ function deletePhrase (req, res) {
   corbelDriver.resources.resource(engine.phrasesCollection, phraseId).delete().then(function (response) {
     logger.debug('phrase:deleted')
     res.send(response.status, response.data)
-  }).catch(function (error) {
-    res.send(error.status, new ComposrError('error:phrase:delete', error.message, error.status))
   })
+    .catch(function (error) {
+      res.send(error.status, new ComposrError('error:phrase:delete', error.message, error.status))
+    })
 }
 
 /**
@@ -153,6 +154,7 @@ function getPhrase (req, res) {
 
   if (!authorization) {
     res.send(401, new ComposrError('error:authorization:required', {}, 401))
+    return
   }
 
   var corbelDriver = connection.getTokenDriver(authorization)
@@ -163,10 +165,12 @@ function getPhrase (req, res) {
 
   corbelDriver.resources.resource(engine.phrasesCollection, phraseId).get().then(function (response) {
     res.send(response.status, response.data)
-  }).catch(function (error) {
-    var errorBody = getCorbelErrorBody(error)
-    res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status))
   })
+    .catch(function (error) {
+      var errorBody = getCorbelErrorBody(error)
+      console.log(error)
+      res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status))
+    })
 }
 
 /**
