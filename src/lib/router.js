@@ -1,34 +1,33 @@
-'use strict';
-var hub = require('./hub'),
-  connection = require('./corbelConnection'),
-  engine = require('./engine'),
-  ComposrError = require('./ComposrError'),
-  logger = require('../utils/composrLogger'),
-  config = require('./config'),
-  pmx = require('pmx');
+'use strict'
+var hub = require('./hub')
+var connection = require('./corbelConnection')
+var engine = require('./engine')
+var ComposrError = require('./ComposrError')
+var logger = require('../utils/composrLogger')
+var config = require('./config')
+var pmx = require('pmx')
+var allowedVerbs = ['get', 'put', 'post', 'delete']
 
-var allowedVerbs = ['get', 'put', 'post', 'delete'];
-
-/*************************************
+/* ************************************
   Metrics
 *************************************/
-var probe = pmx.probe();
+var probe = pmx.probe()
 
 var counterPhrasesBeingExecuted = probe.counter({
   name: 'phrases_in_execution'
-});
+})
 
 var counterPhrasesExecuted = probe.counter({
   name: 'phrases_executed'
-});
+})
 
 /**
  * [extractDomainFromId description]
  * @param  {[type]} id [description]
  * @return {[type]}    [description]
  */
-function extractDomainFromId(id) {
-  return id.split('!')[0];
+function extractDomainFromId (id) {
+  return id.split('!')[0]
 }
 
 /**
@@ -36,15 +35,14 @@ function extractDomainFromId(id) {
  * @param  {[type]} acc [description]
  * @return {[type]}     [description]
  */
-function analyzePhrase(acc) {
-  return function(item) {
-    var domain = extractDomainFromId(item.id);
+function analyzePhrase (acc) {
+  return function (item) {
+    var domain = extractDomainFromId(item.id)
 
-    allowedVerbs.forEach(function(verb) {
-
+    allowedVerbs.forEach(function (verb) {
       if (item[verb]) {
-        //Restify doesn't use delete it uses 'del' for storing the delete callback
-        var restifyMappedVerb = verb === 'delete' ? 'del' : verb;
+        // Restify doesn't use delete it uses 'del' for storing the delete callback
+        var restifyMappedVerb = verb === 'delete' ? 'del' : verb
 
         acc.push({
           restifyVerb: restifyMappedVerb,
@@ -52,11 +50,10 @@ function analyzePhrase(acc) {
           domain: domain,
           path: item.url,
           id: item.id
-        });
+        })
       }
-    });
-  };
-
+    })
+  }
 }
 
 /**
@@ -67,7 +64,7 @@ function analyzePhrase(acc) {
  * @param  {[type]}   routeItem [description]
  * @return {[type]}             [description]
  */
-function executePhraseById(req, res, next, routeItem) {
+function executePhraseById (req, res, next, routeItem) {
   var params = {
     corbelDriver: req.corbelDriver,
     req: req,
@@ -76,18 +73,18 @@ function executePhraseById(req, res, next, routeItem) {
     browser: true,
     timeout: config('phrases.timeout'),
     server: 'restify'
-  };
+  }
 
   // Metrics for number of phrases executed
-  counterPhrasesExecuted.inc();
+  counterPhrasesExecuted.inc()
   // Metrics for number of phrases being executed
-  counterPhrasesBeingExecuted.inc();
+  counterPhrasesBeingExecuted.inc()
 
   return engine.composr.Phrases.runById(routeItem.domain, routeItem.id, routeItem.verb, params)
-    .catch(function(err) {
-      logger.error('Failing executing Phrase', err);
-      res.send(404, new ComposrError('endpoint:not:found', 'Not found', 404));
-    });
+    .catch(function (err) {
+      logger.error('Failing executing Phrase', err)
+      res.send(404, new ComposrError('endpoint:not:found', 'Not found', 404))
+    })
 }
 
 /**
@@ -96,10 +93,10 @@ function executePhraseById(req, res, next, routeItem) {
  * @param  {Function} next    [description]
  * @return {[type]}           [description]
  */
-function createRoutes(phrases, next) {
-  var routeObjects = [];
-  phrases.forEach(analyzePhrase(routeObjects));
-  next(routeObjects);
+function createRoutes (phrases, next) {
+  var routeObjects = []
+  phrases.forEach(analyzePhrase(routeObjects))
+  next(routeObjects)
 }
 
 /**
@@ -109,18 +106,17 @@ function createRoutes(phrases, next) {
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-function authCorbelHook(req, res, next) {
+function authCorbelHook (req, res, next) {
+  var authorization = req.headers.authorization
 
-  var authorization = req.headers.authorization;
+  var corbelDriver = connection.getTokenDriver(authorization, true)
 
-  var corbelDriver = connection.getTokenDriver(authorization, true);
+  // var caller = req.params.name || 'caller'
+  // req.log.debug('caller is "%s"', caller)
 
-  // var caller = req.params.name || 'caller';
-  // req.log.debug('caller is "%s"', caller);
+  req.corbelDriver = corbelDriver
 
-  req.corbelDriver = corbelDriver;
-
-  return next();
+  return next()
 }
 
 /**
@@ -130,10 +126,10 @@ function authCorbelHook(req, res, next) {
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-function postExecutionHook(){
-    // Metric for counterPhrasesBeingExecuted,
-    // after execution decrease number.
-    counterPhrasesBeingExecuted.dec();
+function postExecutionHook () {
+  // Metric for counterPhrasesBeingExecuted,
+  // after execution decrease number.
+  counterPhrasesBeingExecuted.dec()
 }
 
 /**
@@ -142,31 +138,26 @@ function postExecutionHook(){
  * @param  {[type]} routeObjects [description]
  * @return {[type]}              [description]
  */
-function bindRoutes(server, routeObjects) {
-
+function bindRoutes (server, routeObjects) {
   for (var i = routeObjects.length - 1; i >= 0; i--) {
-
-    (function(item) {
-      var url = '/' + item.domain + '/' + item.path;
+    (function (item) {
+      var url = '/' + item.domain + '/' + item.path
 
       server[item.restifyVerb](url,
         authCorbelHook,
-        function(req, res, next) {
-          executePhraseById(req, res, next, item);
-        }, postExecutionHook);
+        function (req, res, next) {
+          executePhraseById(req, res, next, item)
+        }, postExecutionHook)
 
-      //Support also v1.0 paths for the moment
+      // Support also v1.0 paths for the moment
       server[item.restifyVerb]('/v1.0' + url,
         authCorbelHook,
-        function(req, res, next) {
-          executePhraseById(req, res, next, item);
-        }, postExecutionHook);
-
-    })(routeObjects[i]);
-
+        function (req, res, next) {
+          executePhraseById(req, res, next, item)
+        }, postExecutionHook)
+    })(routeObjects[i])
   }
 }
-
 
 /**
  * List All End-points registered in
@@ -174,59 +165,53 @@ function bindRoutes(server, routeObjects) {
  * @param  {[type]} server [description]
  * @return {[type]}        [description]
  */
-function listAllRoutes(server) {
-  logger.debug('GET paths:');
+function listAllRoutes (server) {
+  logger.debug('GET paths:')
   server.router.routes.GET.forEach(
-    function(value) {
-      logger.info(value.spec.path);
+    function (value) {
+      logger.info(value.spec.path)
     }
-  );
-  logger.debug('PUT paths:');
+  )
+  logger.debug('PUT paths:')
   server.router.routes.PUT.forEach(
-    function(value) {
-      logger.info(value.spec.path);
+    function (value) {
+      logger.info(value.spec.path)
     }
-  );
-  logger.debug('POST paths:');
+  )
+  logger.debug('POST paths:')
   server.router.routes.POST.forEach(
-    function(value) {
-      logger.info(value.spec.path);
+    function (value) {
+      logger.info(value.spec.path)
     }
-  );
+  )
 }
 
-
-
-module.exports = function(server) {
-
-  hub.on('create:routes', function(phrases) {
-
-    logger.debug('=========== CREATING ENDPOINTS ROUTES ===========');
+module.exports = function (server) {
+  hub.on('create:routes', function (phrases) {
+    logger.debug('=========== CREATING ENDPOINTS ROUTES ===========')
 
     if (!Array.isArray(phrases)) {
-      phrases = [phrases];
+      phrases = [phrases]
     }
 
-    createRoutes(phrases, function(routeObjects) {
-      bindRoutes(server, routeObjects);
+    createRoutes(phrases, function (routeObjects) {
+      bindRoutes(server, routeObjects)
       if (config('env') === 'development') {
-        listAllRoutes(server);
+        listAllRoutes(server)
       }
-    });
+    })
+  })
 
-  });
+  hub.once('create:staticRoutes', function (server) {
+    logger.info('=========== CREATING STATIC ROUTES ===========')
+    require('../routes')(server)
+  })
 
-  hub.once('create:staticRoutes', function(server) {
-    logger.info('=========== CREATING STATIC ROUTES ===========');
-    require('../routes')(server);
-  });
+  hub.on('remove:route', function (url) {
+    logger.debug('=========== REMOVE ROUTE ===========', url)
+  })
 
-  hub.on('remove:route', function(url) {
-    logger.debug('=========== REMOVE ROUTE ===========', url);
-  });
-
-  hub.once('load:worker', function() {
-    logger.debug('=========== LOAD WORKER ===========');
-  });
-
-};
+  hub.once('load:worker', function () {
+    logger.debug('=========== LOAD WORKER ===========')
+  })
+}

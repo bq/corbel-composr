@@ -1,24 +1,23 @@
-/*************************************
+'use strict'
+/* ************************************
   Logs Middleware
 **************************************/
-'use strict';
-module.exports = function(server,logger) {
-
-  server.pre(function(request, response, next) {
+module.exports = function (server, logger) {
+  server.pre(function (request, response, next) {
     request.log.info({
-      url : request.url,
+      url: request.url,
       req: request
-    }, 'start'); // (1)
-    return next();
-  });
+    }, 'start')
+    return next()
+  })
 
-  server.on('after', function(req, res, route) {
+  server.on('after', function (req, res, route) {
     req.log.info({
-      url : req.url,
+      url: req.url,
       res: res,
       route: route
-    }, 'finished'); // (3)
-  });
+    }, 'finished')
+  })
 
-  logger.info(' - Logs Middlewares loaded');
-};
+  logger.info(' - Logs Middlewares loaded')
+}

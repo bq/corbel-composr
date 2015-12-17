@@ -1,12 +1,12 @@
-'use strict';
+'use strict'
 
-const util = require('util');
-const EventEmitter = require('events');
+const util = require('util')
+const EventEmitter = require('events')
 
-function Hub() {
-  EventEmitter.call(this);
+function Hub () {
+  EventEmitter.call(this)
 }
 
-util.inherits(Hub, EventEmitter);
+util.inherits(Hub, EventEmitter)
 
-module.exports = exports = new Hub();
+module.exports = exports = new Hub()

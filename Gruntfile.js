@@ -1,41 +1,39 @@
-'use strict';
+'use strict'
 
-var request = require('request');
-var madge = require('madge');
+var request = require('request')
+var madge = require('madge')
 
-
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   // show elapsed time at the end
-  require('time-grunt')(grunt);
+  require('time-grunt')(grunt)
   // load all grunt tasks
-  require('load-grunt-tasks')(grunt);
+  require('load-grunt-tasks')(grunt)
 
-  var reloadPort = 35729,
-    files;
+  var reloadPort = 35729
+  var files
 
-  function jsdocTask() {
-    var exec = require('child_process').exec;
+  function jsdocTask () {
+    var exec = require('child_process').exec
     /* jshint validthis:true */
-    var done = this.async();
+    var done = this.async()
 
-    var jsdocCmd = './node_modules/jsdoc/jsdoc';
+    var jsdocCmd = './node_modules/jsdoc/jsdoc'
 
-    var src = ' -r src';
-    var dest = ' -d doc/jsdoc';
-    var config = ' -c .jsdoc';
-    var template = ' -t node_modules/jaguarjs-jsdoc';
+    var src = ' -r src'
+    var dest = ' -d doc/jsdoc'
+    var config = ' -c .jsdoc'
+    var template = ' -t node_modules/jaguarjs-jsdoc'
 
-    exec(jsdocCmd + src + dest + config + template, function(err, stdout, stderr) {
-      console.log(stdout);
-      console.log(stderr);
-      done(err === null);
-    });
+    exec(jsdocCmd + src + dest + config + template, function (err, stdout, stderr) {
+      console.log(stdout)
+      console.log(stderr)
+      done(err === null)
+    })
   }
 
-  grunt.registerTask('jsdoc', 'Generates JSDoc', jsdocTask);
+  grunt.registerTask('jsdoc', 'Generates JSDoc', jsdocTask)
 
   grunt.initConfig({
-
     pkg: grunt.file.readJSON('./package.json'),
 
     clean: {
@@ -80,6 +78,25 @@ module.exports = function(grunt) {
       ]
     },
 
+    standard: {
+      lint: {
+        src: [
+          '{bin/,src/}**/**.js',
+          '*.js'
+        ]
+      },
+      format: {
+        options: {
+          format: true,
+          lint: false
+        },
+        src: [
+          '{bin/,src/}**/**.js',
+          '*.js'
+        ]
+      }
+    },
+
     watch: {
       options: {
         nospawn: true,
@@ -109,10 +126,10 @@ module.exports = function(grunt) {
       }
     },
 
-    mochaTest: { //test for nodejs app with mocha
+    mochaTest: { // test for nodejs app with mocha
       testCoverage: {
         options: {
-          reporter: 'spec',
+          reporter: 'spec'
         },
         src: ['.tmp/coverage/test/runner.js']
       },
@@ -172,56 +189,56 @@ module.exports = function(grunt) {
     release: {
       /* For more options: https://github.com/geddski/grunt-release#options */
       options: {
-        indentation: '\t', //default: '  ' (two spaces)
-        commitMessage: 'Release v<%= version %>', //default: 'release <%= version %>'
-        tagMessage: 'v<%= version %>', //default: 'Version <%= version %>',
+        indentation: '\t', // default: '  ' (two spaces)
+        commitMessage: 'Release v<%= version %>', // default: 'release <%= version %>'
+        tagMessage: 'v<%= version %>', // default: 'Version <%= version %>',
         tagName: 'v<%= version %>'
       }
     }
 
-  });
+  })
 
-  grunt.config.requires('watch.server.files');
-  files = grunt.config('watch.server.files');
-  files = grunt.file.expand(files);
+  grunt.config.requires('watch.server.files')
+  files = grunt.config('watch.server.files')
+  files = grunt.file.expand(files)
 
-  //Register circular dependencies
-  grunt.registerTask('madge', 'Run madge.', function() {
-    var dependencyObject = madge('./src');
-    var listOfCircularDependencies = dependencyObject.circular().getArray();
+  // Register circular dependencies
+  grunt.registerTask('madge', 'Run madge.', function () {
+    var dependencyObject = madge('./src')
+    var listOfCircularDependencies = dependencyObject.circular().getArray()
 
     if (listOfCircularDependencies.length > 0) {
-      grunt.log.error('CIRCULAR DEPENDENCIES FOUND');
-      grunt.log.error(listOfCircularDependencies);
-      return false;
+      grunt.log.error('CIRCULAR DEPENDENCIES FOUND')
+      grunt.log.error(listOfCircularDependencies)
+      return false
     } else {
-      grunt.log.writeln('No circular dependencies found :)');
+      grunt.log.writeln('No circular dependencies found :)')
     }
-  });
+  })
 
-
-  grunt.registerTask('delayed-livereload', 'Live reload after the node server has restarted.', function() {
-    var done = this.async();
-    setTimeout(function() {
-      request.get('http://localhost:' + reloadPort + '/changed?files=' + files.join(','), function(err, res) {
-        var reloaded = !err && res.statusCode === 200;
+  grunt.registerTask('delayed-livereload', 'Live reload after the node server has restarted.', function () {
+    var done = this.async()
+    setTimeout(function () {
+      request.get('http://localhost:' + reloadPort + '/changed?files=' + files.join(','), function (err, res) {
+        var reloaded = !err && res.statusCode === 200
         if (reloaded) {
-          grunt.log.ok('Delayed live reload successful.');
+          grunt.log.ok('Delayed live reload successful.')
         } else {
-          grunt.log.error('Unable to make a delayed live reload.');
+          grunt.log.error('Unable to make a delayed live reload.')
         }
-        done(reloaded);
-      });
-    }, 500);
-  });
+        done(reloaded)
+      })
+    }, 500)
+  })
 
   grunt.registerTask('default', [
     'clean',
     'jshint',
+    'standard',
     'test',
     'develop',
     'watch'
-  ]);
+  ])
 
   grunt.registerTask('test:coverage', [
     'clean',
@@ -234,15 +251,16 @@ module.exports = function(grunt) {
     'mochaTest:coveralls',
     'mochaTest:travis-cov',
     'coveralls'
-  ]);
+  ])
 
   grunt.registerTask('test', [
     'jshint',
+    'standard:lint',
     'madge',
     'mochaTest:ci'
-  ]);
+  ])
 
   grunt.registerTask('unit', [
     'mochaTest:unit'
-  ]);
-};
+  ])
+}

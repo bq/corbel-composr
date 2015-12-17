@@ -9,7 +9,7 @@ COPY . /src
 RUN cd /src; npm install; npm rebuild
 
 #pm2 for utilities
-RUN npm install -g pm2
+RUN npm install -g pm2 standard
 
 #update packages
 RUN apt-get update
