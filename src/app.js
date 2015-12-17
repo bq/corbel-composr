@@ -44,17 +44,10 @@ server.on('InternalServer', function (req, res, err, next) {
   return next()
 })
 
-server.on('Internal', function (req, res, err, next) {
+server.on('uncaughtException', function (req, res, route, err) {
+  logger.error(err, route)
   err.body = new ComposrError('error:internal:server:error', err.message, 500)
-  res.send(500, err)
-  return next()
-})
-
-server.on('uncaughtException', function (req, res, err, next) {
-  console.log(err)
-  err.body = new ComposrError('error:internal:server:error', err.message, 500)
-  res.send(500, err)
-  return next()
+  res.send(err)
 })
 
 process.on('uncaughtException', function (err) {

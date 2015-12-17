@@ -256,6 +256,7 @@ module.exports = function (grunt) {
   grunt.registerTask('test', [
     'jshint',
     'standard:lint',
+    'standard:format',
     'madge',
     'mochaTest:ci'
   ])
