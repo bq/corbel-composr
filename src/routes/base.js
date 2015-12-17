@@ -4,6 +4,7 @@ var config = require('../lib/config')
 var engine = require('../lib/engine')
 var https = require('https')
 var packageJSON = require('../../package.json')
+var _ = require('lodash')
 
 function status (req, res) {
   var phrasesLoaded = engine.composr.Phrases.count()
