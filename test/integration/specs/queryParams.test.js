@@ -8,7 +8,7 @@ var request = require('supertest'),
 chai.use(chaiAsPromised);
 
 function test(server) {
-  describe.only('Query params', function() {
+  describe('Query params', function() {
     var phrase = {
       id: 'testdomain!queryparams',
       url: 'queryparams',
@@ -48,6 +48,17 @@ function test(server) {
           expect(response).to.be.an('object');
           expect(response.body.id).to.equals('20');
           expect(response.body.name).to.equals('Harkonnen');
+          done(err);
+        });
+    });
+
+    it('executes the phrase correctly a second time without query params and / in the end.', function(done) {
+      this.timeout(30000);
+      request(server.app)
+        .get('/testdomain/queryparams/')
+        .expect(200)
+        .end(function(err, response) {
+          expect(response).to.be.an('object');
           done(err);
         });
     });

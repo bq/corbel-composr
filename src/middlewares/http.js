@@ -4,6 +4,13 @@
 
 'use strict';
 module.exports = function(restify, server, logger) {
+
+  /**************************************
+    Sanitize Path
+  **************************************/
+  var sanitize = require('../utils/prePath');
+  server.pre(sanitize());
+
   /*************************************
     Allows you to add in handlers
     that run before routing occurs
