@@ -45,12 +45,14 @@ server.on('InternalServer', function (req, res, err, next) {
 })
 
 server.on('uncaughtException', function (req, res, route, err) {
+  console.log('EY')
   logger.error(err, route)
   err.body = new ComposrError('error:internal:server:error', err.message, 500)
   res.send(err)
 })
 
 process.on('uncaughtException', function (err) {
+  console.log('AY')
   logger.debug('Error caught by uncaughtException', err)
   logger.error(err)
   if (!err || err.message !== "Can't set headers after they are sent.") {

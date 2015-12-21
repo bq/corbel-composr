@@ -10,6 +10,7 @@ var getAuth = function (req, res) {
 
   if (!auth) {
     res.send(401, new ComposrError('missing:header:authorization', 'Authorization header not found', 401))
+    return
   }
 
   return auth

@@ -40,13 +40,21 @@ function test(server) {
       request(server.app)
       .get('/phrase')
       .set('Authorization', 'fakeClientToken')
-      .expect(401,done);
+      .expect(401)
+      .end(function(err, response){
+        console.log(response.body);
+        done(err);
+      });
     });
 
     it('should return unauthorized with a get to /phrase without authorization', function(done) {
       request(server.app)
       .get('/phrase')
-      .expect(401,done);
+      .expect(401)
+      .end(function(err, response){
+        console.log('EEEEE');
+        done(err);
+      });
     });
   });
 }

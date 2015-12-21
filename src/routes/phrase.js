@@ -168,6 +168,7 @@ function getPhrase (req, res) {
   })
     .catch(function (error) {
       var errorBody = getCorbelErrorBody(error)
+      console.log('wattt')
       console.log(error)
       res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status))
     })
@@ -184,6 +185,7 @@ function getPhrases (req, res) {
 
   if (!authorization) {
     res.send(401, new ComposrError('error:authorization:required', {}, 401))
+    return
   }
 
   var domainExtracted = connection.extractDomain(authorization)
