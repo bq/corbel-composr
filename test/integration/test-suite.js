@@ -15,7 +15,10 @@ var tests = [
   require('./specs/cache.test.js'),
   require('./specs/getToPhraseEndpoint.test.js'),
   require('./specs/domainUserReturnsNotFound.test.js'),
-  require('./specs/orderExecutionPhrases.test.js')
+  require('./specs/orderExecutionPhrases.test.js'),
+  require('./specs/notFoundHandler.test.js'),
+  require('./specs/methodNotAllowed.test.js'),
+  require('./specs/postExecutionHandler.test.js')
   //require('./specs/unpublishSnippet.test.js'),
   //require('./specs/unpublishPhrase.test.js'),
 ];

@@ -25,6 +25,13 @@ module.exports = function (server) {
     res.send(200, corbel.jwt.generate(req.body.claims, req.body.secret))
   })
 
+  server.post('/postexecutionhandler', function (req, res, next) {
+    req.body = { 'hello': 'world' }
+    return next()
+  }, function (req, res, e) {
+    res.send(200, req.body)
+  })
+
   server.post('/token', function (req, res, next) {
     var data = req.body || {}
 

@@ -81,9 +81,13 @@ function executePhraseById (req, res, next, routeItem) {
   counterPhrasesBeingExecuted.inc()
 
   return engine.composr.Phrases.runById(routeItem.domain, routeItem.id, routeItem.verb, params)
+    .then(function (response) {
+      return next()
+    })
     .catch(function (err) {
       logger.error('Failing executing Phrase', err)
       res.send(404, new ComposrError('endpoint:not:found', 'Not found', 404))
+      return next()
     })
 }
 
@@ -193,8 +197,6 @@ module.exports = function (server) {
     if (!Array.isArray(phrases)) {
       phrases = [phrases]
     }
-
-    console.log('route')
 
     createRoutes(phrases, function (routeObjects) {
       bindRoutes(server, routeObjects)

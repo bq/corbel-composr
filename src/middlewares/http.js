@@ -3,6 +3,9 @@
 **************************************/
 
 'use strict'
+
+var ComposrError = require('../lib/ComposrError')
+
 module.exports = function (restify, server, logger) {
   /* *************************************
     Sanitize Path
@@ -54,7 +57,7 @@ module.exports = function (restify, server, logger) {
 
       return res.send(204)
     } else {
-      return res.send(new restify.MethodNotAllowedError())
+      return res.send(405, new ComposrError('unknown:method', req.method + ' method not allowed', 405))
     }
   }
 
