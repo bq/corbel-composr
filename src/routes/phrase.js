@@ -148,11 +148,6 @@ function deletePhrase (req, res) {
 function getPhrase (req, res) {
   var authorization = auth.getAuth(req, res)
 
-  if (!authorization) {
-    res.send(401, new ComposrError('error:authorization:required', {}, 401))
-    return
-  }
-
   var corbelDriver = connection.getTokenDriver(authorization)
 
   var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid
@@ -164,7 +159,6 @@ function getPhrase (req, res) {
   })
     .catch(function (error) {
       var errorBody = getCorbelErrorBody(error)
-      console.log(error)
       res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status))
     })
 }

@@ -55,7 +55,6 @@ server.on('uncaughtException', function (req, res, route, err) {
 })
 
 process.on('uncaughtException', function (err) {
-  console.log('AY')
   logger.debug('Error caught by uncaughtException', err)
   logger.error(err)
   if (!err || err.message !== "Can't set headers after they are sent.") {
