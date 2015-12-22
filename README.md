@@ -1,5 +1,14 @@
-![composr](https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/public/img/composr_medium.png)
+```
+                                                                             
+   _|_|_|                                                  _|_|_|  _|_|_|    
+ _|          _|_|    _|_|_|  _|_|    _|_|_|      _|_|    _|        _|    _|  
+ _|        _|    _|  _|    _|    _|  _|    _|  _|    _|    _|_|    _|_|_|    
+ _|        _|    _|  _|    _|    _|  _|    _|  _|    _|        _|  _|    _|  
+   _|_|_|    _|_|    _|    _|    _|  _|_|_|      _|_|    _|_|_|    _|    _|  
+                                     _|                                      
+                                     _|                                      
 
+```
 
 [![Build Status](https://api.travis-ci.org/corbel-platform/corbel-composr.png?branch=master)](http://travis-ci.org/corbel-platform/corbel-composr)
 [![npm version](https://badge.fury.io/js/corbel-composr.svg)](http://badge.fury.io/js/corbel-composr)
@@ -24,11 +33,6 @@ Composr is responsible for **composing** **phrases** of code than can be reused 
 > wiki: A composer (Latin com+ponere, literally "one who puts together") is a person who creates music.
 
 >wiki: In music and music theory, phrase and phrasing are concepts and practices related to grouping consecutive melodic notes, both in their composition and performance. A musical work is typically made up of a melody that consists of numerous consecutive phrases.
-
-
-### Diagram
-
-![diagram](https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/public/img/diagram.png)
 
 
 ## QuickStart
