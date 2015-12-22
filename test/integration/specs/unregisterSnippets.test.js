@@ -95,13 +95,10 @@ function test(server) {
         .get('/testDomainComposr/unregister-snippet-test')
         .expect(503)
         .end(function(err, response) {
-          if(err){
-            console.log(err);
-            done(err);
-          }else{
-            console.log(response.text);
-            done();
-          }
+          expect(response.body).to.be.an('object');
+          expect(response.body.error).to.equals('error:phrase:timedout:unregister-snippet-test');
+          console.log(response.body);
+          done(err);
         });
       });
 
@@ -110,11 +107,9 @@ function test(server) {
         .get('/testDomainComposr/unregister-snippet-test/juan')
         .expect(503)
         .end(function(err, response) {
-          if(err){
-            done(err);
-          }else{
-            done();
-          }
+          expect(response.body).to.be.an('object');
+          expect(response.body.error).to.equals('error:phrase:timedout:unregister-snippet-test/:name');
+          done(err);
         });
       });
     });

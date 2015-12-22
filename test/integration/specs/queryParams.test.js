@@ -31,7 +31,6 @@ function test(server) {
         .get('/testdomain/queryparams?id=10&name=Atreides')
         .expect(200)
         .end(function(err, response) {
-            console.log(err);
           expect(response).to.be.an('object');
           expect(response.body.id).to.equals('10');
           expect(response.body.name).to.equals('Atreides');

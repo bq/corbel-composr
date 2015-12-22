@@ -9,7 +9,7 @@ COPY . /src
 RUN cd /src; npm install; npm rebuild
 
 #pm2 for utilities
-RUN npm install -g pm2
+RUN npm install -g pm2 standard
 
 #update packages
 RUN apt-get update
@@ -25,12 +25,11 @@ EXPOSE  3000
 
 # Global config environment variable
 
-ENV COMPOSR_CONFIG ''
 ENV URL_BASE ''
 ENV RABBITMQ_HOST ''
 ENV RABBITMQ_PASSWORD ''
-ENV CLIENT_ID ''
-ENV CLIENT_SECRET ''
+ENV CREDENTIALS_CLIENT_ID ''
+ENV CREDENTIALS_CLIENT_SECRET ''
 ENV CREDENTIALS_SCOPES ''
 ENV LOG_LEVEL debug
 ENV LOG_FILE logs/composr.log
@@ -41,16 +40,8 @@ ENV NRACTIVE false
 ENV NRAPPNAME ''
 ENV NRAPIKEY ''
 ENV NODE_ENV production
-
-
-#Set the endpoint suffix for the environment to use
-ENV ENDPOINT_SUFFIX -qa
+ENV BUNYAN_LOG true
+ENV PORT 3000
 
 # Enable corbel-composr
-CMD STATUS=0; \
-    while [ "$STATUS" != 200 ]; \
-    do STATUS=`curl -s -o /dev/null -w "%{http_code}" https://iam$ENDPOINT_SUFFIX.bqws.io/version`; \
-    echo $STATUS on https://iam$ENDPOINT_SUFFIX.bqws.io/version; \
-    sleep 5 ; \
-    done ; \
-    cd /src && npm start && npm run logs
+CMD cd /src && NODE_ENV=production npm start && npm run logs
