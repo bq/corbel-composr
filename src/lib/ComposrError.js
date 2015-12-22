@@ -6,8 +6,15 @@ var ComposrError = function (error, description, status) {
 
   // set properties specific to the custom error
   err.status = status
+  err.statusCode = status
   err.error = error
   err.errorDescription = description
+
+  err.body = {
+    status: status,
+    error: error,
+    errorDescription: description
+  }
 
   return err
 }

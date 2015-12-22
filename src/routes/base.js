@@ -33,7 +33,7 @@ function status (req, res) {
 
   Promise.all(promises)
     .then(function () {
-      res.send({
+      res.send(200, {
         version: packageJSON.version,
         statuses: statuses
       })
@@ -42,7 +42,7 @@ function status (req, res) {
 
 module.exports = function (server) {
   server.get('/', function (req, res) {
-    res.send({
+    res.send(200, {
       title: 'Composing your phrases',
       version: packageJSON.version
     })
@@ -54,7 +54,7 @@ module.exports = function (server) {
     picked['corbel-js'] = packageJSON.dependencies['corbel-js']
     picked['composr-core'] = packageJSON.dependencies['composr-core']
 
-    res.send(picked)
+    res.send(200, picked)
   })
 
   server.get('/status', status)

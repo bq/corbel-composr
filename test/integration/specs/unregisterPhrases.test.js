@@ -42,7 +42,7 @@ function test(server) {
             .end(function(err, response) {
               expect(response).to.be.an('object');
               expect(response.status).to.equals(404);
-              expect(response.error.text).to.equals('{"message":"endpoint:not:found"}');
+              expect(response.body.error).to.equals('endpoint:not:found');
               expect(response.body.surname).to.equals(undefined);
               done(err);
             });

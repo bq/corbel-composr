@@ -42,7 +42,7 @@ function test(server) {
       .set('Authorization', 'fakeClientToken')
       .expect(401)
       .end(function(err, response){
-        console.log(response.body);
+        expect(response.body.error).to.equals('error:domain:undefined');
         done(err);
       });
     });
@@ -52,7 +52,7 @@ function test(server) {
       .get('/phrase')
       .expect(401)
       .end(function(err, response){
-        console.log('EEEEE');
+        expect(response.body.error).to.equals('missing:header:authorization');
         done(err);
       });
     });

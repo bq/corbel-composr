@@ -33,22 +33,25 @@ require('./middlewares')(restify, server, config, logger)
 **************************************/
 
 server.on('NotFound', function (req, res, err, next) {
-  err.body = new ComposrError('error:not_found', err.message, 404)
+  err = new ComposrError('error:not_found', err.message, 404)
   res.send(404, err)
   return next()
 })
 
 server.on('InternalServer', function (req, res, err, next) {
-  err.body = new ComposrError('error:internal:server:error', err.message, 500)
+  err = new ComposrError('error:internal:server:error', err.message, 500)
   res.send(500, err)
   return next()
 })
 
 server.on('uncaughtException', function (req, res, route, err) {
-  console.log('EY')
+  if (err instanceof ComposrError === false) {
+    err = new ComposrError('error:internal:server:error', err.message, err.status || err.statusCode || 500)
+  }
+
   logger.error(err, route)
-  err.body = new ComposrError('error:internal:server:error', err.message, 500)
-  res.send(err)
+
+  res.send(err.statusCode, err)
 })
 
 process.on('uncaughtException', function (err) {

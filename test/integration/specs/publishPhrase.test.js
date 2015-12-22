@@ -79,9 +79,8 @@ function test(server) {
         .send(invalidPhrase)
         .expect(422)
         .end(function(err, response) {
-          expect(response.statusCode).to.equals(422);
-          console.log(response.body);
-          expect(response.body.message).to.equals('error:phrase:validation');
+          expect(response.status).to.equals(422);
+          expect(response.body.error).to.equals('error:phrase:validation');
           done(err);
         });
     });

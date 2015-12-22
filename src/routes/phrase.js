@@ -74,10 +74,6 @@ function createOrUpdatePhrase (req, res) {
 
   var authorization = auth.getAuth(req, res)
 
-  if (!authorization) {
-    res.send(401, new ComposrError('error:authorization:required', {}, 401))
-  }
-
   var phrase = req.body || {}
 
   var corbelDriver = connection.getTokenDriver(authorization)
@@ -168,7 +164,6 @@ function getPhrase (req, res) {
   })
     .catch(function (error) {
       var errorBody = getCorbelErrorBody(error)
-      console.log('wattt')
       console.log(error)
       res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status))
     })
@@ -191,7 +186,7 @@ function getPhrases (req, res) {
   var domainExtracted = connection.extractDomain(authorization)
   if (domainExtracted) {
     var phrases = engine.composr.Phrases.getPhrases(domainExtracted)
-    res.json(phrases || [])
+    res.send(200, phrases || [])
   } else {
     res.send(401, new ComposrError('error:domain:undefined', '', 401))
   }

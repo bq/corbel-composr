@@ -22,7 +22,7 @@ module.exports = function (server) {
     req.body = req.body || {}
     req.body.claims.aud = corbel.Iam.AUD
 
-    res.send(corbel.jwt.generate(req.body.claims, req.body.secret))
+    res.send(200, corbel.jwt.generate(req.body.claims, req.body.secret))
   })
 
   server.post('/token', function (req, res, next) {
@@ -36,7 +36,7 @@ module.exports = function (server) {
     var corbelDriver = corbel.getDriver(corbelConfig)
 
     corbelDriver.iam.token().create().then(function (response) {
-      res.send(response)
+      res.send(200, response)
     }).catch(function (error) {
       var errorBody = getCorbelErrorBody(error)
       next(new ComposrError('error:token', errorBody, error.status))
@@ -45,7 +45,7 @@ module.exports = function (server) {
 
   server.get('/cache', function (req, res) {
     res.set('Cache-Control', 'public, max-age=31536000')
-    res.send({
+    res.send(200, {
       data: true
     })
   })
