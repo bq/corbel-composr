@@ -1,31 +1,29 @@
-'use strict';
+'use strict'
 
-/* jshint proto: true */
+var ComposrError = function (error, description, status) {
+  var err = new Error(error)
+  Object.setPrototypeOf(err, ComposrError.prototype)
 
-//polyfil
-Object.setPrototypeOf = Object.setPrototypeOf || function(obj, proto) {
-    obj.__proto__ = proto;
-    return obj;
-};
+  // set properties specific to the custom error
+  err.status = status
+  err.statusCode = status
+  err.error = error
+  err.errorDescription = description
 
-//custom error
-var ComposrError = function(error, description, status) {
-    var err = new Error(error);
-    Object.setPrototypeOf(err, ComposrError.prototype);
+  err.body = {
+    status: status,
+    error: error,
+    errorDescription: description
+  }
 
-    //set properties specific to the custom error
-    err.status = status;
-    err.error = error;
-    err.errorDescription = description;
-
-    return err;
-};
+  return err
+}
 
 ComposrError.prototype = Object.create(Error.prototype, {
-    name: {
-        value: 'ComposrError',
-        enumerable: false
-    }
-});
+  name: {
+    value: 'ComposrError',
+    enumerable: false
+  }
+})
 
-module.exports = ComposrError;
+module.exports = ComposrError

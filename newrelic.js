@@ -1,4 +1,4 @@
-var config = require('./src/lib/config');
+var config = require('./src/lib/config')
 /**
  * New Relic agent configuration.
  *
@@ -21,5 +21,8 @@ exports.config = {
      * production applications.
      */
     level: 'trace'
+  },
+  transaction_tracer: {
+    enabled: true
   }
 }

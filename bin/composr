@@ -1,32 +1,35 @@
 #!/usr/bin/env node
 
 var pmx = require('pmx');
+
 //Log routes and latency.
+// You must do this BEFORE any require('http')
 pmx.init({
   http: true
 });
-// You must do this BEFORE any require('http') 
 
-var logger = require('../src/utils/logger');
-var q = require('q');
-var dfd = q.defer();
+var logger = require('../src/utils/composrLogger');
+var config = require('../src/lib/config');
+var version = require('../package.json').version;
 
-require('../src/app')
-  .then(function(serverObjects) {
-    serverObjects.app.set('port', process.env.PORT || 3000);
+module.exports = new Promise(function(resolve, reject) {
 
-    var server = serverObjects.app.listen(serverObjects.app.get('port'), function() {
-      logger.debug('Express server listening on port ' + server.address().port);
+  require('../src/app')
+    .then(function(serverObjects) {
 
-      logger.salute(function() {
-        dfd.resolve(serverObjects);
+      var port = config('port');
+
+      var server = serverObjects.app.listen(port, function() {
+        logger.debug('Restify server listening on port ' + server.address().port);
+
+        logger.salute(config('serverName'), version, function() {
+          resolve(serverObjects);
+        });
+
       });
-
+    })
+    .catch(function(err) {
+      console.log('ERROR launching ' + config('serverName') + ' application', err);
+      reject(err);
     });
-  })
-  .catch(function(err) {
-    console.log('ERROR launching express application', err);
-    dfd.reject(err);
-  });
-
-module.exports = dfd.promise;
+});

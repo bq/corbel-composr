@@ -37,6 +37,7 @@ function test(server) {
         .expect(200)
         .end(function(err, response) {
           expect(response).to.be.an('object');
+          console.log(response.body);
           expect(response.body.data.accessToken).to.exist;
           adminClientToken = response.body.data.accessToken;
 
@@ -78,9 +79,8 @@ function test(server) {
         .send(invalidPhrase)
         .expect(422)
         .end(function(err, response) {
-          expect(response.statusCode).to.equals(422);
-          console.log(response.body);
-          expect(response.body.status).to.equals(422);
+          expect(response.status).to.equals(422);
+          expect(response.body.error).to.equals('error:phrase:validation');
           done(err);
         });
     });

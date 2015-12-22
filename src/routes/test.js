@@ -1,61 +1,59 @@
-'use strict';
+'use strict'
 
-var express = require('express'),
-  router = express.Router(),
-  corbel = require('corbel-js'),
-  ComposrError = require('../lib/ComposrError'),
-  config = require('../lib/config');
+var corbel = require('corbel-js')
+var ComposrError = require('../lib/ComposrError')
+var config = require('../lib/config')
 
-router.get('/e1', function(res) {
-  res.undefinedFunction();
-});
-
-router.get('/e2', function() {
-  throw new ComposrError('error:custom', '', 555);
-});
-
-router.post('/jwt', function(req, res) {
-
-  req.body = req.body || {};
-  req.body.claims.aud = corbel.Iam.AUD;
-
-  res.json(corbel.jwt.generate(req.body.claims, req.body.secret));
-
-});
-
-
-function getCorbelErrorBody(corbelErrResponse) {
-  var errorBody = typeof(corbelErrResponse.data) !== 'undefined' && typeof(corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse;
-  return errorBody;
+function getCorbelErrorBody (corbelErrResponse) {
+  var errorBody = typeof (corbelErrResponse.data) !== 'undefined' && typeof (corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
+  return errorBody
 }
 
+module.exports = function (server) {
+  server.get('/e1', function (res) {
+    res.undefinedFunction()
+  })
 
-router.post('/token', function(req, res, next) {
+  server.get('/e2', function () {
+    throw new ComposrError('error:custom', '', 555)
+  })
 
-    var data = req.body || {};
+  server.post('/jwt', function (req, res) {
+    req.body = req.body || {}
+    req.body.claims.aud = corbel.Iam.AUD
 
-    var corbelConfig = config('corbel.driver.options');
+    res.send(200, corbel.jwt.generate(req.body.claims, req.body.secret))
+  })
 
-    corbelConfig.clientId = data.clientId;
-    corbelConfig.clientSecret = data.clientSecret;
-    corbelConfig.scopes = data.scopes;
+  server.post('/postexecutionhandler', function (req, res, next) {
+    req.body = { 'hello': 'world' }
+    return next()
+  }, function (req, res, e) {
+    res.send(200, req.body)
+  })
 
-    var corbelDriver = corbel.getDriver(corbelConfig);
+  server.post('/token', function (req, res, next) {
+    var data = req.body || {}
 
-    corbelDriver.iam.token().create().then(function(response) {
-        res.send(response);
-    }).catch(function(error) {
-      var errorBody = getCorbelErrorBody(error);
-        next(new ComposrError('error:token', errorBody, error.status));
-    });
+    var corbelConfig = config('corbel.driver.options')
+    corbelConfig.clientId = data.clientId
+    corbelConfig.clientSecret = data.clientSecret
+    corbelConfig.scopes = data.scopes
 
-});
+    var corbelDriver = corbel.getDriver(corbelConfig)
 
-router.get('/cache', function(req, res) {
-  res.set('Cache-Control', 'public, max-age=31536000');
-  res.json({
-    data: true
-  });
-});
+    corbelDriver.iam.token().create().then(function (response) {
+      res.send(200, response)
+    }).catch(function (error) {
+      var errorBody = getCorbelErrorBody(error)
+      next(new ComposrError('error:token', errorBody, error.status))
+    })
+  })
 
-module.exports = router;
+  server.get('/cache', function (req, res) {
+    res.set('Cache-Control', 'public, max-age=31536000')
+    res.send(200, {
+      data: true
+    })
+  })
+}

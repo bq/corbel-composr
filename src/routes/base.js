@@ -1,73 +1,63 @@
-'use strict';
+'use strict'
 
-var express = require('express'),
-  router = express.Router(),
-  config = require('../lib/config'),
-  engine = require('../lib/engine'),
-  q = require('q'),
-  https = require('https'),
-  packageJSON = require('../../package.json');
+var config = require('../lib/config')
+var engine = require('../lib/engine')
+var https = require('https')
+var packageJSON = require('../../package.json')
+var _ = require('lodash')
 
-router.get('/', function(req, res) {
-  res.render('index', {
-    title: 'Composing your phrases',
-    version: packageJSON.version
-  });
-});
-
-router.get('/version', function(req, res) {
-  res.send(packageJSON);
-});
-
-function status(req, res) {
-
-  var phrasesLoaded = engine.composr.Phrases.count();
+function status (req, res) {
+  var phrasesLoaded = engine.composr.Phrases.count()
 
   var statuses = {
-    'phrases': phrasesLoaded > 0 ? true : false,
-    'phrasesLoaded' : phrasesLoaded,
-    'worker' : engine.getWorkerStatus()
-  };
+    'phrases': phrasesLoaded > 0,
+    'phrasesLoaded': phrasesLoaded,
+    'worker': engine.getWorkerStatus()
+  }
 
-  var modules = ['iam', 'resources'];
-  var path = config('corbel.driver.options').urlBase;
-  var promises = modules.map(function(module) {
-    var deferred = q.defer();
+  var modules = ['iam', 'resources']
+  var path = config('corbel.driver.options').urlBase
 
-    https.get(path.replace('{{module}}', module) + '/version', function() {
-      statuses[module] = true;
-      deferred.resolve();
+  var promises = modules.map(function (module) {
+    return new Promise(function (resolve, reject) {
+      https.get(path.replace('{{module}}', module) + '/version', function () {
+        statuses[module] = true
+        resolve()
+      })
+        .on('error', function () {
+          statuses[module] = false
+          reject()
+        })
     })
-      .on('error', function() {
-        statuses[module] = false;
+  })
 
-        deferred.resolve();
-      });
-
-    return deferred.promise;
-  });
-
-  q.all(promises)
-    .then(function() {
-      if (req.accepts('html')) {
-        res.render('status', {
-          statuses: statuses,
-          version: packageJSON.version,
-          title: 'CompoSR Status',
-          appName: 'CompoSR'
-        });
-
-      } else {
-        res.send({
-          version: packageJSON.version,
-          statuses: statuses
-        });
-      }
-    });
-
+  Promise.all(promises)
+    .then(function () {
+      res.send(200, {
+        version: packageJSON.version,
+        statuses: statuses
+      })
+    })
 }
 
-router.get('/status', status);
-router.get('/healthcheck', status);
+module.exports = function (server) {
+  server.get('/', function (req, res) {
+    res.send(200, {
+      title: 'Composing your phrases',
+      version: packageJSON.version
+    })
+  })
 
-module.exports = router;
+  server.get('/version', function (req, res) {
+    var picked = _.pick(packageJSON, ['name', 'description', 'version', 'build.version', 'build.date'])
+
+    picked['corbel-js'] = packageJSON.dependencies['corbel-js']
+    picked['composr-core'] = packageJSON.dependencies['composr-core']
+
+    res.send(200, picked)
+  })
+
+  server.get('/status', status)
+
+  server.get('/healthcheck', status)
+}

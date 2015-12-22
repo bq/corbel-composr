@@ -1,5 +1,13 @@
+var config = require('../../../src/lib/config');
+
 function getAdminClient(){
-  var clientData = require('../../fixtures/client/clientAdmin.json');
+  var clientData = {};
+
+  if(config('env') === 'development'){
+    clientData = require('../../fixtures/client/_clientAdmin.json');
+  }else{
+    clientData = require('../../fixtures/client/clientAdmin.json');
+  }
 
   //Use environment variables (if jenkins provided those), fixtures ones other way.
   var adminClientData = {
@@ -12,7 +20,13 @@ function getAdminClient(){
 }
 
 function getDemoClient(){
-  var clientData = require('../../fixtures/client/clientDemo.json');
+  var clientData = {};
+
+  if(config('env') === 'development'){
+    clientData = require('../../fixtures/client/_clientDemo.json');
+  }else{
+    clientData = require('../../fixtures/client/clientDemo.json');
+  }
 
   //Use environment variables (if jenkins provided those), fixtures ones other way.
   var demoClientData = {
@@ -25,7 +39,13 @@ function getDemoClient(){
 }
 
 function getUser(){
-  var userData = require('../../fixtures/user/userDemo.json');
+  var userData = {};
+
+  if(config('env') === 'development'){
+    userData = require('../../fixtures/client/_userDemo.json');
+  }else{
+    userData = require('../../fixtures/client/userDemo.json');
+  }
 
   //Use environment variables (if jenkins provided those), fixtures ones other way.
   var demoUserData = {
