@@ -6,6 +6,9 @@
 [![Dependency status](https://david-dm.org/corbel-platform/corbel-composr/status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=dependencies&view=table)
 [![Dev Dependency Status](https://david-dm.org/corbel-platform/corbel-composr/dev-status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=devDependencies&view=table)
 [![Coverage Status](https://coveralls.io/repos/corbel-platform/corbel-composr/badge.svg?branch=master)](https://coveralls.io/r/corbel-platform/corbel-composr?branch=master)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+[![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
+
 
 
 ## [Homepage](http://opensource.bq.com/composr/)
@@ -80,12 +83,17 @@ You can send the following environment variables (or define a environment config
 ### Environment variables
 
 ```
+SERVER_NAME (Composr 2.0)
+PORT (3000)
 CREDENTIALS_CLIENT_ID
 CREDENTIALS_CLIENT_SECRET
 CREDENTIALS_SCOPES
 URL_BASE
 LOG_LEVEL
 LOG_FILE
+BUNYAN_LOG(true) => Bunyan logs
+BUNYAN_STDOUT(false) => Bunyan output in terminal
+BUNYAN_STREAM_SERVER (null) => Composr Stream Server endpoint
 RABBITMQ_HOST
 RABBITMQ_PORT
 RABBITMQ_USERNAME

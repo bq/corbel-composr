@@ -1,219 +1,75 @@
-'use strict';
-
-var express = require('express'),
-  path = require('path'),
-  favicon = require('serve-favicon'),
-  morgan = require('morgan'),
-  helmet = require('helmet'),
-  ejslocals = require('ejs-locals'),
-  cookieParser = require('cookie-parser'),
-  bodyParser = require('body-parser'),
-  engine = require('./lib/engine'),
-  WorkerClass = require('./lib/worker'),
-  ComposrError = require('./lib/ComposrError'),
-  config = require('./lib/config'),
-  timeout = require('connect-timeout'),
-  responseTime = require('response-time'),
-  domain = require('express-domain-middleware'),
-  routes = require('./routes'),
-  cors = require('cors'),
-  pmx = require('pmx'),
-  fs = require('fs'),
-  app = express(),
-  configChecker = require('./utils/envConfigChecker');
-
-var worker = new WorkerClass();
-
-var ERROR_CODE_SERVER_TIMEOUT = 503;
-var DEFAULT_TIMEOUT = '10s';
-
-/*************************************
-  Logs
+/* ************************************
+  Server Config and Load
 **************************************/
-var logger = require('./utils/logger');
-//Custom log
-app.set('logger', logger);
+'use strict'
 
-if (config('accessLog') === true || config('accessLog') === 'true') {
-  // Access log, logs http requests
-  var accessLogStream = fs.createWriteStream(config('accessLogFile'), {
-    flags: 'a'
-  });
+var restify = require('restify')
+var hub = require('./lib/hub')
+var srvConf = require('./lib/server')
+var server = restify.createServer(srvConf)
+require('./lib/router')(server)
+var engine = require('./lib/engine')
+var WorkerClass = require('./lib/worker')
+var config = require('./lib/config')
+var configChecker = require('./utils/envConfigChecker')
+var worker = new WorkerClass()
+var logger = require('./utils/composrLogger')
+var ComposrError = require('./lib/ComposrError')
 
-  app.use(morgan('combined', {
-    stream: accessLogStream
-  }));
-}
-
-
-/*************************************
-  New Relic
-**************************************/
-if (config('newrelic') === true || config('newrelic') === 'true') {
-  require('newrelic');
-}
-
-
-/*************************************
-  Views engine
-**************************************/
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-app.engine('ejs', ejslocals);
-
-
-/*************************************
+/* ************************************
   Configuration check
 **************************************/
-var env = process.env.NODE_ENV || 'development';
-app.locals.ENV = env;
-app.locals.ENV_DEVELOPMENT = env === 'development';
+var env = process.env.NODE_ENV || 'development'
+configChecker.checkConfig(env)
 
-configChecker.checkConfig(env);
-
-
-/*******************************
-    Change powered by
-********************************/
-app.use(helmet());
-var powered = require('./utils/powered');
-var randomIndex = function(powered) {
-  return Math.floor(Math.random() * powered.length);
-};
-app.use(helmet.hidePoweredBy({
-  setTo: powered[randomIndex(powered)]
-}));
-
-app.use(responseTime());
-app.use(favicon(__dirname + '/../public/img/favicon.ico'));
-
-/*************************************
-  Cache
+/* ************************************
+  Error handlers
 **************************************/
-app.disable('etag');
+logger.info('Loading Middlewares...')
+require('./middlewares')(restify, server, config, logger)
 
-/**************************************
-  Body limit
-**************************************/
-app.use(bodyParser.json({
-  limit: config('bodylimit') || '50mb'
-}));
-
-app.use(bodyParser.urlencoded({
-  extended: true,
-  limit: config('bodylimit') || '50mb'
-}));
-
-app.use(cookieParser());
-
-app.use(express.static(path.join(__dirname, '../public')));
-
-app.use(domain);
-
-/*************************************
-  Cors
-**************************************/
-app.use(cors({
-  origin: function(origin, callback) {
-    callback(null, true);
-  },
-  credentials: true
-}));
-
-app.options('*', cors());
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Expose-Headers', 'Location');
-  next();
-});
-
-app.use(timeout(DEFAULT_TIMEOUT, {
-  status: ERROR_CODE_SERVER_TIMEOUT,
-  respond: true
-}));
-
-
-/*************************************
-  Engine middlewares
-**************************************/
-app.use(routes.base);
-app.use(routes.doc);
-app.use(routes.snippet);
-app.use(routes.phrase);
-
-if (app.get('env') === 'development' || app.get('env') === 'test') {
-  app.use(routes.test);
-}
-
-/*************************************
-  Timeout
-**************************************/
-var haltOnTimedout = function(req, res, next) {
-  if (!req.timedout) {
-    next();
-  }
-};
-
-app.use(haltOnTimedout);
-
-/*************************************
-  Cache
-**************************************/
-app.disable('etag');
-
-/*************************************
+/* ************************************
   Error handlers
 **************************************/
 
-/// catch 404 and forward to error handler
-var NotFoundHandler = function(req, res, next) {
-  next(new ComposrError('error:not_found', 'Not Found', 404));
-};
+server.on('NotFound', function (req, res, err, next) {
+  err = new ComposrError('error:not_found', err.message, 404)
+  res.send(404, err)
+  return next()
+})
 
-app.use(NotFoundHandler);
+server.on('InternalServer', function (req, res, err, next) {
+  err = new ComposrError('error:internal:server:error', err.message, 500)
+  res.send(500, err)
+  return next()
+})
 
-var errorHandler = function(err, req, res, next) {
-
-  var message = err.error || err.message || err;
-  if (message === 'Error caught by express error handler') {
-    message = 'error:internal';
+server.on('uncaughtException', function (req, res, route, err) {
+  if (err instanceof ComposrError === false) {
+    err = new ComposrError('error:internal:server:error', err.message, err.status || err.statusCode || 500)
   }
 
-  var status = err.status || 500;
-  if (err.timeout || message === 'Blocked event loop.') {
-    message = 'error:timeout';
-    status = ERROR_CODE_SERVER_TIMEOUT;
+  logger.error(err, route)
+
+  res.send(err.statusCode, err)
+})
+
+process.on('uncaughtException', function (err) {
+  logger.debug('Error caught by uncaughtException', err)
+  logger.error(err)
+  if (!err || err.message !== "Can't set headers after they are sent.") {
+    process.exit(1)
   }
+})
 
-  var errorLogged = {
-    status: status,
-    error: message,
-    errorDescription: err.errorDescription || '',
-    // development error handler
-    // will print stacktrace
-    trace: (app.get('env') === 'development' ? err.stack : '')
-  };
+/* ************************************
+  Initialization
+**************************************/
 
-  logger.error(errorLogged);
-  res.status(status);
-  res.json(errorLogged);
+// Trigger the worker execution
+worker.init()
 
-  next(err);
-};
+// Trigger the static routes creation
+hub.emit('create:staticRoutes', server)
 
-app.use(errorHandler);
-
-app.use(pmx.expressErrorHandler());
-
-process.on('uncaughtException', function(err) {
-  logger.debug('Error caught by uncaughtException', err);
-  logger.error(err);
-  if (!err || err.message !== 'Can\'t set headers after they are sent.') {
-    process.exit(1);
-  }
-});
-
-//Trigger the worker execution
-worker.init();
-
-module.exports = engine.init(app);
+module.exports = engine.init(server)

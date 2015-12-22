@@ -32,7 +32,6 @@ function test(server) {
         .expect(200)
         .end(function(err, response) {
           expect(response).to.be.an('object');
-          console.log(response.body);
           expect(response.body.name).to.equals('pepe');
           expect(response.body.id).to.equals('1');
           done(err);
@@ -47,7 +46,6 @@ function test(server) {
         .expect(200)
         .end(function(err, response) {
           expect(response).to.be.an('object');
-          console.log(response.body);
           expect(response.body.name).to.equals('pacopepe');
           expect(response.body.id).to.equals('2');
           done(err);

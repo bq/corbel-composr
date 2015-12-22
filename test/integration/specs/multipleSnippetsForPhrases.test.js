@@ -70,7 +70,7 @@ function test(server) {
       .expect(201)
       .end(function(err, response) {
         expect(response).to.be.an('object');
-        expect(response.text).to.equals('test');
+        expect(response.text).to.equals('"test"');
         done(err);
       });
     });
@@ -81,7 +81,7 @@ function test(server) {
       .expect(200)
       .end(function(err, response) {
         expect(response).to.be.an('object');
-        expect(response.text).to.equals('JUAN');
+        expect(response.text).to.equals('"JUAN"');
         done(err);
       });
     });
@@ -92,7 +92,7 @@ function test(server) {
       .expect(200)
       .end(function(err, response) {
         expect(response).to.be.an('object');
-        expect(response.text).to.equals('JUAN IS AWESOME!');
+        expect(response.text).to.equals('"JUAN IS AWESOME!"');
         done(err);
       });
     });
