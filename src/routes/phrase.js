@@ -12,7 +12,6 @@ var auth = require('../lib/auth')
 *************************************/
 var probe = pmx.probe()
 
-
 var counterPhrasesUpdated = probe.counter({
   name: 'phrases_updated'
 })
