@@ -6,7 +6,7 @@ var uuid = require('uuid')
 var ComposrError = require('./ComposrError')
 
 function getDefaultConfig () {
-  return require('../config/config.json')
+  return _.cloneDeep(require('../config/config.json'))
 }
 
 function getConfigFromFile (environment) {
@@ -80,7 +80,7 @@ if (isDefinedConfigValue(process.env.URL_BASE)) {
 }
 
 if (isDefinedConfigValue(process.env.ACCESS_LOG)) {
-  initialConfig['composrLog.accessLog'] = process.env.ACCESS_LOG
+  initialConfig['composrLog.accessLog'] = JSON.parse(process.env.ACCESS_LOG)
 }
 
 if (isDefinedConfigValue(process.env.PORT)) {
@@ -153,6 +153,13 @@ if (isDefinedConfigValue(process.env.SERVICES_RETRIES)) {
 
 if (isDefinedConfigValue(process.env.SERVICES_TIME)) {
   initialConfig['services.time'] = process.env.SERVICES_TIME
+}
+
+// Sanitize BASE_URL forcing to always end with '/'
+var lastCharUrlBase = initialConfig['corbel.driver.options'].urlBase.split('').pop()
+
+if (lastCharUrlBase !== '/') {
+  initialConfig['corbel.driver.options'].urlBase = initialConfig['corbel.driver.options'].urlBase + '/'
 }
 
 module.exports = function (key, haltOnUndefined) {

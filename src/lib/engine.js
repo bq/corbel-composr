@@ -26,7 +26,6 @@ var engine = {
     })
 
     engine.composr.events.on('phrase:registered', 'CorbelComposr', function (phrase) {
-      console.log('register')
       hub.emit('create:routes', phrase)
     })
   },
