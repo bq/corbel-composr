@@ -1,7 +1,7 @@
 'use strict'
 
 var winston = require('winston')
-var mkdirp = require('mkdirp')
+var folderMaker = require('./folderMaker')
 var art = require('ascii-art')
 var config = require('../lib/config')
 var logLevel = config('logLevel') ? config('logLevel') : false
@@ -20,9 +20,8 @@ if (logLevel) {
 
   if (logFile) {
     // If file log is enabled, create the directory
-    var logDirs = logFile.split('/').slice(0, -1).join('/')
-
-    mkdirp.sync(logDirs)
+    var logDirs = folderMaker.getPathFromFilePath(logFile)
+    folderMaker.makePath(logDirs)
 
     transports.push(new (winston.transports.File)({
       name: 'error-file',
