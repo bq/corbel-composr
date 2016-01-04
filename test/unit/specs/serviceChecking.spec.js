@@ -14,6 +14,7 @@ var engine = null,
   fs = require('fs'),
   sinon = require('sinon'),
   engine = require('../../../src/lib/engine.js');
+
 chai.use(chaiAsPromised);
 
 describe('Engine', function() {
@@ -33,21 +34,20 @@ describe('Engine', function() {
       options = {
         allowUnmocked: true
       };
-      engineAbsPath = path.resolve(__dirname + '../../../../src/lib/engine.js');
+      engineAbsPath = path.resolve(__dirname + '../../../../src/lib/engine.js'); 
     });
 
     beforeEach(function() {
-      engine = require(engineAbsPath);
+      engine = require(engineAbsPath); 
     });
 
     afterEach(function() {
       mySandbox.restore();
-      nock.cleanAll();
       // Required to allow to create a new instance of 'engine'
       // Every time a 'require' is made, is saved into a local 'require' cache, so to create a new instance every time, 
       // we need to replace cache
       delete require.cache[engineAbsPath];
-    });
+      });
 
     describe('Engine', function() {
 
@@ -143,6 +143,10 @@ describe('Engine', function() {
 
         Promise.all(engine.initServiceCheckingRequests(modules, 0))
           .should.be.rejected
+           .then(function(){
+            expect(nock.isDone()).to.be.true; 
+            nock.cleanAll(); 
+          })
           .should.notify(done);
       });
 
@@ -156,7 +160,11 @@ describe('Engine', function() {
 
         Promise.all(engine.initServiceCheckingRequests(modules, 0))
           .should.be.rejected
-          .should.notify(done);
+            .then(function(){
+            expect(nock.isDone()).to.be.true; 
+            nock.cleanAll(); 
+          })
+         .should.notify(done);
       });
 
       it('when request is replied and no body exists promise should be resolved', function(done) {
@@ -169,7 +177,11 @@ describe('Engine', function() {
 
         Promise.all(engine.initServiceCheckingRequests(modules, 5000))
           .should.be.fulfilled
-          .should.notify(done);
+             .then(function(){
+            expect(nock.isDone()).to.be.true; 
+            nock.cleanAll(); 
+          })
+        .should.notify(done);
       });
 
       it('when request is replied and JSON body without error is sent promise should be resolved', function(done) {
@@ -184,7 +196,11 @@ describe('Engine', function() {
 
         Promise.all(engine.initServiceCheckingRequests(modules, 5000))
           .should.be.fulfilled
-          .should.notify(done);
+              .then(function(){
+            expect(nock.isDone()).to.be.true; 
+            nock.cleanAll(); 
+          })
+       .should.notify(done);
       });
 
       it('when response status code is !== 200 and no body error is sent promise should be rejected', function(done) {
@@ -197,7 +213,11 @@ describe('Engine', function() {
 
         Promise.all(engine.initServiceCheckingRequests(modules, 0))
           .should.be.rejected
-          .should.notify(done);
+               .then(function(){
+            expect(nock.isDone()).to.be.true; 
+            nock.cleanAll(); 
+          })
+      .should.notify(done);
       });
 
       it('when response status code !== 200 and response body contains a JSON error promise should be rejected', function(done) {
@@ -218,17 +238,18 @@ describe('Engine', function() {
 
         Promise.all(engine.initServiceCheckingRequests(modules, 0))
           .should.be.rejected
-          .should.notify(done);
+                .then(function(){
+            expect(nock.isDone()).to.be.true; 
+            nock.cleanAll(); 
+          })
+     .should.notify(done);
       });
 
       it('when response status code === 200 && response body contains an error promise should be rejected', function(done) {
 
         var bodyError = new Error('Undefined error').toString(); 
-
         nock(domain, options)
-          .get('/resources/v1.0')
-          .reply(200)
-          .get('/iam/version')
+         .get('/iam/version')
           .reply(200, bodyError, {
             'Content-Type': 'application/html'
           })
@@ -238,10 +259,15 @@ describe('Engine', function() {
           });
 
         Promise.all(engine.initServiceCheckingRequests(modules, 0))
-          .should.be.rejected
-          .should.notify(done);
+         .should.be.rejected
+          .then(function(){
+            expect(nock.isDone()).to.be.true;             
+            // cleanAll must be called here, because 'afterEach' || 'after' hooks are called immediately, buy promise resolves before, so, there's a time fraction where nock is still loaded and further calls hit it, that means, no interceptor is defined for arbitrary endpoints ---> nock reject request
+            nock.cleanAll(); 
+          })  
+          .should.notify(done); 
       });
-
     });
+
   });
 });
