@@ -155,8 +155,6 @@ if (isDefinedConfigValue(process.env.SERVICES_TIME)) {
   initialConfig['services.time'] = process.env.SERVICES_TIME
 }
 
-console.log(JSON.stringify(initialConfig, null, 2))
-
 module.exports = function (key, haltOnUndefined) {
   if (!key) {
     return _.cloneDeep(initialConfig)

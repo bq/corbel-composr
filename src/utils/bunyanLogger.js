@@ -12,9 +12,8 @@ var folderMaker = require('./folderMaker')
 var logger = null
 
 if (config('bunyan.log') === true) {
-  
   folderMaker.makePath('./logs')
-  
+
   var streams = [{
     level: 'error',
     path: './logs/api-error.log' // log ERROR and above to a file
