@@ -99,8 +99,8 @@ if (isDefinedConfigValue(process.env.LOG_LEVEL)) {
   initialConfig['composrLog.logLevel'] = process.env.LOG_LEVEL
 }
 
-if (isDefinedConfigValue(process.env.LOG_FILE)) {
-  initialConfig['composrLog.logFile'] = process.env.LOG_FILE
+if (isDefinedConfigValue(process.env.SYSLOG)) {
+  initialConfig['composrLog.syslog'] = JSON.parse(process.env.SYSLOG)
 }
 
 if (isDefinedConfigValue(process.env.BUNYAN_LOG)) {

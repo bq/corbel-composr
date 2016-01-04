@@ -7,10 +7,13 @@ var bunyan = require('bunyan')
 var restify = require('restify')
 var config = require('../lib/config')
 var logStreamer = config('bunyan.streamServer')
+var folderMaker = require('./folderMaker')
 
 var logger = null
 
 if (config('bunyan.log') === true) {
+  folderMaker.makePath('./logs')
+
   var streams = [{
     level: 'error',
     path: './logs/api-error.log' // log ERROR and above to a file
