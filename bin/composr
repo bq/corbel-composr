@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+if (process.env.NRACTIVE === 'true') {
+    require('newrelic')
+}
 
 var pmx = require('pmx');
 
@@ -11,7 +14,7 @@ pmx.init({
 var logger = require('../src/utils/composrLogger');
 var config = require('../src/lib/config');
 var version = require('../package.json').version;
-
+     
 module.exports = new Promise(function(resolve, reject) {
 
   require('../src/app')
