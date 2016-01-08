@@ -42,7 +42,7 @@
     "atob": "^2.0.0",
     "body-parser": "^1.12.0",
     "bunyan": "^1.5.1",
-    "composr-core": "^1.0.10",
+    "composr-core": "^1.0.11",
     "connect-timeout": "^1.6.1",
     "corbel-js": "^0.2.17",
     "cors": "^2.5.3",
