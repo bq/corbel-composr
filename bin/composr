@@ -1,38 +1,35 @@
 #!/usr/bin/env node
-var config = require('../src/lib/config'); 
+var config = require('../src/lib/config')
 if (config('newrelic')) {
-    require('newrelic'); 
+  require('newrelic')
 }
 
-var pmx = require('pmx');
+var pmx = require('pmx')
 
-//Log routes and latency.
+// Log routes and latency.
 // You must do this BEFORE any require('http')
 pmx.init({
   http: true
-});
+})
 
-var logger = require('../src/utils/composrLogger');
-var version = require('../package.json').version;
-     
-module.exports = new Promise(function(resolve, reject) {
+var logger = require('../src/utils/composrLogger')
+var version = require('../package.json').version
 
+module.exports = new Promise(function (resolve, reject) {
   require('../src/app')
-    .then(function(serverObjects) {
+    .then(function (serverObjects) {
+      var port = config('port')
 
-      var port = config('port');
+      var server = serverObjects.app.listen(port, function () {
+        logger.debug('CompoSR by BQ - listening on port ' + server.address().port)
 
-      var server = serverObjects.app.listen(port, function() {
-        logger.debug('Restify server listening on port ' + server.address().port);
-
-        logger.salute(config('serverName'), version, function() {
-          resolve(serverObjects);
-        });
-
-      });
+        logger.salute(config('serverName'), version, function () {
+          resolve(serverObjects)
+        })
+      })
     })
-    .catch(function(err) {
-      console.log('ERROR launching ' + config('serverName') + ' application', err);
-      reject(err);
-    });
-});
+    .catch(function (err) {
+      console.log('ERROR launching ' + config('serverName') + ' application', err)
+      reject(err)
+    })
+})

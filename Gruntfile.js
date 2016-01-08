@@ -72,7 +72,8 @@ module.exports = function (grunt) {
       lint: {
         src: [
           '{bin/,src/}**/**.js',
-          '*.js'
+          '*.js',
+          'bin/composr'
         ]
       },
       format: {
@@ -82,7 +83,8 @@ module.exports = function (grunt) {
         },
         src: [
           '{bin/,src/}**/**.js',
-          '*.js'
+          '*.js',
+          'bin/composr'
         ]
       }
     },

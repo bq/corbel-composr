@@ -131,8 +131,12 @@ if (isDefinedConfigValue(process.env.RABBITMQ_PASSWORD)) {
   initialConfig['rabbitmq.password'] = process.env.RABBITMQ_PASSWORD
 }
 
+if (isDefinedConfigValue(process.env.KEYMETRICS)) {
+  initialConfig.keymetrics = JSON.parse(process.env.KEYMETRICS)
+}
+
 if (isDefinedConfigValue(process.env.NRACTIVE)) {
-  initialConfig.newrelic = process.env.NRACTIVE
+  initialConfig.newrelic = JSON.parse(process.env.NRACTIVE)
 }
 
 if (isDefinedConfigValue(process.env.NRAPPNAME)) {
