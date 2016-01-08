@@ -28,7 +28,7 @@
         "urlBase": "https://{{module}}corbel-domain.io/"
     },
 
-    "bunyan.requestLog" : true,
+    "bunyan.log" : true,
     "bunyan.stdout": false,
     "bunyan.streamServer": false,
 
@@ -40,6 +40,7 @@
 
     "newrelic" : false,
     "newrelic.name": "",
-    "newrelic.key": ""
+    "newrelic.key": "",
 
+    "keymetrics": true
 }

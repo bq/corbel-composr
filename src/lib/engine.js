@@ -30,9 +30,7 @@ var engine = {
     })
 
     engine.composr.events.on('metrics', 'CorbelComposr', function (options) {
-      //@TODO: implement, 
-      //options.domain 
-      //options.data
+      hub.emit('metrics', options.domain, options.data)
     })
   },
 

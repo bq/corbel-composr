@@ -5,6 +5,7 @@
 'use strict'
 
 var ComposrError = require('../lib/ComposrError')
+var hub = require('../lib/hub')
 
 module.exports = function (restify, server, logger) {
   /* *************************************
@@ -62,6 +63,13 @@ module.exports = function (restify, server, logger) {
   }
 
   server.on('MethodNotAllowed', unknownMethodHandler)
+
+  /* ***********************************
+    Http Status event
+  **************************************/
+  server.on('after', function (req, res) {
+    hub.emit('http:status', res.statusCode, req.url, req.method)
+  })
 
   /* ************************************
     Accept Parser
