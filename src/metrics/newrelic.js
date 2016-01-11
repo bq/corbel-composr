@@ -1,6 +1,4 @@
 'use strict'
-
-var newrelic = require('newrelic')
 var hub = require('../lib/hub')
 
 /* *********************************
@@ -9,6 +7,7 @@ var hub = require('../lib/hub')
 
 function initMetrics (config, logger) {
   if (config('newrelic') === true) {
+    var newrelic = require('newrelic')
     logger.info('Initializing NewRelic events...')
 
     hub.on('http:status', function (status, url, method) {

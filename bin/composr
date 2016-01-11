@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 var config = require('../src/lib/config')
-if (config('newrelic')) {
+if (config('newrelic') === true) {
   require('newrelic')
 }
 
