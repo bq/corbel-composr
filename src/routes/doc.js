@@ -4,11 +4,10 @@ var engine = require('../lib/engine')
 var ComposrError = require('../lib/ComposrError')
 
 module.exports = function (server) {
-
   server.get('/doc/:domain/', serveDocumentation)
   server.get('/doc/:domain/:version/', serveDocumentation)
 
-  function serveDocumentation(req, res, next) {
+  function serveDocumentation (req, res, next) {
     var domain = req.params.domain || ''
     // TODO move to core
     var rawPhrases = engine.composr.data.phrases
@@ -36,5 +35,4 @@ module.exports = function (server) {
         next(new ComposrError('error:phrase:doc', 'Error generating doc: ' + err, 422))
       })
   }
-
 }
