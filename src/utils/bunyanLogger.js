@@ -18,14 +18,14 @@ if (config('bunyan.log') === true) {
   var streams = [{
     level: 'error',
     type: 'rotating-file',
-    period: '1d',   // daily rotation
-    count: 3,        // keep 3 back copies
+    period: '1d', // daily rotation
+    count: 3, // keep 3 back copies
     path: './logs/api-error.log' // log ERROR and above to a file
   }, {
     level: 'trace',
     type: 'rotating-file',
-    period: '1d',   // daily rotation
-    count: 3,        // keep 3 back copies
+    period: '1d', // daily rotation
+    count: 3, // keep 3 back copies
     path: './logs/api.log'
   }]
 
@@ -36,21 +36,21 @@ if (config('bunyan.log') === true) {
     })
   }
 
-  if(config('bunyan.syslog') === true){
+  if (config('bunyan.syslog') === true) {
     streams.push({
       level: 'debug',
       type: 'raw',
       stream: bsyslog.createBunyanStream({
-          type: 'sys',
-          facility: bsyslog.local0,
-          host: '127.0.0.1',
-          port: 514
+        type: 'sys',
+        facility: bsyslog.local0,
+        host: '127.0.0.1',
+        port: 514
       })
     })
   }
 
   if (logStreamer) {
-    //TODO: make it work
+    // TODO: make it work
     /* var io = require('socket.io-client')
     var socket = io.connect(logStreamer)
     var ss = require('socket.io-stream')
@@ -63,9 +63,8 @@ if (config('bunyan.log') === true) {
 
     streams.push(bunyanStreamConfig)*/
 
-    /*socket.on('reconnect', function () {
-      
-        
+    /* socket.on('reconnect', function () {
+
       console.log(_server.log.streams)
       var socketLoggerStream = ss.createStream()
       var bunyanStreamConfig = {
@@ -75,7 +74,7 @@ if (config('bunyan.log') === true) {
       _server.log.streams[0] = bunyanStreamConfig
       ss(socket).emit('log-stream', socketLoggerStream, {
         server: config('serverID')
-      });
+      })
     })*/
 
     /* ss(socket).emit('log-stream', socketLoggerStream, {
