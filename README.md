@@ -57,32 +57,55 @@ You can send the following environment variables (or define a environment config
 
 ```
 {
+    "serverName" : "CompoSR",
+    "bodylimit" : "50mb",
+    "port": 3000,
+    
     "rabbitmq.host": "RABBIT_HOST",
     "rabbitmq.port": "RABBIT_PORT",
     "rabbitmq.username": "RABBIT_USERNAME",
     "rabbitmq.password": "RABBIT_PASSWORD",
     "rabbitmq.reconntimeout": 10000,
     "rabbitmq.event": "class io.corbel.event.ResourceEvent",
+
     "bootstrap.retrytimeout": 10000,
-    "services.timeout": 3000,
-    "services.retries": 3,
-    "services.time": 100,
-    "timeout": 2000,
+
+    "phrases.timeout": 10000,
+
+    "services.timeout": 5000,
+    "services.retries": 30,
+    "services.time": 1000,
+
     "corbel.composr.credentials": {
         "clientId": "CLIENT_ID",
         "clientSecret": "CLIENT_SECRET",
         "scopes": "composr:comp:base"
     },
+
     "corbel.driver.options": {
         "urlBase": "https://{{module}}corbel-domain.io/"
     },
-    "logLevel": "error",
-    "logFile": "logs/composr.log",
-    "syslog" : false,
-    "bodylimit" : "50mb"
+
+    "bunyan.log" : true,
+    "bunyan.syslog" : true,
+    "bunyan.stdout": false,
+    "bunyan.streamServer": false,
+
+    "composrLog.accessLog" : true,
+    "composrLog.accessLogFile" : "logs/access.log",
+    "composrLog.logLevel": "error",
+    "composrLog.logFile": "logs/composr.log",
+    "composrLog.syslog" : false,
+
+    "newrelic" : false,
+    "newrelic.name": "",
+    "newrelic.key": "",
+
+    "keymetrics": true
 }
 ```
 
+Almost all of the vales in the configuration file can be overwriten by environment variables:
 
 ### Environment variables
 
@@ -93,9 +116,12 @@ CREDENTIALS_CLIENT_ID
 CREDENTIALS_CLIENT_SECRET
 CREDENTIALS_SCOPES
 URL_BASE
-LOG_LEVEL
-LOG_FILE
+ACCESS_LOG => winston access log
+ACCESS_LOG_FILE => winston access log file
+LOG_LEVEL => winston log level
+LOG_FILE => winston log file
 BUNYAN_LOG(true) => Bunyan logs
+BUNYAN_SYSLOG(true) => Send bunyan stream to syslog (127.0.0.1:514)
 BUNYAN_STDOUT(false) => Bunyan output in terminal
 BUNYAN_STREAM_SERVER (null) => Composr Stream Server endpoint
 RABBITMQ_HOST
@@ -105,11 +131,15 @@ RABBITMQ_PASSWORD
 SERVICES_TIMEOUT
 SERVIES_RETRIES
 SERVICES_TIME 
+KEYMETRICS (true) => Keymetrics active
+NRACTIVE => New relic active
+NRAPPNAME => New relic app name
+NRAPIKEY => New relic api key
 ```
 
 ## Phrases
 
-Phrases is one of the CompoSR strongest capabilities, they are JSON models that can define a dinamic endpoint. 
+Phrases are one of the CompoSR strongest capabilities, they are JSON models that can define a dinamic endpoint. 
 
 Each Phrase has an endpoint and the list of HTTP verbs it can handle (POST, PUT, GET, DELETE) with their code associated.
 

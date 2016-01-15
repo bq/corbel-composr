@@ -29,6 +29,7 @@
     },
 
     "bunyan.log" : true,
+    "bunyan.syslog" : true,
     "bunyan.stdout": false,
     "bunyan.streamServer": false,
 

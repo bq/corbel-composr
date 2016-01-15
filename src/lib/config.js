@@ -111,6 +111,10 @@ if (isDefinedConfigValue(process.env.BUNYAN_STDOUT)) {
   initialConfig['bunyan.stdout'] = JSON.parse(process.env.BUNYAN_STDOUT)
 }
 
+if (isDefinedConfigValue(process.env.BUNYAN_SYSLOG)) {
+  initialConfig['bunyan.syslog'] = JSON.parse(process.env.BUNYAN_SYSLOG)
+}
+
 if (isDefinedConfigValue(process.env.BUNYAN_STREAM_SERVER)) {
   initialConfig['bunyan.streamServer'] = process.env.BUNYAN_STREAM_SERVER
 }
