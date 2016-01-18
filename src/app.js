@@ -23,10 +23,16 @@ var env = process.env.NODE_ENV || 'development'
 configChecker.checkConfig(env)
 
 /* ************************************
-  Error handlers
+  Middlewares
 **************************************/
 logger.info('Loading Middlewares...')
 require('./middlewares')(restify, server, config, logger)
+
+/* ************************************
+  Metrics
+**************************************/
+logger.info('Initializing metrics...')
+require('./metrics')(restify, server, config, logger)
 
 /* ************************************
   Error handlers

@@ -28,6 +28,10 @@ var engine = {
     engine.composr.events.on('phrase:registered', 'CorbelComposr', function (phrase) {
       hub.emit('create:routes', phrase)
     })
+
+    engine.composr.events.on('metrics', 'CorbelComposr', function (options) {
+      hub.emit('metrics', options.domain, options.data)
+    })
   },
 
   /* ***********************************************************
