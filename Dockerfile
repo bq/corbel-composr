@@ -17,6 +17,9 @@ RUN apt-get update
 # Any text editor
 RUN apt-get install -y nano net-tools
 
+# Extra tools
+RUN npm install -g bunyan
+
 # For allowing nano
 ENV TERM xterm
 
