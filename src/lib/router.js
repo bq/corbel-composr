@@ -2,24 +2,10 @@
 var hub = require('./hub')
 var connection = require('./corbelConnection')
 var engine = require('./engine')
-var ComposrError = require('./ComposrError')
 var logger = require('../utils/composrLogger')
 var config = require('./config')
-var pmx = require('pmx')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
-
-/* ************************************
-  Metrics
-*************************************/
-var probe = pmx.probe()
-
-var counterPhrasesBeingExecuted = probe.counter({
-  name: 'phrases_in_execution'
-})
-
-var counterPhrasesExecuted = probe.counter({
-  name: 'phrases_executed'
-})
+var ComposrError = require('./ComposrError')
 
 /**
  * [extractDomainFromId description]
@@ -75,19 +61,23 @@ function executePhraseById (req, res, next, routeItem) {
     server: 'restify'
   }
 
-  // Metrics for number of phrases executed
-  counterPhrasesExecuted.inc()
-  // Metrics for number of phrases being executed
-  counterPhrasesBeingExecuted.inc()
+  hub.emit('phrase:execution:start', routeItem.domain, routeItem.id, routeItem.verb)
 
   return engine.composr.Phrases.runById(routeItem.domain, routeItem.id, routeItem.verb, params)
     .then(function (response) {
+      hub.emit('phrase:execution:end', response.status, routeItem.domain, routeItem.id, routeItem.verb)
       return next()
     })
     .catch(function (err) {
+      if (err === 'phrase:cant:be:runned') {
+        err = new ComposrError('endpoint:not:found', 'Endpoint not found', 404)
+      }
+
       logger.error('Failing executing Phrase', err)
-      res.send(404, new ComposrError('endpoint:not:found', 'Not found', 404))
-      return next()
+      // @TODO: log error in metrics
+      var status = typeof err === 'object' ? err.status || err.statusCode : 404
+      hub.emit('phrase:execution:end', status, routeItem.domain, routeItem.id, routeItem.verb)
+      return next(err)
     })
 }
 
@@ -124,19 +114,6 @@ function authCorbelHook (req, res, next) {
 }
 
 /**
- * [postExecutionHook description]
- * @param  {[type]}   req  [description]
- * @param  {[type]}   res  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
- */
-function postExecutionHook () {
-  // Metric for counterPhrasesBeingExecuted,
-  // after execution decrease number.
-  counterPhrasesBeingExecuted.dec()
-}
-
-/**
  * Add End-Points to Restify Router
  * @param  {[type]} server       [description]
  * @param  {[type]} routeObjects [description]
@@ -151,14 +128,14 @@ function bindRoutes (server, routeObjects) {
         authCorbelHook,
         function (req, res, next) {
           executePhraseById(req, res, next, item)
-        }, postExecutionHook)
+        })
 
       // Support also v1.0 paths for the moment
       server[item.restifyVerb]('/v1.0' + url,
         authCorbelHook,
         function (req, res, next) {
           executePhraseById(req, res, next, item)
-        }, postExecutionHook)
+        })
     })(routeObjects[i])
   }
 }

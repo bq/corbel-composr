@@ -8,17 +8,8 @@ COPY . /src
 # Install dev dependencies
 RUN cd /src; npm install; npm rebuild
 
-#pm2 for utilities
-RUN npm install -g pm2 standard
-
-#update packages
-RUN apt-get update
-
-# Any text editor
-RUN apt-get install -y nano net-tools
-
-# Extra tools
-RUN npm install -g bunyan
+# Tools
+RUN npm install -g bunyan pm2 standard; apt-get update; apt-get install -y nano net-tools
 
 # For allowing nano
 ENV TERM xterm
