@@ -68,39 +68,51 @@ function createOrUpdatePhrase (req, res) {
 
   var phrase = req.body || {}
 
-  var corbelDriver = connection.getTokenDriver(authorization)
+  var clientCorbelDriver = connection.getTokenDriver(authorization)
 
   var domain = connection.extractDomain(authorization)
 
-  engine.composr.Phrases.validate(phrase)
+  checkIfClientCanPublish(clientCorbelDriver)
     .then(function () {
-      phrase.id = domain + '!' + phrase.url.replace(/\//g, '!')
-      pmx.emit('phrase:updated_created', {
-        domain: domain,
-        id: phrase.id
-      })
+      engine.composr.Phrases.validate(phrase)
+        .then(function () {
+          phrase.id = domain + '!' + phrase.url.replace(/\//g, '!')
+          pmx.emit('phrase:updated_created', {
+            domain: domain,
+            id: phrase.id
+          })
 
-      logger.debug('Storing or updating phrase', phrase.id, domain)
+          logger.debug('Storing or updating phrase', phrase.id, domain)
 
-      corbelDriver.resources.resource(engine.phrasesCollection, phrase.id)
-        .update(phrase)
-        .then(function (response) {
-          res.setHeader('Location', 'phrase/' + phrase.id)
-          res.send(response.status, response.data)
+          engine.composr.corbelDriver.resources.resource(engine.phrasesCollection, phrase.id)
+            .update(phrase)
+            .then(function (response) {
+              res.setHeader('Location', 'phrase/' + phrase.id)
+              res.send(response.status, response.data)
+            })
+            .catch(function (error) {
+              var errorBody = getCorbelErrorBody(error)
+              res.send(error.status, new ComposrError('error:phrase:create', errorBody, error.status))
+            })
         })
-        .catch(function (error) {
-          var errorBody = getCorbelErrorBody(error)
-          res.send(error.status, new ComposrError('error:phrase:create', errorBody, error.status))
+        .catch(function (result) {
+          var errors = result.errors
+          logger.warn('SERVER', 'invalid:phrase', phrase.id, result)
+          res.send(422, new ComposrError('error:phrase:validation', 'Error validating phrase: ' +
+            JSON.stringify(errors, null, 2), 422))
         })
     })
-    .catch(function (result) {
-      var errors = result.errors
-      logger.warn('SERVER', 'invalid:phrase', phrase.id, result)
-      res.send(422, new ComposrError('error:phrase:validation', 'Error validating phrase: ' +
-        JSON.stringify(errors, null, 2), 422))
+    .catch(function (error) {
+      var errorBody = getCorbelErrorBody(error)
+      logger.warn('SERVER', 'invalid:client:phrase', errorBody)
+      res.send(401, new ComposrError('error:phrase:create', 'Unauthorized client', 401))
     })
 }
 
+function checkIfClientCanPublish (driver) {
+  return driver.resources.collection(engine.phrasesCollection)
+    .get()
+}
 /**
  * Deletes a phrase
  * @param  {[type]}   req  [description]
