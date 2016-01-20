@@ -69,6 +69,7 @@ module.exports = function (restify, server, logger) {
   **************************************/
   server.on('after', function (req, res) {
     hub.emit('http:status', res.statusCode, req.url, req.method)
+    hub.emit('http:end', req, res)
   })
 
   /* ************************************
