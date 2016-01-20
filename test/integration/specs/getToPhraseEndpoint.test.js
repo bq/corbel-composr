@@ -10,6 +10,7 @@ function test(server) {
   describe('Get to phrase returns not found', function() {
     var AdminClientData = clientUtils.getAdminClient();
     var adminClientToken;
+    this.timeout(10000);
 
     before(function(done) {
       request(server.app)
