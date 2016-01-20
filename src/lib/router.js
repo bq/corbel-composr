@@ -6,24 +6,16 @@ var logger = require('../utils/composrLogger')
 var config = require('./config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
 var ComposrError = require('./ComposrError')
+var phraseUtils = require('../utils/phraseUtils')
 
-/**
- * [extractDomainFromId description]
- * @param  {[type]} id [description]
- * @return {[type]}    [description]
- */
-function extractDomainFromId (id) {
-  return id.split('!')[0]
-}
-
-/**
+/* *
  * [analyzePhrase description]
  * @param  {[type]} acc [description]
  * @return {[type]}     [description]
  */
 function analyzePhrase (acc) {
   return function (item) {
-    var domain = extractDomainFromId(item.id)
+    var domain = phraseUtils.extractDomainFromId(item.id)
 
     allowedVerbs.forEach(function (verb) {
       if (item[verb]) {
@@ -114,6 +106,45 @@ function authCorbelHook (req, res, next) {
 }
 
 /**
+ * Add custom metrics parameters in req before running phrase
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+
+function initReqParams (req, res, next) {
+  hub.emit('http:start', req.getId())
+  req.corbelDriver.on('service:request:after', corbelDriverEventHookAfter(req))
+  return next()
+}
+
+/**
+ * Forward corbel driver events to corbel-composer event hub
+ * @param  {[type]}   req  [description]
+ * @param  {[type]}   res  [description]
+ * @param  {Function} next [description]
+ * @return {[type]}        [description]
+ */
+
+function corbelDriverEventHookAfter (req) {
+  return function hook (evt) {
+    var evtData = {
+      guid: req.getId(),
+      startDate: req.date(),
+      endDate: Date.now(),
+      url: evt.response.request.href,
+      status: evt.response.statusCode,
+      method: evt.response.req.method,
+      time: req.time(),
+      isError: (evt.response.statusCode.toString().indexOf('4') === 0 || evt.response.statusCode.toString().indexOf('5') === 0),
+      type: 'EXTERNAL'
+    }
+    hub.emit('metrics:add:segment', evtData)
+  }
+}
+
+/**
  * Add End-Points to Restify Router
  * @param  {[type]} server       [description]
  * @param  {[type]} routeObjects [description]
@@ -126,14 +157,16 @@ function bindRoutes (server, routeObjects) {
 
       server[item.restifyVerb](url,
         authCorbelHook,
-        function (req, res, next) {
+        initReqParams,
+        function bindRoute (req, res, next) {
           executePhraseById(req, res, next, item)
         })
 
       // Support also v1.0 paths for the moment
       server[item.restifyVerb]('/v1.0' + url,
         authCorbelHook,
-        function (req, res, next) {
+        initReqParams,
+        function bindRouteV1 (req, res, next) {
           executePhraseById(req, res, next, item)
         })
     })(routeObjects[i])
