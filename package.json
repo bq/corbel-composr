@@ -58,7 +58,7 @@
     "node-localstorage": "~0.6.0",
     "object-sizeof": "1.0.6",
     "pm2": "^1.0.0",
-    "pmx": "^0.5.5",
+    "pmx": "^0.5.8",
     "q": "^1.2.0",
     "raml-parser": "~0.8.10",
     "raml2html": "~2.1.0",
