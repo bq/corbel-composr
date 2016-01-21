@@ -92,7 +92,7 @@
     "madge": "^0.5.0",
     "mocha": "~2.3.3",
     "mocha-lcov-reporter": "1.0.0",
-    "nock": "^3.5.0",
+    "nock": "^5.2.1",
     "request": "^2.53.0",
     "sinon": "^1.14.1",
     "supertest": "^1.0.0",
