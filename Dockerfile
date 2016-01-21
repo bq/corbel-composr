@@ -16,6 +16,8 @@ RUN apt-get update && \
 # Install dev dependencies
 RUN npm install; npm rebuild
 
+ENV PATH node_modules/pm2/bin
+
 # Global config environment variable
 
 ENV URL_BASE ''
