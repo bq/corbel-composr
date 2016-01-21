@@ -16,7 +16,7 @@ RUN apt-get update && \
 # Install dev dependencies
 RUN npm install; npm rebuild; npm install -g bunyan
 
-ENV PATH node_modules/pm2/bin
+ENV PATH node_modules/pm2/bin:$PATH
 
 # Global config environment variable
 
