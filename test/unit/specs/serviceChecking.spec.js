@@ -34,7 +34,7 @@ describe('Engine', function() {
       options = {
         allowUnmocked: true
       };
-      engineAbsPath = path.resolve(__dirname + '../../../../src/lib/engine.js'); 
+      engineAbsPath = path.resolve(__dirname + '../../../../src/lib/engine.js');
     });
 
     beforeEach(function() {
@@ -140,7 +140,7 @@ describe('Engine', function() {
           .get('/resources/version')
           .delayConnection(time)
           .reply(200);
-
+        
         Promise.all(engine.initServiceCheckingRequests(modules, 0))
           .should.be.rejected
            .then(function(){
