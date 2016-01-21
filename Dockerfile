@@ -39,7 +39,7 @@ ENV BUNYAN_LOG true
 ENV PORT 3000
 
 # Expose port
-EXPOSE PORT
+EXPOSE $PORT
 
 # Enable corbel-composr
 CMD npm start
