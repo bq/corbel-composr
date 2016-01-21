@@ -14,7 +14,7 @@ RUN apt-get update && \
  rm -rf /var/lib/apt/lists/*
 
 # Install dev dependencies
-RUN npm install; npm rebuild
+RUN npm install; npm rebuild; npm install -g bunyan
 
 ENV PATH node_modules/pm2/bin
 
