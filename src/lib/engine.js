@@ -55,7 +55,6 @@ var engine = {
     } else if (reject) {
       rejectMessage = rejectMessage || ''
       logger.error('External service', module, 'is DOWN')
-      request.abort()
       reject(rejectMessage)
     }
   },
@@ -71,6 +70,7 @@ var engine = {
    *************************************************************/
 
   setUpRequest: function (url, module, resolve, reject, serviceCheckingRequestTimeout) {
+    var promiseTimeoutHandler
     var request = https.get(url, function (res) {
       var responseData = ''
       res.on('data', function (chunk) {
@@ -94,7 +94,11 @@ var engine = {
           engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err)
         }
       })
-    var promiseTimeoutHandler = setTimeout(engine.resolveOrRejectServiceCheckingRequest, serviceCheckingRequestTimeout, null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired')
+
+    promiseTimeoutHandler = setTimeout(function () {
+      request.abort()
+      engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired')
+    }, serviceCheckingRequestTimeout)
     return request
   },
 
@@ -107,8 +111,10 @@ var engine = {
 
   initServiceCheckingRequests: function (modules, serviceCheckingRequestTimeout) {
     var path = config('corbel.driver.options').urlBase
+
     return modules.map(function (module) {
       var url
+
       logger.info('Checking for external service', module)
       return new Promise(function (resolve, reject) {
         url = path.replace('{{module}}', module).replace(/\/(v.+)\//, '/') + 'version'
