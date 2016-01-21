@@ -262,8 +262,9 @@ describe('Engine', function() {
          .should.be.rejected
           .then(function(){
             expect(nock.isDone()).to.be.true;             
-            // cleanAll must be called here, because 'afterEach' || 'after' hooks are called immediately, buy promise resolves before, so, there's a time fraction where nock is still loaded and further calls hit it, that means, no interceptor is defined for arbitrary endpoints ---> nock reject request
+            // cleanAll must be called here, because 'afterEach' || 'after' hooks are called immediately, but promise resolves before, so, there's a time fraction where nock is still loaded and further calls hit it, that means, no interceptor is defined for arbitrary endpoints ---> nock reject request
             nock.cleanAll(); 
+            nock.restore();
           })  
           .should.notify(done); 
       });
