@@ -17,37 +17,50 @@ function createOrUpdateSnippet (req, res) {
 
   var snippet = req.body || {}
 
-  var corbelDriver = connection.getTokenDriver(authorization)
+  var clientCorbelDriver = connection.getTokenDriver(authorization)
 
   var domain = connection.extractDomain(authorization)
 
-  engine.composr.Snippets.validate(snippet)
+  checkIfClientCanPublish(clientCorbelDriver)
     .then(function () {
-      // TODO: check if we generate the snippet ID
-      // snippet.id = domain + '!' + snippet.name)
-      pmx.emit('snippet:updated_created', {
-        domain: domain,
-        id: snippet.id
-      })
+      engine.composr.Snippets.validate(snippet)
+        .then(function () {
+          // TODO: check if we generate the snippet ID
+          // snippet.id = domain + '!' + snippet.name)
+          pmx.emit('snippet:updated_created', {
+            domain: domain,
+            id: snippet.id
+          })
 
-      logger.debug('Storing or updating snippet', snippet.id, domain)
+          logger.debug('Storing or updating snippet', snippet.id, domain)
 
-      corbelDriver.resources.resource(engine.snippetsCollection, snippet.id)
-        .update(snippet)
-        .then(function (response) {
-          res.send(response.status, response.data)
+          engine.composr.corbelDriver.resources.resource(engine.snippetsCollection, snippet.id)
+            .update(snippet)
+            .then(function (response) {
+              res.send(response.status, response.data)
+            })
+            .catch(function (error) {
+              var errorBody = getCorbelErrorBody(error)
+              res.send(error.status, new ComposrError('error:snippet:create', errorBody, error.status))
+            })
         })
-        .catch(function (error) {
-          var errorBody = getCorbelErrorBody(error)
-          res.send(error.status, new ComposrError('error:snippet:create', errorBody, error.status))
+        .catch(function (result) {
+          var errors = result.errors
+          logger.warn('SERVER', 'invalid:snippet', snippet.id, result)
+          res.send(422, new ComposrError('error:snippet:validation', 'Error validating snippet: ' +
+            JSON.stringify(errors, null, 2), 422))
         })
     })
-    .catch(function (result) {
-      var errors = result.errors
-      logger.warn('SERVER', 'invalid:snippet', snippet.id, result)
-      res.send(422, new ComposrError('error:snippet:validation', 'Error validating snippet: ' +
-        JSON.stringify(errors, null, 2), 422))
+    .catch(function (error) {
+      var errorBody = getCorbelErrorBody(error)
+      logger.warn('SERVER', 'invalid:client:snippet', errorBody)
+      res.send(401, new ComposrError('error:snippet:create', 'Unauthorized client', 401))
     })
+}
+
+function checkIfClientCanPublish (driver) {
+  return driver.resources.collection(engine.snippetsCollection)
+    .get()
 }
 
 function deleteSnippet (req, res, next) {
