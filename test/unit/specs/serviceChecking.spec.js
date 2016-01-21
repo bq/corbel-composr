@@ -34,7 +34,7 @@ describe('Engine', function() {
       options = {
         allowUnmocked: true
       };
-      engineAbsPath = path.resolve(__dirname + '../../../../src/lib/engine.js'); 
+      engineAbsPath = path.resolve(__dirname + '../../../../src/lib/engine.js');
     });
 
     beforeEach(function() {
@@ -140,7 +140,7 @@ describe('Engine', function() {
           .get('/resources/version')
           .delayConnection(time)
           .reply(200);
-
+        
         Promise.all(engine.initServiceCheckingRequests(modules, 0))
           .should.be.rejected
            .then(function(){
@@ -262,8 +262,9 @@ describe('Engine', function() {
          .should.be.rejected
           .then(function(){
             expect(nock.isDone()).to.be.true;             
-            // cleanAll must be called here, because 'afterEach' || 'after' hooks are called immediately, buy promise resolves before, so, there's a time fraction where nock is still loaded and further calls hit it, that means, no interceptor is defined for arbitrary endpoints ---> nock reject request
+            // cleanAll must be called here, because 'afterEach' || 'after' hooks are called immediately, but promise resolves before, so, there's a time fraction where nock is still loaded and further calls hit it, that means, no interceptor is defined for arbitrary endpoints ---> nock reject request
             nock.cleanAll(); 
+            nock.restore();
           })  
           .should.notify(done); 
       });
