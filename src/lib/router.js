@@ -43,7 +43,8 @@ function analyzePhrase (acc) {
  * @return {[type]}             [description]
  */
 function executePhraseById (req, res, next, routeItem) {
-  var params = {
+
+  var params = executionMode({
     corbelDriver: req.corbelDriver,
     req: req,
     res: res,
@@ -51,12 +52,14 @@ function executePhraseById (req, res, next, routeItem) {
     browser: true,
     timeout: config('phrases.timeout'),
     server: 'restify'
-  }
+  })
+
 
   hub.emit('phrase:execution:start', routeItem.domain, routeItem.id, routeItem.verb)
 
   return engine.composr.Phrases.runById(routeItem.domain, routeItem.id, routeItem.verb, params)
     .then(function (response) {
+      enforceGC()
       hub.emit('phrase:execution:end', response.status, routeItem.domain, routeItem.id, routeItem.verb)
       return next()
     })
@@ -71,6 +74,29 @@ function executePhraseById (req, res, next, routeItem) {
       hub.emit('phrase:execution:end', status, routeItem.domain, routeItem.id, routeItem.verb)
       return next(err)
     })
+}
+
+/**
+ * Set composr-core execution phrases with Node VM
+ * @param  {Object} params execution configuration
+ * @return {Object} modified execution params
+ */
+function executionMode(params){
+    if(config('execution.vm') === 'true'){
+        params.browser = false
+    }
+
+    return params
+}
+
+/**
+ * Enforce run Garbage Collector every phrase execution
+ * @return {[type]} [description]
+ */
+function enforceGC(){
+    if(config('execution.gc') === 'true'){
+        global.gc()
+    }
 }
 
 /**
