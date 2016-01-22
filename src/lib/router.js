@@ -7,6 +7,7 @@ var config = require('./config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
 var ComposrError = require('./ComposrError')
 var phraseUtils = require('../utils/phraseUtils')
+var _ = require('lodash')
 
 /* *
  * [analyzePhrase description]
@@ -94,8 +95,8 @@ function executionMode(params){
  * @return {[type]} [description]
  */
 function enforceGC(){
-    if(config('execution.gc') === 'true'){
-        global.gc()
+    if(config('execution.gc') === 'true' && !!global.gc){
+      global.gc()
     }
 }
 
