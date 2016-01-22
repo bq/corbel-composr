@@ -7,7 +7,6 @@ var config = require('./config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
 var ComposrError = require('./ComposrError')
 var phraseUtils = require('../utils/phraseUtils')
-var _ = require('lodash')
 
 /* *
  * [analyzePhrase description]
