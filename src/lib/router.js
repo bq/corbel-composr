@@ -96,14 +96,11 @@ function authCorbelHook (req, res, next) {
   var authorization = req.headers.authorization
 
   var corbelDriver = connection.getTokenDriver(authorization, true)
-  corbelDriver.on('request', function () {
-    logger.debug(arguments)
-    console.log('--------------')
-    console.dir(arguments)
-    console.log('--------------')
-  })
-  // var caller = req.params.name || 'caller'
-  // req.log.debug('caller is "%s"', caller)
+  if (config('composrLog.logLevel') === 'debug') {
+    corbelDriver.on('request', function () {
+      logger.debug(arguments)
+    })
+  }
 
   req.corbelDriver = corbelDriver
 
