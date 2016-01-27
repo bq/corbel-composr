@@ -135,6 +135,10 @@ if (isDefinedConfigValue(process.env.RABBITMQ_PASSWORD)) {
   initialConfig['rabbitmq.password'] = process.env.RABBITMQ_PASSWORD
 }
 
+if (isDefinedConfigValue(process.env.RABBITMQ_FORCE_CONNECT)) {
+  initialConfig['rabbitmq.forceconnect'] = JSON.parse(process.env.RABBITMQ_FORCE_CONNECT)
+}
+
 if (isDefinedConfigValue(process.env.KEYMETRICS)) {
   initialConfig.keymetrics = JSON.parse(process.env.KEYMETRICS)
 }

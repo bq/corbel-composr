@@ -1,6 +1,5 @@
 'use strict'
 
-var engine = require('./engine')
 var corbelConnection = require('./corbelConnection')
 var amqp = require('amqplib')
 var uuid = require('uuid')
@@ -9,9 +8,12 @@ var config = require('./config')
 var logger = require('../utils/composrLogger')
 var hub = require('./hub')
 
-function Worker () {
+function Worker (engine) {
+  var that = this;
   this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=30'
   this.workerID = uuid.v4()
+  this.engine = engine;
+  this.connectionStatus = false
 }
 
 Worker.prototype.phraseOrSnippet = function (type) {
@@ -26,47 +28,49 @@ Worker.prototype.isSnippet = function (type) {
   return type === corbelConnection.SNIPPETS_COLLECTION
 }
 
-Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action, engine) {
+Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action) {
   var domain = id.split('!')[0]
+  var that = this
   switch (action) {
     case 'DELETE':
+      logger.debug('WORKER triggered DELETE event', id, 'domain:' + domain)
       if (itemIsPhrase) {
-        engine.composr.Phrases.unregister(domain, id)
-        engine.composr.removePhrasesFromDataStructure(id)
+        this.engine.composr.Phrases.unregister(domain, id)
+        this.engine.composr.removePhrasesFromDataStructure(id)
       } else {
-        engine.composr.Snippets.unregister(domain, id)
-        engine.composr.removeSnippetsFromDataStructure(id)
+        this.engine.composr.Snippets.unregister(domain, id)
+        this.engine.composr.removeSnippetsFromDataStructure(id)
       }
       // ch.ack(msg)
       break
 
-    case 'CREATE': // TODO remove?
+    case 'CREATE':
     case 'UPDATE':
-      logger.debug('WORKER triggered create or update event', id, 'domain:' + domain)
+      logger.debug('WORKER triggered CREATE or UPDATE event', id, 'domain:' + domain)
       var promise
       var itemToAdd
 
       if (itemIsPhrase) {
-        promise = engine.composr.loadPhrase(id)
+        promise = this.engine.composr.loadPhrase(id)
       } else {
-        promise = engine.composr.loadSnippet(id)
+        promise = this.engine.composr.loadSnippet(id)
       }
       promise
         .then(function (item) {
           logger.debug('worker item fetched', item.id)
           itemToAdd = item
           if (itemIsPhrase) {
-            return engine.composr.Phrases.register(domain, item)
+            return that.engine.composr.Phrases.register(domain, item)
           } else {
-            return engine.composr.Snippets.register(domain, item)
+            return that.engine.composr.Snippets.register(domain, item)
           }
         })
         .then(function (result) {
           if (result.registered === true) {
             if (itemIsPhrase) {
-              engine.composr.addPhrasesToDataStructure(itemToAdd)
+              that.engine.composr.addPhrasesToDataStructure(itemToAdd)
             } else {
-              engine.composr.addSnippetsToDataStructure(itemToAdd)
+              that.engine.composr.addSnippetsToDataStructure(itemToAdd)
             }
           }
           logger.debug('worker item registered', id, result.registered)
@@ -94,14 +98,14 @@ Worker.prototype.doWork = function (ch, msg) {
     if (this.isPhrase(type) || this.isSnippet(type)) {
       var itemIsPhrase = this.isPhrase(type)
       logger.debug('WORKER ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
-      this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action, engine)
+      this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action)
     }
   }
 }
 
 Worker.prototype.createChannel = function (conn) {
   var that = this
-  var queue = 'composer-' + that.workerID
+  var queue = config('serverName') + that.workerID
   var exchange = 'eventbus.exchange'
   var pattern = ''
 
@@ -110,9 +114,10 @@ Worker.prototype.createChannel = function (conn) {
       return ch.assertQueue(queue, {
         durable: false,
         autoDelete: true
-      }).then(function () {
-        return ch.bindQueue(queue, exchange, pattern)
       })
+        .then(function () {
+          return ch.bindQueue(queue, exchange, pattern)
+        })
         .then(function () {
           ch.consume(queue, function (message) {
             // Added callback function in case we need to do manual ack of the messages
@@ -126,17 +131,21 @@ Worker.prototype.createChannel = function (conn) {
 }
 
 Worker.prototype._closeConnectionSIGINT = function (connection) {
+  var that = this;
+  logger.warn('RABBIT closing connection')
   process.once('SIGINT', function () {
     connection.close()
+    that.connectionStatus = false
     process.exit()
-    engine.setWorkerStatus(false)
   })
 }
 
 Worker.prototype._closeConnection = function (connection) {
+  var that = this;
+  logger.warn('RABBIT closing connection')
   connection.close(function () {
+    that.connectionStatus = false
     process.exit(1)
-    engine.setWorkerStatus(false)
   })
 }
 
@@ -155,12 +164,13 @@ Worker.prototype.init = function () {
   var conn
   var that = this
   logger.info('Creating worker with ID', that.workerID)
+
   that._connect()
     .then(function (connection) {
       // Bind connection errror
       connection.on('error', function (error) {
-        logger.error('WORKER', error)
-        engine.setWorkerStatus(false)
+        logger.error('RABBIT', error)
+        that.connectionStatus = false
         that.init()
       })
 
@@ -168,7 +178,7 @@ Worker.prototype.init = function () {
       that._closeConnectionSIGINT(connection)
       that.createChannel(connection)
         .then(function () {
-          engine.setWorkerStatus(true)
+          that.connectionStatus = true
           logger.info('Worker up, with ID', that.workerID)
           // emit loaded worker
           hub.emit('load:worker')

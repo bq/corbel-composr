@@ -9,10 +9,8 @@ try {
   var server = restify.createServer(srvConf)
   require('./lib/router')(server)
   var engine = require('./lib/engine')
-  var WorkerClass = require('./lib/worker')
   var config = require('./lib/config')
   var configChecker = require('./utils/envConfigChecker')
-  var worker = new WorkerClass()
   var logger = require('./utils/composrLogger')
   var ComposrError = require('./lib/ComposrError')
 
@@ -71,9 +69,6 @@ try {
   /* ************************************
     Initialization
   **************************************/
-
-  // Trigger the worker execution
-  worker.init()
 
   // Trigger the static routes creation
   hub.emit('create:staticRoutes', server)

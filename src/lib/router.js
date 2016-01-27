@@ -98,7 +98,7 @@ function authCorbelHook (req, res, next) {
   var corbelDriver = connection.getTokenDriver(authorization, true)
   if (config('composrLog.logLevel') === 'debug') {
     corbelDriver.on('request', function () {
-      logger.debug(arguments)
+      logger.debug('>>> corbelDriver request: ', arguments)
     })
   }
 
@@ -204,7 +204,7 @@ function listAllRoutes (server) {
 
 module.exports = function (server) {
   hub.on('create:routes', function (phrases) {
-    logger.debug('=========== CREATING ENDPOINTS ROUTES ===========')
+    logger.debug('Creting or updating endpoints...')
 
     if (!Array.isArray(phrases)) {
       phrases = [phrases]
@@ -212,22 +212,17 @@ module.exports = function (server) {
 
     createRoutes(phrases, function (routeObjects) {
       bindRoutes(server, routeObjects)
-      if (config('env') === 'development') {
-        listAllRoutes(server)
-      }
     })
   })
 
   hub.once('create:staticRoutes', function (server) {
-    logger.info('=========== CREATING STATIC ROUTES ===========')
+    logger.info('Creating static routes...')
     require('../routes')(server)
   })
 
   hub.on('remove:route', function (url) {
     logger.debug('=========== REMOVE ROUTE ===========', url)
-  })
-
-  hub.once('load:worker', function () {
-    logger.debug('=========== LOAD WORKER ===========')
+    // Restify doesn't support removing routes on the fly, instead return a 404
+    listAllRoutes()
   })
 }

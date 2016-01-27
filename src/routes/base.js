@@ -4,15 +4,16 @@ var config = require('../lib/config')
 var engine = require('../lib/engine')
 var https = require('https')
 var packageJSON = require('../../package.json')
+var phraseUtils = require('../utils/phraseUtils')
 var _ = require('lodash')
 
-function check (req, res) {
+function checkServerStatus (req, res) {
   var phrases = engine.composr.data.phrases
 
   var domain = req.params.domain
   if (domain) {
     phrases = phrases.filter(function (item) {
-      return item.id.split('!')[0] === domain
+      return phraseUtils.extractDomainFromId(item.id) === domain
     })
   }
 
@@ -24,64 +25,65 @@ function check (req, res) {
   }
 
   var phrasesLoaded = phrases.length
+  var domains = _.uniq(phrases.map(function(item){
+    return phraseUtils.extractDomainFromId(item.id)
+  }));
 
-  var statuses = {
-    'phrases': phrasesLoaded > 0,
-    'phrasesLoaded': phrasesLoaded,
-    'worker': engine.getWorkerStatus()
+  var serverStatus = {
+    env: config('env'),
+    domains: domains,
+    domain: req.params.domain,
+    version: packageJSON.version,
+    statuses: {
+      'phrases': phrasesLoaded > 0,
+      'phrasesLoaded': phrasesLoaded,
+      'worker': engine.getWorkerStatus(),
+    }
   }
 
   var modules = ['iam', 'resources']
   var path = config('corbel.driver.options').urlBase
 
   var promises = modules.map(function (module) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       https.get(path.replace('{{module}}', module) + '/version', function () {
-        statuses[module] = true
+        serverStatus.statuses[module] = true
         resolve()
       })
         .on('error', function () {
-          statuses[module] = false
-          reject()
+          serverStatus.statuses[module] = false
+          resolve()
         })
     })
   })
 
   return Promise.all(promises)
     .then(function () {
-      return statuses
+      return serverStatus
     })
     .catch(function () {
-      return statuses
+      return serverStatus
     })
 }
 
 function status (req, res) {
-  return check(req, res).then(function (statuses) {
-    res.send(200, {
-      version: packageJSON.version,
-      domain: req.params.domain,
-      statuses: statuses
-    })
+  return checkServerStatus(req, res)
+  .then(function (serverStatus) {
+    res.send(200, serverStatus)
   })
 }
 
 function healthcheck (req, res) {
-  return check(req, res).then(function (statuses) {
-    var errors = _.filter(statuses, function (status) {
+  return checkServerStatus(req, res)
+  .then(function (serverStatus) {
+    var errors = _.filter(serverStatus.statuses, function (status) {
       return !status === true
     })
 
-    var response = {
-      version: packageJSON.version,
-      domain: req.params.domain,
-      statuses: statuses
-    }
-
     if (errors.length > 0) {
-      res.send(500, response)
+      res.send(500, serverStatus)
     } else {
-      res.send(200, response)
+      res.send(200, serverStatus)
     }
   })
 }

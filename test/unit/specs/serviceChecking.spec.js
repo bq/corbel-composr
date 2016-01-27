@@ -58,7 +58,7 @@ describe('Engine', function() {
         stubOnComposrInit.returns(Promise.resolve());
         stubInitServiceChecking.returns([Promise.resolve()]);
 
-        engine.launchTries()
+        engine.waitUntilCorbelIsReady()
           .should.be.fulfilled
           .then(function() {
             engine.initComposrCore(null, true);
@@ -74,18 +74,18 @@ describe('Engine', function() {
 
         var stubOnComposrInit = mySandbox.stub(engine, 'initComposrCore');
         var stubInitServiceChecking = mySandbox.stub(engine, 'initServiceCheckingRequests');
-        var spyWaitTilServicesUp = mySandbox.spy(engine, 'waitTilServicesUp');
+        var spyModulesReady = mySandbox.spy(engine, '_waitUntilCorbelModulesReady');
         stubOnComposrInit.returns(Promise.reject());
         stubInitServiceChecking.returns([Promise.reject()])
 
-        engine.launchTries(50,3)
+        engine.waitUntilCorbelIsReady(50,3)
           .should.be.rejected
           .then(function() {
             engine.initComposrCore(null, false)
               .should.be.rejected
           })
           .then(function() {
-            expect(spyWaitTilServicesUp.callCount === 3).to.be.true;
+            expect(spyModulesReady.callCount === 3).to.be.true;
             expect(stubOnComposrInit.calledOnce).to.be.true;
             expect(stubOnComposrInit.lastCall.args[1] === false).to.be.true;
           })
@@ -96,7 +96,7 @@ describe('Engine', function() {
 
         var stubOnComposrInit = mySandbox.stub(engine, 'initComposrCore');
         var stubInitServiceChecking = mySandbox.stub(engine, 'initServiceCheckingRequests');
-        var spyWaitTilServicesUp = mySandbox.spy(engine, 'waitTilServicesUp');
+        var spyModulesReady = mySandbox.spy(engine, '_waitUntilCorbelModulesReady');
 
         stubInitServiceChecking.onCall(0).returns([Promise.reject()]);
         stubInitServiceChecking.onCall(1).returns([Promise.reject()]);
@@ -104,14 +104,14 @@ describe('Engine', function() {
         stubInitServiceChecking.onCall(3).returns([Promise.resolve()]);
         stubOnComposrInit.returns(Promise.resolve());
 
-        engine.launchTries(50,3)
+        engine.waitUntilCorbelIsReady(50,3)
           .should.be.rejected
           .then(function() {
             engine.initComposrCore(null, false)
               .should.be.fulfilled
           })
           .then(function() {
-            engine.launchTries(50,3)
+            engine.waitUntilCorbelIsReady(50,3)
               .should.be.fulfilled;
           })
           .then(function() {
@@ -120,7 +120,7 @@ describe('Engine', function() {
           })
           .then(function() {
             expect(stubInitServiceChecking.callCount === 4).to.be.true;
-            expect(spyWaitTilServicesUp.callCount === 4).to.be.true;
+            expect(spyModulesReady.callCount === 4).to.be.true;
             expect(stubOnComposrInit.calledTwice).to.be.true;
             expect(stubOnComposrInit.firstCall.args[1] === false).to.be.true;
             expect(stubOnComposrInit.secondCall.args[1] === true).to.be.true;
