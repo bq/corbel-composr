@@ -43,7 +43,6 @@ function analyzePhrase (acc) {
  * @return {[type]}             [description]
  */
 function executePhraseById (req, res, next, routeItem) {
-
   var params = executionMode({
     corbelDriver: req.corbelDriver,
     req: req,
@@ -53,7 +52,6 @@ function executePhraseById (req, res, next, routeItem) {
     timeout: config('phrases.timeout'),
     server: 'restify'
   })
-
 
   hub.emit('phrase:execution:start', routeItem.domain, routeItem.id, routeItem.verb)
 
@@ -81,22 +79,22 @@ function executePhraseById (req, res, next, routeItem) {
  * @param  {Object} params execution configuration
  * @return {Object} modified execution params
  */
-function executionMode(params){
-    if(config('execution.vm') === 'true'){
-        params.browser = false
-    }
+function executionMode (params) {
+  if (config('execution.vm')) {
+    params.browser = false
+  }
 
-    return params
+  return params
 }
 
 /**
  * Enforce run Garbage Collector every phrase execution
  * @return {[type]} [description]
  */
-function enforceGC(){
-    if(config('execution.gc') === 'true' && !!global.gc){
-      global.gc()
-    }
+function enforceGC () {
+  if (config('execution.gc') && !!global.gc) {
+    global.gc()
+  }
 }
 
 /**
