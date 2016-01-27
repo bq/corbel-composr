@@ -162,6 +162,14 @@ if (isDefinedConfigValue(process.env.SERVICES_RETRIES)) {
 if (isDefinedConfigValue(process.env.SERVICES_TIME)) {
   initialConfig['services.time'] = process.env.SERVICES_TIME
 }
+// Set composr-core execution phrases with Node VM
+if (isDefinedConfigValue(process.env.EXEC_WITH_VM)) {
+  initialConfig['execution.vm'] = JSON.parse(process.env.EXEC_WITH_VM) || false
+}
+// Enforce run Garbage Collector every phrase execution
+if (isDefinedConfigValue(process.env.ENFORCE_GC)) {
+  initialConfig['execution.gc'] = JSON.parse(process.env.ENFORCE_GC)
+}
 
 // Sanitize BASE_URL forcing to always end with '/'
 var lastCharUrlBase = initialConfig['corbel.driver.options'].urlBase.split('').pop()
