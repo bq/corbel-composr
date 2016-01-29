@@ -117,7 +117,6 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action
 }
 
 Worker.prototype.doWork = function (ch, msg) {
-
   if (msg.fields.routingKey === config('rabbitmq.event')) {
     var message
     try {
@@ -203,17 +202,17 @@ Worker.prototype.init = function () {
       connection.on('error', function (error) {
         logger.error('RabbitMQ-worker', error)
         that.connectionStatus = false
-        
-        setTimeout(function(){
-          that.init();
+
+        setTimeout(function () {
+          that.init()
         }, 4000)
       })
 
       connection.on('close', function (error) {
         logger.error('RabbitMQ-worker connection closed', error)
         that.connectionStatus = false
-        setTimeout(function(){
-          that.init();
+        setTimeout(function () {
+          that.init()
         }, 4000)
       })
 
