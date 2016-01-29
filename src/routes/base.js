@@ -25,9 +25,9 @@ function checkServerStatus (req, res) {
   }
 
   var phrasesLoaded = phrases.length
-  var domains = _.uniq(phrases.map(function(item){
+  var domains = _.uniq(phrases.map(function (item) {
     return phraseUtils.extractDomainFromId(item.id)
-  }));
+  }))
 
   var serverStatus = {
     env: config('env'),
@@ -37,7 +37,7 @@ function checkServerStatus (req, res) {
     statuses: {
       'phrases': phrasesLoaded > 0,
       'phrasesLoaded': phrasesLoaded,
-      'worker': engine.getWorkerStatus(),
+      'worker': engine.getWorkerStatus()
     }
   }
 
@@ -68,24 +68,24 @@ function checkServerStatus (req, res) {
 
 function status (req, res) {
   return checkServerStatus(req, res)
-  .then(function (serverStatus) {
-    res.send(200, serverStatus)
-  })
+    .then(function (serverStatus) {
+      res.send(200, serverStatus)
+    })
 }
 
 function healthcheck (req, res) {
   return checkServerStatus(req, res)
-  .then(function (serverStatus) {
-    var errors = _.filter(serverStatus.statuses, function (status) {
-      return !status === true
-    })
+    .then(function (serverStatus) {
+      var errors = _.filter(serverStatus.statuses, function (status) {
+        return !status === true
+      })
 
-    if (errors.length > 0) {
-      res.send(500, serverStatus)
-    } else {
-      res.send(200, serverStatus)
-    }
-  })
+      if (errors.length > 0) {
+        res.send(500, serverStatus)
+      } else {
+        res.send(200, serverStatus)
+      }
+    })
 }
 
 module.exports = function (server) {

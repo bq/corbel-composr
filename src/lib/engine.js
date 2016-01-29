@@ -10,7 +10,6 @@ var WorkerClass = require('./worker')
 var worker = new WorkerClass()
 
 var engine = {
-
   /* ***********************************************************
    * - Suscribes to the Composr-Core log events
    * @return nothing
@@ -177,7 +176,6 @@ var engine = {
       retries = config('services.retries')
     }
 
-
     return new Promise(function (resolve, reject) {
       function launch (retries) {
         if (!retries) {
@@ -199,7 +197,7 @@ var engine = {
     })
   },
 
-  _waitUntilCorbelIsReadyAndFetchData:  function () {
+  _waitUntilCorbelIsReadyAndFetchData: function (retries) {
     engine.waitUntilCorbelIsReady(retries)
       .then(function () {
         logger.info('Data is available, fetching')
@@ -220,26 +218,26 @@ var engine = {
   init: function (app) {
     var dfd = q.defer()
 
-    hub.on('corbel:ready', function(){
+    hub.on('corbel:ready', function () {
       engine.launchWithData(app, dfd)
     })
 
-    hub.on('corbel:not:ready', function(){
+    hub.on('corbel:not:ready', function () {
       engine.launchWithoutData(app, dfd)
     })
 
     // Suscribe to log events
     engine.suscribeToCoreEvents()
 
-    //Launch the worker
-    worker.init(this);
+    // Launch the worker
+    worker.init(this)
 
-    if(config('rabbitmq.forceconnect')){
+    if (config('rabbitmq.forceconnect')) {
       logger.info('>>> The server will start after RabbitMQ is connected')
-      hub.on('load:worker', function(){
-        engine._init(app, dfd);
+      hub.on('load:worker', function () {
+        engine._init(app, dfd)
       })
-    }else{
+    } else {
       logger.info('>>> The server will start even if RabbitMQ is NOT connected')
       engine._init(app, dfd)
     }
@@ -247,43 +245,43 @@ var engine = {
     return dfd.promise
   },
 
-  launchWithData: function(app, promise){
+  launchWithData: function (app, promise) {
     engine.initComposrCore(engine.getComposrCoreCredentials(), true)
-    .then(function () {
-      promise.resolve({
-        app: app,
-        composr: engine.composr,
-        initialized: engine.initialized
+      .then(function () {
+        promise.resolve({
+          app: app,
+          composr: engine.composr,
+          initialized: engine.initialized
+        })
       })
-    })
-    .catch(promise.reject)
+      .catch(promise.reject)
   },
 
-  launchWithoutData: function(app, promise){
+  launchWithoutData: function (app, promise) {
     var retries = config('services.retries')
 
     engine.initComposrCore(engine.getComposrCoreCredentials(), false)
-    .then(function () {
-      promise.resolve({
-        app: app,
-        composr: engine.composr,
-        initialized: engine.initialized
+      .then(function () {
+        promise.resolve({
+          app: app,
+          composr: engine.composr,
+          initialized: engine.initialized
+        })
+        logger.info('The server is launched, delaying the fetch data')
+        engine._waitUntilCorbelIsReadyAndFetchData(retries)
       })
-      logger.info('The server is launched, delaying the fetch data')
-      engine._waitUntilCorbelIsReadyAndFetchData()
-    })
-    .catch(promise.reject)
+      .catch(promise.reject)
   },
 
-  _init : function(app, promise){
+  _init: function (app, promise) {
     var retries = config('services.retries')
 
     engine.waitUntilCorbelIsReady(retries)
       .then(function () {
-        hub.emit('corbel:ready');
+        hub.emit('corbel:ready')
       })
       .catch(function () {
-        hub.emit('corbel:not:ready');
+        hub.emit('corbel:not:ready')
       })
   },
 
