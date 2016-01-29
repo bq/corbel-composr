@@ -238,7 +238,7 @@ var engine = {
         engine._init(app, dfd)
       })
     } else {
-      logger.info('>>> The server will start even if RabbitMQ is NOT connected')
+      logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
       engine._init(app, dfd)
     }
 

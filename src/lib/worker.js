@@ -10,7 +10,7 @@ var hub = require('./hub')
 var utils = require('../utils/phraseUtils')
 
 function Worker (engine) {
-  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=30'
+  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=1'
   this.workerID = uuid.v4()
   this.engine = engine
   this.connectionStatus = false
@@ -28,9 +28,9 @@ Worker.prototype.isSnippet = function (type) {
  * Fired when an event of CREATE phrase gets received
  * Returns Promise
  ***********************************/
-Worker.prototype._addPhrase = function(domain, id){
-  var itemToAdd;
-  var that = this;
+Worker.prototype._addPhrase = function (domain, id) {
+  var itemToAdd
+  var that = this
   return this.engine.composr.loadPhrase(id)
     .then(function (item) {
       logger.debug('RabbitMQ-worker item fetched', item.id)
@@ -41,17 +41,17 @@ Worker.prototype._addPhrase = function(domain, id){
       if (result.registered === true) {
         that.engine.composr.addPhrasesToDataStructure(itemToAdd)
       }
-      return result.registered;
-    });
-};
+      return result.registered
+    })
+}
 
 /* *********************************
  * Fired when an event of CREATE snippet gets received
  * Returns Promise
  ***********************************/
-Worker.prototype._addSnippet = function(domain, id){
-  var itemToAdd;
-  var that = this;
+Worker.prototype._addSnippet = function (domain, id) {
+  var itemToAdd
+  var that = this
   return this.engine.composr.loadSnippet(id)
     .then(function (item) {
       logger.debug('RabbitMQ-worker item fetched', item.id)
@@ -62,30 +62,28 @@ Worker.prototype._addSnippet = function(domain, id){
       if (result.registered === true) {
         that.engine.composr.addSnippetsToDataStructure(itemToAdd)
       }
-      return result.registered;
-    });
-};
-
+      return result.registered
+    })
+}
 
 /* *********************************
  * Fired when an event of DELETE phrase gets received
  ***********************************/
-Worker.prototype._removePhrase = function(domain, id){
+Worker.prototype._removePhrase = function (domain, id) {
   this.engine.composr.Phrases.unregister(domain, id)
   this.engine.composr.removePhrasesFromDataStructure(id)
-};
+}
 
 /* *********************************
  * Fired when an event of DELETE snippet gets received
  ***********************************/
-Worker.prototype._removeSnippet = function(domain, id){
+Worker.prototype._removeSnippet = function (domain, id) {
   this.engine.composr.Snippets.unregister(domain, id)
   this.engine.composr.removeSnippetsFromDataStructure(id)
-};
+}
 
 Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action) {
   var domain = utils.extractDomainFromId(id)
-  var that = this
   switch (action) {
     case 'DELETE':
       logger.debug('RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
@@ -93,32 +91,33 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action
       if (itemIsPhrase) {
         this._removePhrase(domain, id)
       } else {
-        this._removeSnippet(domain, id) 
+        this._removeSnippet(domain, id)
       }
       break
 
     case 'CREATE':
     case 'UPDATE':
       logger.debug('RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
-      
-      var promise = itemIsPhrase ? this._addPhrase(domain, id) : this._addSnippet(domain, id);
+
+      var promise = itemIsPhrase ? this._addPhrase(domain, id) : this._addSnippet(domain, id)
 
       promise
-        .then(function(registered){
+        .then(function (registered) {
           logger.debug('RabbitMQ-worker item registered', id, registered)
         })
         .catch(function (err) {
           logger.error('RabbitMQ-worker error: ', err.data.error, err.data.errorDescription, err.status)
         })
-      
+
       break
 
     default:
-      logger.warn('WORKER error: wrong action ', action)
+      logger.warn('RabbitMQ-worker error: wrong action ', action)
   }
 }
 
 Worker.prototype.doWork = function (ch, msg) {
+
   if (msg.fields.routingKey === config('rabbitmq.event')) {
     var message
     try {
@@ -165,8 +164,8 @@ Worker.prototype.createChannel = function (conn) {
 
 Worker.prototype._closeConnectionSIGINT = function (connection) {
   var that = this
-  logger.warn('RabbitMQ-worker closing connection')
   process.once('SIGINT', function () {
+    logger.error('RabbitMQ-worker closing connection')
     connection.close()
     that.connectionStatus = false
     process.exit()
@@ -175,8 +174,8 @@ Worker.prototype._closeConnectionSIGINT = function (connection) {
 
 Worker.prototype._closeConnection = function (connection) {
   var that = this
-  logger.warn('RabbitMQ-worker closing connection')
   connection.close(function () {
+    logger.error('RabbitMQ-worker closing connection')
     that.connectionStatus = false
     process.exit(1)
   })
@@ -204,7 +203,18 @@ Worker.prototype.init = function () {
       connection.on('error', function (error) {
         logger.error('RabbitMQ-worker', error)
         that.connectionStatus = false
-        that.init()
+        
+        setTimeout(function(){
+          that.init();
+        }, 4000)
+      })
+
+      connection.on('close', function (error) {
+        logger.error('RabbitMQ-worker connection closed', error)
+        that.connectionStatus = false
+        setTimeout(function(){
+          that.init();
+        }, 4000)
       })
 
       conn = connection
@@ -217,14 +227,15 @@ Worker.prototype.init = function () {
           hub.emit('load:worker')
         })
         .catch(function (error) {
-          logger.error('RabbitMQ-worker error ', error, 'with ID', that.workerID)
+          logger.error('RabbitMQ-worker error channel', error, 'with ID', that.workerID)
           if (conn) {
             that._closeConnection(conn)
           }
+          that.retryInit()
         })
     })
     .then(null, function (err) {
-      logger.error('RabbitMQ-worker error %s with ID : %s', err, that.workerID)
+      logger.error('RabbitMQ-worker error connection %s with ID : %s', err, that.workerID)
       that.retryInit()
     })
 }
