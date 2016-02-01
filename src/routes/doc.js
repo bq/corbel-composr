@@ -6,15 +6,14 @@ var ComposrError = require('../lib/ComposrError')
 var noSnippetsTemplate = '<div class="alert alert-info">No snippets for domain {0}</div>'
 var titleTemplate = '<h1>Domain {0}</h1>'
 var bootstrap = '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" ' +
-  'integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">';
-
+  'integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">'
 
 module.exports = function (server) {
   server.get('/doc/:domain/', serveDocumentation)
   server.get('/doc/:domain/:version/', serveDocumentation)
   server.get('/snippets/:domain', snippetsDoc)
 
-  function serveDocumentation(req, res, next) {
+  function serveDocumentation (req, res, next) {
     var domain = req.params.domain || ''
     // TODO move to core
     var rawPhrases = engine.composr.data.phrases
@@ -43,7 +42,7 @@ module.exports = function (server) {
       })
   }
 
-  function snippetsDoc(req, res, next) {
+  function snippetsDoc (req, res, next) {
     var domain = req.params.domain || ''
     var snippets = engine.composr.data.snippets
     snippets = snippets.filter(function (item) {
@@ -63,7 +62,7 @@ module.exports = function (server) {
       body += noSnippetsTemplate.replace('{0}', domain)
     }
 
-    body += '</body></html>';
+    body += '</body></html>'
 
     res.writeHead(200, {
       'Content-Length': Buffer.byteLength(body),
@@ -74,16 +73,15 @@ module.exports = function (server) {
   }
 
   var titleRow =
-    '<tr class="success">' +
+  '<tr class="success">' +
     '<th>' + 'Snippet' + '</th>' +
     '<th>' + 'Last updated' + '</th>' +
     '</tr>'
 
-  function row(snippet) {
+  function row (snippet) {
     return '<tr>' +
-      '<td>' + snippet.id.split('!')[1] + '</td>' +
-      '<td>' + new Date(snippet._updatedAt) + '</td>' +
-      '</tr>'
+    '<td>' + snippet.id.split('!')[1] + '</td>' +
+    '<td>' + new Date(snippet._updatedAt) + '</td>' +
+    '</tr>'
   }
-
 }
