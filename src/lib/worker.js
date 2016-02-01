@@ -1,6 +1,5 @@
 'use strict'
 
-var engine = require('./engine')
 var corbelConnection = require('./corbelConnection')
 var amqp = require('amqplib')
 var uuid = require('uuid')
@@ -8,14 +7,13 @@ var ComposrError = require('./ComposrError')
 var config = require('./config')
 var logger = require('../utils/composrLogger')
 var hub = require('./hub')
+var utils = require('../utils/phraseUtils')
 
-function Worker () {
-  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=30'
+function Worker (engine) {
+  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=1'
   this.workerID = uuid.v4()
-}
-
-Worker.prototype.phraseOrSnippet = function (type) {
-  return type === corbelConnection.PHRASES_COLLECTION
+  this.engine = engine
+  this.connectionStatus = false
 }
 
 Worker.prototype.isPhrase = function (type) {
@@ -26,58 +24,95 @@ Worker.prototype.isSnippet = function (type) {
   return type === corbelConnection.SNIPPETS_COLLECTION
 }
 
-Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action, engine) {
-  var domain = id.split('!')[0]
+/* *********************************
+ * Fired when an event of CREATE phrase gets received
+ * Returns Promise
+ ***********************************/
+Worker.prototype._addPhrase = function (domain, id) {
+  var itemToAdd
+  var that = this
+  return this.engine.composr.loadPhrase(id)
+    .then(function (item) {
+      logger.debug('RabbitMQ-worker item fetched', item.id)
+      itemToAdd = item
+      return that.engine.composr.Phrases.register(domain, item)
+    })
+    .then(function (result) {
+      if (result.registered === true) {
+        that.engine.composr.addPhrasesToDataStructure(itemToAdd)
+      }
+      return result.registered
+    })
+}
+
+/* *********************************
+ * Fired when an event of CREATE snippet gets received
+ * Returns Promise
+ ***********************************/
+Worker.prototype._addSnippet = function (domain, id) {
+  var itemToAdd
+  var that = this
+  return this.engine.composr.loadSnippet(id)
+    .then(function (item) {
+      logger.debug('RabbitMQ-worker item fetched', item.id)
+      itemToAdd = item
+      return that.engine.composr.Snippets.register(domain, item)
+    })
+    .then(function (result) {
+      if (result.registered === true) {
+        that.engine.composr.addSnippetsToDataStructure(itemToAdd)
+      }
+      return result.registered
+    })
+}
+
+/* *********************************
+ * Fired when an event of DELETE phrase gets received
+ ***********************************/
+Worker.prototype._removePhrase = function (domain, id) {
+  this.engine.composr.Phrases.unregister(domain, id)
+  this.engine.composr.removePhrasesFromDataStructure(id)
+}
+
+/* *********************************
+ * Fired when an event of DELETE snippet gets received
+ ***********************************/
+Worker.prototype._removeSnippet = function (domain, id) {
+  this.engine.composr.Snippets.unregister(domain, id)
+  this.engine.composr.removeSnippetsFromDataStructure(id)
+}
+
+Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action) {
+  var domain = utils.extractDomainFromId(id)
   switch (action) {
     case 'DELETE':
+      logger.debug('RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
+
       if (itemIsPhrase) {
-        engine.composr.Phrases.unregister(domain, id)
-        engine.composr.removePhrasesFromDataStructure(id)
+        this._removePhrase(domain, id)
       } else {
-        engine.composr.Snippets.unregister(domain, id)
-        engine.composr.removeSnippetsFromDataStructure(id)
+        this._removeSnippet(domain, id)
       }
-      // ch.ack(msg)
       break
 
-    case 'CREATE': // TODO remove?
+    case 'CREATE':
     case 'UPDATE':
-      logger.debug('WORKER triggered create or update event', id, 'domain:' + domain)
-      var promise
-      var itemToAdd
+      logger.debug('RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
 
-      if (itemIsPhrase) {
-        promise = engine.composr.loadPhrase(id)
-      } else {
-        promise = engine.composr.loadSnippet(id)
-      }
+      var promise = itemIsPhrase ? this._addPhrase(domain, id) : this._addSnippet(domain, id)
+
       promise
-        .then(function (item) {
-          logger.debug('worker item fetched', item.id)
-          itemToAdd = item
-          if (itemIsPhrase) {
-            return engine.composr.Phrases.register(domain, item)
-          } else {
-            return engine.composr.Snippets.register(domain, item)
-          }
-        })
-        .then(function (result) {
-          if (result.registered === true) {
-            if (itemIsPhrase) {
-              engine.composr.addPhrasesToDataStructure(itemToAdd)
-            } else {
-              engine.composr.addSnippetsToDataStructure(itemToAdd)
-            }
-          }
-          logger.debug('worker item registered', id, result.registered)
+        .then(function (registered) {
+          logger.debug('RabbitMQ-worker item registered', id, registered)
         })
         .catch(function (err) {
-          logger.error('WORKER error: ', err.data.error, err.data.errorDescription, err.status)
+          logger.error('RabbitMQ-worker error: ', err.data.error, err.data.errorDescription, err.status)
         })
+
       break
 
     default:
-      logger.warn('WORKER error: wrong action ', action)
+      logger.warn('RabbitMQ-worker error: wrong action ', action)
   }
 }
 
@@ -93,15 +128,15 @@ Worker.prototype.doWork = function (ch, msg) {
     var type = message.type
     if (this.isPhrase(type) || this.isSnippet(type)) {
       var itemIsPhrase = this.isPhrase(type)
-      logger.debug('WORKER ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
-      this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action, engine)
+      logger.debug('RabbitMQ-worker ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
+      this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action)
     }
   }
 }
 
 Worker.prototype.createChannel = function (conn) {
   var that = this
-  var queue = 'composer-' + that.workerID
+  var queue = config('serverName') + that.workerID
   var exchange = 'eventbus.exchange'
   var pattern = ''
 
@@ -110,9 +145,10 @@ Worker.prototype.createChannel = function (conn) {
       return ch.assertQueue(queue, {
         durable: false,
         autoDelete: true
-      }).then(function () {
-        return ch.bindQueue(queue, exchange, pattern)
       })
+        .then(function () {
+          return ch.bindQueue(queue, exchange, pattern)
+        })
         .then(function () {
           ch.consume(queue, function (message) {
             // Added callback function in case we need to do manual ack of the messages
@@ -126,17 +162,21 @@ Worker.prototype.createChannel = function (conn) {
 }
 
 Worker.prototype._closeConnectionSIGINT = function (connection) {
+  var that = this
   process.once('SIGINT', function () {
+    logger.error('RabbitMQ-worker closing connection')
     connection.close()
+    that.connectionStatus = false
     process.exit()
-    engine.setWorkerStatus(false)
   })
 }
 
 Worker.prototype._closeConnection = function (connection) {
+  var that = this
   connection.close(function () {
+    logger.error('RabbitMQ-worker closing connection')
+    that.connectionStatus = false
     process.exit(1)
-    engine.setWorkerStatus(false)
   })
 }
 
@@ -154,34 +194,47 @@ Worker.prototype.retryInit = function () {
 Worker.prototype.init = function () {
   var conn
   var that = this
-  logger.info('Creating worker with ID', that.workerID)
+  logger.info('Creating RabbitMQ-worker with ID', that.workerID)
+
   that._connect()
     .then(function (connection) {
       // Bind connection errror
       connection.on('error', function (error) {
-        logger.error('WORKER', error)
-        engine.setWorkerStatus(false)
-        that.init()
+        logger.error('RabbitMQ-worker', error)
+        that.connectionStatus = false
+
+        setTimeout(function () {
+          that.init()
+        }, 4000)
+      })
+
+      connection.on('close', function (error) {
+        logger.error('RabbitMQ-worker connection closed', error)
+        that.connectionStatus = false
+        setTimeout(function () {
+          that.init()
+        }, 4000)
       })
 
       conn = connection
       that._closeConnectionSIGINT(connection)
       that.createChannel(connection)
         .then(function () {
-          engine.setWorkerStatus(true)
-          logger.info('Worker up, with ID', that.workerID)
+          that.connectionStatus = true
+          logger.info('RabbitMQ-worker up, with ID', that.workerID)
           // emit loaded worker
           hub.emit('load:worker')
         })
         .catch(function (error) {
-          logger.error('WORKER error ', error, 'with ID', that.workerID)
+          logger.error('RabbitMQ-worker error channel', error, 'with ID', that.workerID)
           if (conn) {
             that._closeConnection(conn)
           }
+          that.retryInit()
         })
     })
     .then(null, function (err) {
-      logger.error('Worker error %s with ID : %s', err, that.workerID)
+      logger.error('RabbitMQ-worker error connection %s with ID : %s', err, that.workerID)
       that.retryInit()
     })
 }

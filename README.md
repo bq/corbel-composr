@@ -67,6 +67,7 @@ You can send the following environment variables (or define a environment config
     "rabbitmq.password": "RABBIT_PASSWORD",
     "rabbitmq.reconntimeout": 10000,
     "rabbitmq.event": "class io.corbel.event.ResourceEvent",
+    "rabbitmq.forceconnect": true,
 
     "bootstrap.retrytimeout": 10000,
 
@@ -128,6 +129,7 @@ RABBITMQ_HOST
 RABBITMQ_PORT
 RABBITMQ_USERNAME
 RABBITMQ_PASSWORD
+RABBITMQ_FORCE_CONNECT => Only launch composr if rabbit is connected
 SERVICES_TIMEOUT
 SERVIES_RETRIES
 SERVICES_TIME 

@@ -6,8 +6,15 @@ var q = require('q')
 var https = require('https')
 var hub = require('./hub')
 var config = require('./config')
+var WorkerClass = require('./worker')
+var worker = new WorkerClass()
 
 var engine = {
+  /* ***********************************************************
+   * - Suscribes to the Composr-Core log events
+   * @return nothing
+   *************************************************************/
+
   suscribeToCoreEvents: function () {
     engine.composr.events.on('debug', 'CorbelComposr', function () {
       logger.debug.apply(logger, arguments)
@@ -124,7 +131,7 @@ var engine = {
   },
 
   // Recursivelly wait until all the corbel services are up
-  waitTilServicesUp: function () {
+  _waitUntilCorbelModulesReady: function () {
     var modules = ['iam', 'resources']
     var serviceCheckingRequestTimeout = config('services.timeout')
     var promises = engine.initServiceCheckingRequests(modules, serviceCheckingRequestTimeout)
@@ -161,7 +168,7 @@ var engine = {
     })
   },
 
-  launchTries: function (time, retries) {
+  waitUntilCorbelIsReady: function (time, retries) {
     if (!time) {
       time = config('services.time')
     }
@@ -174,7 +181,7 @@ var engine = {
         if (!retries) {
           return reject()
         }
-        engine.waitTilServicesUp()
+        engine._waitUntilCorbelModulesReady()
           .then(function () {
             logger.info('All Services up and running!')
             resolve()
@@ -190,6 +197,19 @@ var engine = {
     })
   },
 
+  _waitUntilCorbelIsReadyAndFetchData: function (retries) {
+    engine.waitUntilCorbelIsReady(retries)
+      .then(function () {
+        logger.info('Data is available, fetching')
+        engine.initComposrCore(engine.getComposrCoreCredentials(), true)
+      })
+      .catch(function () {
+        // If the services were unavailable delay the retries and go on
+        logger.error('Services where unaccesible after ' + retries + ' retries')
+        engine._waitUntilCorbelIsReadyAndFetchData()
+      })
+  },
+
   /**
    * Launches the bootstrap of data, worker and logger
    * @param  {[type]} app [description]
@@ -197,66 +217,80 @@ var engine = {
    */
   init: function (app) {
     var dfd = q.defer()
-    var retries = config('services.retries')
-    var fetchData = true
+
+    hub.on('corbel:ready', function () {
+      engine.launchWithData(app, dfd)
+    })
+
+    hub.on('corbel:not:ready', function () {
+      engine.launchWithoutData(app, dfd)
+    })
 
     // Suscribe to log events
     engine.suscribeToCoreEvents()
 
-    engine.launchTries(retries)
-      .then(function () {
-        engine.initComposrCore(engine.getComposrCoreCredentials(), fetchData)
-          .then(function () {
-            dfd.resolve({
-              app: app,
-              composr: engine.composr,
-              initialized: engine.initialized
-            })
-          })
-          .catch(dfd.reject)
-      })
-      .catch(function () {
-        engine.initComposrCore(engine.getComposrCoreCredentials(), !fetchData)
-          .then(function () {
-            dfd.resolve({
-              app: app,
-              composr: engine.composr,
-              initialized: engine.initialized
-            })
-            logger.info('The server is launched, delaying the fetch data')
-          })
-          .then(function () {
-            tryAgain()
-          })
-          .catch(dfd.reject)
-      })
+    // Launch the worker
+    worker.init(this)
 
-    function tryAgain () {
-      engine.launchTries(retries)
-        .then(function () {
-          logger.info('Data is available, fetching')
-          engine.initComposrCore(engine.getComposrCoreCredentials(), fetchData)
-        })
-        .catch(function () {
-          // If the services were unavailable delay the retries and go on
-          logger.error('Services where unaccesible after ' + retries + ' retries')
-          tryAgain()
-        })
+    if (config('rabbitmq.forceconnect')) {
+      logger.info('>>> The server will start after RabbitMQ is connected')
+      hub.on('load:worker', function () {
+        engine._init(app, dfd)
+      })
+    } else {
+      logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
+      engine._init(app, dfd)
     }
+
     return dfd.promise
   },
 
-  setWorkerStatus: function (bool) {
-    engine.workerStatus = bool
+  launchWithData: function (app, promise) {
+    engine.initComposrCore(engine.getComposrCoreCredentials(), true)
+      .then(function () {
+        promise.resolve({
+          app: app,
+          composr: engine.composr,
+          initialized: engine.initialized
+        })
+      })
+      .catch(promise.reject)
+  },
+
+  launchWithoutData: function (app, promise) {
+    var retries = config('services.retries')
+
+    engine.initComposrCore(engine.getComposrCoreCredentials(), false)
+      .then(function () {
+        promise.resolve({
+          app: app,
+          composr: engine.composr,
+          initialized: engine.initialized
+        })
+        logger.info('The server is launched, delaying the fetch data')
+        engine._waitUntilCorbelIsReadyAndFetchData(retries)
+      })
+      .catch(promise.reject)
+  },
+
+  _init: function (app, promise) {
+    var retries = config('services.retries')
+
+    engine.waitUntilCorbelIsReady(retries)
+      .then(function () {
+        hub.emit('corbel:ready')
+      })
+      .catch(function () {
+        hub.emit('corbel:not:ready')
+      })
   },
 
   getWorkerStatus: function () {
-    return engine.workerStatus
+    return worker.connectionStatus
   }
 }
 
 engine.initialized = false
-engine.workerStatus = false
 engine.phrasesCollection = 'composr:Phrase'
 engine.snippetsCollection = 'composr:Snippet'
 engine.composr = composr

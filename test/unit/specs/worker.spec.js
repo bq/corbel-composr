@@ -7,7 +7,7 @@ var chai = require('chai'),
   should = chai.should(),
   WorkerClass = require('../../../src/lib/worker.js');
 
-var worker = new WorkerClass();
+var worker;
 
 chai.use(chaiAsPromised);
 
@@ -48,6 +48,8 @@ describe('Rabbit worker', function() {
         resolve(data);
       });
     });
+
+    worker = new WorkerClass(engineCustom);
 
   });
 

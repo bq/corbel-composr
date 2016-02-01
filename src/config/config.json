@@ -9,6 +9,7 @@
     "rabbitmq.password": "RABBIT_PASSWORD",
     "rabbitmq.reconntimeout": 10000,
     "rabbitmq.event": "class io.corbel.event.ResourceEvent",
+    "rabbitmq.forceconnect": false,
 
     "bootstrap.retrytimeout": 10000,
 
