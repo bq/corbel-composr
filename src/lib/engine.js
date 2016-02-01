@@ -6,7 +6,7 @@ var q = require('q')
 var https = require('https')
 var hub = require('./hub')
 var config = require('./config')
-var WorkerClass = require('./worker')
+var WorkerClass = require('./rabbitMQworker')
 var worker = new WorkerClass()
 
 var engine = {
@@ -234,6 +234,8 @@ var engine = {
 
     if (config('rabbitmq.forceconnect')) {
       logger.info('>>> The server will start after RabbitMQ is connected')
+      logger.info('>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
+        'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
       hub.on('load:worker', function () {
         engine._init(app, dfd)
       })
