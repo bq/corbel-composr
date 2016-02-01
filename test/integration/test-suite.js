@@ -18,7 +18,8 @@ var tests = [
   require('./specs/orderExecutionPhrases.test.js'),
   require('./specs/notFoundHandler.test.js'),
   require('./specs/methodNotAllowed.test.js'),
-  require('./specs/postExecutionHandler.test.js')
+  require('./specs/postExecutionHandler.test.js'),
+  require('./specs/status.endpoint.test.js')
   //require('./specs/unpublishSnippet.test.js'),
   //require('./specs/unpublishPhrase.test.js'),
 ];
