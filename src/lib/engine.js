@@ -163,6 +163,7 @@ var engine = {
         .catch(function (err) {
           engine.initialized = false
           logger.error('ERROR launching composr, please check your credentials and network')
+          logger.error(err)
           reject(err)
         })
     })
@@ -236,7 +237,7 @@ var engine = {
       logger.info('>>> The server will start after RabbitMQ is connected')
       logger.info('>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
         'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
-      hub.on('load:worker', function () {
+      hub.once('load:worker', function () {
         engine._init(app, dfd)
       })
     } else {
