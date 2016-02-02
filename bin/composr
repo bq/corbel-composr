@@ -1,19 +1,20 @@
 #!/usr/bin/env node
 var config = require('../src/lib/config')
+var logger = require('../src/utils/composrLogger')
+var version = require('../package.json').version
+
 if (config('newrelic') === true) {
   require('newrelic')
 }
 
-var pmx = require('pmx')
-
-// Log routes and latency.
-// You must do this BEFORE any require('http')
-pmx.init({
-  http: true
-})
-
-var logger = require('../src/utils/composrLogger')
-var version = require('../package.json').version
+if (config('keymetrics') === true) {
+  var pmx = require('pmx')
+  // Log routes and latency.
+  // You must do this BEFORE any require('http')
+  pmx.init({
+    http: true
+  })
+}
 
 module.exports = new Promise(function (resolve, reject) {
   require('../src/app')
