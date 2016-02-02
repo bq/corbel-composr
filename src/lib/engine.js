@@ -7,7 +7,7 @@ var https = require('https')
 var hub = require('./hub')
 var config = require('./config')
 var WorkerClass = require('./rabbitMQworker')
-var worker = new WorkerClass()
+var worker
 
 var engine = {
   /* ***********************************************************
@@ -231,7 +231,8 @@ var engine = {
     engine.suscribeToCoreEvents()
 
     // Launch the worker
-    worker.init(this)
+    worker = new WorkerClass(engine)
+    worker.init()
 
     if (config('rabbitmq.forceconnect')) {
       logger.info('>>> The server will start after RabbitMQ is connected')
