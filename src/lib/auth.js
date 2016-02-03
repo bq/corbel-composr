@@ -4,7 +4,7 @@ var ComposrError = require('./ComposrError')
 
 var getAuth = function (req, res) {
   if (!req) {
-    throw new ComposrError('undefined:req', 'invalid value: ' + req, 422)
+    throw new ComposrError('undefined:req', 'Missing request parameter', 422)
   }
 
   var auth = req.header('Authorization')
