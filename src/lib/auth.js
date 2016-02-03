@@ -1,10 +1,11 @@
 'use strict'
 
-var validator = require('./validate')
 var ComposrError = require('./ComposrError')
 
 var getAuth = function (req, res) {
-  validator.isValue(req, 'undefined:req')
+  if (!req) {
+    throw new ComposrError('undefined:req', 'invalid value: ' + req, 422)
+  }
 
   var auth = req.header('Authorization')
 
