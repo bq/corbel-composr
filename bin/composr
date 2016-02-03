@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 var config = require('../src/lib/config')
+
 if (config('newrelic') === true) {
   require('newrelic')
 }
 
-var pmx = require('pmx')
+if (config('keymetrics') === true) {
+  var pmx = require('pmx')
+  // Log routes and latency.
+  // You must do this BEFORE any require('http')
+  pmx.init({
+    http: true
+  })
+}
 
-// Log routes and latency.
-// You must do this BEFORE any require('http')
-pmx.init({
-  http: true
-})
-
+// This packages must be after loading keymetrics and newrelic packages
 var logger = require('../src/utils/composrLogger')
 var version = require('../package.json').version
 
