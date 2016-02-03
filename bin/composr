@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 var config = require('../src/lib/config')
-var logger = require('../src/utils/composrLogger')
-var version = require('../package.json').version
 
 if (config('newrelic') === true) {
   require('newrelic')
@@ -15,6 +13,10 @@ if (config('keymetrics') === true) {
     http: true
   })
 }
+
+# This packages must be after loading keymetrics and newrelic packages
+var logger = require('../src/utils/composrLogger')
+var version = require('../package.json').version
 
 module.exports = new Promise(function (resolve, reject) {
   require('../src/app')
