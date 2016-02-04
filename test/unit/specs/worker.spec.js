@@ -13,10 +13,8 @@ chai.use(chaiAsPromised);
 
 describe('Rabbit worker', function() {
   var domain = 'domain';
-  var id = domain + '!name';
-  var item = {
-    id: 42
-  };
+  var id;
+  var item;
   var engineCustom;
   var promiseRegisterPhrases;
   var promiseRegisterSnippets;
@@ -24,18 +22,27 @@ describe('Rabbit worker', function() {
   var stubRegisterSnippets;
 
   beforeEach(function() {
+    id = domain + '!' + Date.now();
+    item = {
+      id: Date.now()
+    };
+
     engineCustom = {};
     engineCustom.composr = {};
     engineCustom.composr.Phrases = {};
     engineCustom.composr.Phrases.unregister = sinon.stub();
+    engineCustom.composr.addPhrasesToDataStructure = sinon.stub()
     engineCustom.composr.removePhrasesFromDataStructure = sinon.stub();
     engineCustom.composr.Snippets = {};
     engineCustom.composr.Snippets.unregister = sinon.stub();
+    engineCustom.composr.addSnippetsToDataStructure = sinon.stub()
     engineCustom.composr.removeSnippetsFromDataStructure = sinon.stub();
     engineCustom.composr.loadPhrase = sinon.stub().returns(Promise.resolve(item));
     engineCustom.composr.Phrases.register = function() {};
     engineCustom.composr.loadSnippet = sinon.stub().returns(Promise.resolve(item));
     engineCustom.composr.Snippets.register = function() {};
+    engineCustom.snippetsCollection = '';
+    engineCustom.phrasesCollection =  '';
 
     promiseRegisterPhrases = new Promise(function(resolve) {
       stubRegisterPhrases = sinon.stub(engineCustom.composr.Phrases, 'register', function(data) {
@@ -48,14 +55,141 @@ describe('Rabbit worker', function() {
         resolve(data);
       });
     });
-
     worker = new WorkerClass(engineCustom);
 
+  });
+
+  it('an error is returned if Worker is instantiated with an invalid engine', function() {
+      var invalidEngine = {};
+      expect(function(){
+          return new WorkerClass(invalidEngine);
+      }).to.throw('error:worker:engine');
+  });
+
+  it('an error is returned if Worker is instantiated without engine', function() {
+      expect(function(){
+          return new WorkerClass();
+      }).to.throw('error:worker:engine');
+  });
+
+  it('isValidEngine returns true if its sended a valid engine', function() {
+      var validEngine = {
+        composr: '',
+        snippetsCollection: '',
+        phrasesCollection: ''
+      };
+
+      expect(WorkerClass.prototype.isValidEngine(validEngine)).to.be.equal(true);
+  });
+
+  it('isValidEngine returns false if its sended an invalid engine', function() {
+      var invalidEngine = {};
+      expect(WorkerClass.prototype.isValidEngine(invalidEngine)).to.be.equal(false);
+  });
+
+  it('isValidEngine returns false if its called without an engine', function() {
+      expect(WorkerClass.prototype.isValidEngine()).to.be.equal(false);
+  });
+
+  it('isPhrase returns false if its sended an invalid type', function() {
+      expect(WorkerClass.prototype.isPhrase('invalid')).to.be.equal(false);
+  });
+
+  it('isPhrase returns true if its sended a valid type', function() {
+      expect(WorkerClass.prototype.isPhrase('composr:Phrase')).to.be.equal(true);
+  });
+
+  it('isSnippet returns false if its sended an invalid type', function() {
+      expect(WorkerClass.prototype.isSnippet('invalid')).to.be.equal(false);
+  });
+
+  it('isSnippet returns true if its sended a valid type', function() {
+      expect(WorkerClass.prototype.isSnippet('composr:Snippet')).to.be.equal(true);
   });
 
   it('has the expected API', function() {
     expect(worker).to.respondTo('init');
     expect(worker).to.respondTo('_doWorkWithPhraseOrSnippet');
+  });
+
+  it('_addPhrase method returns true when a phrase is added', function(){
+    worker._addPhrase(domain, id)
+        .then(function(status){
+            expect(status).to.be.equal(true);
+            return promiseRegisterPhrases;
+        })
+        .then(function(){
+          expect(engineCustom.composr.loadPhrase.callCount).to.equals(1);
+          expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true);
+          expect(stubRegisterPhrases.callCount).to.equals(1);
+          expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true);
+          expect(engineCustom.composr.addPhrasesToDataStructure.calledWith(item)).to.equals(true);
+        });
+  });
+
+  it.skip('_addPhrase method returns false when a phrase is not added', function(){
+    worker._addPhrase(domain, id)
+        .then(function(status){
+            expect(status).to.be.equal(false);
+            return promiseRegisterPhrases;
+        })
+        .then(function(){
+          expect(engineCustom.composr.loadPhrase.callCount).to.equals(1);
+          expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true);
+          expect(stubRegisterPhrases.callCount).to.equals(1);
+          expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true);
+          expect(engineCustom.composr.addPhrasesToDataStructure.calledWith(item)).to.equals(false);
+        });
+  });
+
+  it('_addSnippet method returns true when a snippet is added', function(){
+    worker._addSnippet(domain, id)
+        .then(function(status){
+            expect(status).to.be.equal(true);
+            return promiseRegisterPhrases;
+        })
+        .then(function(){
+          expect(engineCustom.composr.loadSnippet.callCount).to.equals(0);
+          expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(false);
+          expect(stubRegisterSnippets.callCount).to.equals(0);
+          expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(false);
+          expect(engineCustom.composr.addSnippetsToDataStructure.calledWith(item)).to.equals(true);
+        });
+  });
+
+  it.skip('_addSnippet method returns false when a snippet is added', function(){
+    worker._addSnippet(domain, id)
+        .then(function(status){
+            expect(status).to.be.equal(false);
+            return promiseRegisterPhrases;
+        })
+        .then(function(){
+          expect(engineCustom.composr.loadSnippet.callCount).to.equals(0);
+          expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(false);
+          expect(stubRegisterSnippets.callCount).to.equals(0);
+          expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(false);
+          expect(engineCustom.composr.addSnippetsToDataStructure.calledWith(item)).to.equals(false);
+        });
+  });
+
+  it('all methods are called inside of _removePhrase', function(){
+    worker._removePhrase(domain, id);
+
+    promiseRegisterPhrases
+    .then(function(){
+          expect(engineCustom.composr.Phrases.unregister.calledWith(domain, id)).to.equals(true);
+          expect(engineCustom.composr.removePhrasesFromDataStructure.calledWith(id)).to.equals(true);
+        });
+  });
+
+  it('all methods are called inside of _removeSnippet', function(){
+    worker._removePhrase(domain, id);
+
+    promiseRegisterPhrases
+    .then(function(){
+          expect(engineCustom.composr.Snippets.unregister.calledWith(domain, id)).to.equals(true);
+          expect(engineCustom.composr.removeSnippetsFromDataStructure.calledWith(id)).to.equals(true);
+        });
   });
 
   it('should call correct method in engine when a delete is requested for a phrase', function() {
@@ -185,7 +319,12 @@ describe('Rabbit worker', function() {
     };
 
     beforeEach(function() {
-      theWorker = new WorkerClass();
+      var engine = {
+        composr: '',
+        snippetsCollection: '',
+        phrasesCollection: ''
+      };
+      theWorker = new WorkerClass(engine);
       theWorker.connUrl = 'amqp://username:password@host:port';
       theWorker.workerID = 1234;
       theWorker._closeConnectionSIGINT = function() {};

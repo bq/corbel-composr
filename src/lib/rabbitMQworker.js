@@ -10,12 +10,20 @@ var hub = require('./hub')
 var utils = require('../utils/phraseUtils')
 
 function Worker (engine) {
+  if (!this.isValidEngine(engine)) {
+    throw new ComposrError('error:worker:engine', 'invalid engine', 422)
+  }
+  this.engine = engine
   this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=1'
   this.workerID = uuid.v4()
-  this.engine = engine
   this.connectionStatus = false
 }
 
+Worker.prototype.isValidEngine = function (engine) {
+  return !(!engine) && (engine.hasOwnProperty('composr') &&
+  engine.hasOwnProperty('snippetsCollection') &&
+  engine.hasOwnProperty('phrasesCollection'))
+}
 Worker.prototype.isPhrase = function (type) {
   return type === corbelConnection.PHRASES_COLLECTION
 }
