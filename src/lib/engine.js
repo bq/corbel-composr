@@ -132,7 +132,7 @@ var engine = {
 
   // Recursivelly wait until all the corbel services are up
   _waitUntilCorbelModulesReady: function () {
-    var modules = ['iam', 'resources']
+    var modules = ['iam', 'resources', 'evci', 'assets']
     var serviceCheckingRequestTimeout = config('services.timeout')
     var promises = engine.initServiceCheckingRequests(modules, serviceCheckingRequestTimeout)
     return Promise.all(promises)
