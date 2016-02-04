@@ -47,7 +47,7 @@ function checkServerStatus (req, res) {
   var promises = modules.map(function (module) {
     return new Promise(function (resolve) {
       https.get(path.replace('{{module}}', module) + '/version', function (res) {
-        serverStatus.statuses[module] = res.statusCode === 200
+        serverStatus.statuses[module] = Math.floor(res.statusCode/100) === 2;
         resolve()
       })
         .on('error', function () {
