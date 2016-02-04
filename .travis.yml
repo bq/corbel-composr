@@ -7,9 +7,13 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-4.8
+  code_climate:
+    repo_token: c965e66a6a4c8b80fa9ed3709ff79364a21e24c2c46e680e040a56ea820522d1
 env:
   global:
     - CXX=g++-4.8
 before_install: npm install -g npm
 script:
   - grunt test:coverage
+
+
