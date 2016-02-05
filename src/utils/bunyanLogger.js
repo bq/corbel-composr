@@ -18,13 +18,13 @@ if (config('bunyan.log') === true) {
   var streams = [{
     level: 'error',
     type: 'rotating-file',
-    period: '1d', // daily rotation
+    period: '6h', // 6h rotation
     count: 3, // keep 3 back copies
     path: './logs/api-error.log' // log ERROR and above to a file
   }, {
     level: 'trace',
     type: 'rotating-file',
-    period: '1d', // daily rotation
+    period: '6h', // 6h rotation
     count: 3, // keep 3 back copies
     path: './logs/api.log'
   }]
