@@ -5,7 +5,7 @@ var chai = require('chai'),
   expect = chai.expect,
   chaiAsPromised = require('chai-as-promised'),
   should = chai.should(),
-  WorkerClass = require('../../../src/lib/rabbitMQworker.js');
+  WorkerClass = require('../../../../src/lib/rabbitMQworker.js');
 
 var worker;
 
