@@ -127,18 +127,30 @@ describe('Rabbit worker', function() {
         });
   });
 
-  it.skip('_addPhrase method returns false when a phrase is not added', function(){
-    worker._addPhrase(domain, id)
+  it('_addPhrase method returns false when a phrase is not added', function(){
+    var result = {
+      'registered': false
+    };
+    var engine = {
+      composr: {},
+      snippetsCollection: '',
+      phrasesCollection: ''
+    };
+    engine.composr.Phrases = {};
+    engine.composr.Phrases.register = sinon.stub().returns(Promise.resolve(result));
+    engine.composr.loadPhrase = sinon.stub().returns(Promise.resolve());
+    engine.composr.addSnippetsToDataStructure = sinon.stub();
+
+    var customWorker = new WorkerClass(engine);
+
+    customWorker._addPhrase(domain, id)
         .then(function(status){
-            expect(status).to.be.equal(false);
-            return promiseRegisterPhrases;
-        })
-        .then(function(){
-          expect(engineCustom.composr.loadPhrase.callCount).to.equals(1);
-          expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true);
-          expect(stubRegisterPhrases.callCount).to.equals(1);
-          expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true);
-          expect(engineCustom.composr.addPhrasesToDataStructure.calledWith(item)).to.equals(false);
+          expect(status).to.be.equal(false);
+          expect(engine.composr.loadPhrase.callCount).to.equals(1);
+          expect(engine.composr.loadPhrase.calledWith(id)).to.equals(true);
+          expect(engine.composr.Phrases.register.callCount).to.equals(1);
+          expect(engine.composr.Phrases.register.calledWith(domain, item)).to.equals(true);
+          expect(engine.composr.addPhrasesToDataStructure.callCount).to.equals(0);
         });
   });
 
@@ -157,18 +169,30 @@ describe('Rabbit worker', function() {
         });
   });
 
-  it.skip('_addSnippet method returns false when a snippet is added', function(){
-    worker._addSnippet(domain, id)
+  it('_addSnippet method returns false when a snippet is added', function(){
+    var result = {
+      'registered': false
+    };
+    var engine = {
+      composr: {},
+      snippetsCollection: '',
+      phrasesCollection: ''
+    };
+    engine.composr.Snippets = {};
+    engine.composr.Snippets.register = sinon.stub().returns(Promise.resolve(result));
+    engine.composr.loadSnippet = sinon.stub().returns(Promise.resolve());
+    engine.composr.addSnippetsToDataStructure = sinon.stub();
+
+    var customWorker = new WorkerClass(engine);
+
+    customWorker._addSnippet(domain, id)
         .then(function(status){
-            expect(status).to.be.equal(false);
-            return promiseRegisterPhrases;
-        })
-        .then(function(){
-          expect(engineCustom.composr.loadSnippet.callCount).to.equals(0);
-          expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(false);
-          expect(stubRegisterSnippets.callCount).to.equals(0);
-          expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(false);
-          expect(engineCustom.composr.addSnippetsToDataStructure.calledWith(item)).to.equals(false);
+          expect(status).to.be.equal(false);
+          expect(engine.composr.loadSnippet.callCount).to.equals(1);
+          expect(engine.composr.loadSnippet.calledWith(id)).to.equals(true);
+          expect(engine.composr.Snippets.register.callCount).to.equals(1);
+          expect(engine.composr.Snippets.register.calledWith(domain, item)).to.equals(true);
+          expect(engine.composr.addSnippetsToDataStructure.callCount).to.equals(0);
         });
   });
 
@@ -307,6 +331,49 @@ describe('Rabbit worker', function() {
       expect(stubRegisterPhrases.callCount).to.equals(0);
       expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(false);
     })
+      .should.notify(done);
+  });
+
+  it('connection is closed correctly', function(){
+      var connection = {
+        'close' : sinon.stub()
+      };
+
+      worker._closeConnection(connection);
+
+      expect(connection.close.callCount).to.be.equals(1);
+      expect(worker.connectionStatus).to.be.equals(false);
+  });
+
+  it('worker create channel make correct calls', function(done) {
+      var worker;
+      var engine = {
+        composr: '',
+        snippetsCollection: '',
+        phrasesCollection: ''
+      };
+      var channel = {};
+      var connection = {
+        'createChannel' : sinon.stub().returns(Promise.resolve(channel))
+      };
+
+      worker = new WorkerClass(engine);
+
+      worker.assertQueue = sinon.stub().returns(Promise.resolve());
+      worker.bindQueue = sinon.stub().returns(Promise.resolve());
+      worker.consumeChannel = sinon.stub().returns(Promise.resolve());
+
+      worker.createChannel(connection)
+      .then(function(){
+        var queue = worker.assertQueue.getCall(0).args[1];
+
+        expect(worker.assertQueue.callCount).to.equals(1);
+        expect(worker.assertQueue.calledWith(channel, worker.bindQueue.getCall(0).args[1])).to.equals(true);
+        expect(worker.bindQueue.callCount).to.equals(1);
+        expect(worker.bindQueue.calledWith(channel, queue)).to.equals(true);
+        expect(worker.consumeChannel.callCount).to.equals(1);
+        expect(worker.consumeChannel.calledWith(channel, queue)).to.equals(true);
+      })
       .should.notify(done);
   });
 
