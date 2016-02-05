@@ -2,7 +2,7 @@
 var request = require('supertest'),
   chai = require('chai'),
   expect = chai.expect,
-  clientUtils = require('../utils/client');
+  clientUtils = require('../../utils/client');
 
 var AdminClientData = clientUtils.getAdminClient();
 var demoAppClientData = clientUtils.getDemoClient();

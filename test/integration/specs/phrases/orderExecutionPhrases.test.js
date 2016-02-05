@@ -7,7 +7,7 @@ var request = require('supertest'),
 chai.use(chaiAsPromised);
 
 function test(server) {
-  describe.only('Path params', function() {
+  describe('Path params', function() {
 
     var phraseWithTwoParams = {
       url: 'user/:name/:surname',

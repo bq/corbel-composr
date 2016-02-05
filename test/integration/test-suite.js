@@ -3,22 +3,32 @@
 
 var tests = [
   //require('./specs/timeout.test.js'),
-  require('./specs/errorHandlers.test.js'),
-  require('./specs/queryParams.test.js'),
-  require('./specs/pathParams.test.js'),
+
+  // handlers
+  require('./specs/handlers/errorHandlers.test.js'),
+  require('./specs/handlers/notFoundHandler.test.js'),
+  require('./specs/handlers/postExecutionHandler.test.js'),
+
+  //phrases
+  require('./specs/phrases/getToPhraseEndpoint.test.js'),
+  require('./specs/phrases/orderExecutionPhrases.test.js'),
+  require('./specs/phrases/publishPhrase.test.js'),
+  require('./specs/phrases/unregisterPhrases.test.js'),
+
+  //snippets
+  require('./specs/snippets/multipleSnippetsForPhrases.test.js'),
+  require('./specs/snippets/publishSnippet.test.js'),
+  require('./specs/snippets/unregisterSnippets.test.js'),
+
+  //params
+  require('./specs/params/queryParams.test.js'),
+  require('./specs/params/pathParams.test.js'),
+
+  //other
   require('./specs/docField.test.js'),
-  require('./specs/publishPhrase.test.js'),
-  require('./specs/multipleSnippetsForPhrases.test.js'),
-  require('./specs/unregisterPhrases.test.js'),
-  require('./specs/unregisterSnippets.test.js'),
-  require('./specs/publishSnippet.test.js'),
   require('./specs/cache.test.js'),
-  require('./specs/getToPhraseEndpoint.test.js'),
   require('./specs/domainUserReturnsNotFound.test.js'),
-  require('./specs/orderExecutionPhrases.test.js'),
-  require('./specs/notFoundHandler.test.js'),
   require('./specs/methodNotAllowed.test.js'),
-  require('./specs/postExecutionHandler.test.js'),
   require('./specs/status.endpoint.test.js')
   //require('./specs/unpublishSnippet.test.js'),
   //require('./specs/unpublishPhrase.test.js'),
