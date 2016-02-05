@@ -3,7 +3,7 @@ var request = require('supertest'),
 chai = require('chai'),
 expect = chai.expect,
 chaiAsPromised = require('chai-as-promised'),
-clientUtils = require('../utils/client');
+clientUtils = require('../../utils/client');
 chai.use(chaiAsPromised);
 
 function test(server) {
