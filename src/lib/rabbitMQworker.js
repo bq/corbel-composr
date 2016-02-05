@@ -14,7 +14,13 @@ function Worker (engine) {
     throw new ComposrError('error:worker:engine', 'invalid engine', 422)
   }
   this.engine = engine
-  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + encodeURIComponent(config('rabbitmq.password')) + '@' + config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=1'
+  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + 
+    encodeURIComponent(config('rabbitmq.password')) + '@' +
+    config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=' +
+    config('rabbitmq.heartbeat');
+
+  logger.info('RabbitMQ heartbeat at', config('rabbitmq.heartbeat'));
+  
   this.workerID = uuid.v4()
   this.connectionStatus = false
 }
@@ -142,49 +148,63 @@ Worker.prototype.doWork = function (ch, msg) {
   }
 }
 
-Worker.prototype.createChannel = function (conn) {
+Worker.prototype.createChannel = function (connection) {
   var that = this
   var queue = config('serverName') + that.workerID
+  var channel
+
+  return connection.createChannel()
+    .then(function (ch) {
+      channel = ch
+      return that.assertQueue(channel, queue)
+    })
+    .then(function () {
+      return that.bindQueue(channel, queue)
+    })
+    .then(function () {
+      return that.consumeChannel(channel, queue)
+    })
+}
+
+Worker.prototype.assertQueue = function (ch, queue) {
+  return ch.assertQueue(queue, {
+    durable: false,
+    autoDelete: true
+  })
+}
+
+Worker.prototype.bindQueue = function (ch, queue) {
   var exchange = 'eventbus.exchange'
   var pattern = ''
 
-  return conn.createChannel()
-    .then(function (ch) {
-      return ch.assertQueue(queue, {
-        durable: false,
-        autoDelete: true
-      })
-        .then(function () {
-          return ch.bindQueue(queue, exchange, pattern)
-        })
-        .then(function () {
-          ch.consume(queue, function (message) {
-            // Added callback function in case we need to do manual ack of the messages
-            that.doWork(ch, message)
-          },
-            Object.create({
-              noAck: true
-            }))
-        })
-    })
+  return ch.bindQueue(queue, exchange, pattern)
+}
+
+Worker.prototype.consumeChannel = function (ch, queue) {
+  var that = this
+  return ch.consume(queue, function (message) {
+    // Added callback function in case we need to do manual ack of the messages
+    that.doWork(ch, message)
+  },
+    Object.create({
+      noAck: true
+    }))
 }
 
 Worker.prototype._closeConnectionSIGINT = function (connection) {
   var that = this
   process.once('SIGINT', function () {
-    logger.error('RabbitMQ-worker closing connection')
-    connection.close()
-    that.connectionStatus = false
-    process.exit()
+    that._closeConnection(connection, 0)
   })
 }
 
-Worker.prototype._closeConnection = function (connection) {
+Worker.prototype._closeConnection = function (connection, exitCode) {
   var that = this
+  var code = exitCode | 1
   connection.close(function () {
     logger.error('RabbitMQ-worker closing connection')
     that.connectionStatus = false
-    process.exit(1)
+    process.exit(code)
   })
 }
 
@@ -192,11 +212,12 @@ Worker.prototype._connect = function () {
   return amqp.connect(this.connUrl)
 }
 
-Worker.prototype.retryInit = function () {
+Worker.prototype.retryInit = function (waitTime) {
+  var time = waitTime | config('rabbitmq.reconntimeout')
   var that = this
   return setTimeout(function () {
     that.init()
-  }, config('rabbitmq.reconntimeout'))
+  }, time)
 }
 
 Worker.prototype.init = function () {
@@ -210,18 +231,13 @@ Worker.prototype.init = function () {
       connection.on('error', function (error) {
         logger.error('RabbitMQ-worker', error)
         that.connectionStatus = false
-
-        setTimeout(function () {
-          that.init()
-        }, 4000)
+        that.retryInit(4000)
       })
 
       connection.on('close', function (error) {
         logger.error('RabbitMQ-worker connection closed', error)
         that.connectionStatus = false
-        setTimeout(function () {
-          that.init()
-        }, 4000)
+        that.retryInit(4000)
       })
 
       conn = connection

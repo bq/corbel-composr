@@ -139,6 +139,10 @@ if (isDefinedConfigValue(process.env.RABBITMQ_FORCE_CONNECT)) {
   initialConfig['rabbitmq.forceconnect'] = JSON.parse(process.env.RABBITMQ_FORCE_CONNECT)
 }
 
+if (isDefinedConfigValue(process.env.RABBITMQ_HEARTBEAT)) {
+  initialConfig['rabbitmq.heartbeat'] = parseInt(process.env.RABBITMQ_HEARTBEAT, 10)
+}
+
 if (isDefinedConfigValue(process.env.KEYMETRICS)) {
   initialConfig.keymetrics = JSON.parse(process.env.KEYMETRICS)
 }
