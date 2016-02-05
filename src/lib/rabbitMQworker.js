@@ -14,13 +14,13 @@ function Worker (engine) {
     throw new ComposrError('error:worker:engine', 'invalid engine', 422)
   }
   this.engine = engine
-  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' + 
+  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' +
     encodeURIComponent(config('rabbitmq.password')) + '@' +
     config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=' +
-    config('rabbitmq.heartbeat');
+    config('rabbitmq.heartbeat')
 
-  logger.info('RabbitMQ heartbeat at', config('rabbitmq.heartbeat'));
-  
+  logger.info('RabbitMQ heartbeat at', config('rabbitmq.heartbeat'))
+
   this.workerID = uuid.v4()
   this.connectionStatus = false
 }
