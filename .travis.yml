@@ -15,5 +15,6 @@ env:
 before_install: npm install -g npm
 script:
   - grunt test:coverage
-
+after_script:
+  - codeclimate-test-reporter < ./tmp/coverage/lcov.info
 
