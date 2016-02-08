@@ -41,13 +41,17 @@ function checkServerStatus (req, res) {
     }
   }
 
-  var modules = ['iam', 'resources']
+  var modules = ['iam', 'resources', 'assets', 'evci']
   var path = config('corbel.driver.options').urlBase
 
   var promises = modules.map(function (module) {
     return new Promise(function (resolve) {
-      https.get(path.replace('{{module}}', module) + '/version', function () {
-        serverStatus.statuses[module] = true
+      // Remove the version (v1.0) from the urlBase and add '/version'
+      var versionPath = path.replace(new RegExp('(.*/)[^/]+/?$'), '$1')
+          .replace('{{module}}', module) + '/version'
+
+      https.get(versionPath, function (res) {
+        serverStatus.statuses[module] = Math.floor(res.statusCode / 100) === 2
         resolve()
       })
         .on('error', function () {

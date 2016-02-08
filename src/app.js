@@ -59,7 +59,7 @@ try {
   })
 
   process.on('uncaughtException', function (err) {
-    logger.debug('Error caught by uncaughtException', err)
+    logger.warn('Error caught by uncaughtException', err)
     logger.error(err)
     if (!err || err.message !== "Can't set headers after they are sent.") {
       process.exit(1)

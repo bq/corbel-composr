@@ -10,6 +10,7 @@
     "rabbitmq.reconntimeout": 10000,
     "rabbitmq.event": "class io.corbel.event.ResourceEvent",
     "rabbitmq.forceconnect": false,
+    "rabbitmq.heartbeat" : 30,
 
     "bootstrap.retrytimeout": 10000,
 

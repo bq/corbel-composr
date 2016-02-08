@@ -88,11 +88,13 @@ if (isDefinedConfigValue(process.env.PORT)) {
 }
 
 if (isDefinedConfigValue(process.env.ACCESS_LOG_FILE)) {
-  initialConfig['composrLog.accessLogFile'] = process.env.ACCESS_LOG_FILE
+  var accesLogFile = process.env.ACCESS_LOG_FILE === 'false' ? '' : process.env.ACCESS_LOG_FILE
+  initialConfig['composrLog.accessLogFile'] = accesLogFile
 }
 
 if (isDefinedConfigValue(process.env.LOG_FILE)) {
-  initialConfig['composrLog.logFile'] = process.env.LOG_FILE
+  var logFile = process.env.LOG_FILE === 'false' ? '' : process.env.LOG_FILE
+  initialConfig['composrLog.logFile'] = logFile
 }
 
 if (isDefinedConfigValue(process.env.LOG_LEVEL)) {
@@ -137,6 +139,10 @@ if (isDefinedConfigValue(process.env.RABBITMQ_PASSWORD)) {
 
 if (isDefinedConfigValue(process.env.RABBITMQ_FORCE_CONNECT)) {
   initialConfig['rabbitmq.forceconnect'] = JSON.parse(process.env.RABBITMQ_FORCE_CONNECT)
+}
+
+if (isDefinedConfigValue(process.env.RABBITMQ_HEARTBEAT)) {
+  initialConfig['rabbitmq.heartbeat'] = parseInt(process.env.RABBITMQ_HEARTBEAT, 10)
 }
 
 if (isDefinedConfigValue(process.env.KEYMETRICS)) {

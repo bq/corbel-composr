@@ -16,8 +16,9 @@
 [![Dev Dependency Status](https://david-dm.org/corbel-platform/corbel-composr/dev-status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=devDependencies&view=table)
 [![Coverage Status](https://coveralls.io/repos/corbel-platform/corbel-composr/badge.svg?branch=master)](https://coveralls.io/r/corbel-platform/corbel-composr?branch=master)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+[![Code Climate](https://codeclimate.com/github/corbel-platform/corbel-composr/badges/gpa.svg)](https://codeclimate.com/github/corbel-platform/corbel-composr)
+[![Test Coverage](https://codeclimate.com/github/corbel-platform/corbel-composr/badges/coverage.svg)](https://codeclimate.com/github/corbel-platform/corbel-composr/coverage)
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
-
 
 
 ## [Homepage](http://opensource.bq.com/composr/)
@@ -68,6 +69,7 @@ You can send the following environment variables (or define a environment config
     "rabbitmq.reconntimeout": 10000,
     "rabbitmq.event": "class io.corbel.event.ResourceEvent",
     "rabbitmq.forceconnect": true,
+    "rabbitmq.heartbgeat": 30,
 
     "bootstrap.retrytimeout": 10000,
 
@@ -130,6 +132,7 @@ RABBITMQ_PORT
 RABBITMQ_USERNAME
 RABBITMQ_PASSWORD
 RABBITMQ_FORCE_CONNECT => Only launch composr if rabbit is connected
+RABBITMQ_HEARTBEAT => Heartbeat for the rabbitmq connection
 SERVICES_TIMEOUT
 SERVIES_RETRIES
 SERVICES_TIME 
