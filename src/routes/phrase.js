@@ -82,7 +82,7 @@ function createOrUpdatePhrase (req, res) {
             id: phrase.id
           })
 
-          logger.debug('Storing or updating phrase', phrase.id, domain)
+          logger.info('Storing or updating phrase', phrase.id, domain)
 
           engine.composr.corbelDriver.resources.resource(engine.phrasesCollection, phrase.id)
             .update(phrase)
@@ -132,11 +132,16 @@ function deletePhrase (req, res) {
 
   var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid
 
-  logger.debug('phrase:delete:id', phraseId)
-  corbelDriver.resources.resource(engine.phrasesCollection, phraseId).delete().then(function (response) {
-    logger.debug('phrase:deleted')
-    res.send(response.status, response.data)
-  })
+  logger.debug('Request delete phrase:', phraseId)
+
+  corbelDriver
+    .resources
+    .resource(engine.phrasesCollection, phraseId)
+    .delete()
+    .then(function (response) {
+      logger.debug('phrase:deleted')
+      res.send(response.status, response.data)
+    })
     .catch(function (error) {
       res.send(error.status, new ComposrError('error:phrase:delete', error.message, error.status))
     })
@@ -158,9 +163,13 @@ function getPhrase (req, res) {
 
   logger.debug('Trying to get phrase:', phraseId)
 
-  corbelDriver.resources.resource(engine.phrasesCollection, phraseId).get().then(function (response) {
-    res.send(response.status, response.data)
-  })
+  corbelDriver
+    .resources
+    .resource(engine.phrasesCollection, phraseId)
+    .get()
+    .then(function (response) {
+      res.send(response.status, response.data)
+    })
     .catch(function (error) {
       var errorBody = getCorbelErrorBody(error)
       res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status))

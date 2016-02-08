@@ -34,7 +34,9 @@ function createOrUpdateSnippet (req, res) {
 
           logger.debug('Storing or updating snippet', snippet.id, domain)
 
-          engine.composr.corbelDriver.resources.resource(engine.snippetsCollection, snippet.id)
+          engine.composr.corbelDriver
+            .resources
+            .resource(engine.snippetsCollection, snippet.id)
             .update(snippet)
             .then(function (response) {
               res.send(response.status, response.data)
@@ -69,11 +71,17 @@ function deleteSnippet (req, res, next) {
   var corbelDriver = connection.getTokenDriver(authorization)
 
   var snippetID = connection.extractDomain(authorization) + '!' + req.params.snippetID
+
   logger.debug('snippet:delete:id', snippetID)
-  corbelDriver.resources.resource(engine.SnippetsCollection, snippetID).delete().then(function (response) {
-    logger.debug('snippet:deleted')
-    res.status(response.status).send(response.data)
-  })
+
+  corbelDriver
+    .resources
+    .resource(engine.SnippetsCollection, snippetID)
+    .delete()
+    .then(function (response) {
+      logger.debug('snippet:deleted')
+      res.status(response.status).send(response.data)
+    })
     .catch(function (error) {
       next(new ComposrError('error:snippet:delete', error.message, error.status))
     })

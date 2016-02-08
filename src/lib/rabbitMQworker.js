@@ -47,7 +47,7 @@ Worker.prototype._addPhrase = function (domain, id) {
   var that = this
   return this.engine.composr.loadPhrase(id)
     .then(function (item) {
-      logger.debug('RabbitMQ-worker item fetched', item.id)
+      logger.debug('RabbitMQ-worker phrase fetched', item.id)
       itemToAdd = item
       return that.engine.composr.Phrases.register(domain, item)
     })
@@ -68,7 +68,7 @@ Worker.prototype._addSnippet = function (domain, id) {
   var that = this
   return this.engine.composr.loadSnippet(id)
     .then(function (item) {
-      logger.debug('RabbitMQ-worker item fetched', item.id)
+      logger.debug('RabbitMQ-worker snippet fetched', item.id)
       itemToAdd = item
       return that.engine.composr.Snippets.register(domain, item)
     })
@@ -100,7 +100,7 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action
   var domain = utils.extractDomainFromId(id)
   switch (action) {
     case 'DELETE':
-      logger.debug('RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
+      logger.info('RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
 
       if (itemIsPhrase) {
         this._removePhrase(domain, id)
@@ -111,13 +111,13 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action
 
     case 'CREATE':
     case 'UPDATE':
-      logger.debug('RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
+      logger.info('RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
 
       var promise = itemIsPhrase ? this._addPhrase(domain, id) : this._addSnippet(domain, id)
 
       promise
         .then(function (registered) {
-          logger.debug('RabbitMQ-worker item registered', id, registered)
+          logger.info('RabbitMQ-worker item registered', id, registered)
         })
         .catch(function (err) {
           logger.error('RabbitMQ-worker error: ', err.data.error, err.data.errorDescription, err.status)
@@ -142,7 +142,7 @@ Worker.prototype.doWork = function (ch, msg) {
     var type = message.type
     if (this.isPhrase(type) || this.isSnippet(type)) {
       var itemIsPhrase = this.isPhrase(type)
-      logger.debug('RabbitMQ-worker ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
+      logger.info('RabbitMQ-worker ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
       this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action)
     }
   }
