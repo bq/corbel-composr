@@ -12,8 +12,9 @@ addons:
 env:
   global:
     - CXX=g++-4.8
-before_install: npm install -g npm
+before_install: 
+  - npm install -g npm
+  - npm install -g codeclimate-test-reporter
 script:
   - grunt test:coverage
   - codeclimate-test-reporter < ./.tmp/coverage/lcov.info
-
