@@ -171,7 +171,7 @@ module.exports = function (grunt) {
 
     coveralls: {
       options: {
-        force: false
+        force: true
       },
       'default': {
         src: '.tmp/coverage/lcov.info'
