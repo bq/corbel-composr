@@ -72,7 +72,7 @@
     "chai": "^3.4.0",
     "chai-as-promised": "^5.1.0",
     "grunt": "~0.4.5",
-    "grunt-blanket": "0.0.10",
+    "grunt-blanket": "0.0.8",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.7.0",
     "grunt-contrib-copy": "^0.8.0",
