@@ -5,17 +5,17 @@ var chai = require('chai'),
   expect = chai.expect,
   chaiAsPromised = require('chai-as-promised'),
   should = chai.should(),
-  snippetFile = require('../../../../src/routes/snippet.js');
+  snippetFile = require('../../../../src/routes/phrase.js');
 
 chai.use(chaiAsPromised);
 
-describe('Snippet routes', function() {
+describe('Phrase routes', function() {
   //TODO add unit test for :
   it.skip('getCorbelErrorBody', function() {
 
   });
 
-  it.skip('createOrUpdateSnippet', function() {
+  it.skip('createOrUpdatePhrase', function() {
 
   });
 
@@ -23,7 +23,15 @@ describe('Snippet routes', function() {
 
   });
 
-  it.skip('deleteSnippet', function() {
+  it.skip('deletePhrase', function() {
+
+  });
+
+  it.skip('getPhrase', function() {
+
+  });
+
+  it.skip('getPhrases', function() {
 
   });
 });

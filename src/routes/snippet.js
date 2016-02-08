@@ -13,29 +13,20 @@ function getCorbelErrorBody (corbelErrResponse) {
 }
 
 function createOrUpdateSnippet (req, res) {
-  var authorization = auth.getAuth(req)
-
+  var authorization = getAuthorization(req)
   var snippet = req.body || {}
+  var driver = getToken(authorization)
+  var domain = getDomain(authorization)
 
-  var clientCorbelDriver = connection.getTokenDriver(authorization)
-
-  var domain = connection.extractDomain(authorization)
-
-  checkIfClientCanPublish(clientCorbelDriver)
+  checkIfClientCanPublish(driver)
     .then(function () {
-      engine.composr.Snippets.validate(snippet)
+      validateSnippet(snippet)
         .then(function () {
           // TODO: check if we generate the snippet ID
           // snippet.id = domain + '!' + snippet.name)
-          pmx.emit('snippet:updated_created', {
-            domain: domain,
-            id: snippet.id
-          })
-
+          emitEvent(domain, snippet.id, 'snippet:updated_created')
           logger.debug('Storing or updating snippet', snippet.id, domain)
-
-          engine.composr.corbelDriver.resources.resource(engine.snippetsCollection, snippet.id)
-            .update(snippet)
+          makeSnippetCreationOrUpdate(snippet.id, snippet)
             .then(function (response) {
               res.send(response.status, response.data)
             })
@@ -64,35 +55,85 @@ function checkIfClientCanPublish (driver) {
 }
 
 function deleteSnippet (req, res, next) {
-  var authorization = auth.getAuth(req)
+  var authorization = getAuthorization(req)
+  var driver = getToken(authorization)
+  var snippetID = getFullSnippetId(authorization, req.params.snippetId)
 
-  var corbelDriver = connection.getTokenDriver(authorization)
-
-  var snippetID = connection.extractDomain(authorization) + '!' + req.params.snippetID
   logger.debug('snippet:delete:id', snippetID)
-  corbelDriver.resources.resource(engine.SnippetsCollection, snippetID).delete().then(function (response) {
-    logger.debug('snippet:deleted')
-    res.status(response.status).send(response.data)
-  })
+  makeSnippetDeletion(driver, snippetID)
+    .then(function (response) {
+      logger.debug('snippet:deleted')
+      res.status(response.status).send(response.data)
+    })
     .catch(function (error) {
       next(new ComposrError('error:snippet:delete', error.message, error.status))
     })
 }
 
-module.exports = function (server) {
-  server.del('/snippet/:snippetID', function (req, res, next) {
-    deleteSnippet(req, res, next)
-  })
+function getAuthorization (req) {
+  return auth.getAuth(req)
+}
 
-  server.del('/v1.0/snippet/:snippetID', function (req, res, next) {
-    deleteSnippet(req, res, next)
-  })
+function getToken (authorization) {
+  return connection.getTokenDriver(authorization)
+}
 
-  server.put('/snippet', function (req, res, next) {
-    createOrUpdateSnippet(req, res, next)
-  })
+function getDomain (authorization) {
+  return connection.extractDomain(authorization)
+}
 
-  server.put('/v1.0/snippet', function (req, res, next) {
-    createOrUpdateSnippet(req, res, next)
+function getFullSnippetId (authorization, snippetId) {
+  return getDomain(authorization) + '!' + snippetId
+}
+
+function validateSnippet (snippet) {
+  return engine.composr.Snippets.validate(snippet)
+}
+
+function emitEvent (domain, id, text) {
+  pmx.emit(text, {
+    domain: domain,
+    id: id
   })
+}
+
+function makeSnippetCreationOrUpdate (id, data) {
+  return engine.composr.corbelDriver.resources.resource(engine.snippetsCollection, id)
+    .update(data)
+}
+
+function makeSnippetDeletion (driver, snippetId) {
+  return driver.resources.resource(engine.SnippetsCollection, snippetId).delete()
+}
+
+module.exports = {
+  loadRoutes: function (server) {
+    server.del('/snippet/:snippetID', function (req, res, next) {
+      deleteSnippet(req, res, next)
+    })
+
+    server.del('/v1.0/snippet/:snippetID', function (req, res, next) {
+      deleteSnippet(req, res, next)
+    })
+
+    server.put('/snippet', function (req, res, next) {
+      createOrUpdateSnippet(req, res, next)
+    })
+
+    server.put('/v1.0/snippet', function (req, res, next) {
+      createOrUpdateSnippet(req, res, next)
+    })
+  },
+  getCorbelErrorBody: getCorbelErrorBody,
+  createOrUpdateSnippet: createOrUpdateSnippet,
+  checkIfClientCanPublish: checkIfClientCanPublish,
+  deleteSnippet: deleteSnippet,
+  getAuthorization: getAuthorization,
+  getToken: getToken,
+  getDomain: getDomain,
+  getFullSnippetId: getFullSnippetId,
+  validateSnippet: validateSnippet,
+  emitEvent: emitEvent,
+  makeSnippetCreationOrUpdate: makeSnippetCreationOrUpdate,
+  makeSnippetDeletion: makeSnippetDeletion
 }
