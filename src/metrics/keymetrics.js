@@ -70,6 +70,13 @@ function initMetrics (config, logger) {
     hub.on('metrics', function (domain, options) {
       pmx.emit(domain, options)
     })
+
+    hub.on('snippet:upsert', function (domain, id) {
+      pmx.emit('snippet:upsert', {
+        domain: domain,
+        id: id
+      })
+    })
   }
 }
 

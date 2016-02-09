@@ -24,7 +24,7 @@ function upsertSnippet (req, res) {
         .then(function () {
           // TODO: check if we generate the snippet ID
           // snippet.id = domain + '!' + snippet.name)
-          emitEvent(domain, snippet.id, 'snippet:updated_created')
+          emitEvent('snippet:upsert', domain, snippet.id)
           logger.debug('Storing or updating snippet', snippet.id, domain)
           upsertSnippetCall(snippet.id, snippet)
             .then(function (response) {
@@ -90,11 +90,8 @@ function validateSnippet (snippet) {
   return engine.composr.Snippets.validate(snippet)
 }
 
-function emitEvent (domain, id, text) {
-  hub.emit(text, {
-    domain: domain,
-    id: id
-  })
+function emitEvent (text, domain, id) {
+  hub.emit(text, domain, id)
 }
 
 function upsertSnippetCall (id, data) {
