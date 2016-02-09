@@ -29,9 +29,10 @@
   },
   "scripts": {
     "test:debug": "node-debug $(which grunt) test",
-    "start": "node node_modules/pm2/bin/pm2 start bin/composr -i 0 --max-memory-restart 900M && npm run logs",
+    "start": "node node_modules/pm2/bin/pm2 start bin/composr -i 0 --max-memory-restart 3G && npm run logs",
     "stop": "node node_modules/pm2/bin/pm2 stop composr",
     "restart": "node node_modules/pm2/bin/pm2 restart composr",
+    "coverage": "istanbul cover node_modules/.bin/_mocha -- -R dot",
     "debug": "node-debug bin/composr",
     "clean": "rm -rf node_modules",
     "logs": "node node_modules/pm2/bin/pm2 logs",
@@ -73,7 +74,6 @@
     "chai": "^3.4.0",
     "chai-as-promised": "^5.1.0",
     "grunt": "~0.4.5",
-    "grunt-blanket": "0.0.8",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.7.0",
     "grunt-contrib-copy": "^0.8.0",
@@ -95,7 +95,6 @@
     "sinon": "^1.14.1",
     "supertest": "^1.0.0",
     "time-grunt": "~1.3.0",
-    "travis-cov": "^0.2.5",
     "v8-profiler": "^5.2.9"
   }
 }

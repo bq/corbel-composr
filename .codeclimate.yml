@@ -1,8 +1,22 @@
-languages:
-   JavaScript: true
+---
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - javascript
+  eslint:
+    enabled: true
+  fixme:
+    enabled: true
+ratings:
+  paths:
+  - "**.js"
 exclude_paths:
 - test/**/*
 - node_modules/**/*
+- coverage/**
+- .tmp/**
 - doc/**/*
 - logs/**/*
 - src/config/**/*

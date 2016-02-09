@@ -229,13 +229,12 @@ Worker.prototype.init = function () {
     .then(function (connection) {
       // Bind connection errror
       connection.on('error', function (error) {
-        logger.error('RabbitMQ-worker', error)
+        logger.error('RabbitMQ-worker on uncaught error:', error)
         that.connectionStatus = false
-        that.retryInit(4000)
       })
 
-      connection.on('close', function (error) {
-        logger.error('RabbitMQ-worker connection closed', error)
+      connection.once('close', function (error) {
+        logger.error('RabbitMQ-worker on connection closed', error)
         that.connectionStatus = false
         that.retryInit(4000)
       })
@@ -250,15 +249,18 @@ Worker.prototype.init = function () {
           hub.emit('load:worker')
         })
         .catch(function (error) {
-          logger.error('RabbitMQ-worker error channel', error, 'with ID', that.workerID)
+          logger.error('RabbitMQ-worker error creating channel', error, 'with ID', that.workerID)
           if (conn) {
             that._closeConnection(conn)
+          // @TODO: If cannot create channel, retry N times to create channel.
+          // If after N times channel cannot be created, delete connection and retryInit.
+          } else {
+            that.retryInit()
           }
-          that.retryInit()
         })
     })
     .then(null, function (err) {
-      logger.error('RabbitMQ-worker error connection %s with ID : %s', err, that.workerID)
+      logger.error('RabbitMQ-worker error connecting %s with ID : %s', err, that.workerID)
       that.retryInit()
     })
 }

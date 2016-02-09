@@ -7,7 +7,6 @@
    _|_|_|    _|_|    _|    _|    _|  _|_|_|      _|_|    _|_|_|    _|    _|  
                                      _|                                      
                                      _|                                      
-
 ```
 
 [![Build Status](https://api.travis-ci.org/corbel-platform/corbel-composr.png?branch=master)](http://travis-ci.org/corbel-platform/corbel-composr)
@@ -18,6 +17,8 @@
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 [![Code Climate](https://codeclimate.com/github/corbel-platform/corbel-composr/badges/gpa.svg)](https://codeclimate.com/github/corbel-platform/corbel-composr)
 [![Test Coverage](https://codeclimate.com/github/corbel-platform/corbel-composr/badges/coverage.svg)](https://codeclimate.com/github/corbel-platform/corbel-composr/coverage)
+
+
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
 
@@ -25,7 +26,7 @@
 
 ## Overview
 
-CompoSR is a [nodeJS](https://nodejs.org/api/) middleware, built on top  of [express](http://expressjs.com/4x/api.html), for [Corbel][corbel-link].
+CompoSR is a [nodeJS](https://nodejs.org/api/) middleware, built on top  of [restify](http://restify.com/), for [Corbel][corbel-link].
 
 It uses the [composr-core](https://github.com/bq/composr-core) capabilities and offers developers the ability to make their own specific application API with a Corbel generic backend.
 
@@ -34,6 +35,18 @@ Composr is responsible for **composing** **phrases** of code than can be reused 
 > wiki: A composer (Latin com+ponere, literally "one who puts together") is a person who creates music.
 
 >wiki: In music and music theory, phrase and phrasing are concepts and practices related to grouping consecutive melodic notes, both in their composition and performance. A musical work is typically made up of a melody that consists of numerous consecutive phrases.
+
+## Features
+
+- Built in PM2 configuration for cluster mode
+- Bunyan Access logs
+- Winston Logs (debug, info, warn, error)
+- Endpoint documentation
+- RabbitMQ connection for endpoint updates
+- Status and Healthcheck endpoints
+- Keymetrics and Newrelic support
+- Docker Ready!
+- [Corbel][corbel-link] ready!
 
 
 ## QuickStart
@@ -142,53 +155,21 @@ NRAPPNAME => New relic app name
 NRAPIKEY => New relic api key
 ```
 
-## Phrases
+## Read:
 
-Phrases are one of the CompoSR strongest capabilities, they are JSON models that can define a dinamic endpoint. 
+[What are Phrases or Snippets?](https://github.com/corbel-platform/composr-core/wiki/Phrases)
 
-Each Phrase has an endpoint and the list of HTTP verbs it can handle (POST, PUT, GET, DELETE) with their code associated.
+## Routing endpoints
 
-See the following Phrase model.
+Corbel-CompoSR has a similar routing mechanism than restify. You can define urls by following this conventions:
 
-```
-{
-    "url": "user/:userID",
-    "get": {
-        "code": "res.status(200).send({title: 'hello world', user: req.params.userID});",
-        "doc": {
-            "description": "Phrase description",
-            "queryParameters": {
-                "param1": {
-                    "type": "number",
-                    "description": "Param description",
-                    "default": 0
-                }
-            },
-            "responses": {
-                "200": {
-                    "body": {
-                        "application/json": {
-                            "schema": "{\n\t"$schema": "http://json-schema.org/schema",\n\t"type": "object",\n\t"description": "A canonical song",\n\t"properties": {\n\t\t"title": {\n\t\t\t"type": "String"\n\t\t},\n\t\t"artist": {\n\t\t\t"type": "String"\n\t\t}\n\t},\n\t"required": ["title", "artist"]\n}"
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-```
-
-### Routing
-
-Composr Phrases have a similar routing mechanism than expressJS. You can define optional and fixed parameters on the urls by following this conventions:
-
-- `:param` : Mandatory parameter
-- `:param?` : Optional parameter
+- `:param` : Url parameter
+- `user` : Fixed path value
 
 Some examples
 
 - `user/:userId`
-- `user/status/:optionalParam?`
+- `user/status/:parameter`
 - `thing/one`
 
 ```json
@@ -206,136 +187,66 @@ Some examples
 }
 ```
 
-## Writting CompoSR phrases
+### Reference
 
-On execution time all the phrases are wrapped inside this `Function` closure, meaning you can access any of it's params:
-
-```
-function phrase(req, res, next, corbelDriver, domain, require){
-  //Your phrase code
-}
-```
-
-- req, res, next : [express](https://www.npmjs.com/package/express) request parameters
-- [corbel](https://www.npmjs.com/package/corbel-js): Corbel JavaScript SDK with an extended `corbel.generateDriver` function that generates `corbelDriver` instances with the correct `urlBase`.
-- corbelDriver : An instance of corbelDriver provided by corbel, instantiated with your `Authorization` header if provided
-- require : A package and snippet requirer
-
-## Phrases examples:
-
-### `count` value in collections query
-
-```json
-{
-    "url": "countExample",
-    "get": {
-        "code": /*...*/
-    }
-}
-```
-
-where `code` should be a string with, this [corbel-js](https://github.com/bq/corbel-js) code snippet:
-
-```javascript
-//Example endpoint code
-corbelDriver.resources.collection('test:ComposrTest').get(undefined, {
-    aggregation: {
-        $count: '*'
-    }
-}).then(function(response) {
-    res.status(200).send(response.data.count);
-.catch(function(error) {
-    res.status(500).send(error);
-});
-```
-
-### Login a client 
-
-Phrase code : 
-
-```javascript
-var corbel = require('corbel-js');
-var ComposrError = require('ComposrError');
-var utils = require('composrUtils');
-
-function validateParams(){
-  return Promise.resolve()
-    .then(function(){
-      if (!req.body || !req.body.jwt) {
-        throw new ComposrError('error:jwt:undefined', '', 401);
-      }
-    });
-}
-
-function loginClient(){
-  var corbelDriver = corbel.generateDriver({
-    iamToken: '',
-    domain : domain
-  });
-  /*
-   - Required claims:
-   - iss: CLIENT_ID
-   - aud: 'http://iam.bqws.io'
-   - scope: 'scope1 scope2'
-   - exp: epoch + 1h
-   */
-  return corbelDriver.iam.token().create({
-    jwt: req.body.jwt
-  });
-}
-
-
-validateParams()
-  .then(loginClient)
-  .then(function(response){
-    res.status(200).send(response.data);
-  })
-  .catch(function(err){
-    res.status(err.status).send(err);
-  });
-```
-
-## How can I generate Phrase models ? 
-
-> we are developing some cool tools that you will be able to use in order to avoid thinking about phrase models, and just worry about the code.
-
-## Code snippets
-
-Code snippets are a minor form of `phrases`, they are accesible through the `require` function on your phrases.
-
-```javascript
-var mySnippet = require('snippet-mySnippet');
-
-//Do whatever you want with that snippet
-```
-
-Corbel `domains` can only access it's own snippets, the Snippet syntax is the following one:
-
-```javascript
-//Random thing
-var myModel = function(options){
-  this.options = options;
-}
-
-//Mandatory exports
-exports(myModel);
-```
-
-Those snippets are also stored in Corbel as JSON models.
-
-```json
-{
-  "id": "domain:myModelSnippet",
-  "codehash": "BASE64CodeHash"
-}
-```
-
-## Reference
-
-* [corbel-js](https://github.com/bq/corbel-js) API
-* [Request object](http://expressjs.com/4x/api.html#req)
-* [Response object](http://expressjs.com/4x/api.html#res)
+* [composr-core](https://github.com/corbel-platform/composr-core)
+* [corbel-js](https://github.com/corbel-platform/corbel-js) API
 * [RAML](http://raml.org/) for phrase definition
+
+
+# Logs
+
+**CompoSR** is shipped with built-in **bunyan** and **winston** support.
+
+## Winston logs:
+
+You can set `logFile` and `logLevel` in your config file.
+
+Available log levels can be found at [winston's npm page](https://www.npmjs.com/package/winston#logging-levels):
+- debug
+- info
+- warn
+- error
+
+## Bunyan Logs:
+
+Bunyan logs are enabled by default. You can disable them by turning `bunyan.log` to `false` in your configuration.
+
+
+## Tests
+
+```
+npm test
+```
+
+
+### Coverage
+
+```
+npm run coverage
+```
+
+
+### Debug
+
+Requires [node-inspector](https://github.com/node-inspector/node-inspector)
+```
+npm install -g node-inspector
+```
+
+* Server
+
+  ```
+  npm run debug --myphrase.get
+  ```
+
+* Tests
+
+  ```
+  npm run test:debug
+  ```
+
+
 
 ## API design best practices
 
@@ -361,7 +272,7 @@ update  DELETE
 
 ### Versioning your phrases
 
-A simple way to achieve this is definning the phrase version in the url, like this
+A simple way to achieve this is defining the phrase version in the url, like this
 
 ```
 {
@@ -399,56 +310,6 @@ A phrase version should change only if the phrase contract is broken
   ```
   docker start/stop corbel-composr
   ```
-
-
-## Tests
-
-```
-npm test
-```
-
-
-## Coverage
-
-```
-grunt test:coverage
-```
-
-
-## Debug
-
-Requires [node-inspector](https://github.com/node-inspector/node-inspector)
-```
-npm install -g node-inspector
-```
-
-* Server
-
-  ```
-  npm run debug
-  ```
-
-* Tests
-
-  ```
-  npm run test:debug
-  ```
-
-
-# Logs
-
-Logs are written to the linux syslog and in the logs folder.
-
-You can set `logFile` and `logLevel` in your config file.
-
-Available log levels can be found at [winston's npm page](https://www.npmjs.com/package/winston#logging-levels):
-- debug
-- info
-- warn
-- error
-
-You can disable syslog by setting `syslog` property to `false` in the config file.
-
 
 
 ## Postman Playground
