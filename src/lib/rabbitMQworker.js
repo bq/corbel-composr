@@ -252,10 +252,10 @@ Worker.prototype.init = function () {
           logger.error('RabbitMQ-worker error creating channel', error, 'with ID', that.workerID)
           if (conn) {
             that._closeConnection(conn)
-            //@TODO: If cannot create channel, retry N times to create channel. 
-            //If after N times channel cannot be created, delete connection and retryInit.
-          }else{
-            that.retryInit()            
+          // @TODO: If cannot create channel, retry N times to create channel.
+          // If after N times channel cannot be created, delete connection and retryInit.
+          } else {
+            that.retryInit()
           }
         })
     })
