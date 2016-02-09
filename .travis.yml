@@ -19,3 +19,4 @@ before_install:
 after_script:
   - istanbul cover node_modules/.bin/_mocha -- -R dot
   - codeclimate-test-reporter < coverage/lcov.info
+  - grunt coveralls
