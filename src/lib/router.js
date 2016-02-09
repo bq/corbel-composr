@@ -66,10 +66,14 @@ function executePhraseById (req, res, next, routeItem) {
         err = new ComposrError('endpoint:not:found', 'Endpoint not found', 404)
       }
 
+      if (err instanceof ComposrError === false) {
+        err = new ComposrError('error:internal:server:error', err.message, err.status || err.statusCode || 500)
+      }
+
       logger.error('Failing executing Phrase', err)
       // @TODO: log error in metrics
-      var status = typeof err === 'object' ? err.status || err.statusCode : 404
-      hub.emit('phrase:execution:end', status, routeItem.domain, routeItem.id, routeItem.verb)
+      
+      hub.emit('phrase:execution:end', err.status, routeItem.domain, routeItem.id, routeItem.verb)
       return next(err)
     })
 }

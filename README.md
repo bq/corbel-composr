@@ -36,6 +36,18 @@ Composr is responsible for **composing** **phrases** of code than can be reused 
 
 >wiki: In music and music theory, phrase and phrasing are concepts and practices related to grouping consecutive melodic notes, both in their composition and performance. A musical work is typically made up of a melody that consists of numerous consecutive phrases.
 
+## Features
+
+- Built in PM2 configuration for cluster mode
+- Bunyan Access logs
+- Winston Logs (debug, info, warn, error)
+- Endpoint documentation
+- RabbitMQ connection for endpoint updates
+- Status and Healthcheck endpoints
+- Keymetrics and Newrelic support
+- Docker Ready!
+- [Corbel][corbel-link] ready!
+
 
 ## QuickStart
 
