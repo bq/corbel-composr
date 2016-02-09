@@ -382,7 +382,8 @@ describe('Rabbit worker', function() {
     var promiseCreateChannel;
     var stubCreateChannel;
     var connection = {
-      'on' : sinon.stub()
+      'on' : sinon.stub(),
+      'once' : sinon.stub()
     };
 
     beforeEach(function() {
