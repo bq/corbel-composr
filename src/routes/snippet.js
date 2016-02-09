@@ -1,6 +1,6 @@
 'use strict'
 
-var pmx = require('pmx')
+var hub = require('../lib/hub')
 var connection = require('../lib/corbelConnection')
 var engine = require('../lib/engine')
 var ComposrError = require('../lib/ComposrError')
@@ -12,13 +12,13 @@ function getCorbelErrorBody (corbelErrResponse) {
   return errorBody
 }
 
-function createOrUpdateSnippet (req, res) {
+function upsertSnippet (req, res) {
   var authorization = getAuthorization(req)
   var snippet = req.body || {}
-  var driver = getToken(authorization)
+  var driver = getDriver(authorization)
   var domain = getDomain(authorization)
 
-  checkIfClientCanPublish(driver)
+  checkPublishAvailability(driver)
     .then(function () {
       validateSnippet(snippet)
         .then(function () {
@@ -26,7 +26,7 @@ function createOrUpdateSnippet (req, res) {
           // snippet.id = domain + '!' + snippet.name)
           emitEvent(domain, snippet.id, 'snippet:updated_created')
           logger.debug('Storing or updating snippet', snippet.id, domain)
-          makeSnippetCreationOrUpdate(snippet.id, snippet)
+          upsertSnippetCall(snippet.id, snippet)
             .then(function (response) {
               res.send(response.status, response.data)
             })
@@ -49,18 +49,18 @@ function createOrUpdateSnippet (req, res) {
     })
 }
 
-function checkIfClientCanPublish (driver) {
+function checkPublishAvailability (driver) {
   return driver.resources.collection(engine.snippetsCollection)
     .get()
 }
 
 function deleteSnippet (req, res, next) {
   var authorization = getAuthorization(req)
-  var driver = getToken(authorization)
+  var driver = getDriver(authorization)
   var snippetID = getFullSnippetId(authorization, req.params.snippetId)
 
   logger.debug('snippet:delete:id', snippetID)
-  makeSnippetDeletion(driver, snippetID)
+  deleteSnippetCall(driver, snippetID)
     .then(function (response) {
       logger.debug('snippet:deleted')
       res.status(response.status).send(response.data)
@@ -74,7 +74,7 @@ function getAuthorization (req) {
   return auth.getAuth(req)
 }
 
-function getToken (authorization) {
+function getDriver (authorization) {
   return connection.getTokenDriver(authorization)
 }
 
@@ -91,18 +91,18 @@ function validateSnippet (snippet) {
 }
 
 function emitEvent (domain, id, text) {
-  pmx.emit(text, {
+  hub.emit(text, {
     domain: domain,
     id: id
   })
 }
 
-function makeSnippetCreationOrUpdate (id, data) {
+function upsertSnippetCall (id, data) {
   return engine.composr.corbelDriver.resources.resource(engine.snippetsCollection, id)
     .update(data)
 }
 
-function makeSnippetDeletion (driver, snippetId) {
+function deleteSnippetCall (driver, snippetId) {
   return driver.resources.resource(engine.SnippetsCollection, snippetId).delete()
 }
 
@@ -117,23 +117,23 @@ module.exports = {
     })
 
     server.put('/snippet', function (req, res, next) {
-      createOrUpdateSnippet(req, res, next)
+      upsertSnippet(req, res, next)
     })
 
     server.put('/v1.0/snippet', function (req, res, next) {
-      createOrUpdateSnippet(req, res, next)
+      upsertSnippet(req, res, next)
     })
   },
   getCorbelErrorBody: getCorbelErrorBody,
-  createOrUpdateSnippet: createOrUpdateSnippet,
-  checkIfClientCanPublish: checkIfClientCanPublish,
+  upsertSnippet: upsertSnippet,
+  checkPublishAvailability: checkPublishAvailability,
   deleteSnippet: deleteSnippet,
   getAuthorization: getAuthorization,
-  getToken: getToken,
+  getDriver: getDriver,
   getDomain: getDomain,
   getFullSnippetId: getFullSnippetId,
   validateSnippet: validateSnippet,
   emitEvent: emitEvent,
-  makeSnippetCreationOrUpdate: makeSnippetCreationOrUpdate,
-  makeSnippetDeletion: makeSnippetDeletion
+  upsertSnippetCall: upsertSnippetCall,
+  deleteSnippetCall: deleteSnippetCall
 }
