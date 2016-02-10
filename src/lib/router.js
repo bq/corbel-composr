@@ -5,7 +5,6 @@ var engine = require('./engine')
 var logger = require('../utils/composrLogger')
 var config = require('./config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
-var ComposrError = require('./ComposrError')
 var phraseUtils = require('../utils/phraseUtils')
 
 /* *
@@ -63,18 +62,16 @@ function executePhraseById (req, res, next, routeItem) {
     })
     .catch(function (err) {
       if (err === 'phrase:cant:be:runned') {
-        err = new ComposrError('endpoint:not:found', 'Endpoint not found', 404)
+        err = new engine.composr.ComposrError('endpoint:not:found', 'Endpoint not found', 404)
       }
+      var parsedErr = engine.composr.parseToComposrError(err.body || err, 'internal:server:error:endpoint:execution')
 
-      if (err instanceof engine.composr.ComposrError === false) {
-        err = new ComposrError('error:internal:server:error', err.message || err, err.status || err.statusCode || 500)
-      }
-
-      logger.error('Failing executing Phrase', err)
+      logger.debug(err)
+      logger.error('Failing executing Phrase', parsedErr.status, routeItem.domain, routeItem.id)
       // @TODO: log error in metrics
 
-      hub.emit('phrase:execution:end', err.status, routeItem.domain, routeItem.id, routeItem.verb)
-      return next(err)
+      hub.emit('phrase:execution:end', parsedErr.status, routeItem.domain, routeItem.id, routeItem.verb)
+      return next(parsedErr)
     })
 }
 
