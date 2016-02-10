@@ -52,16 +52,16 @@ var engine = {
    * @return nothing
    *************************************************************/
 
-  resolveOrRejectServiceCheckingRequest: function (resolve, reject, request, module, promiseTimeoutHandler, rejectMessage) {
+  resolveOrRejectServiceCheckingRequest: function (resolve, reject, request, module, promiseTimeoutHandler, rejectMessage, url) {
     if (promiseTimeoutHandler) {
       clearTimeout(promiseTimeoutHandler)
     }
     if (resolve) {
-      logger.info('External service', module, 'is UP')
+      logger.info('External service', module, 'is UP', url)
       resolve()
     } else if (reject) {
       rejectMessage = rejectMessage || ''
-      logger.error('External service', module, 'is DOWN')
+      logger.error('External service', module, 'is DOWN', url)
       reject(rejectMessage)
     }
   },
@@ -88,9 +88,9 @@ var engine = {
           var isValidResponse = (res.statusCode === 200)
           var bodyContainsError = (responseData.indexOf('error') > -1 || responseData.indexOf('err') > -1)
           if (isValidResponse && !bodyContainsError) {
-            engine.resolveOrRejectServiceCheckingRequest(resolve, null, request, module, promiseTimeoutHandler, null)
+            engine.resolveOrRejectServiceCheckingRequest(resolve, null, request, module, promiseTimeoutHandler, null, url)
           } else {
-            engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'JSON error')
+            engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'JSON error', url)
           }
         }
       })
@@ -98,13 +98,13 @@ var engine = {
       .on('error', function (err) {
         // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved
         if (engine.resolveOrRejectServiceCheckingRequest) {
-          engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err)
+          engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err, url)
         }
       })
 
     promiseTimeoutHandler = setTimeout(function () {
       request.abort()
-      engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired')
+      engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired', url)
     }, serviceCheckingRequestTimeout)
     return request
   },
