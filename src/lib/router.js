@@ -66,13 +66,13 @@ function executePhraseById (req, res, next, routeItem) {
         err = new ComposrError('endpoint:not:found', 'Endpoint not found', 404)
       }
 
-      if (err instanceof ComposrError === false) {
-        err = new ComposrError('error:internal:server:error', err.message, err.status || err.statusCode || 500)
+      if (err instanceof engine.composr.ComposrError === false) {
+        err = new ComposrError('error:internal:server:error', err.message || err, err.status || err.statusCode || 500)
       }
 
       logger.error('Failing executing Phrase', err)
       // @TODO: log error in metrics
-      
+
       hub.emit('phrase:execution:end', err.status, routeItem.domain, routeItem.id, routeItem.verb)
       return next(err)
     })
