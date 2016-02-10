@@ -17,6 +17,7 @@ if (config('keymetrics') === true) {
 // This packages must be after loading keymetrics and newrelic packages
 var logger = require('../src/utils/composrLogger')
 var version = require('../package.json').version
+var hub = require('../src/lib/hub')
 
 module.exports = new Promise(function (resolve, reject) {
   require('../src/app')
@@ -28,6 +29,7 @@ module.exports = new Promise(function (resolve, reject) {
 
         logger.salute(config('serverName'), version, function () {
           resolve(serverObjects)
+          hub.emit('server:start')
         })
       })
     })
