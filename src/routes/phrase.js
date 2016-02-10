@@ -110,8 +110,7 @@ function createOrUpdatePhrase (req, res) {
 }
 
 function checkIfClientCanPublish (driver) {
-  return driver.resources.collection(engine.phrasesCollection)
-    .get()
+  return driver.resources.collection(engine.phrasesCollection).get()
 }
 /**
  * Deletes a phrase
@@ -206,36 +205,44 @@ function getPhrases (req, res) {
  * domain => 'apps-sandbox'
  * phrasePath => 'login'
  */
-module.exports = function (server) {
-  server.get('/phrase', function (req, res) {
-    getPhrases(req, res)
-  })
+module.exports = {
+  loadRoutes: function (server) {
+    server.get('/phrase', function (req, res) {
+      getPhrases(req, res)
+    })
 
-  server.get('/v1.0/phrase', function (req, res) {
-    getPhrases(req, res)
-  })
+    server.get('/v1.0/phrase', function (req, res) {
+      getPhrases(req, res)
+    })
 
-  server.put('/phrase', function (req, res, next) {
-    createOrUpdatePhrase(req, res, next)
-  })
+    server.put('/phrase', function (req, res, next) {
+      createOrUpdatePhrase(req, res, next)
+    })
 
-  server.put('/v1.0/phrase', function (req, res, next) {
-    createOrUpdatePhrase(req, res, next)
-  })
+    server.put('/v1.0/phrase', function (req, res, next) {
+      createOrUpdatePhrase(req, res, next)
+    })
 
-  server.del('/phrase/:phraseid', function (req, res, next) {
-    deletePhrase(req, res, next)
-  })
+    server.del('/phrase/:phraseid', function (req, res, next) {
+      deletePhrase(req, res, next)
+    })
 
-  server.del('/v1.0/phrase/:phraseid', function (req, res, next) {
-    deletePhrase(req, res, next)
-  })
+    server.del('/v1.0/phrase/:phraseid', function (req, res, next) {
+      deletePhrase(req, res, next)
+    })
 
-  server.get('/phrase/:phraseid', function (req, res, next) {
-    getPhrase(req, res, next)
-  })
+    server.get('/phrase/:phraseid', function (req, res, next) {
+      getPhrase(req, res, next)
+    })
 
-  server.get('/v1.0/phrase/:phraseid', function (req, res, next) {
-    getPhrase(req, res, next)
-  })
+    server.get('/v1.0/phrase/:phraseid', function (req, res, next) {
+      getPhrase(req, res, next)
+    })
+  },
+  getCorbelErrorBody: getCorbelErrorBody,
+  createOrUpdatePhrase: createOrUpdatePhrase,
+  checkIfClientCanPublish: checkIfClientCanPublish,
+  deletePhrase: deletePhrase,
+  getPhrase: getPhrase,
+  getPhrases: getPhrases
 }
