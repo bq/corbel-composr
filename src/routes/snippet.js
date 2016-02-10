@@ -34,7 +34,8 @@ Snippet.upsert = function (req, res) {
             })
             .catch(function (error) {
               var errorBody = Snippet.getCorbelErrorBody(error)
-              res.send(error.status, new ComposrError('error:snippet:create', errorBody, error.status))
+              logger.warn('SERVER', 'invalid:upsert:snippet', errorBody)
+              res.send(error.status, new ComposrError('error:upsert:snippet', errorBody, error.status))
             })
         })
         .catch(function (result) {
@@ -47,7 +48,7 @@ Snippet.upsert = function (req, res) {
     .catch(function (error) {
       var errorBody = Snippet.getCorbelErrorBody(error)
       logger.warn('SERVER', 'invalid:client:snippet', errorBody)
-      res.send(401, new ComposrError('error:snippet:create', 'Unauthorized client', 401))
+      res.send(401, new ComposrError('error:upsert:snippet', 'Unauthorized client', 401))
     })
 }
 
