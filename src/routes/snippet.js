@@ -60,10 +60,10 @@ Snippet.checkPublishAvailability = function (driver) {
 Snippet.delete = function (req, res, next) {
   var authorization = Snippet.getAuthorization(req)
   var driver = Snippet.getDriver(authorization)
-  var snippetID = Snippet.getFullId(authorization, req.params.snippetId)
+  var snippetId = Snippet.getFullId(authorization, req.params.snippetId)
 
-  logger.debug('snippet:delete:id', snippetID)
-  Snippet.deleteCall(driver, snippetID)
+  logger.debug('snippet:delete:id', snippetId)
+  Snippet.deleteCall(driver, snippetId)
     .then(function (response) {
       logger.debug('snippet:deleted')
       res.send(response.status, response.data)
@@ -103,16 +103,16 @@ Snippet.upsertCall = function (id, data) {
 }
 
 Snippet.deleteCall = function (driver, snippetId) {
-  return driver.resources.resource(engine.SnippetsCollection, snippetId).delete()
+  return driver.resources.resource(engine.snippetsCollection, snippetId).delete()
 }
 
 module.exports = {
   loadRoutes: function (server) {
-    server.del('/snippet/:snippetID', function (req, res, next) {
+    server.del('/snippet/:snippetId', function (req, res, next) {
       Snippet.delete(req, res, next)
     })
 
-    server.del('/v1.0/snippet/:snippetID', function (req, res, next) {
+    server.del('/v1.0/snippet/:snippetId', function (req, res, next) {
       Snippet.delete(req, res, next)
     })
 

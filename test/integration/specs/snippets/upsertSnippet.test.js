@@ -2,39 +2,33 @@
 var request = require('supertest'),
   chai = require('chai'),
   expect = chai.expect,
-  clientUtils = require('../../utils/client');
+  clientUtils = require('../../utils/client'),
+  commonUtils = require('../../utils/commonUtils');
 
-var AdminClientData = clientUtils.getAdminClient();
-var demoAppClientData = clientUtils.getDemoClient();
-
-var adminClientToken;
 
 function test(server) {
-  describe('Publish snippet', function() {
-
+  describe('Upsert snippet', function() {
+    var codehash = 'var userModel = function(id){ this.id = id; }; exports(userModel);';
+    var AdminClientData = clientUtils.getAdminClient();
+    var demoAppClientData = clientUtils.getDemoClient();
+    var adminClientToken;
     var validSnippet = {
-      id: 'testDomainComposr!TheSnippet1',
-      codehash: server.composr.utils.encodeToBase64('var userModel = function(id){ this.id = id; }; exports(userModel);')
+      id: 'testDomainComposr!valid',
+      codehash: server.composr.utils.encodeToBase64(codehash)
     };
 
     var invalidSnippet = {
-      'id': 'testDomainComposr!something',
+      'id': 'testDomainComposr!invalid',
       codehash: server.composr.utils.encodeToBase64('var a = 3;')
     };
 
     before(function(done) {
       this.timeout(30000);
-      request(server.app)
-        .post('/token')
-        .send(AdminClientData)
-        .expect(200)
-        .end(function(err, response) {
-          expect(response).to.be.an('object');
-          expect(response.body.data.accessToken).to.exist;
-          adminClientToken = response.body.data.accessToken;
-
-          done(err);
-        });
+      commonUtils.makeRequest(server, 'post', '/token', AdminClientData, 200)
+      .then(function(response){
+        adminClientToken = response.body.data.accessToken;
+      })
+      .should.notify(done);
     });
 
     it('Allows to create a wellformed snippet', function(done) {
@@ -65,8 +59,6 @@ function test(server) {
     });
 
   });
-
-
 }
 
 module.exports = test;

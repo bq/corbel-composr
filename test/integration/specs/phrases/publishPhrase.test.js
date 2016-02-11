@@ -37,7 +37,6 @@ function test(server) {
         .expect(200)
         .end(function(err, response) {
           expect(response).to.be.an('object');
-          console.log(response.body);
           expect(response.body.data.accessToken).to.exist;
           adminClientToken = response.body.data.accessToken;
 

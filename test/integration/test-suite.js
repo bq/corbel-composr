@@ -17,7 +17,8 @@ var tests = [
 
   //snippets
   require('./specs/snippets/multipleSnippetsForPhrases.test.js'),
-  require('./specs/snippets/publishSnippet.test.js'),
+  require('./specs/snippets/upsertSnippet.test.js'),
+  require('./specs/snippets/deleteSnippet.test.js'),
   require('./specs/snippets/unregisterSnippets.test.js'),
 
   //params
@@ -30,8 +31,6 @@ var tests = [
   require('./specs/domainUserReturnsNotFound.test.js'),
   require('./specs/methodNotAllowed.test.js'),
   require('./specs/status.endpoint.test.js')
-  //require('./specs/unpublishSnippet.test.js'),
-  //require('./specs/unpublishPhrase.test.js'),
 ];
 
 module.exports = function(serverPromise) {
