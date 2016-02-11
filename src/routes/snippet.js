@@ -10,7 +10,10 @@ var auth = require('../lib/auth')
 var Snippet = {}
 
 Snippet.getCorbelErrorBody = function (corbelErrResponse) {
-  var errorBody = typeof (corbelErrResponse.data) !== 'undefined' && typeof (corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
+  var errorBody = typeof (corbelErrResponse.data) !== 'undefined' &&
+  typeof (corbelErrResponse.data.body) === 'string' &&
+  corbelErrResponse.data.body.indexOf('{') !== -1
+    ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
   return errorBody
 }
 
@@ -52,15 +55,11 @@ Snippet.upsert = function (req, res) {
     })
 }
 
-Snippet.checkPublishAvailability = function (driver) {
-  return driver.resources.collection(engine.snippetsCollection)
-    .get()
-}
-
 Snippet.delete = function (req, res, next) {
   var authorization = Snippet.getAuthorization(req)
   var driver = Snippet.getDriver(authorization)
-  var snippetId = Snippet.getFullId(authorization, req.params.snippetId)
+  var domain = Snippet.getDomain(authorization)
+  var snippetId = Snippet.getFullId(domain, req.params.snippetId)
 
   logger.debug('snippet:delete:id', snippetId)
   Snippet.deleteCall(driver, snippetId)
@@ -85,8 +84,12 @@ Snippet.getDomain = function (authorization) {
   return connection.extractDomain(authorization)
 }
 
-Snippet.getFullId = function (authorization, snippetId) {
-  return Snippet.getDomain(authorization) + '!' + snippetId
+Snippet.checkPublishAvailability = function (driver) {
+  return driver.resources.collection(engine.snippetsCollection).get()
+}
+
+Snippet.getFullId = function (domain, id) {
+  return domain + '!' + id
 }
 
 Snippet.validate = function (snippet) {
@@ -102,8 +105,8 @@ Snippet.upsertCall = function (id, data) {
     .update(data)
 }
 
-Snippet.deleteCall = function (driver, snippetId) {
-  return driver.resources.resource(engine.snippetsCollection, snippetId).delete()
+Snippet.deleteCall = function (driver, id) {
+  return driver.resources.resource(engine.snippetsCollection, id).delete()
 }
 
 module.exports = {

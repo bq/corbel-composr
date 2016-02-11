@@ -1,6 +1,7 @@
 'use strict'
 
 var pmx = require('pmx')
+var hub = require('../lib/hub')
 var connection = require('../lib/corbelConnection')
 var engine = require('../lib/engine')
 var ComposrError = require('../lib/ComposrError')
@@ -16,8 +17,14 @@ var counterPhrasesUpdated = probe.counter({
   name: 'phrases_updated'
 })
 
-function getCorbelErrorBody (corbelErrResponse) {
-  var errorBody = typeof (corbelErrResponse.data) !== 'undefined' && typeof (corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
+
+var Phrase = {}
+
+Phrase.getCorbelErrorBody = function (corbelErrResponse) {
+  var errorBody = typeof (corbelErrResponse.data) !== 'undefined' &&
+  typeof (corbelErrResponse.data.body) === 'string' &&
+  corbelErrResponse.data.body.indexOf('{') !== -1
+    ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
   return errorBody
 }
 
@@ -60,39 +67,32 @@ function getCorbelErrorBody (corbelErrResponse) {
  * @param  {json} phrase body
  * @return {promise}
  */
-function createOrUpdatePhrase (req, res) {
+Phrase.upsert = function (req, res) {
   // Metrics for phrases updated since last restart
   counterPhrasesUpdated.inc()
 
-  var authorization = auth.getAuth(req, res)
-
+  var authorization = Phrase.getAuthorization(req)
   var phrase = req.body || {}
+  var driver = Phrase.getDriver(authorization)
+  var domain = Phrase.getDomain(authorization)
 
-  var clientCorbelDriver = connection.getTokenDriver(authorization)
-
-  var domain = connection.extractDomain(authorization)
-
-  checkIfClientCanPublish(clientCorbelDriver)
+  Phrase.checkPublishAvailability(driver)
     .then(function () {
-      engine.composr.Phrases.validate(phrase)
+      Phrase.validate(phrase)
         .then(function () {
           phrase.id = domain + '!' + phrase.url.replace(/\//g, '!')
-          pmx.emit('phrase:updated_created', {
-            domain: domain,
-            id: phrase.id
-          })
-
+          Phrase.emitEvent('phrase:upsert', domain, phrase.id)
           logger.info('Storing or updating phrase', phrase.id, domain)
 
-          engine.composr.corbelDriver.resources.resource(engine.phrasesCollection, phrase.id)
-            .update(phrase)
+          Phrase.upsertCall(phrase.id, phrase)
             .then(function (response) {
               res.setHeader('Location', 'phrase/' + phrase.id)
               res.send(response.status, response.data)
             })
             .catch(function (error) {
-              var errorBody = getCorbelErrorBody(error)
-              res.send(error.status, new ComposrError('error:phrase:create', errorBody, error.status))
+              var errorBody = Phrase.getCorbelErrorBody(error)
+              logger.warn('SERVER', 'invalid:upsert:phrase', errorBody)
+              res.send(error.status, new ComposrError('error:upsert:phrase', errorBody, error.status))
             })
         })
         .catch(function (result) {
@@ -103,15 +103,12 @@ function createOrUpdatePhrase (req, res) {
         })
     })
     .catch(function (error) {
-      var errorBody = getCorbelErrorBody(error)
+      var errorBody = Phrase.getCorbelErrorBody(error)
       logger.warn('SERVER', 'invalid:client:phrase', errorBody)
-      res.send(401, new ComposrError('error:phrase:create', 'Unauthorized client', 401))
+      res.send(401, new ComposrError('error:upsert:phrase', 'Unauthorized client', 401))
     })
 }
 
-function checkIfClientCanPublish (driver) {
-  return driver.resources.collection(engine.phrasesCollection).get()
-}
 /**
  * Deletes a phrase
  * @param  {[type]}   req  [description]
@@ -120,23 +117,14 @@ function checkIfClientCanPublish (driver) {
  * @return {[type]}        [description]
  * TODO: unregister phrase on core,
  */
-function deletePhrase (req, res) {
-  var authorization = auth.getAuth(req, res)
-
-  if (!authorization) {
-    res.send(401, new ComposrError('error:authorization:required', {}, 401))
-  }
-
-  var corbelDriver = connection.getTokenDriver(authorization)
-
-  var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid
-
+Phrase.delete = function (req, res) {
+  var authorization = Phrase.getAuthorization(req)
+  var driver = Phrase.getDriver(authorization)
+  var domain = Phrase.getDomain(authorization)
+  var phraseId = Phrase.getFullId(domain, req.params.phraseId)
   logger.debug('Request delete phrase:', phraseId)
 
-  corbelDriver
-    .resources
-    .resource(engine.phrasesCollection, phraseId)
-    .delete()
+  Phrase.deleteCall(driver, phraseId)
     .then(function (response) {
       logger.debug('phrase:deleted')
       res.send(response.status, response.data)
@@ -153,24 +141,19 @@ function deletePhrase (req, res) {
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-function getPhrase (req, res) {
-  var authorization = auth.getAuth(req, res)
-
-  var corbelDriver = connection.getTokenDriver(authorization)
-
-  var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid
+Phrase.get = function (req, res) {
+  var authorization = Phrase.getAuthorization(req)
+  var driver = Phrase.getDriver(authorization)
+  var domain = Phrase.getDomain(authorization)
+  var phraseId = Phrase.getFullId(domain, req.params.phraseId)
 
   logger.debug('Trying to get phrase:', phraseId)
-
-  corbelDriver
-    .resources
-    .resource(engine.phrasesCollection, phraseId)
-    .get()
+  Phrase.getCall(driver, phraseId)
     .then(function (response) {
       res.send(response.status, response.data)
     })
     .catch(function (error) {
-      var errorBody = getCorbelErrorBody(error)
+      var errorBody = Phrase.getCorbelErrorBody(error)
       res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status))
     })
 }
@@ -181,21 +164,61 @@ function getPhrase (req, res) {
  * @param  {[type]} res [description]
  * @return {[type]}     [description]
  */
-function getPhrases (req, res) {
-  var authorization = auth.getAuth(req, res)
+Phrase.getAll = function (req, res) {
+  var authorization = Phrase.getAuthorization(req)
+  var domain = Phrase.getDomain(authorization)
 
-  if (!authorization) {
-    res.send(401, new ComposrError('error:authorization:required', {}, 401))
-    return
-  }
-
-  var domainExtracted = connection.extractDomain(authorization)
-  if (domainExtracted) {
-    var phrases = engine.composr.Phrases.getPhrases(domainExtracted)
+  if (domain) {
+    var phrases = Phrase.getAllCall(domain)
     res.send(200, phrases || [])
   } else {
     res.send(401, new ComposrError('error:domain:undefined', '', 401))
   }
+}
+
+Phrase.getAuthorization = function (req) {
+  return auth.getAuth(req)
+}
+
+Phrase.getDriver = function (authorization) {
+  return connection.getTokenDriver(authorization)
+}
+
+Phrase.getDomain = function (authorization) {
+  return connection.extractDomain(authorization)
+}
+
+Phrase.checkPublishAvailability = function (driver) {
+  return driver.resources.collection(engine.phrasesCollection).get()
+}
+
+Phrase.validate = function (phrase) {
+  return engine.composr.Phrases.validate(phrase)
+}
+
+Phrase.emitEvent = function (text, domain, id) {
+  hub.emit(text, domain, id)
+}
+
+Phrase.getFullId = function (domain, id) {
+  return domain + '!' + id
+}
+
+Phrase.upsertCall = function (id, data) {
+  return engine.composr.corbelDriver.resources.resource(engine.phrasesCollection, id)
+    .update(data)
+}
+
+Phrase.deleteCall = function (driver, id) {
+  return driver.resources.resource(engine.phrasesCollection, id).delete()
+}
+
+Phrase.getCall = function (driver, id) {
+  return driver.resources.resource(engine.phrasesCollection, id).get()
+}
+
+Phrase.getAllCall = function (domain) {
+  return engine.composr.Phrases.getPhrases(domain)
 }
 
 /**
@@ -207,42 +230,36 @@ function getPhrases (req, res) {
  */
 module.exports = {
   loadRoutes: function (server) {
-    server.get('/phrase', function (req, res) {
-      getPhrases(req, res)
-    })
-
-    server.get('/v1.0/phrase', function (req, res) {
-      getPhrases(req, res)
-    })
-
     server.put('/phrase', function (req, res, next) {
-      createOrUpdatePhrase(req, res, next)
+      Phrase.upsert(req, res, next)
     })
 
     server.put('/v1.0/phrase', function (req, res, next) {
-      createOrUpdatePhrase(req, res, next)
+      Phrase.upsert(req, res, next)
     })
 
-    server.del('/phrase/:phraseid', function (req, res, next) {
-      deletePhrase(req, res, next)
+    server.del('/phrase/:phraseId', function (req, res, next) {
+      Phrase.delete(req, res, next)
     })
 
-    server.del('/v1.0/phrase/:phraseid', function (req, res, next) {
-      deletePhrase(req, res, next)
+    server.del('/v1.0/phrase/:phraseId', function (req, res, next) {
+      Phrase.delete(req, res, next)
     })
 
-    server.get('/phrase/:phraseid', function (req, res, next) {
-      getPhrase(req, res, next)
+    server.get('/phrase/:phraseId', function (req, res, next) {
+      Phrase.get(req, res, next)
     })
 
-    server.get('/v1.0/phrase/:phraseid', function (req, res, next) {
-      getPhrase(req, res, next)
+    server.get('/v1.0/phrase/:phraseId', function (req, res, next) {
+      Phrase.get(req, res, next)
+    })
+    server.get('/phrase', function (req, res) {
+      Phrase.getAll(req, res)
+    })
+
+    server.get('/v1.0/phrase', function (req, res) {
+      Phrase.getAll(req, res)
     })
   },
-  getCorbelErrorBody: getCorbelErrorBody,
-  createOrUpdatePhrase: createOrUpdatePhrase,
-  checkIfClientCanPublish: checkIfClientCanPublish,
-  deletePhrase: deletePhrase,
-  getPhrase: getPhrase,
-  getPhrases: getPhrases
+  Phrase: Phrase
 }

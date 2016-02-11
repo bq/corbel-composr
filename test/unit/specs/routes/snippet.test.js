@@ -98,7 +98,7 @@ describe('Snippet upsert and delete', function() {
   });
 
   it('Snippet.getFullId returns complete id', function() {
-      expect(Snippet.getFullId(auth, req.body.id)).to.be.equals('domain!test');
+      expect(Snippet.getFullId(domain, req.body.id)).to.be.equals('domain!test');
   });
 
   it('Snippet.upsert works correctly', function(done) {
