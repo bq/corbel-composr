@@ -297,5 +297,6 @@ var engine = {
 engine.initialized = false
 engine.phrasesCollection = 'composr:Phrase'
 engine.snippetsCollection = 'composr:Snippet'
+engine.domainCollection = 'composr:Domain'
 engine.composr = composr
 module.exports = engine

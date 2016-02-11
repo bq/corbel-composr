@@ -5,5 +5,6 @@ module.exports = function (server) {
   require('./doc')(server)
   require('./phrase')(server)
   require('./snippet')(server)
+  require('./domain')(server)
   require('./test')(server)
 }
