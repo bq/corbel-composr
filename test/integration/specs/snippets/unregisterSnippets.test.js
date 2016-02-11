@@ -93,10 +93,10 @@ function test(server) {
       it('should fail when using an unregistered snippet', function(done) {
         request(server.app)
         .get('/testDomainComposr/unregister-snippet-test')
-        .expect(503)
+        .expect(500)
         .end(function(err, response) {
           expect(response.body).to.be.an('object');
-          expect(response.body.error).to.equals('error:phrase:timedout:unregister-snippet-test');
+          expect(response.body.error).to.equals('error:phrase:exception:unregister-snippet-test');
           console.log(response.body);
           done(err);
         });
@@ -105,10 +105,10 @@ function test(server) {
       it('should fail when using the other unregistered snippet', function(done){
         request(server.app)
         .get('/testDomainComposr/unregister-snippet-test/juan')
-        .expect(503)
+        .expect(500)
         .end(function(err, response) {
           expect(response.body).to.be.an('object');
-          expect(response.body.error).to.equals('error:phrase:timedout:unregister-snippet-test/:name');
+          expect(response.body.error).to.equals('error:phrase:exception:unregister-snippet-test/:name');
           done(err);
         });
       });

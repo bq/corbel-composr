@@ -31,7 +31,7 @@ function createOrUpdateVirtualDomain(req, res) {
     })
 }
 
-function getVirtualDomain (req, res) {
+function getVirtualDomain(req, res) {
   var authorization = auth.getAuth(req, res)
 
   if (!authorization) {
@@ -88,14 +88,16 @@ function getCorbelErrorBody(corbelErrResponse) {
   return errorBody
 }
 
-module.exports = function (server) {
+module.exports = {
+  loadRoutes: function (server) {
 
-  server.put('/vdomain', function (req, res, next) {
-    createOrUpdateVirtualDomain(req, res, next)
-  })
+    server.put('/vdomain', function (req, res, next) {
+      createOrUpdateVirtualDomain(req, res, next)
+    })
 
-  server.getVirtualDomain('/vdomain', function (req, res, next) {
-    getVirtualDomain(req, res, next)
-  })
+    server.getVirtualDomain('/vdomain', function (req, res, next) {
+      getVirtualDomain(req, res, next)
+    })
 
+  }
 }

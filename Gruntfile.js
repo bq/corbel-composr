@@ -40,28 +40,6 @@ module.exports = function (grunt) {
       all: ['.tmp']
     },
 
-    copy: {
-      coverage: {
-        expand: true,
-        src: [
-          'test/**',
-          'src/**',
-          'bin/**',
-          // static files
-          'public/**',
-          'package.json'
-        ],
-        dest: '.tmp/coverage/'
-      }
-    },
-
-    blanket: {
-      coverage: {
-        src: ['.tmp/coverage/src/'],
-        dest: '.tmp/coverage/src/'
-      }
-    },
-
     develop: {
       server: {
         file: 'bin/composr'
@@ -119,34 +97,6 @@ module.exports = function (grunt) {
     },
 
     mochaTest: { // test for nodejs app with mocha
-      testCoverage: {
-        options: {
-          reporter: 'spec'
-        },
-        src: ['.tmp/coverage/test/runner.js']
-      },
-      coverage: {
-        options: {
-          reporter: 'html-cov',
-          quiet: true,
-          captureFile: '.tmp/coverage/coverage.html'
-        },
-        src: ['.tmp/coverage/test/runner.js']
-      },
-      coveralls: {
-        options: {
-          reporter: 'mocha-lcov-reporter',
-          quiet: true,
-          captureFile: '.tmp/coverage/lcov.info'
-        },
-        src: ['.tmp/coverage/test/runner.js']
-      },
-      'travis-cov': {
-        options: {
-          reporter: 'travis-cov'
-        },
-        src: ['.tmp/coverage/test/runner.js']
-      },
       tap: {
         options: {
           reporter: 'tap',
@@ -174,7 +124,7 @@ module.exports = function (grunt) {
         force: false
       },
       'default': {
-        src: '.tmp/coverage/lcov.info'
+        src: 'coverage/lcov.info'
       }
     },
 
@@ -229,19 +179,6 @@ module.exports = function (grunt) {
     'test',
     'develop',
     'watch'
-  ])
-
-  grunt.registerTask('test:coverage', [
-    'clean',
-    'standard:lint',
-    'madge',
-    'copy:coverage',
-    'blanket',
-    'mochaTest:testCoverage',
-    'mochaTest:coverage',
-    'mochaTest:coveralls',
-    'mochaTest:travis-cov',
-    'coveralls'
   ])
 
   grunt.registerTask('test', [
