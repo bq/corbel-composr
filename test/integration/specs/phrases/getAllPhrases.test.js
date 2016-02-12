@@ -1,30 +1,27 @@
 'use strict';
 var request = require('supertest'),
-chai = require('chai'),
-expect = chai.expect,
-chaiAsPromised = require('chai-as-promised'),
-clientUtils = require('../../utils/client');
+  chai = require('chai'),
+  expect = chai.expect,
+  chaiAsPromised = require('chai-as-promised'),
+  clientUtils = require('../../utils/client'),
+  commonUtils = require('../../utils/commonUtils');
+
 chai.use(chaiAsPromised);
 
 function test(server) {
-  describe('Get to phrase returns not found', function() {
+  describe('getAll phrases', function() {
     var AdminClientData = clientUtils.getAdminClient();
     var adminClientToken;
     this.timeout(10000);
 
     before(function(done) {
-      request(server.app)
-      .post('/token')
-      .send(AdminClientData)
-      .expect(200)
-      .end(function(err, response) {
-        expect(response).to.be.an('object');
-        expect(response.body.data.accessToken).to.exist;
+      this.timeout(30000);
+      commonUtils.makeRequest(server, 'post', '/token', AdminClientData, 200)
+      .then(function(response){
         adminClientToken = response.body.data.accessToken;
-        done(err);
-      });
+      })
+      .should.notify(done);
     });
-
 
     it('should return a list of phrases with a get to /phrase with correct authorization', function(done) {
       request(server.app)
@@ -37,7 +34,7 @@ function test(server) {
       });
     });
 
-    it('should return unauthorized with a get to /phrase with incorrect authorization', function(done) {
+    it('should return unauthorized if the request is made with an incorrect authorization', function(done) {
       request(server.app)
       .get('/phrase')
       .set('Authorization', 'fakeClientToken')
@@ -48,7 +45,7 @@ function test(server) {
       });
     });
 
-    it('should return unauthorized with a get to /phrase without authorization', function(done) {
+    it('should return unauthorized if the request is made without authorization', function(done) {
       request(server.app)
       .get('/phrase')
       .expect(401)

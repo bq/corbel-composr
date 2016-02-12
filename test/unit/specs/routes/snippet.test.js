@@ -14,6 +14,7 @@ describe('Snippet upsert and delete', function() {
   var stubGetAuthorization;
   var stubGetDriver;
   var stubGetDomain;
+  var stubGetFullId;
   var stubPublishAvailability;
   var stubValidate;
   var stubEmitEvent;
@@ -37,7 +38,7 @@ describe('Snippet upsert and delete', function() {
   };
   var driver = 'driver';
   var domain = 'domain';
-  var fullId = 'FullId';
+  var fullId = 'domain!deleteId';
   var textEvent = 'snippet:upsert';
 
   beforeEach(function() {
@@ -67,11 +68,12 @@ describe('Snippet upsert and delete', function() {
     sandbox.restore();
   });
 
-  it('getCorbelErrorBody is called with a string and returns a string', function() {
+  it('getCorbelErrorBody is called with a string and returns a string', function(done) {
     expect(Snippet.getCorbelErrorBody('test')).to.be.equal('test');
+    done();
   });
 
-  it('getCorbelErrorBody is called with an object and returns a json parsed correctly', function() {
+  it('getCorbelErrorBody is called with an object and returns a json parsed correctly', function(done) {
     var dataObj = {
         data: {
           body: '{"error": "errorTest"}'
@@ -83,9 +85,10 @@ describe('Snippet upsert and delete', function() {
     };
 
     expect(Snippet.getCorbelErrorBody(dataObj)).to.be.deep.equal(parsedData);
+    done();
   });
 
-  it('getCorbelErrorBody is called with an object and returns the same object', function() {
+  it('getCorbelErrorBody is called with an object and returns the same object', function(done) {
     var dataObj = {
         data: {
           body: {
@@ -95,10 +98,12 @@ describe('Snippet upsert and delete', function() {
     };
 
     expect(Snippet.getCorbelErrorBody(dataObj)).to.be.equal(dataObj);
+    done();
   });
 
-  it('Snippet.getFullId returns complete id', function() {
-      expect(Snippet.getFullId(auth, req.body.id)).to.be.equals('domain!test');
+  it('Snippet.getFullId returns complete id', function(done) {
+      expect(Snippet.getFullId(domain, req.body.id)).to.be.equals('domain!test');
+      done();
   });
 
   it('Snippet.upsert works correctly', function(done) {
@@ -126,19 +131,17 @@ describe('Snippet upsert and delete', function() {
 
      });
 
-  it('Snippet.delete works correctly', function() {
-      var snippetId = 'domain!test';
+  it('Snippet.delete works correctly', function(done) {
       Snippet.delete(req, { send : function(status){
-
         expect(status).to.be.equal(200);
         expect(stubGetAuthorization.callCount).to.equals(1);
         expect(stubGetAuthorization.calledWith(req)).to.equals(true);
         expect(stubGetDriver.callCount).to.equals(1);
         expect(stubGetDriver.calledWith(auth)).to.equals(true);
-        expect(Snippet.getFullId.callCount).to.equals(1);
-        expect(Snippet.getFullId.calledWith(auth, req.params.snippetId)).to.equals(true);
+        expect(stubGetDomain.callCount).to.equals(1);
+        expect(stubGetDomain.calledWith(auth)).to.equals(true);
         expect(stubDeleteCall.callCount).to.equals(1);
-        expect(stubDeleteCall.calledWith(driver, snippetId)).to.equals(true);
+        expect(stubDeleteCall.calledWith(driver, fullId)).to.equals(true);
 
         done();
       }});
