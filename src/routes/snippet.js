@@ -10,7 +10,10 @@ var auth = require('../lib/auth')
 var Snippet = {}
 
 Snippet.getCorbelErrorBody = function (corbelErrResponse) {
-  var errorBody = typeof (corbelErrResponse.data) !== 'undefined' && typeof (corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
+  var errorBody = typeof (corbelErrResponse.data) !== 'undefined' &&
+  typeof (corbelErrResponse.data.body) === 'string' &&
+  corbelErrResponse.data.body.indexOf('{') !== -1
+    ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
   return errorBody
 }
 
@@ -34,7 +37,8 @@ Snippet.upsert = function (req, res) {
             })
             .catch(function (error) {
               var errorBody = Snippet.getCorbelErrorBody(error)
-              res.send(error.status, new ComposrError('error:snippet:create', errorBody, error.status))
+              logger.warn('SERVER', 'invalid:upsert:snippet', errorBody)
+              res.send(error.status, new ComposrError('error:upsert:snippet', errorBody, error.status))
             })
         })
         .catch(function (result) {
@@ -47,22 +51,18 @@ Snippet.upsert = function (req, res) {
     .catch(function (error) {
       var errorBody = Snippet.getCorbelErrorBody(error)
       logger.warn('SERVER', 'invalid:client:snippet', errorBody)
-      res.send(401, new ComposrError('error:snippet:create', 'Unauthorized client', 401))
+      res.send(401, new ComposrError('error:upsert:snippet', 'Unauthorized client', 401))
     })
-}
-
-Snippet.checkPublishAvailability = function (driver) {
-  return driver.resources.collection(engine.snippetsCollection)
-    .get()
 }
 
 Snippet.delete = function (req, res, next) {
   var authorization = Snippet.getAuthorization(req)
   var driver = Snippet.getDriver(authorization)
-  var snippetID = Snippet.getFullId(authorization, req.params.snippetId)
+  var domain = Snippet.getDomain(authorization)
+  var snippetId = Snippet.getFullId(domain, req.params.snippetId)
 
-  logger.debug('snippet:delete:id', snippetID)
-  Snippet.deleteCall(driver, snippetID)
+  logger.debug('snippet:delete:id', snippetId)
+  Snippet.deleteCall(driver, snippetId)
     .then(function (response) {
       logger.debug('snippet:deleted')
       res.send(response.status, response.data)
@@ -84,8 +84,12 @@ Snippet.getDomain = function (authorization) {
   return connection.extractDomain(authorization)
 }
 
-Snippet.getFullId = function (authorization, snippetId) {
-  return Snippet.getDomain(authorization) + '!' + snippetId
+Snippet.checkPublishAvailability = function (driver) {
+  return driver.resources.collection(engine.snippetsCollection).get()
+}
+
+Snippet.getFullId = function (domain, id) {
+  return domain + '!' + id
 }
 
 Snippet.validate = function (snippet) {
@@ -101,17 +105,17 @@ Snippet.upsertCall = function (id, data) {
     .update(data)
 }
 
-Snippet.deleteCall = function (driver, snippetId) {
-  return driver.resources.resource(engine.SnippetsCollection, snippetId).delete()
+Snippet.deleteCall = function (driver, id) {
+  return driver.resources.resource(engine.snippetsCollection, id).delete()
 }
 
 module.exports = {
   loadRoutes: function (server) {
-    server.del('/snippet/:snippetID', function (req, res, next) {
+    server.del('/snippet/:snippetId', function (req, res, next) {
       Snippet.delete(req, res, next)
     })
 
-    server.del('/v1.0/snippet/:snippetID', function (req, res, next) {
+    server.del('/v1.0/snippet/:snippetId', function (req, res, next) {
       Snippet.delete(req, res, next)
     })
 
