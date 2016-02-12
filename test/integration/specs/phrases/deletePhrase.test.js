@@ -7,15 +7,18 @@ var request = require('supertest'),
 
 
 function test(server) {
-  describe('Delete snippet', function() {
-    var codehash = 'var userModel = function(id){ this.id = id; }; exports(userModel);';
-    var snippetId = 'testDomainComposr!valid';
+  describe('Delete phrase', function() {
     var AdminClientData = clientUtils.getAdminClient();
     var demoAppClientData = clientUtils.getDemoClient();
     var adminClientToken;
-    var validSnippet = {
-      id: snippetId,
-      codehash: server.composr.utils.encodeToBase64(codehash)
+    var phrase = {
+      'url': 'published/phrase',
+      'get': {
+        'code': 'res.status(200).send({ "hello": "World!"});',
+        'doc': {
+
+        }
+      }
     };
 
     before(function(done) {
@@ -24,38 +27,38 @@ function test(server) {
       .then(function(response){
         adminClientToken = response.body.data.accessToken;
 
-        return commonUtils.makeRequest(server, 'put', '/snippet', validSnippet, 204, 
+        return commonUtils.makeRequest(server, 'put', '/phrase', phrase, 204, 
                 ['Authorization'], [adminClientToken]);
       })
       .should.notify(done);
     });
 
-    it('allows to delete a snippet', function(done) {
+    it('allows to delete a phrase', function(done) {
       this.timeout(30000);
       request(server.app)
-        .del('/snippet/' + snippetId)
+        .del('/phrase/' + phrase.url.replace('/', '!'))
         .set('Authorization', adminClientToken)
         .expect(204)
         .end(function(err, response) {
-          expect(response.statusCode).to.equals(204);
+          expect(response.status).to.equals(204);
           done(err);
         });
     });
 
     it('should return an error if the request is made with an incorrect authorization', function(done) {
       request(server.app)
-      .del('/snippet/' + snippetId)
+      .del('/phrase/' + phrase.url.replace('/', '!'))
       .set('Authorization', 'fakeClientToken')
       .expect(401)
       .end(function(err, response){
-        expect(response.body.error).to.equals('error:snippet:delete');
+        expect(response.body.error).to.equals('error:phrase:delete');
         done(err);
       });
     });
 
     it('should return an error if the request is made without authorization', function(done) {
       request(server.app)
-      .del('/snippet/' + snippetId)
+      .del('/phrase/' + phrase.url.replace('/', '!'))
       .expect(401)
       .end(function(err, response){
         expect(response.body.error).to.equals('missing:header:authorization');

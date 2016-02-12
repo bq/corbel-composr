@@ -33,8 +33,7 @@ function test(server) {
           expect(response.body.surname).to.equals('palomo');
           //phrase is unregistered
           var phraseId = server.composr.Phrases._generateId('unregister/:name/:surname', 'testDomainComposr');
-          server.composr.Phrases.unregister('testDomainComposr',
-            phraseId);
+          server.composr.Phrases.unregister('testDomainComposr', phraseId);
           //phrase is not registered
           request(server.app)
             .get('/testDomainComposr/unregister/juan/palomo')

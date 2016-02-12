@@ -12,6 +12,7 @@ function test(server) {
     var AdminClientData = clientUtils.getAdminClient();
     var demoAppClientData = clientUtils.getDemoClient();
     var adminClientToken;
+    var snippetIds = [];
     var validSnippet = {
       id: 'testDomainComposr!valid',
       codehash: server.composr.utils.encodeToBase64(codehash)
@@ -31,7 +32,18 @@ function test(server) {
       .should.notify(done);
     });
 
-    it('Allows to create a wellformed snippet', function(done) {
+    after(function(done) {
+      this.timeout(30000);
+      var promises = snippetIds.map(function(snippet){
+        return commonUtils.makeRequest(server, 'del', snippet, null, 204,
+                ['Authorization'], [adminClientToken])
+      });
+
+      Promise.all(promises)
+      .should.notify(done);
+    });
+
+    it('allows to create a wellformed snippet', function(done) {
       this.timeout(30000);
       request(server.app)
         .put('/snippet')
@@ -40,6 +52,7 @@ function test(server) {
         .expect(204)
         .end(function(err, response) {
           expect(response.statusCode).to.equals(204);
+          snippetIds.push('/snippet/' + validSnippet.id);
           done(err);
         });
     });
@@ -52,10 +65,33 @@ function test(server) {
         .send(invalidSnippet)
         .expect(422)
         .end(function(err, response) {
-          expect(response.statusCode).to.equals(422);
           expect(response.status).to.equals(422);
+          expect(response.body.error).to.equals('error:snippet:validation');
           done(err);
         });
+    });
+
+    it('should return an error if the request is made with an incorrect authorization', function(done) {
+      request(server.app)
+      .put('/snippet')
+      .set('Authorization', 'fakeClientToken')
+      .send(validSnippet)
+      .expect(401)
+      .end(function(err, response){
+        expect(response.body.error).to.equals('error:upsert:snippet');
+        done(err);
+      });
+    });
+
+    it('should return an error if the request is made without authorization', function(done) {
+      request(server.app)
+      .put('/snippet')
+      .send(validSnippet)
+      .expect(401)
+      .end(function(err, response){
+        expect(response.body.error).to.equals('missing:header:authorization');
+        done(err);
+      });
     });
 
   });

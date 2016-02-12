@@ -10,9 +10,11 @@ var tests = [
   require('./specs/handlers/postExecutionHandler.test.js'),
 
   //phrases
-  require('./specs/phrases/getToPhraseEndpoint.test.js'),
+  require('./specs/phrases/getAllPhrases.test.js'),
+  require('./specs/phrases/getPhrase.test.js'),
   require('./specs/phrases/orderExecutionPhrases.test.js'),
-  require('./specs/phrases/publishPhrase.test.js'),
+  require('./specs/phrases/upsertPhrase.test.js'),
+  require('./specs/phrases/deletePhrase.test.js'),
   require('./specs/phrases/unregisterPhrases.test.js'),
 
   //snippets

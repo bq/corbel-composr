@@ -1,6 +1,7 @@
 'use strict'
 
 var pmx = require('pmx')
+var _ = require('lodash')
 var hub = require('../lib/hub')
 var connection = require('../lib/corbelConnection')
 var engine = require('../lib/engine')
@@ -16,7 +17,6 @@ var probe = pmx.probe()
 var counterPhrasesUpdated = probe.counter({
   name: 'phrases_updated'
 })
-
 
 var Phrase = {}
 
@@ -143,19 +143,20 @@ Phrase.delete = function (req, res) {
  */
 Phrase.get = function (req, res) {
   var authorization = Phrase.getAuthorization(req)
-  var driver = Phrase.getDriver(authorization)
   var domain = Phrase.getDomain(authorization)
+  if (!authorization || !domain) {
+    res.send(401, new ComposrError('error:unauthorized', 'Invalid credentials', 401))
+    return
+  }
   var phraseId = Phrase.getFullId(domain, req.params.phraseId)
 
   logger.debug('Trying to get phrase:', phraseId)
-  Phrase.getCall(driver, phraseId)
-    .then(function (response) {
-      res.send(response.status, response.data)
-    })
-    .catch(function (error) {
-      var errorBody = Phrase.getCorbelErrorBody(error)
-      res.send(error.status, new ComposrError('error:phrase:get', errorBody, error.status))
-    })
+  var phrase = Phrase.getCall(domain, phraseId)
+  if (phrase) {
+    res.send(200, phrase)
+  } else {
+    res.send(404, new ComposrError('error:phrase:not_found', 'The phrase you are requesting is missing', 404))
+  }
 }
 
 /**
@@ -167,7 +168,6 @@ Phrase.get = function (req, res) {
 Phrase.getAll = function (req, res) {
   var authorization = Phrase.getAuthorization(req)
   var domain = Phrase.getDomain(authorization)
-
   if (domain) {
     var phrases = Phrase.getAllCall(domain)
     res.send(200, phrases || [])
@@ -213,8 +213,11 @@ Phrase.deleteCall = function (driver, id) {
   return driver.resources.resource(engine.phrasesCollection, id).delete()
 }
 
-Phrase.getCall = function (driver, id) {
-  return driver.resources.resource(engine.phrasesCollection, id).get()
+Phrase.getCall = function (domain, id) {
+  var phrases = Phrase.getAllCall(domain)
+  return _.filter(phrases, function (o) {
+    return o.id === id
+  })[0]
 }
 
 Phrase.getAllCall = function (domain) {
