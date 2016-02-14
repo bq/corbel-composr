@@ -1,12 +1,12 @@
-'use strict';
-var request = require('supertest'),
-  chai = require('chai'),
-  sinon = require('sinon'),
-  expect = chai.expect;
+'use strict'
+/* globals before describe it */
 
+var request = require('supertest')
+var chai = require('chai')
+var expect = chai.expect
 
-function test(server) {
-  describe('When a request to composr takes more than 10 seconds', function() {
+function test (server) {
+  describe('When a request to composr takes more than 10 seconds', function () {
     var phrasesToRegister = [{
       'url': 'timeout',
       'get': {
@@ -15,38 +15,33 @@ function test(server) {
 
         }
       }
-    }];
+    }]
 
-    before(function(done) {
+    before(function (done) {
       server.composr.Phrases.register('testDomain', phrasesToRegister)
-        .then(function(results) {
-          done();
-        });
-    });
+        .then(function (results) {
+          done()
+        })
+    })
 
-
-    it('it fails with a 503 error', function(done) {
-
-      this.timeout(30000);
+    it('it fails with a 503 error', function (done) {
+      this.timeout(30000)
 
       request(server.app)
         .get('/testDomain/timeout')
         .expect(503)
-        .end(function(error, response) {
-          expect(response).to.be.an('object');
-          expect(response.body.status).to.equals(503);
-          expect(response.body.error).to.equals('error:phrase:timedout:timeout');
+        .end(function (error, response) {
+          expect(response).to.be.an('object')
+          expect(response.body.status).to.equals(503)
+          expect(response.body.error).to.equals('error:phrase:timedout:timeout')
           if (response.statusCode === 503) {
-            return done();
+            return done()
           } else {
-            return done(error || response);
+            return done(error || response)
           }
-
-        });
-    });
-
-
-  });
+        })
+    })
+  })
 }
 
-module.exports = test;
+module.exports = test

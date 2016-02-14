@@ -1,6 +1,6 @@
-'use strict';
+'use strict'
 
-var request = require('supertest');
+var request = require('supertest')
 
 /*
 * @param  {server} Server where execute the request
@@ -11,34 +11,34 @@ var request = require('supertest');
 * @param  [String] Values to be set in the request
  * @return {promise}
  */
-function makeRequest(server, method, path, data, statusCode, fields, values) {
-  return new Promise(function(resolve, reject){
-      var req = request(server.app)
-          [method](path);
-  
-      if(fields && values) {
-          setFieldsAndValuesToRequest(req, fields, values);
-      }
-  
-      req.send(data)
+function makeRequest (server, method, path, data, statusCode, fields, values) {
+  return new Promise(function (resolve, reject) {
+    var req = request(server.app)
+    ;[method](path)
+
+    if (fields && values) {
+      setFieldsAndValuesToRequest(req, fields, values)
+    }
+
+    req.send(data)
       .expect(statusCode)
-      .end(function(err, response) {
-        if (err){
-          reject(err);
-        }else{
-          resolve(response);
+      .end(function (err, response) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(response)
         }
-      });
-  });
+      })
+  })
 }
 
-function setFieldsAndValuesToRequest(req, fields, values) {
-  values.forEach(function(value, index){
-    req = req.set(fields[index], value);
-  });
-  return req;
+function setFieldsAndValuesToRequest (req, fields, values) {
+  values.forEach(function (value, index) {
+    req = req.set(fields[index], value)
+  })
+  return req
 }
 
 module.exports = {
   makeRequest: makeRequest
-};
+}
