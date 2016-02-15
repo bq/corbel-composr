@@ -92,7 +92,7 @@ describe('Phrase upsert, delete and get', function () {
     done()
   })
 
-  it('getCorbelErrorBody is called with an object and returns the same object', function (done) {
+  it('getCorbelErrorBody is called with an object and returns the same object', function () {
     var dataObj = {
       data: {
         body: {
@@ -101,8 +101,7 @@ describe('Phrase upsert, delete and get', function () {
       }
     }
 
-    expect(Phrase.getCorbelErrorBody(dataObj)).to.be.equal(dataObj)
-    done()
+    expect(Phrase.getCorbelErrorBody(dataObj)).to.be.equal(dataObj.data)
   })
 
   it('Phrase.getFullId returns complete id', function (done) {

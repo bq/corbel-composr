@@ -43,6 +43,7 @@ try {
   })
 
   server.on('InternalServer', function (req, res, err, next) {
+    logger.warn('Error caught by router InternalServer')
     err = new ComposrError('error:internal:server:error', err.message, 500)
     res.send(500, err)
     return next()
@@ -52,14 +53,17 @@ try {
     if (err instanceof ComposrError === false) {
       err = new ComposrError('error:internal:server:error', err.message, err.status || err.statusCode || 500)
     }
+    var status = err.statusCode || err.status || 500
+    var body = err.body || err.data || err
 
-    logger.error(err, route)
+    logger.warn('Error caught by router uncaughtException')
+    logger.error(status, body, route)
 
-    res.send(err.statusCode, err)
+    res.send(status, body)
   })
 
   process.on('uncaughtException', function (err) {
-    logger.warn('Error caught by uncaughtException', err)
+    logger.warn('Error caught by uncaughtException')
     logger.error(err)
     if (!err || err.message !== "Can't set headers after they are sent.") {
       process.exit(1)

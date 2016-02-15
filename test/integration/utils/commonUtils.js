@@ -13,8 +13,7 @@ var request = require('supertest')
  */
 function makeRequest (server, method, path, data, statusCode, fields, values) {
   return new Promise(function (resolve, reject) {
-    var req = request(server.app)
-    ;[method](path)
+    var req = request(server.app)[method](path)
 
     if (fields && values) {
       setFieldsAndValuesToRequest(req, fields, values)

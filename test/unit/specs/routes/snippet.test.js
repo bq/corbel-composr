@@ -87,7 +87,7 @@ describe('Snippet upsert and delete', function () {
     done()
   })
 
-  it('getCorbelErrorBody is called with an object and returns the same object', function (done) {
+  it('getCorbelErrorBody is called with an object and returns the same object', function () {
     var dataObj = {
       data: {
         body: {
@@ -96,8 +96,7 @@ describe('Snippet upsert and delete', function () {
       }
     }
 
-    expect(Snippet.getCorbelErrorBody(dataObj)).to.be.equal(dataObj)
-    done()
+    expect(Snippet.getCorbelErrorBody(dataObj)).to.be.equal(dataObj.data)
   })
 
   it('Snippet.getFullId returns complete id', function (done) {

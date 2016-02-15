@@ -229,6 +229,7 @@ Worker.prototype.init = function () {
     .then(function (connection) {
       // Bind connection errror
       connection.on('error', function (error) {
+        hub.emit('rabbitmq:error', error)
         logger.error('RabbitMQ-worker on uncaught error:', error)
         that.connectionStatus = false
       })

@@ -11,6 +11,7 @@ var expect = chai.expect
 var sinon = require('sinon')
 var engine = require('../../../src/lib/engine.js')
 
+chai.should()
 chai.use(chaiAsPromised)
 
 describe('Engine', function () {

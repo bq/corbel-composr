@@ -259,18 +259,20 @@ describe('Rabbit worker', function () {
 
     worker._doWorkWithPhraseOrSnippet(isPhrase, id, action, engineCustom)
 
-    promiseRegisterPhrases.then(function () {
-      expect(engineCustom.composr.loadPhrase.callCount).to.equals(1)
-      expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true)
-      expect(stubRegisterPhrases.callCount).to.equals(1)
-      expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true)
+    promiseRegisterPhrases
+      .then(function () {
+        expect(engineCustom.composr.loadPhrase.callCount).to.equals(1)
+        expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true)
+        expect(stubRegisterPhrases.callCount).to.equals(1)
+        expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true)
 
-      expect(engineCustom.composr.loadSnippet.callCount).to.equals(0)
-      expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(false)
-      expect(stubRegisterSnippets.callCount).to.equals(0)
-      expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(false)
-    })
-      .should.notify(done)
+        expect(engineCustom.composr.loadSnippet.callCount).to.equals(0)
+        expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(false)
+        expect(stubRegisterSnippets.callCount).to.equals(0)
+        expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(false)
+
+        done()
+      })
   })
 
   it('should call correct method in engine when a update is requested for a phrase', function (done) {
@@ -279,18 +281,20 @@ describe('Rabbit worker', function () {
 
     worker._doWorkWithPhraseOrSnippet(isPhrase, id, action, engineCustom)
 
-    promiseRegisterPhrases.then(function () {
-      expect(engineCustom.composr.loadPhrase.callCount).to.equals(1)
-      expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true)
-      expect(stubRegisterPhrases.callCount).to.equals(1)
-      expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true)
+    promiseRegisterPhrases
+      .then(function () {
+        expect(engineCustom.composr.loadPhrase.callCount).to.equals(1)
+        expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true)
+        expect(stubRegisterPhrases.callCount).to.equals(1)
+        expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true)
 
-      expect(engineCustom.composr.loadSnippet.callCount).to.equals(0)
-      expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(false)
-      expect(stubRegisterSnippets.callCount).to.equals(0)
-      expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(false)
-    })
-      .should.notify(done)
+        expect(engineCustom.composr.loadSnippet.callCount).to.equals(0)
+        expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(false)
+        expect(stubRegisterSnippets.callCount).to.equals(0)
+        expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(false)
+
+        done()
+      })
   })
 
   it('should call correct method in engine when a create is requested for a snippet', function (done) {
@@ -299,18 +303,20 @@ describe('Rabbit worker', function () {
 
     worker._doWorkWithPhraseOrSnippet(isPhrase, id, action, engineCustom)
 
-    promiseRegisterSnippets.then(function () {
-      expect(engineCustom.composr.loadSnippet.callCount).to.equals(1)
-      expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(true)
-      expect(stubRegisterSnippets.callCount).to.equals(1)
-      expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(true)
+    promiseRegisterSnippets
+      .then(function () {
+        expect(engineCustom.composr.loadSnippet.callCount).to.equals(1)
+        expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(true)
+        expect(stubRegisterSnippets.callCount).to.equals(1)
+        expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(true)
 
-      expect(engineCustom.composr.loadPhrase.callCount).to.equals(0)
-      expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(false)
-      expect(stubRegisterPhrases.callCount).to.equals(0)
-      expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(false)
-    })
-      .should.notify(done)
+        expect(engineCustom.composr.loadPhrase.callCount).to.equals(0)
+        expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(false)
+        expect(stubRegisterPhrases.callCount).to.equals(0)
+        expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(false)
+
+        done()
+      })
   })
 
   it('should call correct method in engine when a update is requested for a snippet', function (done) {
@@ -319,18 +325,20 @@ describe('Rabbit worker', function () {
 
     worker._doWorkWithPhraseOrSnippet(isPhrase, id, action, engineCustom)
 
-    promiseRegisterSnippets.then(function () {
-      expect(engineCustom.composr.loadSnippet.callCount).to.equals(1)
-      expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(true)
-      expect(stubRegisterSnippets.callCount).to.equals(1)
-      expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(true)
+    promiseRegisterSnippets
+      .then(function () {
+        expect(engineCustom.composr.loadSnippet.callCount).to.equals(1)
+        expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(true)
+        expect(stubRegisterSnippets.callCount).to.equals(1)
+        expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(true)
 
-      expect(engineCustom.composr.loadPhrase.callCount).to.equals(0)
-      expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(false)
-      expect(stubRegisterPhrases.callCount).to.equals(0)
-      expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(false)
-    })
-      .should.notify(done)
+        expect(engineCustom.composr.loadPhrase.callCount).to.equals(0)
+        expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(false)
+        expect(stubRegisterPhrases.callCount).to.equals(0)
+        expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(false)
+
+        done()
+      })
   })
 
   it('connection is closed correctly', function () {
@@ -372,8 +380,9 @@ describe('Rabbit worker', function () {
         expect(worker.bindQueue.calledWith(channel, queue)).to.equals(true)
         expect(worker.consumeChannel.callCount).to.equals(1)
         expect(worker.consumeChannel.calledWith(channel, queue)).to.equals(true)
+
+        done()
       })
-      .should.notify(done)
   })
 
   describe('worker flow', function () {
@@ -411,13 +420,15 @@ describe('Rabbit worker', function () {
     it('basic init flow should go well', function (done) {
       theWorker.init() // subject under test
 
-      promiseCreateChannel.then(function () {
-        expect(theWorker._connect.callCount).to.equals(1)
-        expect(theWorker._connect.calledWith()).to.equals(true)
-        expect(stubCreateChannel.callCount).to.equals(1)
-        expect(stubCreateChannel.calledWith(connection)).to.equals(true)
-      })
-        .should.notify(done)
+      promiseCreateChannel
+        .then(function () {
+          expect(theWorker._connect.callCount).to.equals(1)
+          expect(theWorker._connect.calledWith()).to.equals(true)
+          expect(stubCreateChannel.callCount).to.equals(1)
+          expect(stubCreateChannel.calledWith(connection)).to.equals(true)
+
+          done()
+        })
     })
   })
 

@@ -38,6 +38,19 @@ function initMetrics (config, logger) {
     newrelic = require('newrelic')
     logger.info('Initializing NewRelic events...')
 
+    hub.on('server:start', function () {
+      newrelic.recordCustomEvent('server:start', {
+        date: Date.now()
+      })
+    })
+
+    hub.on('rabbitmq:error', function (err) {
+      newrelic.recordCustomEvent('rabbitmq:error', {
+        date: Date.now(),
+        err: err
+      })
+    })
+
     hub.on('http:status', function (status, url, method) {
       newrelic.recordCustomEvent('http:status', {
         url: url,

@@ -25,7 +25,7 @@ Phrase.getCorbelErrorBody = function (corbelErrResponse) {
   typeof (corbelErrResponse.data.body) === 'string' &&
   corbelErrResponse.data.body.indexOf('{') !== -1
     ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
-  return errorBody
+  return errorBody.data ? errorBody.data : errorBody
 }
 
 /**
