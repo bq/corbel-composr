@@ -66,6 +66,11 @@ function executePhraseById (req, res, next, routeItem) {
       }
       var parsedErr = engine.composr.parseToComposrError(err.body || err, 'internal:server:error:endpoint:execution')
 
+      if (err.status || err.statusCode) {
+        parsedErr.status = err.status || err.statusCode
+        parsedErr.statusCode = parsedErr.status
+      }
+
       logger.debug(err)
       logger.error('Failing executing Phrase', parsedErr.status, routeItem.domain, routeItem.id)
       // @TODO: log error in metrics

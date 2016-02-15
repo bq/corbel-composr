@@ -3,7 +3,7 @@
 
 var tests = [
   //require('./specs/timeout.test.js'),
-
+  
   // handlers
   require('./specs/handlers/errorHandlers.test.js'),
   require('./specs/handlers/notFoundHandler.test.js'),
@@ -16,6 +16,7 @@ var tests = [
   require('./specs/phrases/upsertPhrase.test.js'),
   require('./specs/phrases/deletePhrase.test.js'),
   require('./specs/phrases/unregisterPhrases.test.js'),
+  require('./specs/phrases/invalidCorbelJsRequest.error.test.js'),
 
   //snippets
   require('./specs/snippets/multipleSnippetsForPhrases.test.js'),
