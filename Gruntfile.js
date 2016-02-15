@@ -49,7 +49,7 @@ module.exports = function (grunt) {
     standard: {
       lint: {
         src: [
-          '{bin/,src/}**/**.js',
+          './{bin,src,test}/**/*.js',
           '*.js',
           'bin/composr'
         ]
@@ -60,7 +60,7 @@ module.exports = function (grunt) {
           lint: true
         },
         src: [
-          '{bin/,src/}**/**.js',
+          './{bin,src,test}/**/*.js',
           '*.js',
           'bin/composr'
         ]
