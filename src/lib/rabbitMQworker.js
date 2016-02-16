@@ -30,12 +30,17 @@ Worker.prototype.isValidEngine = function (engine) {
   engine.hasOwnProperty('snippetsCollection') &&
   engine.hasOwnProperty('phrasesCollection'))
 }
+
 Worker.prototype.isPhrase = function (type) {
   return type === corbelConnection.PHRASES_COLLECTION
 }
 
 Worker.prototype.isSnippet = function (type) {
   return type === corbelConnection.SNIPPETS_COLLECTION
+}
+
+Worker.prototype.isVirtualDomain = function (type) {
+  return type === corbelConnection.VIRTUAL_DOMAIN_COLLECTION
 }
 
 /* *********************************
@@ -81,6 +86,22 @@ Worker.prototype._addSnippet = function (domain, id) {
 }
 
 /* *********************************
+ * Fired when an event of CREATE virtualDomain gets received
+ * Returns Promise
+ ***********************************/
+Worker.prototype._addVirtualDomain = function (domain, id) {
+  var that = this
+  return this.engine.composr.loadVirtualDomain(id)
+    .then(function (item) {
+      logger.debug('RabbitMQ-worker virtualDomain fetched', item.id)
+      return that.engine.composr.VirtualDomain.register(domain, item)
+    })
+    .then(function (result) {
+      return result.registered
+    })
+}
+
+/* *********************************
  * Fired when an event of DELETE phrase gets received
  ***********************************/
 Worker.prototype._removePhrase = function (domain, id) {
@@ -94,6 +115,13 @@ Worker.prototype._removePhrase = function (domain, id) {
 Worker.prototype._removeSnippet = function (domain, id) {
   this.engine.composr.Snippets.unregister(domain, id)
   this.engine.composr.removeSnippetsFromDataStructure(id)
+}
+
+/* *********************************
+ * Fired when an event of DELETE virtualDomain gets received
+ ***********************************/
+Worker.prototype._removeVirtualDomain = function (domain, id) {
+  this.engine.composr.VirtualDomain.unregister(domain, id)
 }
 
 Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action) {
@@ -130,6 +158,32 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action
   }
 }
 
+Worker.prototype._doWorkWithVirtualDomain = function (id, action) {
+  var domain = utils.extractDomainFromId(id)
+  switch (action) {
+    case 'DELETE':
+      logger.info('RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
+      this._removeVirtualDomain(domain, id)
+      break
+
+    case 'CREATE':
+    case 'UPDATE':
+      logger.info('RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
+
+      this._addVirtualDomain(domain, id)
+        .then(function (registered) {
+          logger.info('RabbitMQ-worker item registered', id, registered)
+        })
+        .catch(function (err) {
+          logger.error('RabbitMQ-worker error: ', err.data.error, err.data.errorDescription, err.status)
+        })
+      break
+
+    default:
+      logger.warn('RabbitMQ-worker error: wrong action ', action)
+  }
+}
+
 Worker.prototype.doWork = function (ch, msg) {
   if (msg.fields.routingKey === config('rabbitmq.event')) {
     var message
@@ -144,6 +198,9 @@ Worker.prototype.doWork = function (ch, msg) {
       var itemIsPhrase = this.isPhrase(type)
       logger.info('RabbitMQ-worker ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
       this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action)
+    }
+    if (this.isVirtualDomain) {
+      this._doWorkWithVirtualDomain(message.resourceId, message.action)
     }
   }
 }

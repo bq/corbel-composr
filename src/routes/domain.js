@@ -6,21 +6,16 @@ var ComposrError = require('../lib/ComposrError')
 var logger = require('../utils/composrLogger')
 var auth = require('../lib/auth')
 
-function createOrUpdateVirtualDomain(req, res) {
+function createOrUpdateVirtualDomain (req, res) {
   var authorization = auth.getAuth(req, res)
   var clientCorbelDriver = connection.getTokenDriver(authorization)
 
-  var domain = connection.extractDomain(authorization)
   var virtualDomain = req.body || {}
 
   checkIfClientCanPublish(clientCorbelDriver, res)
     .then(function () {
       return validate(virtualDomain, res)
     })
-    .then(function () {
-      return engine.composr.VirtualDomain.register(domain, virtualDomain)
-    })
-    //.then(reloadPhrases)
     .then(function () {
       return updateDomain(virtualDomain, res)
     })
@@ -31,7 +26,7 @@ function createOrUpdateVirtualDomain(req, res) {
     })
 }
 
-function getVirtualDomain(req, res) {
+function getVirtualDomains (req, res) {
   var authorization = auth.getAuth(req, res)
 
   if (!authorization) {
@@ -48,7 +43,7 @@ function getVirtualDomain(req, res) {
   }
 }
 
-function checkIfClientCanPublish(driver, res) {
+function checkIfClientCanPublish (driver, res) {
   return driver.resources.collection(engine.domainCollection).get()
     .catch(function (error) {
       var errorBody = getCorbelErrorBody(error)
@@ -57,7 +52,7 @@ function checkIfClientCanPublish(driver, res) {
     })
 }
 
-function validate(virtualDomain, res) {
+function validate (virtualDomain, res) {
   return engine.composr.VirtualDomain.validator(virtualDomain)
     .catch(function (errors) {
       var message = []
@@ -68,7 +63,7 @@ function validate(virtualDomain, res) {
     })
 }
 
-function updateDomain(virtualDomain, res) {
+function updateDomain (virtualDomain, res) {
   logger.debug('Storing or updating domain descriptor', virtualDomain.name, virtualDomain)
 
   return engine.composr.corbelDriver.resources.resource(engine.domainCollection, virtualDomain.id)
@@ -78,26 +73,19 @@ function updateDomain(virtualDomain, res) {
     })
 }
 
-//function reloadPhrases() {
-// return engine.composr.fetchData()
-//   .then(engine.composr.registerData())
-//}
-
-function getCorbelErrorBody(corbelErrResponse) {
+function getCorbelErrorBody (corbelErrResponse) {
   var errorBody = typeof (corbelErrResponse.data) !== 'undefined' && typeof (corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
   return errorBody
 }
 
 module.exports = {
   loadRoutes: function (server) {
-
     server.put('/vdomain', function (req, res, next) {
       createOrUpdateVirtualDomain(req, res, next)
     })
 
-    server.getVirtualDomain('/vdomain', function (req, res, next) {
-      getVirtualDomain(req, res, next)
+    server.get('/vdomain', function (req, res, next) {
+      getVirtualDomains(req, res, next)
     })
-
   }
 }

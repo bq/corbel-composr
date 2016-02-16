@@ -33,7 +33,25 @@ var engine = {
     })
 
     engine.composr.events.on('phrase:registered', 'CorbelComposr', function (phrase) {
-      hub.emit('create:routes', phrase)
+      var domain = phrase.id.split('!')[0]
+
+      var apiDescriptor = {}
+      // TODO: we only update a phrase, getting the virtualDomain from memory for now
+      var virtualDomain = engine.composr.VirtualDomain.getVirtualDomains(domain)
+      // TODO: we assume a single virtualDomain!
+      apiDescriptor.virtualDomain = virtualDomain && virtualDomain.length > 0 ? virtualDomain[0] : virtualDomain
+      apiDescriptor.phrases = phrase
+      hub.emit('create:routes', apiDescriptor)
+    })
+
+    engine.composr.events.on('virtualDomain:registered', 'CorbelComposr', function (virtualDomain) {
+      var domain = virtualDomain.id.split('!')[0]
+
+      var apiDescriptor = {}
+      apiDescriptor.virtualDomain = virtualDomain
+      // TODO: we only update the virtualDomain, getting the phrases from memory for now
+      apiDescriptor.phrases = engine.composr.Phrases.getPhrases(domain)
+      hub.emit('create:routes', apiDescriptor)
     })
 
     engine.composr.events.on('metrics', 'CorbelComposr', function (options) {

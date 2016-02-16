@@ -104,10 +104,12 @@ function enforceGC () {
  * @param  {Function} next    [description]
  * @return {[type]}           [description]
  */
-function createRoutes (phrases, next) {
+function createRoutes (apiDescriptor, next) {
+  console.log('EEEEEEEEEEEEEEE', apiDescriptor.phrases)
   var routeObjects = []
-  phrases.forEach(analyzePhrase(routeObjects))
-  next(routeObjects)
+  apiDescriptor.phrases.forEach(analyzePhrase(routeObjects))
+  apiDescriptor.routeObjects = routeObjects
+  next(apiDescriptor)
 }
 
 /**
@@ -177,8 +179,8 @@ function corbelDriverEventHookAfter (req) {
  * @param  {[type]} routeObjects [description]
  * @return {[type]}              [description]
  */
-function bindRoutes (server, routeObjects) {
-  for (var i = routeObjects.length - 1; i >= 0; i--) {
+function bindRoutes (server, apiDescriptor) {
+  for (var i = apiDescriptor.routeObjects.length - 1; i >= 0; i--) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
 
@@ -196,7 +198,7 @@ function bindRoutes (server, routeObjects) {
         function bindRouteV1 (req, res, next) {
           executePhraseById(req, res, next, item)
         })
-    })(routeObjects[i])
+    })(apiDescriptor.routeObjects[i])
   }
 }
 
@@ -228,15 +230,15 @@ function listAllRoutes (server) {
 }
 
 module.exports = function (server) {
-  hub.on('create:routes', function (phrases) {
+  hub.on('create:routes', function (apiDescriptor) {
     logger.debug('Creting or updating endpoints...')
 
-    if (!Array.isArray(phrases)) {
-      phrases = [phrases]
+    if (!Array.isArray(apiDescriptor.phrases)) {
+      apiDescriptor.phrases = [apiDescriptor.phrases]
     }
 
-    createRoutes(phrases, function (routeObjects) {
-      bindRoutes(server, routeObjects)
+    createRoutes(apiDescriptor, function (apiDescriptor) {
+      bindRoutes(server, apiDescriptor)
     })
   })
 
