@@ -34,7 +34,7 @@ function test (server) {
           phrase.id = server.composr.Phrases._generateId(phrase.url, domain)
           phrase.urlReplaced = '/phrase/' + phrase.url.replace('/', '!')
           phrases.push(phrase)
-          return server.composr.addPhrasesToDataStructure(phrase)
+          return server.composr.Phrases.register(domain, phrase)
         })
         .should.notify(done)
     })
@@ -57,6 +57,7 @@ function test (server) {
         .expect(200)
         .end(function (err, response) {
           expect(response).to.be.an('object')
+          console.log(err, JSON.stringify(response.body, null, 2))
           expect(response.body.url).to.be.equals(phrase.url)
           expect(response.body.codes.get.code).to.be.equals(phrase.get.code)
           done(err)
