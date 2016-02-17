@@ -44,14 +44,8 @@ var engine = {
       hub.emit('create:routes', apiDescriptor)
     })
 
-    engine.composr.events.on('virtualDomain:registered', 'CorbelComposr', function (virtualDomain) {
-      var domain = utils.extractDomainFromId(virtualDomain.id)
-
-      var apiDescriptor = {}
-      apiDescriptor.virtualDomain = virtualDomain
-      // TODO: we only update the virtualDomain, getting the phrases from memory for now
-      apiDescriptor.phrases = engine.composr.Phrases.getPhrases(domain)
-      hub.emit('create:routes', apiDescriptor)
+    engine.composr.events.on('virtualDomain:registered', 'CorbelComposr', function (virtualDomainModel) {
+      hub.emit('create:routes', virtualDomainModel)
     })
 
     engine.composr.events.on('metrics', 'CorbelComposr', function (options) {
