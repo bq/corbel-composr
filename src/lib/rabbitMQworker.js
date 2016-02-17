@@ -50,7 +50,7 @@ Worker.prototype.isVirtualDomain = function (type) {
 Worker.prototype._addPhrase = function (domain, id) {
   var itemToAdd
   var that = this
-  return this.engine.composr.loadPhrase(id)
+  return this.engine.composr.phraseDao.load(id)
     .then(function (item) {
       logger.debug('RabbitMQ-worker phrase fetched', item.id)
       itemToAdd = item
@@ -71,7 +71,7 @@ Worker.prototype._addPhrase = function (domain, id) {
 Worker.prototype._addSnippet = function (domain, id) {
   var itemToAdd
   var that = this
-  return this.engine.composr.loadSnippet(id)
+  return this.engine.composr.snippetDao.load(id)
     .then(function (item) {
       logger.debug('RabbitMQ-worker snippet fetched', item.id)
       itemToAdd = item
@@ -91,7 +91,7 @@ Worker.prototype._addSnippet = function (domain, id) {
  ***********************************/
 Worker.prototype._addVirtualDomain = function (domain, id) {
   var that = this
-  return this.engine.composr.loadVirtualDomain(id)
+  return this.engine.composr.virtualDomainDao.load(id)
     .then(function (item) {
       logger.debug('RabbitMQ-worker virtualDomain fetched', item.id)
       return that.engine.composr.VirtualDomain.register(domain, item)

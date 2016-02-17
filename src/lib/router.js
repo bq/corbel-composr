@@ -105,7 +105,6 @@ function enforceGC () {
  * @return {[type]}           [description]
  */
 function createRoutes (apiDescriptor, next) {
-  console.log('EEEEEEEEEEEEEEE', apiDescriptor.phrases)
   var routeObjects = []
   apiDescriptor.phrases.forEach(analyzePhrase(routeObjects))
   apiDescriptor.routeObjects = routeObjects

@@ -33,7 +33,7 @@ var engine = {
     })
 
     engine.composr.events.on('phrase:registered', 'CorbelComposr', function (phrase) {
-      var domain = phrase.id.split('!')[0]
+      var domain = utils.extractDomainFromId(phrase.id)
 
       var apiDescriptor = {}
       // TODO: we only update a phrase, getting the virtualDomain from memory for now
@@ -45,7 +45,7 @@ var engine = {
     })
 
     engine.composr.events.on('virtualDomain:registered', 'CorbelComposr', function (virtualDomain) {
-      var domain = virtualDomain.id.split('!')[0]
+      var domain = utils.extractDomainFromId(virtualDomain.id)
 
       var apiDescriptor = {}
       apiDescriptor.virtualDomain = virtualDomain
