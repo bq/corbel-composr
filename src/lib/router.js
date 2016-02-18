@@ -5,7 +5,6 @@ var engine = require('./engine')
 var logger = require('../utils/composrLogger')
 var config = require('./config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
-var phraseUtils = require('../utils/phraseUtils')
 
 /* *
  * [analyzePhrase description]
@@ -14,7 +13,7 @@ var phraseUtils = require('../utils/phraseUtils')
  */
 function analyzePhrase (acc) {
   return function (phraseModel) {
-    var domain = phraseModel.getDomain();
+    var domain = phraseModel.getDomain()
 
     allowedVerbs.forEach(function (verb) {
       if (phraseModel.hasVerb(verb)) {
@@ -106,11 +105,11 @@ function enforceGC () {
  */
 function createRoutes (virtualDomainModel, phrases, next) {
   var routeObjects = []
-  var analyze = analyzePhrase(routeObjects);
+  var analyze = analyzePhrase(routeObjects)
 
-  phrases.forEach(function(phraseModel){
-    analyze(phraseModel);
-  });
+  phrases.forEach(function (phraseModel) {
+    analyze(phraseModel)
+  })
 
   next(virtualDomainModel, routeObjects)
 }
@@ -187,7 +186,7 @@ function bindRoutes (server, virtualDomainModel, restifyPhrasesMapper) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
 
-      //TODO insert virtualDomainModel.getMiddlewares();
+      // TODO insert virtualDomainModel.getMiddlewares()
 
       server[item.restifyVerb](url,
         authCorbelHook,
@@ -238,11 +237,11 @@ module.exports = function (server) {
   hub.on('create:routes', function (virtualDomainModel) {
     logger.debug('Creting or updating endpoints...')
 
-    var domain = virtualDomainModel.getDomain();
+    var domain = virtualDomainModel.getDomain()
+    var apiId = virtualDomainModel.getApiId()
+    var phraseModels = engine.composr.Phrases.getPhrases(domain, apiId)
 
-    var phrases = engine.composr.Phrases.getPhrases(domain);
-
-    createRoutes(apiDescriptor, function (virtualDomainModel, restifyPhrasesMapper) {
+    createRoutes(virtualDomainModel, phraseModels, function (virtualDomainModel, restifyPhrasesMapper) {
       bindRoutes(server, virtualDomainModel, restifyPhrasesMapper)
     })
   })

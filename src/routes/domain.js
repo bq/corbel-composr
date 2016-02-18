@@ -14,6 +14,9 @@ function createOrUpdateVirtualDomain (req, res) {
 
   checkIfClientCanPublish(clientCorbelDriver, res)
     .then(function () {
+      return recoverVirtualdomain(virtualDomain, res)
+    })
+    .then(function () {
       return validate(virtualDomain, res)
     })
     .then(function () {
@@ -50,6 +53,11 @@ function checkIfClientCanPublish (driver, res) {
       logger.warn('SERVER', 'invalid:virtualDomain', errorBody)
       res.send(401, new ComposrError('error:virtualDomain:create', 'Unauthorized client', 401))
     })
+}
+
+function recoverVirtualdomain (virtualDomain, res) {
+  // TODO: unzip and decode
+  return
 }
 
 function validate (virtualDomain, res) {
