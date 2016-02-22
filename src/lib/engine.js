@@ -32,8 +32,8 @@ var engine = {
       logger.info.apply(logger, arguments)
     })
 
-    engine.composr.events.on('phrase:registered', 'CorbelComposr', function (phrase) {
-      hub.emit('create:routes', phrase)
+    engine.composr.events.on('virtualDomain:registered', 'CorbelComposr', function (virtualDomainModel) {
+      hub.emit('create:routes', virtualDomainModel)
     })
 
     engine.composr.events.on('metrics', 'CorbelComposr', function (options) {
@@ -297,5 +297,6 @@ var engine = {
 engine.initialized = false
 engine.phrasesCollection = 'composr:Phrase'
 engine.snippetsCollection = 'composr:Snippet'
+engine.domainCollection = 'composr:Domain'
 engine.composr = composr
 module.exports = engine

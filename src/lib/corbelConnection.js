@@ -8,6 +8,7 @@ var logger = require('../utils/composrLogger')
 
 var PHRASES_COLLECTION = 'composr:Phrase'
 var SNIPPETS_COLLECTION = 'composr:Snippet'
+var VIRTUAL_DOMAIN_COLLECTION = 'composr:VirtualDomain'
 
 var corbelConfig = config('corbel.driver.options')
 corbelConfig = _.extend(corbelConfig, config('corbel.composr.credentials'))
@@ -48,5 +49,6 @@ var getTokenDriver = function (accessToken, emptyIfNotAuth) {
 
 module.exports.SNIPPETS_COLLECTION = SNIPPETS_COLLECTION
 module.exports.PHRASES_COLLECTION = PHRASES_COLLECTION
+module.exports.VIRTUAL_DOMAIN_COLLECTION = VIRTUAL_DOMAIN_COLLECTION
 module.exports.extractDomain = extractDomain
 module.exports.getTokenDriver = getTokenDriver

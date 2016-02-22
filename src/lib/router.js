@@ -5,7 +5,6 @@ var engine = require('./engine')
 var logger = require('../utils/composrLogger')
 var config = require('./config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
-var phraseUtils = require('../utils/phraseUtils')
 
 /* *
  * [analyzePhrase description]
@@ -13,11 +12,11 @@ var phraseUtils = require('../utils/phraseUtils')
  * @return {[type]}     [description]
  */
 function analyzePhrase (acc) {
-  return function (item) {
-    var domain = phraseUtils.extractDomainFromId(item.id)
+  return function (phraseModel) {
+    var domain = phraseModel.getDomain()
 
     allowedVerbs.forEach(function (verb) {
-      if (item[verb]) {
+      if (phraseModel.hasVerb(verb)) {
         // Restify doesn't use delete it uses 'del' for storing the delete callback
         var restifyMappedVerb = verb === 'delete' ? 'del' : verb
 
@@ -25,8 +24,8 @@ function analyzePhrase (acc) {
           restifyVerb: restifyMappedVerb,
           verb: verb,
           domain: domain,
-          path: item.url,
-          id: item.id
+          path: phraseModel.getUrl(),
+          id: phraseModel.getId()
         })
       }
     })
@@ -109,10 +108,15 @@ function enforceGC () {
  * @param  {Function} next    [description]
  * @return {[type]}           [description]
  */
-function createRoutes (phrases, next) {
+function createRoutes (virtualDomainModel, phrases, next) {
   var routeObjects = []
-  phrases.forEach(analyzePhrase(routeObjects))
-  next(routeObjects)
+  var analyze = analyzePhrase(routeObjects)
+
+  phrases.forEach(function (phraseModel) {
+    analyze(phraseModel)
+  })
+
+  next(virtualDomainModel, routeObjects)
 }
 
 /**
@@ -182,10 +186,12 @@ function corbelDriverEventHookAfter (req) {
  * @param  {[type]} routeObjects [description]
  * @return {[type]}              [description]
  */
-function bindRoutes (server, routeObjects) {
-  for (var i = routeObjects.length - 1; i >= 0; i--) {
+function bindRoutes (server, virtualDomainModel, restifyPhrasesMapper) {
+  for (var i = restifyPhrasesMapper.length - 1; i >= 0; i--) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
+
+      // TODO insert virtualDomainModel.getMiddlewares()
 
       server[item.restifyVerb](url,
         authCorbelHook,
@@ -201,7 +207,7 @@ function bindRoutes (server, routeObjects) {
         function bindRouteV1 (req, res, next) {
           executePhraseById(req, res, next, item)
         })
-    })(routeObjects[i])
+    })(restifyPhrasesMapper[i])
   }
 }
 
@@ -233,15 +239,15 @@ function listAllRoutes (server) {
 }
 
 module.exports = function (server) {
-  hub.on('create:routes', function (phrases) {
+  hub.on('create:routes', function (virtualDomainModel) {
     logger.debug('Creting or updating endpoints...')
 
-    if (!Array.isArray(phrases)) {
-      phrases = [phrases]
-    }
+    var domain = virtualDomainModel.getDomain()
+    var apiId = virtualDomainModel.getApiId()
+    var phraseModels = engine.composr.Phrases.getPhrases(domain, apiId)
 
-    createRoutes(phrases, function (routeObjects) {
-      bindRoutes(server, routeObjects)
+    createRoutes(virtualDomainModel, phraseModels, function (virtualDomainModel, restifyPhrasesMapper) {
+      bindRoutes(server, virtualDomainModel, restifyPhrasesMapper)
     })
   })
 
