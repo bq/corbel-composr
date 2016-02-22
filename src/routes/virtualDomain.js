@@ -14,9 +14,6 @@ function createOrUpdateVirtualDomain (req, res) {
 
   checkIfClientCanPublish(clientCorbelDriver, res)
     .then(function () {
-      return recoverVirtualdomain(virtualDomain, res)
-    })
-    .then(function () {
       return validate(virtualDomain, res)
     })
     .then(function () {
@@ -39,7 +36,7 @@ function getVirtualDomains (req, res) {
 
   var domain = connection.extractDomain(authorization)
   if (domain) {
-    var vDomains = engine.composr.VirtualDomain.getVirtualDomains(domain)
+    var vDomains = engine.composr.VirtualDomain.getByDomain(domain)
     res.send(200, vDomains || [])
   } else {
     res.send(401, new ComposrError('error:domain:undefined', '', 401))
@@ -55,11 +52,6 @@ function checkIfClientCanPublish (driver, res) {
     })
 }
 
-function recoverVirtualdomain (virtualDomain, res) {
-  // TODO: unzip and decode
-  return
-}
-
 function validate (virtualDomain, res) {
   return engine.composr.VirtualDomain.validator(virtualDomain)
     .catch(function (errors) {
@@ -73,11 +65,9 @@ function validate (virtualDomain, res) {
 
 function updateDomain (virtualDomain, res) {
   logger.debug('Storing or updating domain descriptor', virtualDomain.name, virtualDomain)
-
-  return engine.composr.corbelDriver.resources.resource(engine.domainCollection, virtualDomain.id)
-    .update(virtualDomain)
-    .then(function (response) {
-      res.send(response.status, response.data)
+  return engine.composr.VirtualDomain.save(virtualDomain)
+    .then(function (virtualDomain) {
+      res.send(200, virtualDomain)
     })
 }
 

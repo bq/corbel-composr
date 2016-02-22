@@ -4,29 +4,34 @@ var config = require('../lib/config')
 var engine = require('../lib/engine')
 var https = require('https')
 var packageJSON = require('../../package.json')
-var phraseUtils = require('../utils/phraseUtils')
 var _ = require('lodash')
 
-function checkServerStatus (req, res) {
-  var phrases = engine.composr.data.phrases
-
+function checkServerStatus(req, res) {
   var domain = req.params.domain
+  var apiId = req.params.apiId
+  var version = req.params.version
+
+  var phrases = engine.composr.Phrases.getAll()
+
   if (domain) {
-    phrases = phrases.filter(function (item) {
-      return phraseUtils.extractDomainFromId(item.id) === domain
+    phrases = phrases.filter(function (phrase) {
+      return phrase.domain === domain
     })
   }
-
-  var version = req.params.version
+  if (apiId) {
+    phrases = phrases.filter(function (phrase) {
+      return phrase.apiId === apiId
+    })
+  }
   if (version) {
-    phrases = phrases.filter(function (item) {
-      return item.id.split('!')[1] === version
+    phrases = phrases.filter(function (phrase) {
+      return phrase.version === version
     })
   }
 
   var phrasesLoaded = phrases.length
-  var domains = _.uniq(phrases.map(function (item) {
-    return phraseUtils.extractDomainFromId(item.id)
+  var domains = _.uniq(phrases.map(function (phrase) {
+    return phrase.domain;
   }))
 
   var serverStatus = {
@@ -70,14 +75,14 @@ function checkServerStatus (req, res) {
     })
 }
 
-function status (req, res) {
+function status(req, res) {
   return checkServerStatus(req, res)
     .then(function (serverStatus) {
       res.send(200, serverStatus)
     })
 }
 
-function healthcheck (req, res) {
+function healthcheck(req, res) {
   return checkServerStatus(req, res)
     .then(function (serverStatus) {
       var errors = _.filter(serverStatus.statuses, function (status) {
@@ -111,9 +116,11 @@ module.exports = function (server) {
 
   server.get('/status', status)
   server.get('/status/:domain/', status)
-  server.get('/status/:domain/:version/', status)
+  server.get('/status/:domain/:apiId', status)
+  server.get('/status/:domain/:apiId/:version', status)
 
-  server.get('/healthcheck/', healthcheck)
-  server.get('/healthcheck/:domain/', healthcheck)
-  server.get('/healthcheck/:domain/:version/', healthcheck)
+  server.get('/healthcheck', healthcheck)
+  server.get('/healthcheck/:domain', healthcheck)
+  server.get('/healthcheck/:domain/:apiId', healthcheck)
+  server.get('/healthcheck/:domain/:apiId/:version', healthcheck)
 }

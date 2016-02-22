@@ -7,9 +7,8 @@ var ComposrError = require('./ComposrError')
 var config = require('./config')
 var logger = require('../utils/composrLogger')
 var hub = require('./hub')
-var utils = require('../utils/phraseUtils')
 
-function Worker (engine) {
+function Worker(engine) {
   if (!this.isValidEngine(engine)) {
     throw new ComposrError('error:worker:engine', 'invalid engine', 422)
   }
@@ -27,8 +26,8 @@ function Worker (engine) {
 
 Worker.prototype.isValidEngine = function (engine) {
   return !(!engine) && (engine.hasOwnProperty('composr') &&
-  engine.hasOwnProperty('snippetsCollection') &&
-  engine.hasOwnProperty('phrasesCollection'))
+    engine.hasOwnProperty('snippetsCollection') &&
+    engine.hasOwnProperty('phrasesCollection'))
 }
 
 Worker.prototype.isPhrase = function (type) {
@@ -43,134 +42,38 @@ Worker.prototype.isVirtualDomain = function (type) {
   return type === corbelConnection.VIRTUAL_DOMAIN_COLLECTION
 }
 
-/* *********************************
- * Fired when an event of CREATE phrase gets received
- * Returns Promise
- ***********************************/
-Worker.prototype._addPhrase = function (domain, id) {
-  var itemToAdd
-  var that = this
-  return this.engine.composr.phraseDao.load(id)
-    .then(function (item) {
-      logger.debug('RabbitMQ-worker phrase fetched', item.id)
-      itemToAdd = item
-      return that.engine.composr.Phrases.register(domain, item)
-    })
-    .then(function (result) {
-      if (result.registered === true) {
-        that.engine.composr.addPhrasesToDataStructure(itemToAdd)
-      }
-      return result.registered
-    })
-}
-
-/* *********************************
- * Fired when an event of CREATE snippet gets received
- * Returns Promise
- ***********************************/
-Worker.prototype._addSnippet = function (domain, id) {
-  var itemToAdd
-  var that = this
-  return this.engine.composr.snippetDao.load(id)
-    .then(function (item) {
-      logger.debug('RabbitMQ-worker snippet fetched', item.id)
-      itemToAdd = item
-      return that.engine.composr.Snippets.register(domain, item)
-    })
-    .then(function (result) {
-      if (result.registered === true) {
-        that.engine.composr.addSnippetsToDataStructure(itemToAdd)
-      }
-      return result.registered
-    })
-}
-
+// TODO: this class shouldn't be aware of VirtualDomain, Phrases...
 /* *********************************
  * Fired when an event of CREATE virtualDomain gets received
  * Returns Promise
  ***********************************/
-Worker.prototype._addVirtualDomain = function (domain, id) {
-  var that = this
-  return this.engine.composr.virtualDomainDao.load(id)
-    .then(function (item) {
-      logger.debug('RabbitMQ-worker virtualDomain fetched', item.id)
-      return that.engine.composr.VirtualDomain.register(domain, item)
-    })
+Worker.prototype._addVirtualDomain = function (id) {
+  logger.debug('RabbitMQ-worker virtualDomain fetched', item.id)
+  return engine.composr.VirtualDomain.loadAndRegisterById(id)
     .then(function (result) {
       return result.registered
     })
-}
-
-/* *********************************
- * Fired when an event of DELETE phrase gets received
- ***********************************/
-Worker.prototype._removePhrase = function (domain, id) {
-  this.engine.composr.Phrases.unregister(domain, id)
-  this.engine.composr.removePhrasesFromDataStructure(id)
-}
-
-/* *********************************
- * Fired when an event of DELETE snippet gets received
- ***********************************/
-Worker.prototype._removeSnippet = function (domain, id) {
-  this.engine.composr.Snippets.unregister(domain, id)
-  this.engine.composr.removeSnippetsFromDataStructure(id)
 }
 
 /* *********************************
  * Fired when an event of DELETE virtualDomain gets received
  ***********************************/
-Worker.prototype._removeVirtualDomain = function (domain, id) {
-  this.engine.composr.VirtualDomain.unregister(domain, id)
-}
-
-Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action) {
-  var domain = utils.extractDomainFromId(id)
-  switch (action) {
-    case 'DELETE':
-      logger.info('RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
-
-      if (itemIsPhrase) {
-        this._removePhrase(domain, id)
-      } else {
-        this._removeSnippet(domain, id)
-      }
-      break
-
-    case 'CREATE':
-    case 'UPDATE':
-      logger.info('RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
-
-      var promise = itemIsPhrase ? this._addPhrase(domain, id) : this._addSnippet(domain, id)
-
-      promise
-        .then(function (registered) {
-          logger.info('RabbitMQ-worker item registered', id, registered)
-        })
-        .catch(function (err) {
-          logger.error('RabbitMQ-worker error: ', err.data.error, err.data.errorDescription, err.status)
-        })
-
-      break
-
-    default:
-      logger.warn('RabbitMQ-worker error: wrong action ', action)
-  }
+Worker.prototype._removeVirtualDomain = function (id) {
+  this.engine.composr.VirtualDomain.unregister(id)
 }
 
 Worker.prototype._doWorkWithVirtualDomain = function (id, action) {
-  var domain = utils.extractDomainFromId(id)
   switch (action) {
     case 'DELETE':
-      logger.info('RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
-      this._removeVirtualDomain(domain, id)
+      logger.info('RabbitMQ-worker triggered DELETE event', id)
+      this._removeVirtualDomain(id)
       break
 
     case 'CREATE':
     case 'UPDATE':
-      logger.info('RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
+      logger.info('RabbitMQ-worker triggered CREATE or UPDATE event', id)
 
-      this._addVirtualDomain(domain, id)
+      this._addVirtualDomain(id)
         .then(function (registered) {
           logger.info('RabbitMQ-worker item registered', id, registered)
         })
@@ -194,11 +97,6 @@ Worker.prototype.doWork = function (ch, msg) {
       throw new ComposrError('error:worker:message', 'Error parsing message: ' + error, 422)
     }
     var type = message.type
-    if (this.isPhrase(type) || this.isSnippet(type)) {
-      var itemIsPhrase = this.isPhrase(type)
-      logger.info('RabbitMQ-worker ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
-      this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action)
-    }
     if (this.isVirtualDomain) {
       this._doWorkWithVirtualDomain(message.resourceId, message.action)
     }
@@ -240,9 +138,9 @@ Worker.prototype.bindQueue = function (ch, queue) {
 Worker.prototype.consumeChannel = function (ch, queue) {
   var that = this
   return ch.consume(queue, function (message) {
-    // Added callback function in case we need to do manual ack of the messages
-    that.doWork(ch, message)
-  },
+      // Added callback function in case we need to do manual ack of the messages
+      that.doWork(ch, message)
+    },
     Object.create({
       noAck: true
     }))
@@ -310,8 +208,8 @@ Worker.prototype.init = function () {
           logger.error('RabbitMQ-worker error creating channel', error, 'with ID', that.workerID)
           if (conn) {
             that._closeConnection(conn)
-          // @TODO: If cannot create channel, retry N times to create channel.
-          // If after N times channel cannot be created, delete connection and retryInit.
+            // @TODO: If cannot create channel, retry N times to create channel.
+            // If after N times channel cannot be created, delete connection and retryInit.
           } else {
             that.retryInit()
           }
