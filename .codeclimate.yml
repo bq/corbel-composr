@@ -21,4 +21,6 @@ exclude_paths:
 - logs/**/*
 - src/config/**/*
 - Dockerfile
+- newrelic.js
+- Gruntfile.js
 - package.json
