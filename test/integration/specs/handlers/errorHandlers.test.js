@@ -53,6 +53,8 @@ function test (server) {
     })
 
     it('it fails with a 500 error', function (done) {
+      var stub = sinon.stub()
+      server.hub.on('http:end', stub)
       request(server.app)
         .get('/e1')
         .expect(500)
@@ -61,8 +63,7 @@ function test (server) {
             throw err
           }
           expect(response).to.be.an('object')
-          // expect(stub.callCount).to.equals(1)  
-          //TODO : This does not work now with uncaught exceptions :(
+          expect(stub.callCount).to.equals(1)
           done()
         })
     })
@@ -101,7 +102,6 @@ function test (server) {
     it('it parses a error with an error key throwing a 500 error', function (done) {
       var stub = sinon.stub()
       server.hub.on('http:end', stub)
-
 
       request(server.app)
         .get('/testDomainComposr/error/500')

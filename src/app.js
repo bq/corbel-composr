@@ -65,6 +65,7 @@ try {
     logger.error(status, body, route)
 
     res.send(status, body)
+    hub.emit('http:end', req, res)
   })
 
   process.on('uncaughtException', function (err) {
