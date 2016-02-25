@@ -57,7 +57,6 @@ function test (server) {
         .expect(200)
         .end(function (err, response) {
           expect(response).to.be.an('object')
-          console.log(err, JSON.stringify(response.body, null, 2))
           expect(response.body.url).to.be.equals(phrase.url)
           expect(response.body.codes.get.code).to.be.equals(phrase.get.code)
           done(err)
