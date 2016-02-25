@@ -64,6 +64,7 @@ function executePhraseById (req, res, next, routeItem) {
       if (err === 'phrase:cant:be:runned') {
         err = new engine.composr.ComposrError('endpoint:not:found', 'Endpoint not found', 404)
       }
+
       var parsedErr = engine.composr.parseToComposrError(err.body || err, 'internal:server:error:endpoint:execution')
 
       if (err.status || err.statusCode) {
@@ -76,7 +77,13 @@ function executePhraseById (req, res, next, routeItem) {
       // @TODO: log error in metrics
 
       hub.emit('phrase:execution:end', parsedErr.status, routeItem.domain, routeItem.id, routeItem.verb)
-      return next(parsedErr)
+
+      if (res.headersSent) {
+        return next()
+      } else {
+        // Shortcut for res.send if the phrase hasn't handled it
+        return next(parsedErr)
+      }
     })
 }
 

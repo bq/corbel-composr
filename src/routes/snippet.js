@@ -74,6 +74,7 @@ Snippet.delete = function (req, res, next) {
 }
 
 Snippet.getAuthorization = function (req) {
+  // This may throw an error, causing the server.on('uncaughtException') to be fired.
   return auth.getAuth(req)
 }
 

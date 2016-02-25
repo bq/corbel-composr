@@ -239,11 +239,11 @@ var engine = {
       logger.info('>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
         'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
       hub.once('load:worker', function () {
-        engine._init(app, dfd)
+        engine._init()
       })
     } else {
       logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
-      engine._init(app, dfd)
+      engine._init()
     }
 
     return dfd.promise
@@ -255,6 +255,7 @@ var engine = {
         promise.resolve({
           app: app,
           composr: engine.composr,
+          hub: hub,
           initialized: engine.initialized
         })
       })
@@ -268,6 +269,7 @@ var engine = {
       .then(function () {
         promise.resolve({
           app: app,
+          hub: hub,
           composr: engine.composr,
           initialized: engine.initialized
         })
@@ -277,7 +279,7 @@ var engine = {
       .catch(promise.reject)
   },
 
-  _init: function (app, promise) {
+  _init: function () {
     var retries = config('services.retries')
 
     engine.waitUntilCorbelIsReady(retries)

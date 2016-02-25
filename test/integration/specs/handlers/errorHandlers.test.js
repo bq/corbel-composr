@@ -2,6 +2,7 @@
 /* globals before describe it */
 
 var request = require('supertest')
+// var sinon = require('sinon')
 var chai = require('chai')
 var expect = chai.expect
 
@@ -60,6 +61,7 @@ function test (server) {
             throw err
           }
           expect(response).to.be.an('object')
+          // expect(stub.callCount).to.equals(1)
           done()
         })
     })

@@ -39,17 +39,22 @@ try {
   server.on('NotFound', function (req, res, err, next) {
     err = new ComposrError('error:not_found', err.message, 404)
     res.send(404, err)
-    return next()
+    next() // Necesary for triggering request end
   })
 
   server.on('InternalServer', function (req, res, err, next) {
     logger.warn('Error caught by router InternalServer')
     err = new ComposrError('error:internal:server:error', err.message, 500)
     res.send(500, err)
-    return next()
+    next() // Necesary for triggering request end
   })
 
   server.on('uncaughtException', function (req, res, route, err) {
+    // uncaughtException errors doesn't emit a "server after" event
+    if (res.headersSent) {
+      return (false)
+    }
+
     if (err instanceof ComposrError === false) {
       err = new ComposrError('error:internal:server:error', err.message, err.status || err.statusCode || 500)
     }
