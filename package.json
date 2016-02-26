@@ -23,7 +23,7 @@
     "url": "git@github.com:corbel-platform/corbel-composr.git"
   },
   "engines": {
-    "node": "4.2.1",
+    "node": "4.3.0",
     "npm": "~3.3.6"
   },
   "scripts": {

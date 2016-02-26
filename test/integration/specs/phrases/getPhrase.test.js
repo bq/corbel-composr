@@ -34,7 +34,7 @@ function test (server) {
           phrase.id = server.composr.Phrases._generateId(phrase.url, domain)
           phrase.urlReplaced = '/phrase/' + phrase.url.replace('/', '!')
           phrases.push(phrase)
-          return server.composr.addPhrasesToDataStructure(phrase)
+          return server.composr.Phrases.register(domain, phrase)
         })
         .should.notify(done)
     })

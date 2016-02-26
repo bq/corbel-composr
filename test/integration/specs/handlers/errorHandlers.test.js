@@ -2,6 +2,7 @@
 /* globals before describe it */
 
 var request = require('supertest')
+var sinon = require('sinon')
 var chai = require('chai')
 var expect = chai.expect
 
@@ -52,6 +53,8 @@ function test (server) {
     })
 
     it('it fails with a 500 error', function (done) {
+      var stubHttEndCb = sinon.stub()
+      server.hub.on('http:end', stubHttEndCb)
       request(server.app)
         .get('/e1')
         .expect(500)
@@ -60,6 +63,7 @@ function test (server) {
             throw err
           }
           expect(response).to.be.an('object')
+          expect(stubHttEndCb.callCount).to.equals(1)
           done()
         })
     })
@@ -79,6 +83,9 @@ function test (server) {
     })
 
     it('it fails with a 401 sent by the user', function (done) {
+      var stubHttEndCb = sinon.stub()
+      server.hub.on('http:end', stubHttEndCb)
+
       request(server.app)
         .get('/testDomainComposr/error/401')
         .expect(401)
@@ -86,12 +93,16 @@ function test (server) {
           if (err) {
             throw err
           }
+          expect(stubHttEndCb.callCount).to.equals(1)
           expect(response.body).to.be.equals('test')
           done()
         })
     })
 
     it('it parses a error with an error key throwing a 500 error', function (done) {
+      var stubHttEndCb = sinon.stub()
+      server.hub.on('http:end', stubHttEndCb)
+
       request(server.app)
         .get('/testDomainComposr/error/500')
         .expect(500)
@@ -103,6 +114,7 @@ function test (server) {
           expect(response.body.error).to.be.equals('internal_server_error')
           expect(response.body.errorDescription).to.be.equals('error 500 thrown')
           expect(response.body.status).to.be.equals(500)
+          expect(stubHttEndCb.callCount).to.equals(1)
           done()
         })
     })
