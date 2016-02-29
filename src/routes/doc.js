@@ -2,36 +2,27 @@
 
 var engine = require('../lib/engine')
 var ComposrError = require('../lib/ComposrError')
+var raml2html = require('raml2html')
 
-var noSnippetsTemplate = '<div class="alert alert-info">No snippets for domain {0}</div>'
-var titleTemplate = '<h1>Domain {0}</h1>'
-var bootstrap = '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" ' +
-  'integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">'
 
 module.exports = function (server) {
-  server.get('/doc/:domain/', serveDocumentation)
-  server.get('/doc/:domain/:version/', serveDocumentation)
-  server.get('/snippets/:domain', snippetsDoc)
+  server.get('/doc/:domain/:apiId/', serveDocumentation)
+  server.get('/snippets/:domain/:apiId', snippetsDoc)
 
-  function serveDocumentation (req, res, next) {
-    var domain = req.params.domain || ''
-    // TODO move to core
-    var rawPhrases = engine.composr.data.phrases
-    var phrases = rawPhrases.filter(function (item) {
-      return item.id.split('!')[0] === domain
-    })
+  //TODO:
+  //server.get('/doc/:domain/:apiId/:version', serveDocumentation)
+  //server.get('/snippets/:domain/:apiId/:version', snippetsDoc)
 
-    var version = req.params.version
-    if (version) {
-      phrases = phrases.filter(function (item) {
-        return item.id.split('!')[1] === version
+  function serveDocumentation(req, res, next) {
+    var vdomainId = req.params.domain + '!' + req.params.apiId
+
+    return engine.composr.VirtualDomain.loadById(vdomainId)
+      .then(function (virtualDomain) {
+        return ramlToHtml(virtualDomain._apiRaml)
       })
-    }
-
-    engine.composr.documentation(phrases, domain, version || '')
-      .then(function (result) {
+      .then(function (html) {
         res.writeHead(200, {
-          'Content-Length': Buffer.byteLength(result),
+          'Content-Length': Buffer.byteLength(html),
           'Content-Type': 'text/html'
         })
         res.write(result)
@@ -42,13 +33,32 @@ module.exports = function (server) {
       })
   }
 
-  function snippetsDoc (req, res, next) {
-    var domain = req.params.domain || ''
-    var snippets = engine.composr.data.snippets
-    snippets = snippets.filter(function (item) {
-      return item.id.split('!')[0] === domain
-    })
+  function snippetsDoc(req, res, next) {
+    var vdomainId = req.params.domain + '!' + req.params.apiId
 
+    return engine.composr.Snippets.loadByVirtualDomain(vdomainId)
+      .then(function (snippets) {
+        return snippetsToHtml(snippets)
+      })
+      .then(function (html) {
+        res.writeHead(200, {
+          'Content-Length': Buffer.byteLength(html),
+          'Content-Type': 'text/html'
+        })
+        res.write(result)
+        res.end()
+      })
+      .catch(function (err) {
+        next(new ComposrError('error:snippet:doc', 'Error generating doc: ' + err, 422))
+      })
+  }
+
+  var ramlToHtml = function (raml) {
+    return raml2html.render(raml, raml2html.getDefaultConfig())
+  }
+
+  //TODO: Refactor this
+  var snippetsToHtml = function (snippets) {
     var body = '<html><body>' + bootstrap
     body += titleTemplate.replace('{0}', domain)
 
@@ -63,25 +73,24 @@ module.exports = function (server) {
     }
 
     body += '</body></html>'
-
-    res.writeHead(200, {
-      'Content-Length': Buffer.byteLength(body),
-      'Content-Type': 'text/html'
-    })
-    res.write(body)
-    res.end()
+    return body
   }
 
+  var noSnippetsTemplate = '<div class="alert alert-info">No snippets for domain {0}</div>'
+  var titleTemplate = '<h1>Domain {0}</h1>'
+  var bootstrap = '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" ' +
+    'integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">'
+
   var titleRow =
-  '<tr class="success">' +
+    '<tr class="success">' +
     '<th>' + 'Snippet' + '</th>' +
     '<th>' + 'Last updated' + '</th>' +
     '</tr>'
 
-  function row (snippet) {
+  function row(snippet) {
     return '<tr>' +
-    '<td>' + snippet.id.split('!')[1] + '</td>' +
-    '<td>' + new Date(snippet._updatedAt) + '</td>' +
-    '</tr>'
+      '<td>' + snippet.id.split('!')[1] + '</td>' +
+      '<td>' + new Date(snippet._updatedAt) + '</td>' +
+      '</tr>'
   }
 }

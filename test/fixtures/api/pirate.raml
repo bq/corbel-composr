@@ -1,0 +1,68 @@
+#%RAML 0.8
+---
+title : Pirate API
+baseUri: http://api.pirate.com/{version}
+documentation:
+  - title: The Pirate API
+    content: Ahoy! thar buckos! Use this t' sharpen your pirate skills and knowledge
+version: v0
+/talk:
+  description: Random pirate quotes and pickup lines
+  get:
+    description: Get a random pirate quote or pickup line
+    queryParameters:
+      type:
+        description: quote or pickup line
+        enum: [quote, pickup]
+        default: pickup
+        required: false
+    responses:
+      200:
+        body:
+          application/text:
+            example: "Prepare to be boarded"
+/pirate:
+  description: List and information about famous pirates
+  get:
+    description: List of available pirates
+    queryParameters:
+      name:
+        description: Search pirates filtering by its name
+        required: false
+        minLength: 3
+        type: string
+        example: "Guybrush"
+    responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  "pirates": [
+                      {
+                        "id": "1",
+                        "name": "Edward Teach"
+                        "alias": "Blackbeard"
+                      },
+                      {
+                        "id": "2",
+                        "name": "Guybrush Threepwood"
+                      }
+                  ]
+  /{id}:
+        description: Pirate detailed information
+        get:
+          description: Get a pirate detailed information
+          responses:
+            200:
+              body:
+                application/json:
+                  example: !include pirate.json
+            404:
+              body:
+                application/json:
+                  example: |
+                    {"message": "Arrr! Pirate not found!"}
+        post:
+          description: Insert a new pirate
+          body:
+            application/json:

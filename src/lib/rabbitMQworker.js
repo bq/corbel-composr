@@ -1,6 +1,5 @@
 'use strict'
 
-var corbelConnection = require('./corbelConnection')
 var amqp = require('amqplib')
 var uuid = require('uuid')
 var ComposrError = require('./ComposrError')
@@ -8,7 +7,7 @@ var config = require('./config')
 var logger = require('../utils/composrLogger')
 var hub = require('./hub')
 
-function Worker(engine) {
+function Worker (engine) {
   if (!this.isValidEngine(engine)) {
     throw new ComposrError('error:worker:engine', 'invalid engine', 422)
   }
@@ -26,65 +25,30 @@ function Worker(engine) {
 
 Worker.prototype.isValidEngine = function (engine) {
   return !(!engine) && (engine.hasOwnProperty('composr') &&
-    engine.hasOwnProperty('snippetsCollection') &&
-    engine.hasOwnProperty('phrasesCollection'))
+  engine.hasOwnProperty('snippetsCollection') &&
+  engine.hasOwnProperty('phrasesCollection') &&
+  engine.hasOwnProperty('virtualDomainCollection'))
 }
 
-Worker.prototype.isPhrase = function (type) {
-  return type === corbelConnection.PHRASES_COLLECTION
-}
+Worker.prototype.sendEvent = function (type, action, id) {
+  var entity = type.replace('composr:', '')
 
-Worker.prototype.isSnippet = function (type) {
-  return type === corbelConnection.SNIPPETS_COLLECTION
-}
-
-Worker.prototype.isVirtualDomain = function (type) {
-  return type === corbelConnection.VIRTUAL_DOMAIN_COLLECTION
-}
-
-// TODO: this class shouldn't be aware of VirtualDomain, Phrases...
-/* *********************************
- * Fired when an event of CREATE virtualDomain gets received
- * Returns Promise
- ***********************************/
-Worker.prototype._addVirtualDomain = function (id) {
-  logger.debug('RabbitMQ-worker virtualDomain fetched', item.id)
-  return engine.composr.VirtualDomain.loadAndRegisterById(id)
-    .then(function (result) {
-      return result.registered
-    })
-}
-
-/* *********************************
- * Fired when an event of DELETE virtualDomain gets received
- ***********************************/
-Worker.prototype._removeVirtualDomain = function (id) {
-  this.engine.composr.VirtualDomain.unregister(id)
-}
-
-Worker.prototype._doWorkWithVirtualDomain = function (id, action) {
+  var eventAction
   switch (action) {
     case 'DELETE':
-      logger.info('RabbitMQ-worker triggered DELETE event', id)
-      this._removeVirtualDomain(id)
+      eventAction = 'deleted'
       break
-
     case 'CREATE':
     case 'UPDATE':
-      logger.info('RabbitMQ-worker triggered CREATE or UPDATE event', id)
-
-      this._addVirtualDomain(id)
-        .then(function (registered) {
-          logger.info('RabbitMQ-worker item registered', id, registered)
-        })
-        .catch(function (err) {
-          logger.error('RabbitMQ-worker error: ', err.data.error, err.data.errorDescription, err.status)
-        })
+      eventAction = 'saved'
       break
-
     default:
       logger.warn('RabbitMQ-worker error: wrong action ', action)
   }
+
+  // i.e: VirtualDomain:saved
+  var event = entity + eventAction
+  hub.emit(event, id)
 }
 
 Worker.prototype.doWork = function (ch, msg) {
@@ -96,10 +60,7 @@ Worker.prototype.doWork = function (ch, msg) {
       // ch.nack(error, false, false)
       throw new ComposrError('error:worker:message', 'Error parsing message: ' + error, 422)
     }
-    var type = message.type
-    if (this.isVirtualDomain) {
-      this._doWorkWithVirtualDomain(message.resourceId, message.action)
-    }
+    this.sendEvent(message.type, message.action, message.resourceId)
   }
 }
 
@@ -138,9 +99,9 @@ Worker.prototype.bindQueue = function (ch, queue) {
 Worker.prototype.consumeChannel = function (ch, queue) {
   var that = this
   return ch.consume(queue, function (message) {
-      // Added callback function in case we need to do manual ack of the messages
-      that.doWork(ch, message)
-    },
+    // Added callback function in case we need to do manual ack of the messages
+    that.doWork(ch, message)
+  },
     Object.create({
       noAck: true
     }))
@@ -208,8 +169,8 @@ Worker.prototype.init = function () {
           logger.error('RabbitMQ-worker error creating channel', error, 'with ID', that.workerID)
           if (conn) {
             that._closeConnection(conn)
-            // @TODO: If cannot create channel, retry N times to create channel.
-            // If after N times channel cannot be created, delete connection and retryInit.
+          // @TODO: If cannot create channel, retry N times to create channel.
+          // If after N times channel cannot be created, delete connection and retryInit.
           } else {
             that.retryInit()
           }

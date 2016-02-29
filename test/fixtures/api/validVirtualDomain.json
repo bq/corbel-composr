@@ -1,0 +1,62 @@
+{
+  "id": "seven:seas!pirates",
+  "name": "pirate-api",
+  "author": "jack-sparrow",
+  "version": "1.0.0",
+  "source_location": "./src",
+  "git": "",
+  "license": "MIT",
+  "middlewares": [
+    "mock"
+  ],
+  "vd_dependencies": {},
+  "_apiRAML": "eyJ0aXRsZSI6IlBpcmF0ZSBBUEkiLCJiYXNlVXJpIjoiaHR0cDovL2FwaS5waXJhdGUuY29tL3t2ZXJzaW9ufSIsImRvY3VtZW50YXRpb24iOlt7InRpdGxlIjoiVGhlIFBpcmF0ZSBBUEkiLCJjb250ZW50IjoiQWhveSEgdGhhciBidWNrb3MhIFVzZSB0aGlzIHQnIHNoYXJwZW4geW91ciBwaXJhdGUgc2tpbGxzIGFuZCBrbm93bGVkZ2UifV0sInZlcnNpb24iOiJ2MCIsInByb3RvY29scyI6WyJIVFRQIl0sInJlc291cmNlcyI6W3siZGVzY3JpcHRpb24iOiJSYW5kb20gcGlyYXRlIHF1b3RlcyBhbmQgcGlja3VwIGxpbmVzIiwicmVsYXRpdmVVcmkiOiIvdGFsayIsIm1ldGhvZHMiOlt7ImRlc2NyaXB0aW9uIjoiR2V0IGEgcmFuZG9tIHBpcmF0ZSBxdW90ZSBvciBwaWNrdXAgbGluZSIsInF1ZXJ5UGFyYW1ldGVycyI6eyJ0eXBlIjp7ImRlc2NyaXB0aW9uIjoicXVvdGUgb3IgcGlja3VwIGxpbmUiLCJlbnVtIjpbInF1b3RlIiwicGlja3VwIl0sImRlZmF1bHQiOiJwaWNrdXAiLCJyZXF1aXJlZCI6ZmFsc2UsImRpc3BsYXlOYW1lIjoidHlwZSIsInR5cGUiOiJzdHJpbmcifX0sInJlc3BvbnNlcyI6eyIyMDAiOnsiYm9keSI6eyJhcHBsaWNhdGlvbi90ZXh0Ijp7ImV4YW1wbGUiOiJQcmVwYXJlIHRvIGJlIGJvYXJkZWQifX19fSwicHJvdG9jb2xzIjpbIkhUVFAiXSwibWV0aG9kIjoiZ2V0In1dLCJyZWxhdGl2ZVVyaVBhdGhTZWdtZW50cyI6WyJ0YWxrIl19LHsiZGVzY3JpcHRpb24iOiJMaXN0IGFuZCBpbmZvcm1hdGlvbiBhYm91dCBmYW1vdXMgcGlyYXRlcyIsInJlbGF0aXZlVXJpIjoiL3BpcmF0ZSIsIm1ldGhvZHMiOlt7ImRlc2NyaXB0aW9uIjoiTGlzdCBvZiBhdmFpbGFibGUgcGlyYXRlcyIsInF1ZXJ5UGFyYW1ldGVycyI6eyJuYW1lIjp7ImRlc2NyaXB0aW9uIjoiU2VhcmNoIHBpcmF0ZXMgZmlsdGVyaW5nIGJ5IGl0cyBuYW1lIiwicmVxdWlyZWQiOmZhbHNlLCJtaW5MZW5ndGgiOjMsInR5cGUiOiJzdHJpbmciLCJleGFtcGxlIjoiR3V5YnJ1c2giLCJkaXNwbGF5TmFtZSI6Im5hbWUifX0sInJlc3BvbnNlcyI6eyIyMDAiOnsiYm9keSI6eyJhcHBsaWNhdGlvbi9qc29uIjp7ImV4YW1wbGUiOiJcInBpcmF0ZXNcIjogW1xuICAgIHtcbiAgICAgIFwiaWRcIjogXCIxXCIsXG4gICAgICBcIm5hbWVcIjogXCJFZHdhcmQgVGVhY2hcIlxuICAgICAgXCJhbGlhc1wiOiBcIkJsYWNrYmVhcmRcIlxuICAgIH0sXG4gICAge1xuICAgICAgXCJpZFwiOiBcIjJcIixcbiAgICAgIFwibmFtZVwiOiBcIkd1eWJydXNoIFRocmVlcHdvb2RcIlxuICAgIH1cbl1cbiJ9fX19LCJwcm90b2NvbHMiOlsiSFRUUCJdLCJtZXRob2QiOiJnZXQifV0sInJlc291cmNlcyI6W3siZGVzY3JpcHRpb24iOiJQaXJhdGUgZGV0YWlsZWQgaW5mb3JtYXRpb24iLCJyZWxhdGl2ZVVyaSI6Ii97aWR9IiwibWV0aG9kcyI6W3siZGVzY3JpcHRpb24iOiJHZXQgYSBwaXJhdGUgZGV0YWlsZWQgaW5mb3JtYXRpb24iLCJyZXNwb25zZXMiOnsiMjAwIjp7ImJvZHkiOnsiYXBwbGljYXRpb24vanNvbiI6eyJleGFtcGxlIjoie1xuICBcIm5hbWVcIjogXCJFZHdhcmQgVGVhY2hcIixcbiAgXCJhbGlhc1wiOiBcIkJsYWNrYmVhcmRcIixcbiAgXCJ0eXBlXCI6IFwicmVhbFwiLFxuICBcIm5hdGlvbmFsaXR5XCI6IFwiRW5nbGFuZFwiLFxuICBcImJpcnRoXCI6IDE2ODAsXG4gIFwiZGVhdGhcIjogMTcxOCxcbiAgXCJpbmZvcm1hdGlvblwiOiBcIlRob3VnaCB0aGVyZSBoYXZlIGJlZW4gbW9yZSBzdWNjZXNzZnVsIHBpcmF0ZXMsIEJsYWNrYmVhcmQgaXMgb25lIG9mIHRoZSBiZXN0LWtub3duIGFuZCB3aWRlbHktZmVhcmVkIG9mIGhpcyB0aW1lLiBIZSBjb21tYW5kZWQgZm91ciBzaGlwcyBhbmQgaGFkIGEgcGlyYXRlIGFybXkgb2YgMzAwIGF0IHRoZSBoZWlnaHQgb2YgaGlzIGNhcmVlciwgYW5kIGRlZmVhdGVkIHRoZSBmYW1vdXMgd2Fyc2hpcCwgSE1TIOKAnFNjYXJib3JvdWdo4oCdIGluIHNlYS1iYXR0bGUuIEhlIHdhcyBrbm93biBmb3IgYmFycmVsaW5nIGludG8gYmF0dGxlIGNsdXRjaGluZyB0d28gc3dvcmRzLCB3aXRoIHNldmVyYWwga25pdmVzIGFuZCBwaXN0b2xzIGF0IHRoZSByZWFkeS4gSGUgY2FwdHVyZWQgb3ZlciBmb3J0eSBtZXJjaGFudCBzaGlwcyBpbiB0aGUgQ2FyaWJiZWFuLCBhbmQgd2l0aG91dCBmbGluY2hpbmcga2lsbGVkIG1hbnkgcHJpc29uZXJzLiBUaG91Z2ggaGUgaGFkIG1hbnkgdW5vZmZpY2lhbCB3aXZlcywgaGUgd2FzIOKAnG9mZmljaWFsbHnigJ0gbWFycmllZCB0byBhIDE2IHllYXIgb2xkIGdpcmwgLSB3aG9tIGxlZ2VuZCBoYXMgaXQgaGUgb2ZmZXJlZCBhcyBhIGdpZnQgdG8gaGlzIGNyZXcgYWZ0ZXIgc2hlIHRyaWVkIHRvIHJlZm9ybSBoaW0uIEFmdGVyIGEgZmllcmNlIGJhdHRsZSBpbiB3aGljaCBoZSBtYWRlIGEgc3RhbmQgd2l0aCBjYW5kbGUgc21va2UgcmlzaW5nIGZyb20gaGlzIGJlYXJkLCBoZSB3YXMgb3ZlcnRha2VuIGJ5IHRoZSBSb3lhbCBOYXZ5IGFuZCBiZWhlYWRlZC4gSGlzIGhlYWQgd2FzIHRoZW4gcmFpc2VkIHVwb24gYSBzdGFrZSBhcyBhIHdhcm5pbmcgdG8gb3RoZXIgcGlyYXRlcyBuZWFyIFZpcmdpbmlh4oCZcyBIYW1wdG9uIFJpdmVyLlwiXG59In19fSwiNDA0Ijp7ImJvZHkiOnsiYXBwbGljYXRpb24vanNvbiI6eyJleGFtcGxlIjoie1wibWVzc2FnZVwiOiBcIkFycnIhIFBpcmF0ZSBub3QgZm91bmQhXCJ9XG4ifX19fSwibWV0aG9kIjoiZ2V0In0seyJkZXNjcmlwdGlvbiI6Ikluc2VydCBhIG5ldyBwaXJhdGUiLCJib2R5Ijp7ImFwcGxpY2F0aW9uL2pzb24iOm51bGx9LCJtZXRob2QiOiJwb3N0In1dLCJyZWxhdGl2ZVVyaVBhdGhTZWdtZW50cyI6WyJ7aWR9Il0sInVyaVBhcmFtZXRlcnMiOnsiaWQiOnsidHlwZSI6InN0cmluZyIsInJlcXVpcmVkIjp0cnVlLCJkaXNwbGF5TmFtZSI6ImlkIn19fV0sInJlbGF0aXZlVXJpUGF0aFNlZ21lbnRzIjpbInBpcmF0ZSJdfV0sImJhc2VVcmlQYXJhbWV0ZXJzIjp7InZlcnNpb24iOnsidHlwZSI6InN0cmluZyIsInJlcXVpcmVkIjp0cnVlLCJkaXNwbGF5TmFtZSI6InZlcnNpb24iLCJlbnVtIjpbInYwIl19fX0=",
+  "phrases": [
+    {
+      "url": "/talk",
+      "id": "seven:seas!pirates!v0!talk",
+      "md5": "AAAAAAA",
+      "get": {
+        "code": "cmVzLnN0YXR1cygyMDApLnNlbmQoeydBaG95ISd9KTs=",
+        "middlewares": [
+          "validate"
+        ]
+      }
+    },
+    {
+      "url": "/pirate",
+      "id": "seven:seas!pirates!v0!pirate",
+      "md5": "AAAAAAA",
+      "get": {
+        "code": "cmVzLnN0YXR1cygyMDApLnNlbmQoeydBaG95ISd9KTs=",
+        "middlewares": [
+          "validate"
+        ]
+      }
+    },
+    {
+      "url": "/pirate/{id}",
+      "id": "seven:seas!pirates!v0!pirate!:id",
+      "md5": "AAAAAAA",
+      "get": {
+        "code": "cmVzLnN0YXR1cygyMDApLnNlbmQoeydBaG95ISd9KTs=",
+        "middlewares": [
+          "validate"
+        ]
+      },
+      "post": {
+        "code": "cmVzLnN0YXR1cygyMDApLnNlbmQoeydBaG95ISd9KTs=",
+        "middlewares": [
+          "validate"
+        ]
+      }
+    }
+  ],
+  "snippets": [
+    {
+      "id": "seven:seas!pirates!v0!pirate:!UserModel",
+      "md5": "ASBAG12312",
+      "codehash": "ZnVuY3Rpb24gVXNlck1vZGVsKG9wdGlvbnMpewogIHRoaXMubmFtZSA9IG9wdGlvbnMubmFtZTsKfQoKVXNlck1vZGVsLnByb3RvdHlwZS5nZXROYW1lID0gZnVuY3Rpb24oKXsKIHJldHVybiB0aGlzLm5hbWU7IAp9CgpleHBvcnRzKFVzZXJNb2RlbCk7"
+    }
+  ]
+}

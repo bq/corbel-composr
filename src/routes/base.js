@@ -6,7 +6,7 @@ var https = require('https')
 var packageJSON = require('../../package.json')
 var _ = require('lodash')
 
-function checkServerStatus(req, res) {
+function checkServerStatus (req, res) {
   var domain = req.params.domain
   var apiId = req.params.apiId
   var version = req.params.version
@@ -31,7 +31,7 @@ function checkServerStatus(req, res) {
 
   var phrasesLoaded = phrases.length
   var domains = _.uniq(phrases.map(function (phrase) {
-    return phrase.domain;
+    return phrase.domain
   }))
 
   var serverStatus = {
@@ -75,14 +75,14 @@ function checkServerStatus(req, res) {
     })
 }
 
-function status(req, res) {
+function status (req, res) {
   return checkServerStatus(req, res)
     .then(function (serverStatus) {
       res.send(200, serverStatus)
     })
 }
 
-function healthcheck(req, res) {
+function healthcheck (req, res) {
   return checkServerStatus(req, res)
     .then(function (serverStatus) {
       var errors = _.filter(serverStatus.statuses, function (status) {

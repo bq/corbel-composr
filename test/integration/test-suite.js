@@ -20,6 +20,9 @@ var tests = [
   require('./specs/snippets/publishSnippet.test.js'),
   require('./specs/snippets/unregisterSnippets.test.js'),
 
+  //vdomains
+  require('./specs/virtualDomains/publishVirtualDomain.test.js'),
+
   //params
   require('./specs/params/queryParams.test.js'),
   require('./specs/params/pathParams.test.js'),

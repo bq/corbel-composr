@@ -28,7 +28,7 @@ Snippet.upsert = function (req, res) {
           // snippet.id = domain + '!' + snippet.name)
           Snippet.emitEvent('snippet:upsert', domain, snippet.id)
           logger.debug('Storing or updating snippet', snippet.id, domain)
-          Snippet.upsertCall(snippet.id, snippet)
+          Snippet.upsertCall(snippet)
             .then(function (response) {
               res.send(response.status, response.data)
             })
@@ -51,6 +51,7 @@ Snippet.upsert = function (req, res) {
     })
 }
 
+// @TODO: Move to core
 Snippet.checkPublishAvailability = function (driver) {
   return driver.resources.collection(engine.snippetsCollection)
     .get()
@@ -58,11 +59,10 @@ Snippet.checkPublishAvailability = function (driver) {
 
 Snippet.delete = function (req, res, next) {
   var authorization = Snippet.getAuthorization(req)
-  var driver = Snippet.getDriver(authorization)
   var snippetID = Snippet.getFullId(authorization, req.params.snippetId)
 
   logger.debug('snippet:delete:id', snippetID)
-  Snippet.deleteCall(driver, snippetID)
+  Snippet.deleteCall(snippetID)
     .then(function (response) {
       logger.debug('snippet:deleted')
       res.send(response.status, response.data)
@@ -96,13 +96,12 @@ Snippet.emitEvent = function (text, domain, id) {
   hub.emit(text, domain, id)
 }
 
-Snippet.upsertCall = function (id, data) {
-  return engine.composr.corbelDriver.resources.resource(engine.snippetsCollection, id)
-    .update(data)
+Snippet.upsertCall = function (data) {
+  return engine.composr.Snippets.save(data)
 }
 
-Snippet.deleteCall = function (driver, snippetId) {
-  return driver.resources.resource(engine.SnippetsCollection, snippetId).delete()
+Snippet.deleteCall = function (id) {
+  return engine.composr.Snippets.delete(id)
 }
 
 module.exports = {

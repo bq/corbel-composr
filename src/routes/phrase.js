@@ -84,8 +84,7 @@ function createOrUpdatePhrase (req, res) {
 
           logger.info('Storing or updating phrase', phrase.id, domain)
 
-          engine.composr.corbelDriver.resources.resource(engine.phrasesCollection, phrase.id)
-            .update(phrase)
+          engine.composr.Phrases.save(phrase)
             .then(function (response) {
               res.setHeader('Location', 'phrase/' + phrase.id)
               res.send(response.status, response.data)
@@ -109,6 +108,7 @@ function createOrUpdatePhrase (req, res) {
     })
 }
 
+// TODO: Move this to core
 function checkIfClientCanPublish (driver) {
   return driver.resources.collection(engine.phrasesCollection).get()
 }
@@ -127,16 +127,11 @@ function deletePhrase (req, res) {
     res.send(401, new ComposrError('error:authorization:required', {}, 401))
   }
 
-  var corbelDriver = connection.getTokenDriver(authorization)
-
   var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid
 
   logger.debug('Request delete phrase:', phraseId)
 
-  corbelDriver
-    .resources
-    .resource(engine.phrasesCollection, phraseId)
-    .delete()
+  engine.composr.Phrases.delete(phraseId)
     .then(function (response) {
       logger.debug('phrase:deleted')
       res.send(response.status, response.data)
@@ -156,16 +151,11 @@ function deletePhrase (req, res) {
 function getPhrase (req, res) {
   var authorization = auth.getAuth(req, res)
 
-  var corbelDriver = connection.getTokenDriver(authorization)
-
   var phraseId = connection.extractDomain(authorization) + '!' + req.params.phraseid
 
   logger.debug('Trying to get phrase:', phraseId)
 
-  corbelDriver
-    .resources
-    .resource(engine.phrasesCollection, phraseId)
-    .get()
+  engine.composr.Phrases.getById(phraseId)
     .then(function (response) {
       res.send(response.status, response.data)
     })
@@ -191,7 +181,7 @@ function getPhrases (req, res) {
 
   var domainExtracted = connection.extractDomain(authorization)
   if (domainExtracted) {
-    var phrases = engine.composr.Phrases.getPhrases(domainExtracted)
+    var phrases = engine.composr.Phrases.getByDomain(domainExtracted)
     res.send(200, phrases || [])
   } else {
     res.send(401, new ComposrError('error:domain:undefined', '', 401))

@@ -7,6 +7,8 @@ var https = require('https')
 var hub = require('./hub')
 var config = require('./config')
 var WorkerClass = require('./rabbitMQworker')
+var loader = require('../listeners/loader')
+var publisher = require('../listeners/publisher')
 var worker
 
 var engine = {
@@ -30,10 +32,6 @@ var engine = {
 
     engine.composr.events.on('info', 'CorbelComposr', function () {
       logger.info.apply(logger, arguments)
-    })
-
-    engine.composr.events.on('virtualDomain:registered', 'CorbelComposr', function (virtualDomainModel) {
-      hub.emit('create:routes', virtualDomainModel)
     })
 
     engine.composr.events.on('metrics', 'CorbelComposr', function (options) {
@@ -230,6 +228,13 @@ var engine = {
     // Suscribe to log events
     engine.suscribeToCoreEvents()
 
+    // Subscribe to composr flow events
+    loader('VirtualDomain', engine.composr.VirtualDomain)
+    loader('Phrase', engine.composr.Phrases)
+    loader('Snippet', engine.composr.Snippets)
+    publisher(engine.composr.events, 'VirtualDomain')
+    publisher(engine.composr.events, 'Phrase')
+
     // Launch the worker
     worker = new WorkerClass(engine)
     worker.init()
@@ -297,6 +302,6 @@ var engine = {
 engine.initialized = false
 engine.phrasesCollection = 'composr:Phrase'
 engine.snippetsCollection = 'composr:Snippet'
-engine.domainCollection = 'composr:Domain'
+engine.virtualDomainCollection = 'composr:VirtualDomain'
 engine.composr = composr
 module.exports = engine

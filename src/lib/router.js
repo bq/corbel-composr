@@ -11,25 +11,23 @@ var allowedVerbs = ['get', 'put', 'post', 'delete']
  * @param  {[type]} acc [description]
  * @return {[type]}     [description]
  */
-function analyzePhrase (acc) {
-  return function (phraseModel) {
-    var domain = phraseModel.getDomain()
+function analyzePhrase (phrase) {
+  var domain = phrase.getDomain()
 
-    allowedVerbs.forEach(function (verb) {
-      if (phraseModel.hasVerb(verb)) {
-        // Restify doesn't use delete it uses 'del' for storing the delete callback
-        var restifyMappedVerb = verb === 'delete' ? 'del' : verb
+  allowedVerbs.forEach(function (verb) {
+    if (phrase.hasVerb(verb)) {
+      // Restify doesn't use delete it uses 'del' for storing the delete callback
+      var restifyMappedVerb = verb === 'delete' ? 'del' : verb
 
-        acc.push({
-          restifyVerb: restifyMappedVerb,
-          verb: verb,
-          domain: domain,
-          path: phraseModel.getUrl(),
-          id: phraseModel.getId()
-        })
+      return {
+        restifyVerb: restifyMappedVerb,
+        verb: verb,
+        domain: domain,
+        path: phrase.getUrl(),
+        id: phrase.getId()
       }
-    })
-  }
+    }
+  })
 }
 
 /**
@@ -98,23 +96,6 @@ function enforceGC () {
 }
 
 /**
- * [createRoutes description]
- * @param  {[type]}   phrases [description]
- * @param  {Function} next    [description]
- * @return {[type]}           [description]
- */
-function createRoutes (virtualDomainModel, phrases, next) {
-  var routeObjects = []
-  var analyze = analyzePhrase(routeObjects)
-
-  phrases.forEach(function (phraseModel) {
-    analyze(phraseModel)
-  })
-
-  next(virtualDomainModel, routeObjects)
-}
-
-/**
  * [authCorbelHook description]
  * @param  {[type]}   req  [description]
  * @param  {[type]}   res  [description]
@@ -176,12 +157,21 @@ function corbelDriverEventHookAfter (req) {
 }
 
 /**
+ * [createRoutes description]
+ * @param  {[type]}   phrases [description]
+ * @return {[type]}           [description]
+ */
+function publish (server, virtualDomain, phrases) {
+  bindRoutes(server, virtualDomain, phrases.map(analyzePhrase))
+}
+
+/**
  * Add End-Points to Restify Router
  * @param  {[type]} server       [description]
  * @param  {[type]} routeObjects [description]
  * @return {[type]}              [description]
  */
-function bindRoutes (server, virtualDomainModel, restifyPhrasesMapper) {
+function bindRoutes (server, virtualDomain, restifyPhrasesMapper) {
   for (var i = restifyPhrasesMapper.length - 1; i >= 0; i--) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
@@ -216,44 +206,58 @@ function listAllRoutes (server) {
   logger.debug('GET paths:')
   server.router.routes.GET.forEach(
     function (value) {
-      logger.info(value.spec.path)
+      logger.debug(value.spec.path)
     }
   )
   logger.debug('PUT paths:')
   server.router.routes.PUT.forEach(
     function (value) {
-      logger.info(value.spec.path)
+      logger.debug(value.spec.path)
     }
   )
   logger.debug('POST paths:')
   server.router.routes.POST.forEach(
     function (value) {
-      logger.info(value.spec.path)
+      logger.debug(value.spec.path)
     }
   )
 }
 
 module.exports = function (server) {
-  hub.on('create:routes', function (virtualDomainModel) {
-    logger.debug('Creting or updating endpoints...')
+  hub.on('VirtualDomain:publish', function (virtualDomain) {
+    logger.debug('Creating or updating endpoints for VirtualDomain', virtualDomain.getId())
+    var phrases = engine.composr.Phrases.getByVirtualDomain(virtualDomain.getId())
 
-    var domain = virtualDomainModel.getDomain()
-    var apiId = virtualDomainModel.getApiId()
-    var phraseModels = engine.composr.Phrases.getPhrases(domain, apiId)
+    publish(server, virtualDomain, phrases)
+  })
 
-    createRoutes(virtualDomainModel, phraseModels, function (virtualDomainModel, restifyPhrasesMapper) {
-      bindRoutes(server, virtualDomainModel, restifyPhrasesMapper)
-    })
+  hub.on('Phrase:publish', function (phrases) {
+    logger.debug('Creating or updating phrase endpoints')
+
+    phrases = Array.isArray(phrases) ? phrases : [phrases]
+    var virtualDomain
+    if (phrases.length > 0) {
+      // We assume all the phrases belong to the same VirtualDomain
+      virtualDomain = engine.composr.VirtualDomain.getById(phrases[0].getVirtualDomainId())
+    }
+
+    // We publish only if the virtualDomain is available, otherwise we wait for the
+    // VirtualDomain to publish all its phrases
+    if (virtualDomain) {
+      publish(server, virtualDomain, phrases)
+    } else {
+      logger.debug('Phrases not published - waiting for the VirtualDomain')
+    }
+  })
+
+  hub.on('Phrase:unpublish', function (url) {
+    logger.debug('=========== REMOVE ROUTE ===========', url)
+    // Restify doesn't support removing routes on the fly, instead return a 404
+    listAllRoutes(server)
   })
 
   hub.once('create:staticRoutes', function (server) {
     logger.info('Creating static routes...')
     require('../routes')(server)
-  })
-
-  hub.on('remove:route', function (url) {
-    logger.debug('=========== REMOVE ROUTE ===========', url)
-    // Restify doesn't support removing routes on the fly, instead return a 404
-    listAllRoutes()
   })
 }
