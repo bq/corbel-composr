@@ -22,10 +22,8 @@ exports.config = {
      */
     level: 'trace'
   },
-  rules: {
-    ignore: ['.*Restify.*']
-  },
   transaction_tracer: {
     enabled: true
-  }
+  },
+  enforce_backstop: false
 }

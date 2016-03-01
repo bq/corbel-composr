@@ -1,9 +1,10 @@
 'use strict'
 var hub = require('../lib/hub')
 var transactions = require('./transactions')
+var fProxy = require('../utils/proxify.js')
 var newrelic
 /* *********************************
-  Newrelic events
+Newrelic events
 **********************************/
 
 function createNRTransaction (item) {
@@ -17,6 +18,12 @@ function createNRTransaction (item) {
         Object.keys(transaction).forEach(function (attribute) {
           newrelic.addCustomParameter(attribute, transaction.hasOwnProperty(attribute) ? transaction[attribute] : 'undefined attribute')
         })
+
+        var startTime = (transaction.type.toLowerCase() === 'root' ? transaction.time : 0)
+        var tTime = (transaction.type.toLowerCase() === 'root' ? (transaction.endDate - startTime) : 0)
+        newrelic.agent.tracer.segment.transaction.timer.start = startTime
+        newrelic.agent.tracer.segment.transaction.timer.hrstart = [Math.floor(startTime / 1e3), startTime % 1e3 * 1e6]
+        newrelic.agent.tracer.segment.transaction.webSegment.timer.overwriteDurationInMillis(tTime)
         newrelic.endTransaction()
         return resolve()
       }
@@ -28,7 +35,6 @@ function notifyTransaction (transactionId) {
   var transaction = transactions.getTransactionById(transactionId)
   createNRTransaction(transaction)
     .then(function () {
-      newrelic.endTransaction()
       transactions.deleteTransactionById(transactionId)
     })
 }
@@ -37,6 +43,14 @@ function initMetrics (config, logger) {
   if (config('newrelic') === true) {
     newrelic = require('newrelic')
     logger.info('Initializing NewRelic events...')
+    fProxy.proxifyFunction(newrelic, ['agent', '_transactionFinished'], function (cb, transaction) {
+      if (transaction.partialName.indexOf('Custom') === -1) {
+        transaction.forceIgnore = true
+        transaction.ignore = true
+      }
+      cb.call(this, transaction)
+    })
+    newrelic.agent._events['transactionFinished'] = newrelic.agent._transactionFinished
 
     hub.on('server:start', function () {
       newrelic.recordCustomEvent('server:start', {
