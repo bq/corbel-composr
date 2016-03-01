@@ -1,5 +1,4 @@
 'use strict'
-/* globals before describe it */
 
 var tests = [
   // require('./specs/timeout.test.js'),

@@ -1,5 +1,4 @@
 'use strict'
-/* globals before describe it */
 
 var logger = require('../../../src/utils/logger.js')
 var config = require('../../../src/lib/config')
