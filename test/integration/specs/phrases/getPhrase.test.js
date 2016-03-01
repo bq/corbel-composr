@@ -1,5 +1,4 @@
 'use strict'
-/* globals before after describe it */
 
 var request = require('supertest')
 var chai = require('chai')

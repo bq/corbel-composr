@@ -1,5 +1,4 @@
 'use strict'
-/* globals beforeEach afterEach describe it */
 
 var chai = require('chai')
 var sinon = require('sinon')
