@@ -3,20 +3,20 @@ var hub = require('../lib/hub')
 var transactions = require('./transactions')
 var fProxy = require('../utils/proxify.js')
 var newrelic
-  /* *********************************
+/* *********************************
 Newrelic events
 **********************************/
 
-function createNRTransaction(item) {
-  return new Promise(function(resolve, reject) {
-    newrelic.createWebTransaction(item.url, function(transaction) {
+function createNRTransaction (item) {
+  return new Promise(function (resolve, reject) {
+    newrelic.createWebTransaction(item.url, function (transaction) {
       if (transaction.segments) {
         var promises = transaction.segments.map(createNRTransaction)
         newrelic.endTransaction()
         Promise.all(promises)
           .then(resolve)
       } else {
-        Object.keys(transaction).forEach(function(attribute) {
+        Object.keys(transaction).forEach(function (attribute) {
           newrelic.addCustomParameter(attribute, transaction.hasOwnProperty(attribute) ? transaction[attribute] : 'undefined attribute')
         })
 
@@ -32,19 +32,19 @@ function createNRTransaction(item) {
   })
 }
 
-function notifyTransaction(transactionId) {
+function notifyTransaction (transactionId) {
   var transaction = transactions.getTransactionById(transactionId)
   createNRTransaction(transaction)
-    .then(function() {
+    .then(function () {
       transactions.deleteTransactionById(transactionId)
     })
 }
 
-function initMetrics(config, logger) {
+function initMetrics (config, logger) {
   if (config('newrelic') === true) {
     newrelic = require('newrelic')
     logger.info('Initializing NewRelic events...')
-    fProxy.proxifyFunction(newrelic, ['agent', '_transactionFinished'], function(cb, transaction) {
+    fProxy.proxifyFunction(newrelic, ['agent', '_transactionFinished'], function (cb, transaction) {
       if (transaction.partialName.indexOf('Custom') === -1) {
         transaction.forceIgnore = true
         transaction.ignore = true
@@ -53,20 +53,20 @@ function initMetrics(config, logger) {
     })
     newrelic.agent._events['transactionFinished'] = newrelic.agent._transactionFinished
 
-    hub.on('server:start', function() {
+    hub.on('server:start', function () {
       newrelic.recordCustomEvent('server:start', {
         date: Date.now()
       })
     })
 
-    hub.on('rabbitmq:error', function(err) {
+    hub.on('rabbitmq:error', function (err) {
       newrelic.recordCustomEvent('rabbitmq:error', {
         date: Date.now(),
         err: err
       })
     })
 
-    hub.on('http:status', function(status, url, method) {
+    hub.on('http:status', function (status, url, method) {
       newrelic.recordCustomEvent('http:status', {
         url: url,
         status: status,
@@ -74,9 +74,9 @@ function initMetrics(config, logger) {
       })
     })
 
-    hub.on('http:end', function(req, res) {
+    hub.on('http:end', function (req, res) {
       var domain = req.url.match(/((?!\/).+:\w+)/)
-        // @TODO: check if req.domain is setted by some middleware.
+      // @TODO: check if req.domain is setted by some middleware.
       var evtData = {
         guid: req.getId(),
         url: req.url,
@@ -94,18 +94,18 @@ function initMetrics(config, logger) {
       notifyTransaction(req.getId())
     })
 
-    hub.on('metrics:add:segment', function(evt) {
+    hub.on('metrics:add:segment', function (evt) {
       transactions.addSegment(evt.guid, evt)
     })
 
-    hub.on('metrics', function(domain, options) {
+    hub.on('metrics', function (domain, options) {
       newrelic.recordCustomEvent('client:metrics', {
         domain: domain,
         data: options
       })
     })
 
-    hub.on('http:start', function(reqId) {
+    hub.on('http:start', function (reqId) {
       newrelic.setIgnoreTransaction(true)
       transactions.addTransaction(reqId)
     })
