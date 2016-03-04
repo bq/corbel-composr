@@ -9,6 +9,9 @@ var tests = [
   require('./specs/handlers/notFoundHandler.test.js'),
   require('./specs/handlers/postExecutionHandler.test.js'),
 
+  // Headers
+  require('./specs/headers/headersFormat.test.js'),
+
   // phrases
   require('./specs/phrases/getAllPhrases.test.js'),
   require('./specs/phrases/getPhrase.test.js'),
