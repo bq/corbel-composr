@@ -20,8 +20,8 @@ function createNRTransaction (item) {
           newrelic.addCustomParameter(attribute, transaction.hasOwnProperty(attribute) ? transaction[attribute] : 'undefined attribute')
         })
 
-        var startTime = (transaction.type.toLowerCase() === 'root' ? transaction.time : 0)
-        var tTime = (transaction.type.toLowerCase() === 'root' ? (transaction.endDate - startTime) : 0)
+        var startTime = transaction.time 
+        var tTime = transaction.endDate - startTime
         newrelic.agent.tracer.segment.transaction.timer.start = startTime
         newrelic.agent.tracer.segment.transaction.timer.hrstart = [Math.floor(startTime / 1e3), startTime % 1e3 * 1e6]
         newrelic.agent.tracer.segment.transaction.webSegment.timer.overwriteDurationInMillis(tTime)
