@@ -43,19 +43,10 @@ Worker.prototype.isSnippet = function (type) {
  * Returns Promise
  ***********************************/
 Worker.prototype._addPhrase = function (domain, id) {
-  var itemToAdd
-  var that = this
-  return this.engine.composr.loadPhrase(id)
+  return this.engine.composr.Phrase.load(id)
     .then(function (item) {
-      logger.debug('RabbitMQ-worker phrase fetched', item.id)
-      itemToAdd = item
-      return that.engine.composr.Phrases.register(domain, item)
-    })
-    .then(function (result) {
-      if (result.registered === true) {
-        that.engine.composr.addPhrasesToDataStructure(itemToAdd)
-      }
-      return result.registered
+      logger.debug('RabbitMQ-worker phrase fetched', item.id, 'registered', item.registered)
+      return item.registered
     })
 }
 
@@ -64,19 +55,11 @@ Worker.prototype._addPhrase = function (domain, id) {
  * Returns Promise
  ***********************************/
 Worker.prototype._addSnippet = function (domain, id) {
-  var itemToAdd
-  var that = this
-  return this.engine.composr.loadSnippet(id)
+  return this.engine.composr.Snippet.load(id)
     .then(function (item) {
-      logger.debug('RabbitMQ-worker snippet fetched', item.id)
-      itemToAdd = item
-      return that.engine.composr.Snippets.register(domain, item)
-    })
-    .then(function (result) {
-      if (result.registered === true) {
-        that.engine.composr.addSnippetsToDataStructure(itemToAdd)
-      }
-      return result.registered
+      logger.debug('RabbitMQ-worker snippet fetched', item.id, 'registered', item.registered)
+
+      return item.registered
     })
 }
 
@@ -84,16 +67,14 @@ Worker.prototype._addSnippet = function (domain, id) {
  * Fired when an event of DELETE phrase gets received
  ***********************************/
 Worker.prototype._removePhrase = function (domain, id) {
-  this.engine.composr.Phrases.unregister(domain, id)
-  this.engine.composr.removePhrasesFromDataStructure(id)
+  this.engine.composr.Phrase.unregister(domain, id)
 }
 
 /* *********************************
  * Fired when an event of DELETE snippet gets received
  ***********************************/
 Worker.prototype._removeSnippet = function (domain, id) {
-  this.engine.composr.Snippets.unregister(domain, id)
-  this.engine.composr.removeSnippetsFromDataStructure(id)
+  this.engine.composr.Snippet.unregister(domain, id)
 }
 
 Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action) {

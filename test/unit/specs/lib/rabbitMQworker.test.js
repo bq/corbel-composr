@@ -30,20 +30,16 @@ describe('Rabbit worker', function () {
     engineCustom = {}
     engineCustom.composr = {}
 
-    engineCustom.composr.Phrases = {}
-    engineCustom.composr.loadPhrase = sandbox.stub().returns(Promise.resolve(item))
-    engineCustom.composr.Phrases.register = function () {}
-    engineCustom.composr.Phrases.unregister = sandbox.stub()
-    engineCustom.composr.addPhrasesToDataStructure = sandbox.stub()
-    engineCustom.composr.removePhrasesFromDataStructure = sandbox.stub()
+    engineCustom.composr.Phrase = {}
+    engineCustom.composr.Phrase.load = sandbox.stub().returns(Promise.resolve(item))
+    engineCustom.composr.Phrase.register = function () {}
+    engineCustom.composr.Phrase.unregister = sandbox.stub()
     engineCustom.phrasesCollection = ''
 
-    engineCustom.composr.Snippets = {}
-    engineCustom.composr.loadSnippet = sandbox.stub().returns(Promise.resolve(item))
-    engineCustom.composr.Snippets.register = function () {}
-    engineCustom.composr.Snippets.unregister = sandbox.stub()
-    engineCustom.composr.addSnippetsToDataStructure = sandbox.stub()
-    engineCustom.composr.removeSnippetsFromDataStructure = sandbox.stub()
+    engineCustom.composr.Snippet = {}
+    engineCustom.composr.Snippet.load = sandbox.stub().returns(Promise.resolve(item))
+    engineCustom.composr.Snippet.register = function () {}
+    engineCustom.composr.Snippet.unregister = sandbox.stub()
     engineCustom.snippetsCollection = ''
 
     worker = new WorkerClass(engineCustom)
@@ -107,75 +103,66 @@ describe('Rabbit worker', function () {
   })
 
   it('_addPhrase method returns true when a phrase is added', function (done) {
-    stubRegisterPhrases = sandbox.stub(engineCustom.composr.Phrases, 'register', function (data) {
+    stubRegisterPhrases = sandbox.stub(engineCustom.composr.Phrase, 'register', function (data) {
       return Promise.resolve({registered: true})
     })
 
     worker._addPhrase(domain, id)
       .then(function (status) {
-        expect(status).to.be.equal(true)
-        expect(engineCustom.composr.loadPhrase.callCount).to.equals(1)
-        expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true)
+        expect(status).to.be.an('object')
+        expect(status.registered).to.equals(true)
+        expect(engineCustom.composr.Phrase.load.callCount).to.equals(1)
+        expect(engineCustom.composr.Phrase.load.calledWith(id)).to.equals(true)
         expect(stubRegisterPhrases.callCount).to.equals(1)
         expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true)
-        expect(engineCustom.composr.addPhrasesToDataStructure.callCount).to.equals(1)
-        expect(engineCustom.composr.addPhrasesToDataStructure.calledWith(item)).to.equals(true)
-
         done()
       })
   })
 
   it('_addPhrase method returns false when a phrase is not added', function (done) {
-    stubRegisterPhrases = sandbox.stub(engineCustom.composr.Phrases, 'register', function (data) {
+    stubRegisterPhrases = sandbox.stub(engineCustom.composr.Phrase, 'register', function (data) {
       return Promise.resolve({registered: false})
     })
 
     worker._addPhrase(domain, id)
       .then(function (status) {
         expect(status).to.be.equal(false)
-        expect(engineCustom.composr.loadPhrase.callCount).to.equals(1)
-        expect(engineCustom.composr.loadPhrase.calledWith(id)).to.equals(true)
+        expect(engineCustom.composr.Phrase.load.callCount).to.equals(1)
+        expect(engineCustom.composr.Phrase.load.calledWith(id)).to.equals(true)
         expect(stubRegisterPhrases.callCount).to.equals(1)
         expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true)
-        expect(engineCustom.composr.addPhrasesToDataStructure.callCount).to.equals(0)
-
         done()
       })
   })
 
   it('_addSnippet method returns true when a snippet is added', function (done) {
-    stubRegisterSnippets = sandbox.stub(engineCustom.composr.Snippets, 'register', function (data) {
+    stubRegisterSnippets = sandbox.stub(engineCustom.composr.Snippet, 'register', function (data) {
       return Promise.resolve({registered: true})
     })
 
     worker._addSnippet(domain, id)
       .then(function (status) {
         expect(status).to.be.equal(true)
-        expect(engineCustom.composr.loadSnippet.callCount).to.equals(1)
-        expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(true)
+        expect(engineCustom.composr.Snippet.load.callCount).to.equals(1)
+        expect(engineCustom.composr.Snippet.load.calledWith(id)).to.equals(true)
         expect(stubRegisterSnippets.callCount).to.equals(1)
         expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(true)
-        expect(engineCustom.composr.addSnippetsToDataStructure.callCount).to.equals(1)
-        expect(engineCustom.composr.addSnippetsToDataStructure.calledWith(item)).to.equals(true)
-
         done()
       })
   })
 
   it('_addSnippet method returns false when a snippet is added', function (done) {
-    stubRegisterSnippets = sandbox.stub(engineCustom.composr.Snippets, 'register', function (data) {
+    stubRegisterSnippets = sandbox.stub(engineCustom.composr.Snippet, 'register', function (data) {
       return Promise.resolve({registered: false})
     })
 
     worker._addSnippet(domain, id)
       .then(function (status) {
         expect(status).to.be.equal(false)
-        expect(engineCustom.composr.loadSnippet.callCount).to.equals(1)
-        expect(engineCustom.composr.loadSnippet.calledWith(id)).to.equals(true)
+        expect(engineCustom.composr.Snippet.load.callCount).to.equals(1)
+        expect(engineCustom.composr.Snippet.load.calledWith(id)).to.equals(true)
         expect(stubRegisterSnippets.callCount).to.equals(1)
         expect(stubRegisterSnippets.calledWith(domain, item)).to.equals(true)
-        expect(engineCustom.composr.addSnippetsToDataStructure.callCount).to.equals(0)
-
         done()
       })
   })
@@ -183,19 +170,15 @@ describe('Rabbit worker', function () {
   it('all methods are called inside of _removePhrase', function () {
     worker._removePhrase(domain, id)
 
-    expect(engineCustom.composr.Phrases.unregister.callCount).to.equals(1)
-    expect(engineCustom.composr.Phrases.unregister.calledWith(domain, id)).to.equals(true)
-    expect(engineCustom.composr.removePhrasesFromDataStructure.callCount).to.equals(1)
-    expect(engineCustom.composr.removePhrasesFromDataStructure.calledWith(id)).to.equals(true)
+    expect(engineCustom.composr.Phrase.unregister.callCount).to.equals(1)
+    expect(engineCustom.composr.Phrase.unregister.calledWith(domain, id)).to.equals(true)
   })
 
   it('all methods are called inside of _removeSnippet', function () {
     worker._removeSnippet(domain, id)
 
-    expect(engineCustom.composr.Snippets.unregister.callCount).to.equals(1)
-    expect(engineCustom.composr.Snippets.unregister.calledWith(domain, id)).to.equals(true)
-    expect(engineCustom.composr.removeSnippetsFromDataStructure.callCount).to.equals(1)
-    expect(engineCustom.composr.removeSnippetsFromDataStructure.calledWith(id)).to.equals(true)
+    expect(engineCustom.composr.Snippet.unregister.callCount).to.equals(1)
+    expect(engineCustom.composr.Snippet.unregister.calledWith(domain, id)).to.equals(true)
   })
 
   it('should call correct method when a delete is requested for a phrase', function () {

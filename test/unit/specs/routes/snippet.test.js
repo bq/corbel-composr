@@ -99,11 +99,6 @@ describe('Snippet upsert and delete', function () {
     expect(Snippet.getCorbelErrorBody(dataObj)).to.be.equal(dataObj.data)
   })
 
-  it('Snippet.getFullId returns complete id', function (done) {
-    expect(Snippet.getFullId(domain, req.body.id)).to.be.equals('domain!test')
-    done()
-  })
-
   it('Snippet.upsert works correctly', function (done) {
     Snippet.upsert(req, {
       send: function (status) {

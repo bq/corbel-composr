@@ -15,18 +15,19 @@ module.exports = function (server) {
 
   function serveDocumentation (req, res, next) {
     var domain = req.params.domain || ''
-    // TODO move to core
-    var rawPhrases = engine.composr.data.phrases
-    var phrases = rawPhrases.filter(function (item) {
-      return item.id.split('!')[0] === domain
-    })
-
     var version = req.params.version
+
+    var phrases = engine.composr.Phrase.getPhrases(domain)
+
     if (version) {
       phrases = phrases.filter(function (item) {
-        return item.id.split('!')[1] === version
+        return item.getVersion() === version
       })
     }
+
+    phrases = phrases.map(function (item) {
+      return item.getRawModel()
+    })
 
     engine.composr.documentation(phrases, domain, version || '')
       .then(function (result) {
@@ -43,11 +44,15 @@ module.exports = function (server) {
   }
 
   function snippetsDoc (req, res, next) {
+    var version = req.params.version
     var domain = req.params.domain || ''
-    var snippets = engine.composr.data.snippets
-    snippets = snippets.filter(function (item) {
-      return item.id.split('!')[0] === domain
-    })
+    var snippets = engine.composr.Snippet.getSnippets(domain)
+
+    if (version) {
+      snippets = snippets.filter(function (item) {
+        return item.getVersion() === version
+      })
+    }
 
     var body = '<html><body>' + bootstrap
     body += titleTemplate.replace('{0}', domain)
@@ -80,8 +85,8 @@ module.exports = function (server) {
 
   function row (snippet) {
     return '<tr>' +
-    '<td>' + snippet.id.split('!')[1] + '</td>' +
-    '<td>' + new Date(snippet._updatedAt) + '</td>' +
+    '<td>' + snippet.getName() + '</td>' +
+    '<td>' + new Date(snippet.getRawModel()._updatedAt) + '</td>' +
     '</tr>'
   }
 }

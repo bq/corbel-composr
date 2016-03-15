@@ -1,7 +1,6 @@
 'use strict'
 
 var pmx = require('pmx')
-var _ = require('lodash')
 var hub = require('../lib/hub')
 var connection = require('../lib/corbelConnection')
 var engine = require('../lib/engine')
@@ -80,11 +79,7 @@ Phrase.upsert = function (req, res) {
     .then(function () {
       Phrase.validate(phrase)
         .then(function () {
-          phrase.id = domain + '!' + phrase.url.replace(/\//g, '!')
-          Phrase.emitEvent('phrase:upsert', domain, phrase.id)
-          logger.info('Storing or updating phrase', phrase.id, domain)
-
-          Phrase.upsertCall(phrase.id, phrase)
+          Phrase.upsertCall(phrase)
             .then(function (response) {
               res.setHeader('Location', 'phrase/' + phrase.id)
               res.send(response.status, response.data)
@@ -97,14 +92,13 @@ Phrase.upsert = function (req, res) {
         })
         .catch(function (result) {
           var errors = result.errors
-          logger.warn('SERVER', 'invalid:phrase', phrase.id, result)
+          logger.warn('SERVER', 'invalid:phrase', phrase.url, domain, result)
           res.send(422, new ComposrError('error:phrase:validation', 'Error validating phrase: ' +
             JSON.stringify(errors, null, 2), 422))
         })
     })
-    .catch(function (error) {
-      var errorBody = Phrase.getCorbelErrorBody(error)
-      logger.warn('SERVER', 'invalid:client:phrase', errorBody)
+    .catch(function () {
+      logger.warn('SERVER', 'invalid:client:phrase:upsert', domain, authorization)
       res.send(401, new ComposrError('error:upsert:phrase', 'Unauthorized client', 401))
     })
 }
@@ -115,22 +109,35 @@ Phrase.upsert = function (req, res) {
  * @param  {[type]}   res  [description]
  * @param  {Function} next [description]
  * @return {[type]}        [description]
- * TODO: unregister phrase on core,
+ * TODO: Implement the the delete mechanism using the core driver
+ * but check if that phrase
  */
 Phrase.delete = function (req, res) {
   var authorization = Phrase.getAuthorization(req)
   var driver = Phrase.getDriver(authorization)
   var domain = Phrase.getDomain(authorization)
-  var phraseId = Phrase.getFullId(domain, req.params.phraseId)
-  logger.debug('Request delete phrase:', phraseId)
+  logger.debug('Request delete phrase:', req.params.phraseId)
 
-  Phrase.deleteCall(driver, phraseId)
-    .then(function (response) {
-      logger.debug('phrase:deleted')
-      res.send(response.status, response.data)
+  Phrase.checkPublishAvailability(driver)
+    .then(function () {
+      var phrase = engine.composr.Phrase.getById(req.params.phraseId)
+
+      if (phrase && phrase.getDomain() === domain) {
+        Phrase.deleteCall(driver, req.params.phraseId)
+          .then(function (response) {
+            logger.debug('phrase:deleted')
+            res.send(response.status, response.data)
+          })
+          .catch(function (error) {
+            res.send(error.status, new ComposrError('error:phrase:delete', error.message, error.status))
+          })
+      } else {
+        throw new Error('Unauthorized client, trying to delete a phrase of another domain')
+      }
     })
     .catch(function (error) {
-      res.send(error.status, new ComposrError('error:phrase:delete', error.message, error.status))
+      logger.warn('SERVER', 'invalid:client:phrase:delete', error)
+      res.send(401, new ComposrError('error:delete:phrase', 'Unauthorized client', 401))
     })
 }
 
@@ -144,16 +151,18 @@ Phrase.delete = function (req, res) {
 Phrase.get = function (req, res) {
   var authorization = Phrase.getAuthorization(req)
   var domain = Phrase.getDomain(authorization)
+
   if (!authorization || !domain) {
     res.send(401, new ComposrError('error:unauthorized', 'Invalid credentials', 401))
     return
   }
-  var phraseId = Phrase.getFullId(domain, req.params.phraseId)
 
-  logger.debug('Trying to get phrase:', phraseId)
-  var phrase = Phrase.getCall(domain, phraseId)
+  logger.debug('Trying to get phrase:', req.params.phraseId)
+
+  var phrase = Phrase.getCall(req.params.phraseId)
+
   if (phrase) {
-    res.send(200, phrase)
+    res.send(200, phrase.getRawModel())
   } else {
     res.send(404, new ComposrError('error:phrase:not_found', 'The phrase you are requesting is missing', 404))
   }
@@ -189,39 +198,32 @@ Phrase.getDomain = function (authorization) {
 }
 
 Phrase.checkPublishAvailability = function (driver) {
-  return driver.resources.collection(engine.phrasesCollection).get()
+  return driver.resources.collection(engine.phrasesCollection)
+    .get()
+    .catch(function () {
+      throw new Error('Invalid client')
+    })
 }
 
 Phrase.validate = function (phrase) {
-  return engine.composr.Phrases.validate(phrase)
+  return engine.composr.Phrase.validate(phrase)
 }
 
 Phrase.emitEvent = function (text, domain, id) {
   hub.emit(text, domain, id)
 }
 
-Phrase.getFullId = function (domain, id) {
-  return domain + '!' + id
-}
-
-Phrase.upsertCall = function (id, data) {
-  return engine.composr.corbelDriver.resources.resource(engine.phrasesCollection, id)
-    .update(data)
+Phrase.upsertCall = function (item) {
+  return engine.composr.Phrase.save(item)
 }
 
 Phrase.deleteCall = function (driver, id) {
+  // TODO: use the core if needed
   return driver.resources.resource(engine.phrasesCollection, id).delete()
 }
 
-Phrase.getCall = function (domain, id) {
-  var phrases = Phrase.getAllCall(domain)
-  return _.filter(phrases, function (o) {
-    return o.id === id
-  })[0]
-}
-
-Phrase.getAllCall = function (domain) {
-  return engine.composr.Phrases.getPhrases(domain)
+Phrase.getCall = function (id) {
+  return engine.composr.Phrase.getById(id)
 }
 
 /**

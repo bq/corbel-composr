@@ -47,7 +47,7 @@ function initMetrics (config, logger) {
       name: 'Realtime loaded phrases count',
       agg_type: 'max',
       value: function () {
-        return engine.composr.Phrases.count()
+        return engine.composr.Phrase.count()
       }
     })
 
@@ -55,7 +55,7 @@ function initMetrics (config, logger) {
       name: 'Realtime loaded phrases size',
       agg_type: 'max',
       value: function () {
-        return sizeof(engine.composr.Phrases.getPhrases())
+        return sizeof(engine.composr.Phrase.getPhrases())
       }
     })
 
@@ -63,7 +63,7 @@ function initMetrics (config, logger) {
       comment: 'Return all the phrases'
     }, function (reply) {
       reply({
-        phrases: engine.composr.Phrases.getPhrases()
+        phrases: engine.composr.Phrase.getPhrases()
       })
     })
 

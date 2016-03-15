@@ -24,8 +24,8 @@ describe('Phrase upsert, delete and get', function () {
 
   var req = {
     body: {
-      id: 'test',
-      url: ''
+      version: '1.2.3',
+      url: 'user/me'
     },
     params: {
       phraseId: 'testPhrase'
@@ -65,7 +65,6 @@ describe('Phrase upsert, delete and get', function () {
     stubUpsertCall = sandbox.stub(Phrase, 'upsertCall').returns(Promise.resolve(res))
     stubDeleteCall = sandbox.stub(Phrase, 'deleteCall').returns(Promise.resolve(res))
     stubGetCall = sandbox.stub(Phrase, 'getCall').returns(Promise.resolve(res))
-    stubGetAllCall = sandbox.stub(Phrase, 'getAllCall').returns(Promise.resolve(res))
   })
 
   afterEach(function () {

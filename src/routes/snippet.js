@@ -30,9 +30,9 @@ Snippet.upsert = function (req, res) {
         .then(function () {
           // TODO: check if we generate the snippet ID
           // snippet.id = domain + '!' + snippet.name)
-          Snippet.emitEvent('snippet:upsert', domain, snippet.id)
-          logger.debug('Storing or updating snippet', snippet.id, domain)
-          Snippet.upsertCall(snippet.id, snippet)
+          Snippet.emitEvent('snippet:upsert', domain, snippet.name)
+          logger.debug('Storing or updating snippet', snippet.name, domain)
+          Snippet.upsertCall(snippet)
             .then(function (response) {
               res.send(response.status, response.data)
             })
@@ -50,8 +50,7 @@ Snippet.upsert = function (req, res) {
         })
     })
     .catch(function (error) {
-      var errorBody = Snippet.getCorbelErrorBody(error)
-      logger.warn('SERVER', 'invalid:client:snippet', errorBody)
+      logger.warn('SERVER', 'invalid:client:snippet', error)
       res.send(401, new ComposrError('error:upsert:snippet', 'Unauthorized client', 401))
     })
 }
@@ -60,16 +59,29 @@ Snippet.delete = function (req, res, next) {
   var authorization = Snippet.getAuthorization(req)
   var driver = Snippet.getDriver(authorization)
   var domain = Snippet.getDomain(authorization)
-  var snippetId = Snippet.getFullId(domain, req.params.snippetId)
 
-  logger.debug('snippet:delete:id', snippetId)
-  Snippet.deleteCall(driver, snippetId)
-    .then(function (response) {
-      logger.debug('snippet:deleted')
-      res.send(response.status, response.data)
+  logger.debug('Request delete snippet:', req.params.snippetId)
+
+  Snippet.checkPublishAvailability(driver)
+    .then(function () {
+      var snippet = Snippet.getCall(req.params.snippetId)
+
+      if (snippet && snippet.getDomain() === domain) {
+        Snippet.deleteCall(driver, req.params.snippetId)
+          .then(function (response) {
+            logger.debug('snippet:deleted')
+            res.send(response.status, response.data)
+          })
+          .catch(function (error) {
+            res.send(error.status, new ComposrError('error:snippet:delete', error.message, error.status))
+          })
+      } else {
+        throw new Error('Unauthorized client, trying to delete a phrase of another domain')
+      }
     })
     .catch(function (error) {
-      next(new ComposrError('error:snippet:delete', error.message, error.status))
+      logger.warn('SERVER', 'invalid:client:snippet:delete', error)
+      res.send(401, new ComposrError('error:delete:snippet', 'Unauthorized client', 401))
     })
 }
 
@@ -87,27 +99,27 @@ Snippet.getDomain = function (authorization) {
 }
 
 Snippet.checkPublishAvailability = function (driver) {
-  return driver.resources.collection(engine.snippetsCollection).get()
-}
-
-Snippet.getFullId = function (domain, id) {
-  return domain + '!' + id
+  return driver.resources.collection(engine.snippetsCollection)
+    .get()
+    .catch(function () {
+      throw new Error('Invalid client')
+    })
 }
 
 Snippet.validate = function (snippet) {
-  return engine.composr.Snippets.validate(snippet)
+  return engine.composr.Snippet.validate(snippet)
 }
 
 Snippet.emitEvent = function (text, domain, id) {
   hub.emit(text, domain, id)
 }
 
-Snippet.upsertCall = function (id, data) {
-  return engine.composr.corbelDriver.resources.resource(engine.snippetsCollection, id)
-    .update(data)
+Snippet.upsertCall = function (data) {
+  return engine.composr.Snippet.save(data)
 }
 
 Snippet.deleteCall = function (driver, id) {
+  // TODO: use core if needed
   return driver.resources.resource(engine.snippetsCollection, id).delete()
 }
 

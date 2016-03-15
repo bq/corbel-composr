@@ -54,7 +54,7 @@ function executePhraseById (req, res, next, routeItem) {
 
   hub.emit('phrase:execution:start', routeItem.domain, routeItem.id, routeItem.verb)
 
-  return engine.composr.Phrases.runById(routeItem.domain, routeItem.id, routeItem.verb, params)
+  return engine.composr.Phrase.runById(routeItem.id, routeItem.verb, params)
     .then(function (response) {
       enforceGC()
       hub.emit('phrase:execution:end', response.status, routeItem.domain, routeItem.id, routeItem.verb)
