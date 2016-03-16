@@ -3,6 +3,7 @@ var engine = require('../engine')
 var ComposrError = require('../ComposrError')
 var logger = require('../../utils/composrLogger')
 var _ = require('lodash');
+// TODO: Only support for v4 schema!
 var mocker = require('json-schema-faker');
 
 module.exports = function (methodDoc) {
@@ -24,13 +25,15 @@ module.exports = function (methodDoc) {
       methodDoc.responses[status].body && methodDoc.responses[status].body['application/json'] ?
         methodDoc.responses[status].body['application/json'] : null;
 
-      // TODO: catch parseInt and parse errors
-      // TODO: Only support for v4 schema!
-      if (jsonBody && jsonBody.schema) {
-        res.send(parseInt(status), mocker(JSON.parse(jsonBody.schema)));
-      }
-      if (jsonBody && jsonBody.example) {
-        res.send(parseInt(status), JSON.parse(jsonBody.example));
+      try {
+        if (jsonBody && jsonBody.schema) {
+          res.send(parseInt(status), mocker(JSON.parse(jsonBody.schema)));
+        }
+        if (jsonBody && jsonBody.example) {
+          res.send(parseInt(status), JSON.parse(jsonBody.example));
+        }
+      } catch (e) {
+        return next(e);
       }
 
     }

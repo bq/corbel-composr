@@ -22,6 +22,10 @@ var hooks = {
     description: 'Corbel Auth Client hook',
     hookFunction: require('./corbelAuthHook').authClient
   },
+  'corbel-driver-setup': {
+    description: 'Corbel Driver Setup hook',
+    hookFunction: require('./corbelAuthHook').corbelDriverSetup
+  },
   'metrics': {
     description: 'Metrics hook',
     hookFunction: require('./metricsHook')
@@ -47,7 +51,7 @@ module.exports.getHooks = function (phraseItem) {
 
 module.exports.get = function (hookId) {
   if (hooks[hookId]) {
-    return hooks[hookId].hookFunction;
+    return hooks[hookId].hookFunction();
   } else {
     logger.warn('Hook ' + hookId + ' not found');
     return function (req, res, next) {

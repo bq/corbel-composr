@@ -1,7 +1,9 @@
 'use strict'
 var engine = require('../engine')
+var connection = require('../corbelConnection')
 var ComposrError = require('../ComposrError')
 var logger = require('../../utils/composrLogger')
+var config = require('../config')
 var corbel = require('corbel-js')
 
 module.exports.authUser = function (methodDoc) {
@@ -20,7 +22,7 @@ module.exports.authUser = function (methodDoc) {
       next(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400));
     }
 
-    userId ? logCorbelRequest(req, res, next) :
+    userId ? next() :
       next(new ComposrError('unauthorized_token', 'Only users can perform this action', 401));
   }
 }
@@ -35,7 +37,7 @@ module.exports.authClient = function (methodDoc) {
 
     try {
       corbel.jwt.decode(authHeader.replace('Bearer ', ''));
-      return logCorbelRequest(req, res, next)
+      return next();
     } catch (e) {
       return next(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400));
     }
@@ -49,17 +51,19 @@ module.exports.authClient = function (methodDoc) {
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-function logCorbelRequest(req, res, next) {
-  var authorization = req.headers.authorization
+module.exports.corbelDriverSetup = function (methodDoc) {
+  return function (req, res, next) {
+    var authorization = req.headers.authorization
 
-  var corbelDriver = connection.getTokenDriver(authorization, true)
-  if (config('composrLog.logLevel') === 'debug') {
-    corbelDriver.on('request', function () {
-      logger.debug('>>> corbelDriver request: ', arguments)
-    })
+    var corbelDriver = connection.getTokenDriver(authorization, true)
+    if (config('composrLog.logLevel') === 'debug') {
+      corbelDriver.on('request', function () {
+        logger.debug('>>> corbelDriver request: ', arguments)
+      })
+    }
+
+    req.corbelDriver = corbelDriver
+
+    return next()
   }
-
-  req.corbelDriver = corbelDriver
-
-  return next()
 }

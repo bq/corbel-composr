@@ -1,6 +1,5 @@
 'use strict'
 var hub = require('./hub')
-var connection = require('./corbelConnection')
 var engine = require('./engine')
 var logger = require('../utils/composrLogger')
 var config = require('./config')
@@ -138,13 +137,17 @@ function bindRoutes(server, routeObjects) {
         executePhraseById(req, res, next, item)
       }
 
-      var hooks = phraseHooks.getHooks(item)
+      // Mandatory hooks
+      var corbelDriverSetupHook = phraseHooks.get('corbel-driver-setup')
       var metricsHook = phraseHooks.get('metrics')
+      // User-defined hooks
+      var hooks = phraseHooks.getHooks(item)
 
       var args = [url]
       if (hooks) {
         args = args.concat(hooks)
       }
+      args = args.concat(corbelDriverSetupHook)
       args = args.concat(metricsHook)
       args = args.concat(bindRoute)
       server[item.restifyVerb].apply(server, args)
@@ -154,6 +157,7 @@ function bindRoutes(server, routeObjects) {
       if (hooks) {
         argsV1 = argsV1.concat(hooks)
       }
+      argsV1 = argsV1.concat(corbelDriverSetupHook)
       argsV1 = argsV1.concat(metricsHook)
       argsV1 = argsV1.concat(bindRoute)
       server[item.restifyVerb].apply(server, argsV1)
