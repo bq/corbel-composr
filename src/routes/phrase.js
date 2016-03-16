@@ -77,24 +77,9 @@ Phrase.upsert = function (req, res) {
 
   Phrase.checkPublishAvailability(driver)
     .then(function () {
-      Phrase.validate(phrase)
+      Phrase.validate(phrase, res)
         .then(function () {
-          Phrase.upsertCall(phrase)
-            .then(function (response) {
-              res.setHeader('Location', 'phrase/' + phrase.id)
-              res.send(response.status, response.data)
-            })
-            .catch(function (error) {
-              var errorBody = Phrase.getCorbelErrorBody(error)
-              logger.warn('SERVER', 'invalid:upsert:phrase', errorBody)
-              res.send(error.status, new ComposrError('error:upsert:phrase', errorBody, error.status))
-            })
-        })
-        .catch(function (result) {
-          var errors = result.errors
-          logger.warn('SERVER', 'invalid:phrase', phrase.url, domain, result)
-          res.send(422, new ComposrError('error:phrase:validation', 'Error validating phrase: ' +
-            JSON.stringify(errors, null, 2), 422))
+          Phrase.upsertCall(phrase, res)
         })
     })
     .catch(function () {
@@ -205,16 +190,30 @@ Phrase.checkPublishAvailability = function (driver) {
     })
 }
 
-Phrase.validate = function (phrase) {
+Phrase.validate = function (phrase, res) {
   return engine.composr.Phrase.validate(phrase)
+    .catch(function (result) {
+      var errors = result.errors
+      logger.warn('SERVER', 'invalid:phrase', phrase.url, result)
+      res.send(422, new ComposrError('error:phrase:validation', 'Error validating phrase: ' +
+        JSON.stringify(errors, null, 2), 422))
+    })
+}
+
+Phrase.upsertCall = function (item, res) {
+  return engine.composr.Phrase.save(item)
+    .then(function (phrase) {
+      res.setHeader('Location', 'phrase/' + phrase.id)
+      res.send(200, phrase)
+    })
+    .catch(function (error) {
+      logger.warn('SERVER', 'invalid:upsert:phrase', error)
+      res.send(error)
+    })
 }
 
 Phrase.emitEvent = function (text, domain, id) {
   hub.emit(text, domain, id)
-}
-
-Phrase.upsertCall = function (item) {
-  return engine.composr.Phrase.save(item)
 }
 
 Phrase.deleteCall = function (driver, id) {

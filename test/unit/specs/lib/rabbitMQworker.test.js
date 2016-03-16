@@ -31,7 +31,7 @@ describe('Rabbit worker', function () {
     engineCustom.composr = {}
 
     engineCustom.composr.Phrase = {}
-    engineCustom.composr.Phrase.load = sandbox.stub().returns(Promise.resolve(item))
+    engineCustom.composr.Phrase.load = function (item) { return Promise.resolve(item) }
     engineCustom.composr.Phrase.register = function () {}
     engineCustom.composr.Phrase.unregister = sandbox.stub()
     engineCustom.phrasesCollection = ''
@@ -102,21 +102,20 @@ describe('Rabbit worker', function () {
     expect(worker).to.respondTo('_doWorkWithPhraseOrSnippet')
   })
 
-  it('_addPhrase method returns true when a phrase is added', function (done) {
-    stubRegisterPhrases = sandbox.stub(engineCustom.composr.Phrase, 'register', function (data) {
-      return Promise.resolve({registered: true})
+  it.only('_addPhrase method returns true when a phrase is added', function (done) {
+    stubRegisterPhrases = sandbox.stub(engineCustom.composr.Phrase, 'load', function (data) {
+      return Promise.resolve({registered: true, id: 1})
     })
 
     worker._addPhrase(domain, id)
-      .then(function (status) {
-        expect(status).to.be.an('object')
-        expect(status.registered).to.equals(true)
-        expect(engineCustom.composr.Phrase.load.callCount).to.equals(1)
-        expect(engineCustom.composr.Phrase.load.calledWith(id)).to.equals(true)
-        expect(stubRegisterPhrases.callCount).to.equals(1)
-        expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true)
-        done()
-      })
+    .then(function (status) {
+      expect(status).to.equals(true)
+      expect(engineCustom.composr.Phrase.load.callCount).to.equals(1)
+      expect(engineCustom.composr.Phrase.load.calledWith(id)).to.equals(true)
+      expect(stubRegisterPhrases.callCount).to.equals(1)
+      expect(stubRegisterPhrases.calledWith(domain, item)).to.equals(true)
+      done()
+    })
   })
 
   it('_addPhrase method returns false when a phrase is not added', function (done) {

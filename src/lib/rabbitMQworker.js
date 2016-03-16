@@ -45,6 +45,7 @@ Worker.prototype.isSnippet = function (type) {
 Worker.prototype._addPhrase = function (domain, id) {
   return this.engine.composr.Phrase.load(id)
     .then(function (item) {
+      console.log(item)
       logger.debug('RabbitMQ-worker phrase fetched', item.id, 'registered', item.registered)
       return item.registered
     })
