@@ -17,6 +17,7 @@ function test (server) {
 
     var phrase = {
       'url': 'published/phrase',
+      'version': '2.2.2',
       'get': {
         'code': 'res.status(200).send({ "hello": "World!"});',
         'doc': {
@@ -31,10 +32,10 @@ function test (server) {
         .then(function (response) {
           adminClientToken = response.body.data.accessToken
           domain = connection.extractDomain(adminClientToken)
-          phrase.id = server.composr.Phrases._generateId(phrase.url, domain)
+          phrase.id = server.composr.Phrase._generateId(phrase.url, domain)
           phrase.urlReplaced = '/phrase/' + phrase.url.replace('/', '!')
           phrases.push(phrase)
-          return server.composr.Phrases.register(domain, phrase)
+          return server.composr.Phrase.register(domain, phrase)
         })
         .should.notify(done)
     })

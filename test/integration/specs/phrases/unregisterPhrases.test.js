@@ -12,6 +12,7 @@ function test (server) {
   describe('Unregister single phrase', function () {
     var phraseWithTwoParams = {
       url: 'unregister/:name/:surname',
+      version: '3.3.3',
       get: {
         code: 'res.status(200).send(req.params);',
         doc: {}
@@ -19,7 +20,7 @@ function test (server) {
     }
 
     beforeEach(function (done) {
-      server.composr.Phrases.register('testDomainComposr', [phraseWithTwoParams])
+      server.composr.Phrase.register('testDomainComposr', [phraseWithTwoParams])
         .should.be.eventually.fulfilled.and.notify(done)
     })
 
@@ -37,8 +38,8 @@ function test (server) {
           expect(response.body.name).to.equals('juan')
           expect(response.body.surname).to.equals('palomo')
           // phrase is unregistered
-          var phraseId = server.composr.Phrases._generateId('unregister/:name/:surname', 'testDomainComposr')
-          server.composr.Phrases.unregister('testDomainComposr', phraseId)
+          var phraseId = server.composr.Phrase._generateId('unregister/:name/:surname', 'testDomainComposr')
+          server.composr.Phrase.unregister('testDomainComposr', phraseId)
           // phrase is not registered
           request(server.app)
             .get('/testDomainComposr/unregister/juan/palomo')
@@ -60,6 +61,7 @@ function test (server) {
   describe('Unregister multiple phrases', function () {
     var phraseWithTwoParams = {
       url: 'unregister/:name/:surname',
+      version: '3.3.3',
       get: {
         code: 'res.status(200).send(req.params);',
         doc: {}
@@ -68,24 +70,29 @@ function test (server) {
 
     var phraseWithOneParam = {
       url: 'unregister/:name',
+      version: '3.3.3',
       get: {
         code: 'res.status(200).send(req.params);',
         doc: {}
       }
     }
 
+    var phrasesRegistered
+
     beforeEach(function (done) {
-      server.composr.Phrases.register('testDomainComposr', [phraseWithTwoParams, phraseWithOneParam])
-        .should.be.eventually.fulfilled.and.notify(done)
+      server.composr.Phrase.register('testDomainComposr', [phraseWithTwoParams, phraseWithOneParam])
+        .then(function (results) {
+          phrasesRegistered = results.map(function (res) {
+            return res.model
+          })
+        })
+        .should.notify(done)
     })
 
     it('can unregister multiple phrases simultaneously', function (done) {
       this.timeout(30000)
 
-      var phraseWithOneParamId = server.composr.Phrases._generateId('unregister/:name', 'testDomainComposr')
-      var phraseWithTwoParamsId = server.composr.Phrases._generateId('unregister/:name/:surname', 'testDomainComposr')
-
-      server.composr.Phrases.unregister('testDomainComposr', [phraseWithOneParamId, phraseWithTwoParamsId])
+      server.composr.Phrase.unregister('testDomainComposr', [phrasesRegistered[0].getId(), phrasesRegistered[1].getId()])
 
       var promiseUnregisterFirstPhrase = new Promise(function (resolve, reject) {
         request(server.app)

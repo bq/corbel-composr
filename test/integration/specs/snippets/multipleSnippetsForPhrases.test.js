@@ -11,12 +11,14 @@ chai.use(chaiAsPromised)
 function test (server) {
   describe('Describe phrases execution with snippets', function () {
     var basicSnippet = {
-      id: 'testDomainComposr!basicSnippet',
+      name: 'basicSnippet',
+      version: '3.3.3',
       codehash: new Buffer('var thing = function(res){ res.status(201).send("test"); }; exports(thing);').toString('base64')
     }
 
     var basicPhrase = {
       url: 'snippet-test',
+      version: '3.3.3',
       get: {
         code: 'var mything = require("snippet-basicSnippet"); mything(res);',
         doc: {}
@@ -24,12 +26,14 @@ function test (server) {
     }
 
     var upperCaseSnippet = {
-      id: 'testDomainComposr!upperCaseSnippet',
+      name: 'pperCaseSnippet',
+      version: '3.3.3',
       codehash: new Buffer('var thing = function(res,param){res.status(200).send(param.toUpperCase()); }; exports(thing);').toString('base64')
     }
 
     var upperCasePhrase = {
       url: 'snippet-test/:name',
+      version: '3.3.3',
       get: {
         code: 'var mything = require("snippet-upperCaseSnippet"); mything(res,req.params.name);',
         doc: {}
@@ -37,12 +41,14 @@ function test (server) {
     }
 
     var awesomenizerSnippet = {
-      id: 'testDomainComposr!awesomenizerSnippet',
+      name: 'awesomenizerSnippet',
+      version: '3.3.3',
       codehash: new Buffer('var thing = function(param){return param + " is awesome!"; }; exports(thing);').toString('base64')
     }
 
     var awesomenizerPhrase = {
       url: 'snippet-test/awesome/:name',
+      version: '3.3.3',
       get: {
         code: 'var upper = require("snippet-upperCaseSnippet"); ' +
           'var awesomenizer = require("snippet-awesomenizerSnippet"); ' +
@@ -52,11 +58,11 @@ function test (server) {
     }
 
     before(function (done) {
-      server.composr.Snippets.register('testDomainComposr',
+      server.composr.Snippet.register('testDomainComposr',
         [basicSnippet, upperCaseSnippet, awesomenizerSnippet])
         .should.be.eventually.fulfilled
         .then(function () {
-          return server.composr.Phrases.register('testDomainComposr',
+          return server.composr.Phrase.register('testDomainComposr',
             [basicPhrase, upperCasePhrase, awesomenizerPhrase])
             .should.be.eventually.fulfilled
         })

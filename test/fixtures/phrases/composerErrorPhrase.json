@@ -1,5 +1,6 @@
 {
   "url": "composererror",
+  "version": "2.3.3",
   "post": {
     "code": "throw new ComposerError('custom error', 'This is an error', 407);",
     "doc": {

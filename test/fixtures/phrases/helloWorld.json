@@ -1,5 +1,6 @@
 {
     "url": "helloworld",
+    "version": "2.3.3",
     "get": {
         "code": "res.render('index', {title: 'hello world'});",
         "doc": {

@@ -1,34 +1,12 @@
 'use strict'
-/* globals before describe it */
+/* globals describe it */
 
 var request = require('supertest')
 var chai = require('chai')
 var expect = chai.expect
 
 function test (server) {
-  describe('When a request to composr takes more than 10 seconds', function () {
-    var phrasesToRegister = [{
-      'url': 'timeout',
-      'get': {
-        'code': 'var a = 3; while(true){ a = a + 3; };',
-        'doc': {
-
-        }
-      }
-    }]
-
-    before(function (done) {
-      // server.composr.reset()
-      server.composr.Phrases.register('testDomain', phrasesToRegister)
-        .then(function (results) {
-          // console.log(server.composr.data)
-          // TODO: reset phrases beforeEach, theres a bug with phrases
-          // and snippets registration on composr-core related to
-          // the refresh of the data structure
-          done()
-        })
-    })
-
+  describe('The status endpoint', function () {
     it('returns some check statuses in the status page', function (done) {
       request(server.app)
         .get('/status')

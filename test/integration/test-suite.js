@@ -48,6 +48,7 @@ module.exports = function (serverPromise) {
       // Wait for app initialization
       serverPromise.then(function (res) {
         server = res
+        console.info('---------------- Integration tests ------------------')
         done()
       })
     })

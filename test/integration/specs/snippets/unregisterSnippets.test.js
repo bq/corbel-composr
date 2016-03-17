@@ -9,19 +9,24 @@ var chaiAsPromised = require('chai-as-promised')
 chai.use(chaiAsPromised)
 
 function test (server) {
+  var snippetsRegistered
+
   describe('Unregister multiple snippets', function () {
     var unregisterSnippet1 = {
-      id: 'testDomainComposr!unregisterSnippet1',
+      name: 'unregisterSnippet1',
+      version: '1.2.2',
       codehash: new Buffer('var thing = function(res){ res.status(201).send("test"); }; exports(thing);').toString('base64')
     }
 
     var unregisterSnippet2 = {
-      id: 'testDomainComposr!unregisterSnippet2',
+      name: 'unregisterSnippet2',
+      version: '1.2.2',
       codehash: new Buffer('var thing = function(res,param){res.status(200).send(param.toUpperCase()); }; exports(thing);').toString('base64')
     }
 
     var basicPhrase = {
       url: 'unregister-snippet-test',
+      version: '1.2.2',
       get: {
         code: 'var mything = require("snippet-unregisterSnippet1"); mything(res);',
         doc: {}
@@ -30,6 +35,7 @@ function test (server) {
 
     var upperCasePhrase = {
       url: 'unregister-snippet-test/:name',
+      version: '1.2.2',
       get: {
         code: 'var mything = require("snippet-unregisterSnippet2"); mything(res,req.params.name);',
         doc: {}
@@ -38,11 +44,14 @@ function test (server) {
 
     before(function (done) {
       this.timeout(30000)
-      server.composr.Snippets.register('testDomainComposr',
+      server.composr.Snippet.register('testDomainComposr',
         [unregisterSnippet1, unregisterSnippet2])
         .should.be.fulfilled
-        .then(function () {
-          return server.composr.Phrases.register('testDomainComposr',
+        .then(function (results) {
+          snippetsRegistered = results.map(function (res) {
+            return res.model
+          })
+          return server.composr.Phrase.register('testDomainComposr',
             [basicPhrase, upperCasePhrase])
         })
         .should.be.fulfilled.notify(done)
@@ -86,8 +95,8 @@ function test (server) {
           .should.be.fulfilled
           .then(function () {
             // All has worked as expected, unregister the snippets
-            server.composr.Snippets.unregister('testDomainComposr',
-              [unregisterSnippet1.id, unregisterSnippet2.id])
+            server.composr.Snippet.unregister('testDomainComposr',
+              [snippetsRegistered[0].getId(), snippetsRegistered[1].getId()])
             done()
           })
       })

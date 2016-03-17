@@ -13,6 +13,7 @@ function test (server) {
     var adminClientToken
     var phrase = {
       'url': 'published/phrase',
+      'version': '2.3.4',
       'get': {
         'code': 'res.status(200).send({ "hello": "World!"});',
         'doc': {

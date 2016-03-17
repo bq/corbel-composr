@@ -1,5 +1,6 @@
 {
   "url": "logoutuser/:type?",
+  "version": "2.3.3",
   "post": {
     "code": "if(!req.get(\"Authorization\"))throw new ComposerError(\"error:unauthorized\",\"Authorization missing\",401);var method=req.params.type&&\"all\"===req.params.type?\"disconnect\":\"signOut\";corbelDriver.iam.user(\"me\")[method]().then(function(t){res.send(t.data)})[\"catch\"](function(t){var a=t.status?t.status:500,r=t.data.body&&\"string\"==typeof t.data.body&&-1!==t.data.body.indexOf(\"{\")?JSON.parse(t.data.body):t;res.status(a).send(r)});",
     "doc": {
