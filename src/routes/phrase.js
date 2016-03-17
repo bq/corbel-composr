@@ -163,7 +163,7 @@ Phrase.getAll = function (req, res) {
   var authorization = Phrase.getAuthorization(req)
   var domain = Phrase.getDomain(authorization)
   if (domain) {
-    var phrases = Phrase.getAllCall(domain)
+    var phrases = engine.composr.Phrase.getPhrases(domain)
     res.send(200, phrases || [])
   } else {
     res.send(401, new ComposrError('error:domain:undefined', '', 401))
