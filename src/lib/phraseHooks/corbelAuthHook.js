@@ -1,5 +1,4 @@
 'use strict'
-var engine = require('../engine')
 var connection = require('../corbelConnection')
 var ComposrError = require('../ComposrError')
 var logger = require('../../utils/composrLogger')
@@ -8,38 +7,37 @@ var corbel = require('corbel-js')
 
 module.exports.authUser = function (methodDoc) {
   return function (req, res, next) {
-    var authHeader = req.header('Authorization');
+    var authHeader = req.header('Authorization')
 
     if (!authHeader || !authHeader.replace('Bearer ', '')) {
-      throw new ComposrError('error:authorization:undefined', '', 401);
+      throw new ComposrError('error:authorization:undefined', '', 401)
     }
 
-    var userId;
+    var userId
     try {
-      var jwtDecoded = corbel.jwt.decode(authHeader.replace('Bearer ', ''));
-      userId = jwtDecoded.userId;
+      var jwtDecoded = corbel.jwt.decode(authHeader.replace('Bearer ', ''))
+      userId = jwtDecoded.userId
     } catch (e) {
-      next(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400));
+      next(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400))
     }
 
-    userId ? next() :
-      next(new ComposrError('unauthorized_token', 'Only users can perform this action', 401));
+    userId ? next() : next(new ComposrError('unauthorized_token', 'Only users can perform this action', 401))
   }
 }
 
 module.exports.authClient = function (methodDoc) {
   return function (req, res, next) {
-    var authHeader = req.header('Authorization');
+    var authHeader = req.header('Authorization')
 
     if (!authHeader || !authHeader.replace('Bearer ', '')) {
-      throw new ComposrError('error:authorization:undefined', '', 401);
+      throw new ComposrError('error:authorization:undefined', '', 401)
     }
 
     try {
-      corbel.jwt.decode(authHeader.replace('Bearer ', ''));
-      return next();
+      corbel.jwt.decode(authHeader.replace('Bearer ', ''))
+      return next()
     } catch (e) {
-      return next(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400));
+      return next(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400))
     }
   }
 }

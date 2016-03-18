@@ -9,7 +9,6 @@ module.exports = function (methodDoc) {
   }
 }
 
-
 /**
  * Forward corbel driver events to corbel-composer event hub
  * @param  {[type]}   req  [description]
@@ -18,8 +17,8 @@ module.exports = function (methodDoc) {
  * @return {[type]}        [description]
  */
 
-function corbelDriverEventHookAfter(req) {
-  return function hook(evt) {
+function corbelDriverEventHookAfter (req) {
+  return function hook (evt) {
     var evtData = {
       guid: req.getId(),
       startDate: req.date(),

@@ -1,8 +1,7 @@
 'use strict'
 var engine = require('../engine')
-var ComposrError = require('../ComposrError')
 var logger = require('../../utils/composrLogger')
-var _ = require('lodash');
+var _ = require('lodash')
 
 // Implement and include your new hook here to make it available
 var hooks = {
@@ -33,29 +32,29 @@ var hooks = {
 }
 
 module.exports.getHooks = function (phraseItem) {
-  var phrase = _.find(engine.composr.data.phrases, ['id', phraseItem.id]);
+  var phrase = _.find(engine.composr.data.phrases, ['id', phraseItem.id])
 
   if (phrase && phrase[phraseItem.verb] && phrase[phraseItem.verb].middlewares) {
     var functions = _.map(phrase[phraseItem.verb].middlewares, function (hookId) {
       if (hooks[hookId]) {
-        logger.info('Setting ' + hooks[hookId].description + ' for phrase:', phraseItem.id);
-        return hooks[hookId].hookFunction(phrase[phraseItem.verb].doc);
+        logger.info('Setting ' + hooks[hookId].description + ' for phrase:', phraseItem.id)
+        return hooks[hookId].hookFunction(phrase[phraseItem.verb].doc)
       } else {
-        logger.warn('Hook ' + hookId + ' not found for phrase:', phraseItem.id);
-        return null;
+        logger.warn('Hook ' + hookId + ' not found for phrase:', phraseItem.id)
+        return null
       }
-    });
-    return _.without(functions, null);
+    })
+    return _.without(functions, null)
   }
 }
 
 module.exports.get = function (hookId) {
   if (hooks[hookId]) {
-    return hooks[hookId].hookFunction();
+    return hooks[hookId].hookFunction()
   } else {
-    logger.warn('Hook ' + hookId + ' not found');
+    logger.warn('Hook ' + hookId + ' not found')
     return function (req, res, next) {
-      next();
+      next()
     }
   }
 }

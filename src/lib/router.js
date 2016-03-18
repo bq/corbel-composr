@@ -12,7 +12,7 @@ var phraseHooks = require('./phraseHooks/phraseHooks')
  * @param  {[type]} acc [description]
  * @return {[type]}     [description]
  */
-function analyzePhrase(acc) {
+function analyzePhrase (acc) {
   return function (item) {
     var domain = phraseUtils.extractDomainFromId(item.id)
 
@@ -41,7 +41,7 @@ function analyzePhrase(acc) {
  * @param  {[type]}   routeItem [description]
  * @return {[type]}             [description]
  */
-function executePhraseById(req, res, next, routeItem) {
+function executePhraseById (req, res, next, routeItem) {
   var params = executionMode({
     corbelDriver: req.corbelDriver,
     req: req,
@@ -92,7 +92,7 @@ function executePhraseById(req, res, next, routeItem) {
  * @param  {Object} params execution configuration
  * @return {Object} modified execution params
  */
-function executionMode(params) {
+function executionMode (params) {
   if (config('execution.vm')) {
     params.browser = false
   }
@@ -104,7 +104,7 @@ function executionMode(params) {
  * Enforce run Garbage Collector every phrase execution
  * @return {[type]} [description]
  */
-function enforceGC() {
+function enforceGC () {
   if (config('execution.gc') && !!global.gc) {
     global.gc()
   }
@@ -116,7 +116,7 @@ function enforceGC() {
  * @param  {Function} next    [description]
  * @return {[type]}           [description]
  */
-function createRoutes(phrases, next) {
+function createRoutes (phrases, next) {
   var routeObjects = []
   phrases.forEach(analyzePhrase(routeObjects))
   next(routeObjects)
@@ -128,7 +128,7 @@ function createRoutes(phrases, next) {
  * @param  {[type]} routeObjects [description]
  * @return {[type]}              [description]
  */
-function bindRoutes(server, routeObjects) {
+function bindRoutes (server, routeObjects) {
   for (var i = routeObjects.length - 1; i >= 0; i--) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
@@ -161,7 +161,6 @@ function bindRoutes(server, routeObjects) {
       argsV1 = argsV1.concat(metricsHook)
       argsV1 = argsV1.concat(bindRoute)
       server[item.restifyVerb].apply(server, argsV1)
-
     })(routeObjects[i])
   }
 }
@@ -172,7 +171,7 @@ function bindRoutes(server, routeObjects) {
  * @param  {[type]} server [description]
  * @return {[type]}        [description]
  */
-function listAllRoutes(server) {
+function listAllRoutes (server) {
   logger.debug('GET paths:')
   server.router.routes.GET.forEach(
     function (value) {
