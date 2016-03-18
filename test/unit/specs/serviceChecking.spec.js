@@ -9,7 +9,7 @@ var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
 var expect = chai.expect
 var sinon = require('sinon')
-var engine = require('../../../src/lib/engine.js')
+var engine = require('../../../src/lib/engine')
 
 chai.should()
 chai.use(chaiAsPromised)

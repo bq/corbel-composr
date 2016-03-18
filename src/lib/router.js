@@ -1,11 +1,11 @@
 'use strict'
 var hub = require('./hub')
-var connection = require('./corbelConnection')
 var engine = require('./engine')
 var logger = require('../utils/composrLogger')
 var config = require('./config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
 var phraseUtils = require('../utils/phraseUtils')
+var phraseHooks = require('./phraseHooks/phraseHooks')
 
 /* *
  * [analyzePhrase description]
@@ -123,67 +123,6 @@ function createRoutes (phrases, next) {
 }
 
 /**
- * [authCorbelHook description]
- * @param  {[type]}   req  [description]
- * @param  {[type]}   res  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
- */
-function authCorbelHook (req, res, next) {
-  var authorization = req.headers.authorization
-
-  var corbelDriver = connection.getTokenDriver(authorization, true)
-  if (config('composrLog.logLevel') === 'debug') {
-    corbelDriver.on('request', function () {
-      logger.debug('>>> corbelDriver request: ', arguments)
-    })
-  }
-
-  req.corbelDriver = corbelDriver
-
-  return next()
-}
-
-/**
- * Add custom metrics parameters in req before running phrase
- * @param  {[type]}   req  [description]
- * @param  {[type]}   res  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
- */
-
-function initReqParams (req, res, next) {
-  hub.emit('http:start', req.getId())
-  req.corbelDriver.on('service:request:after', corbelDriverEventHookAfter(req))
-  return next()
-}
-
-/**
- * Forward corbel driver events to corbel-composer event hub
- * @param  {[type]}   req  [description]
- * @param  {[type]}   res  [description]
- * @param  {Function} next [description]
- * @return {[type]}        [description]
- */
-
-function corbelDriverEventHookAfter (req) {
-  return function hook (evt) {
-    var evtData = {
-      guid: req.getId(),
-      startDate: req.date(),
-      endDate: Date.now(),
-      url: evt.response.request.href,
-      status: evt.response.statusCode,
-      method: evt.response.req.method,
-      time: req.time(),
-      isError: (evt.response.statusCode.toString().indexOf('4') === 0 || evt.response.statusCode.toString().indexOf('5') === 0),
-      type: 'EXTERNAL'
-    }
-    hub.emit('metrics:add:segment', evtData)
-  }
-}
-
-/**
  * Add End-Points to Restify Router
  * @param  {[type]} server       [description]
  * @param  {[type]} routeObjects [description]
@@ -194,20 +133,34 @@ function bindRoutes (server, routeObjects) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
 
-      server[item.restifyVerb](url,
-        authCorbelHook,
-        initReqParams,
-        function bindRoute (req, res, next) {
-          executePhraseById(req, res, next, item)
-        })
+      var bindRoute = function (req, res, next) {
+        executePhraseById(req, res, next, item)
+      }
+
+      // Mandatory hooks
+      var corbelDriverSetupHook = phraseHooks.get('corbel-driver-setup')
+      var metricsHook = phraseHooks.get('metrics')
+      // User-defined hooks
+      var hooks = phraseHooks.getHooks(item)
+
+      var args = [url]
+      if (hooks) {
+        args = args.concat(hooks)
+      }
+      args = args.concat(corbelDriverSetupHook)
+      args = args.concat(metricsHook)
+      args = args.concat(bindRoute)
+      server[item.restifyVerb].apply(server, args)
 
       // Support also v1.0 paths for the moment
-      server[item.restifyVerb]('/v1.0' + url,
-        authCorbelHook,
-        initReqParams,
-        function bindRouteV1 (req, res, next) {
-          executePhraseById(req, res, next, item)
-        })
+      var argsV1 = ['/v1.0' + url]
+      if (hooks) {
+        argsV1 = argsV1.concat(hooks)
+      }
+      argsV1 = argsV1.concat(corbelDriverSetupHook)
+      argsV1 = argsV1.concat(metricsHook)
+      argsV1 = argsV1.concat(bindRoute)
+      server[item.restifyVerb].apply(server, argsV1)
     })(routeObjects[i])
   }
 }

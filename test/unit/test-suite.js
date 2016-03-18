@@ -12,3 +12,4 @@ require('./specs/routes/snippet.errorTest.js')
 // other
 require('./specs/ComposrError.spec.js')
 require('./specs/serviceChecking.spec.js')
+require('./specs/hooks/mockHook.spec.js')
