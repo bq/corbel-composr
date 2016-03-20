@@ -1,5 +1,4 @@
 'use strict'
-/* globals before beforeEach afterEach describe it */
 
 var options = null
 var config = require('../../../src/lib/config')

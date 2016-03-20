@@ -37,6 +37,16 @@
     "logs": "node node_modules/pm2/bin/pm2 logs",
     "test": "grunt test"
   },
+  "standard": {
+      "globals": [
+          "describe",
+          "it",
+          "before",
+          "beforeEach",
+          "after",
+          "afterEach"
+      ]
+  },
   "dependencies": {
     "amqplib": "^0.4.0",
     "ascii-art": "0.0.2-alpha",
