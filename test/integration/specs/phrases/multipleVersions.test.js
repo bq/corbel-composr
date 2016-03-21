@@ -2,158 +2,88 @@
 /* globals before describe it */
 
 var request = require('supertest')
-var sinon = require('sinon')
 var chai = require('chai')
 var expect = chai.expect
 
 function test (server) {
-  describe('When a request to composr has errors', function () {
-    var errorPhrase401 = {
-      url: 'error/401',
-      version: '4.4.4',
+  describe('Multiple Phrase versions', function () {
+    var phraseMe_1 = {
+      url: 'multiple/path',
+      version: '1.1.1',
       get: {
-        code: 'res.status(401).send("test")',
+        code: 'res.status(200).send("me")',
         doc: {}
       }
     }
 
-    var errorPhrase500 = {
-      url: 'error/500',
-      version: '4.4.4',
+    var phraseMe_2 = {
+      url: 'multiple/path',
+      version: '1.2.1',
       get: {
-        code: 'throw( { error: "internal_server_error", errorDescription: "error 500 thrown"})',
+        code: 'res.status(200).send("you")',
         doc: {}
       }
     }
 
-    var errorWithText = {
-      url: 'error/text',
-      version: '4.4.4',
+    var phraseMe_3 = {
+      url: 'multiple/path',
+      version: '2.1.1',
       get: {
-        code: 'throw("Error thrown")',
+        code: 'res.status(200).send("him")',
         doc: {}
       }
     }
 
-    var composrErrorPhrase = {
-      url: 'error/composr/506',
-      version: '4.4.4',
+    var phraseMe_4 = {
+      url: 'multiple/path',
+      version: '3.0.0',
       get: {
-        code: 'var ComposrError = require("ComposrError"); throw new ComposrError("test", "errorDescription", 506)',
+        code: 'res.status(200).send("her")',
         doc: {}
       }
     }
 
     before(function (done) {
       var phrases = [
-        errorPhrase401,
-        errorPhrase500,
-        errorWithText,
-        composrErrorPhrase
+        phraseMe_1,
+        phraseMe_2,
+        phraseMe_3,
+        phraseMe_4
       ]
 
       server.composr.Phrase.register('testDomainComposr', phrases)
         .should.be.eventually.fulfilled.and.notify(done)
     })
 
-    it('it fails with a 500 error', function (done) {
-      var stubHttEndCb = sinon.stub()
-      server.hub.on('http:end', stubHttEndCb)
+    it('returns the value of the HIGHEST version', function (done) {
       request(server.app)
-        .get('/e1')
-        .expect(500)
+        .get('/testDomainComposr/multiple/path')
+        .expect(200)
         .end(function (err, response) {
-          if (err) {
-            throw err
-          }
-          expect(response).to.be.an('object')
-          expect(stubHttEndCb.callCount).to.equals(1)
-          done()
+          expect(response.body).to.be.equals('her')
+          done(err)
         })
     })
 
-    it('it fails with a 555 error with e2', function (done) {
+    it('returns the correct version if specified', function (done) {
       request(server.app)
-        .get('/e2')
-        .expect(555)
+        .get('/testDomainComposr/multiple/path')
+        .set('Accept-Version', '2.1.1')
+        .expect(200)
         .end(function (err, response) {
-          if (err) {
-            throw err
-          }
-          expect(response).to.be.an('object')
-          expect(response.body.error).to.be.equals('error:custom')
-          done()
+          expect(response.body).to.equals('him')
+          done(err)
         })
     })
 
-    it('it fails with a 401 sent by the user', function (done) {
-      var stubHttEndCb = sinon.stub()
-      server.hub.on('http:end', stubHttEndCb)
-
+    it('returns the 2.X version ', function (done) {
       request(server.app)
-        .get('/testDomainComposr/error/401')
-        .expect(401)
+        .get('/testDomainComposr/multiple/path')
+        .set('Accept-Version', '2.*')
+        .expect(200)
         .end(function (err, response) {
-          if (err) {
-            throw err
-          }
-          expect(stubHttEndCb.callCount).to.equals(1)
-          expect(response.body).to.be.equals('test')
-          done()
-        })
-    })
-
-    it('it parses a error with an error key throwing a 500 error', function (done) {
-      var stubHttEndCb = sinon.stub()
-      server.hub.on('http:end', stubHttEndCb)
-
-      request(server.app)
-        .get('/testDomainComposr/error/500')
-        .expect(500)
-        .end(function (err, response) {
-          if (err) {
-            throw err
-          }
-          expect(response).to.be.an('object')
-          expect(response.body.error).to.be.equals('internal_server_error')
-          expect(response.body.errorDescription).to.be.equals('error 500 thrown')
-          expect(response.body.status).to.be.equals(500)
-          expect(stubHttEndCb.callCount).to.equals(1)
-          done()
-        })
-    })
-
-    it('it returns a 500 error if the phrase throws a single string', function (done) {
-      var errorDescription = 'Error thrown'
-
-      request(server.app)
-        .get('/testDomainComposr/error/text')
-        .expect(500)
-        .end(function (err, response) {
-          if (err) {
-            throw err
-          }
-          expect(response).to.be.an('object')
-          expect(response.body.error).to.be.equals('error:phrase:exception:error/text')
-          expect(response.body.errorDescription).to.be.deep.equals(errorDescription)
-          expect(response.body.status).to.be.deep.equals(500)
-          done()
-        })
-    })
-
-    it('bypasses ComposrErrors', function (done) {
-      request(server.app)
-        .get('/testDomainComposr/error/composr/506')
-        .expect(506)
-        .end(function (err, response) {
-          if (err) {
-            throw err
-          }
-          expect(response).to.be.an('object')
-          expect(response.body.error).to.be.equals('test')
-          expect(response.body.errorDescription).to.be.equals('errorDescription')
-          expect(response.body.status).to.be.deep.equals(506)
-          done()
+          expect(response.body).to.equals('him')
+          done(err)
         })
     })
   })

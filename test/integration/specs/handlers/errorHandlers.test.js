@@ -86,7 +86,7 @@ function test (server) {
         })
     })
 
-    it('it fails with a 401 sent by the user', function (done) {
+    it.only('it fails with a 401 sent by the user', function (done) {
       var stubHttEndCb = sinon.stub()
       server.hub.on('http:end', stubHttEndCb)
 

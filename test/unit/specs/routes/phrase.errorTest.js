@@ -9,9 +9,8 @@ var Phrase = require('../../../../src/routes/phrase.js').Phrase
 
 chai.use(chaiAsPromised)
 
-describe('Phrase upsert, delete and get', function () {
+describe('Phrase upsert, delete and get Errors', function () {
   var sandbox
-  var stubGetCorbelErrorBody
   var stubGetAuthorization
   var stubGetDriver
   var stubGetDomain
@@ -25,7 +24,7 @@ describe('Phrase upsert, delete and get', function () {
       url: ''
     },
     params: {
-      phraseId: 'deleteId'
+      itemId: 'deleteId'
     }
   }
   var auth = {
@@ -33,16 +32,11 @@ describe('Phrase upsert, delete and get', function () {
   }
   var driver = 'driver'
   var domain = 'domain'
-  var fullId = 'domain!deleteId'
-  var textEvent = 'phrase:upsert'
-  var errorBody = 'ErrorBody'
+  var fullId = 'deleteId'
 
   beforeEach(function () {
     sandbox = sinon.sandbox.create()
 
-    stubGetCorbelErrorBody = sandbox.stub(Phrase, 'getCorbelErrorBody', function () {
-      return errorBody
-    })
     stubGetAuthorization = sandbox.stub(Phrase, 'getAuthorization', function () {
       return auth
     })
@@ -60,9 +54,10 @@ describe('Phrase upsert, delete and get', function () {
   })
 
   it('Phrase.upsert throws an error in publishAvailability', function (done) {
-    var error = 'error'
     stubPublishAvailability = sandbox.stub(Phrase, 'checkPublishAvailability', function () {
-      return Promise.reject(error)
+      return Promise.reject({
+        status: 401
+      })
     })
 
     Phrase.upsert(req, {
@@ -76,8 +71,6 @@ describe('Phrase upsert, delete and get', function () {
         expect(stubGetDomain.calledWith(auth)).to.equals(true)
         expect(stubPublishAvailability.callCount).to.equals(1)
         expect(stubPublishAvailability.calledWith(driver)).to.equals(true)
-        expect(stubGetCorbelErrorBody.callCount).to.equals(1)
-        expect(stubGetCorbelErrorBody.calledWith(error)).to.equals(true)
 
         done()
       }
@@ -91,7 +84,7 @@ describe('Phrase upsert, delete and get', function () {
     stubPublishAvailability = sandbox.stub(Phrase, 'checkPublishAvailability', function () {
       return Promise.resolve()
     })
-    stubValidate = sandbox.stub(Phrase, 'validate', function () {
+    stubValidate = sandbox.stub(Phrase.manager, 'validate', function () {
       return Promise.reject(error)
     })
 
@@ -139,13 +132,9 @@ describe('Phrase upsert, delete and get', function () {
         expect(stubPublishAvailability.calledWith(driver)).to.equals(true)
         expect(stubValidate.callCount).to.equals(1)
         expect(stubValidate.calledWith(req.body)).to.equals(true)
-        expect(stubEmitEvent.callCount).to.equals(1)
-        expect(stubEmitEvent.calledWith(textEvent, domain, req.body.id)).to.equals(true)
+        expect(stubEmitEvent.callCount).to.equals(0)
         expect(stubUpsertCall.callCount).to.equals(1)
-        expect(stubUpsertCall.calledWith(req.body.id, req.body)).to.equals(true)
-        expect(stubGetCorbelErrorBody.callCount).to.equals(1)
-        expect(stubGetCorbelErrorBody.calledWith(error)).to.equals(true)
-
+        expect(stubUpsertCall.calledWith(domain, req.body)).to.equals(true)
         done()
       }
     })
@@ -158,6 +147,18 @@ describe('Phrase upsert, delete and get', function () {
     }
     var stubDeleteCall = sandbox.stub(Phrase, 'deleteCall').returns(Promise.reject(error))
 
+    sandbox.stub(Phrase, 'checkPublishAvailability', function () {
+      return Promise.resolve()
+    })
+
+    sandbox.stub(Phrase, 'getItemById', function () {
+      return {
+        getDomain: function () {
+          return domain
+        }
+      }
+    })
+
     Phrase.delete(req, {
       send: function (status) {
         expect(status).to.be.equal(408)
@@ -168,7 +169,7 @@ describe('Phrase upsert, delete and get', function () {
         expect(stubGetDomain.callCount).to.equals(1)
         expect(stubGetDomain.calledWith(auth)).to.equals(true)
         expect(stubDeleteCall.callCount).to.equals(1)
-        expect(stubDeleteCall.calledWith(driver, fullId)).to.equals(true)
+        expect(stubDeleteCall.calledWith(fullId)).to.equals(true)
 
         done()
       }
@@ -176,7 +177,7 @@ describe('Phrase upsert, delete and get', function () {
   })
 
   it('Phrase.get throws an error in getCall if the phrase does not exists', function (done) {
-    var stubGetCall = sandbox.stub(Phrase, 'getCall').returns(undefined)
+    var stubGetCall = sandbox.stub(Phrase, 'getItemById').returns(undefined)
 
     Phrase.get(req, {
       send: function (status) {
@@ -186,7 +187,7 @@ describe('Phrase upsert, delete and get', function () {
         expect(stubGetDomain.callCount).to.equals(1)
         expect(stubGetDomain.calledWith(auth)).to.equals(true)
         expect(stubGetCall.callCount).to.equals(1)
-        expect(stubGetCall.calledWith(domain, fullId)).to.equals(true)
+        expect(stubGetCall.calledWith(fullId)).to.equals(true)
 
         done()
       }

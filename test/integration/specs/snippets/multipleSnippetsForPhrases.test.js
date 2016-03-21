@@ -26,7 +26,7 @@ function test (server) {
     }
 
     var upperCaseSnippet = {
-      name: 'pperCaseSnippet',
+      name: 'upperCaseSnippet',
       version: '3.3.3',
       codehash: new Buffer('var thing = function(res,param){res.status(200).send(param.toUpperCase()); }; exports(thing);').toString('base64')
     }

@@ -23,6 +23,18 @@ function initMetrics (config, logger) {
       name: 'phrases_executed'
     })
 
+    var counterPhrasesUpdated = probe.counter({
+      name: 'phrases_updated'
+    })
+
+    var counterSnippetsUpdated = probe.counter({
+      name: 'snippets_updated'
+    })
+
+    var counterVirtualDomainsUpdated = probe.counter({
+      name: 'virtualdomains_updated'
+    })
+
     hub.on('phrase:execution:start', function (domain, id, method) {
       // Metrics for number of phrases executed
       counterPhrasesExecuted.inc()
@@ -71,7 +83,16 @@ function initMetrics (config, logger) {
       pmx.emit(domain, options)
     })
 
+    hub.on('virtualdomain:upsert', function (domain, id) {
+      counterVirtualDomainsUpdated.inc()
+      pmx.emit('virtualdomain:upsert', {
+        domain: domain,
+        id: id
+      })
+    })
+
     hub.on('snippet:upsert', function (domain, id) {
+      counterSnippetsUpdated.inc()
       pmx.emit('snippet:upsert', {
         domain: domain,
         id: id
@@ -79,6 +100,7 @@ function initMetrics (config, logger) {
     })
 
     hub.on('phrase:upsert', function (domain, id) {
+      counterPhrasesUpdated.inc()
       pmx.emit('phrase:upsert', {
         domain: domain,
         id: id

@@ -5,7 +5,6 @@ var engine = require('./engine')
 var logger = require('../utils/composrLogger')
 var config = require('./config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
-var phraseUtils = require('../utils/phraseUtils')
 
 /* *
  * [analyzePhrase description]
@@ -13,11 +12,11 @@ var phraseUtils = require('../utils/phraseUtils')
  * @return {[type]}     [description]
  */
 function analyzePhrase (acc) {
-  return function (item) {
-    var domain = phraseUtils.extractDomainFromId(item.id)
+  return function (phraseModel) {
+    var domain = phraseModel.getDomain()
 
     allowedVerbs.forEach(function (verb) {
-      if (item[verb]) {
+      if (phraseModel.canRun(verb)) {
         // Restify doesn't use delete it uses 'del' for storing the delete callback
         var restifyMappedVerb = verb === 'delete' ? 'del' : verb
 
@@ -25,8 +24,9 @@ function analyzePhrase (acc) {
           restifyVerb: restifyMappedVerb,
           verb: verb,
           domain: domain,
-          path: item.url,
-          id: item.id
+          path: phraseModel.getUrl(),
+          version: phraseModel.getVersion(),
+          id: phraseModel.getId()
         })
       }
     })
@@ -194,7 +194,10 @@ function bindRoutes (server, routeObjects) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
 
-      server[item.restifyVerb](url,
+      server[item.restifyVerb]({
+        path: url,
+        version: item.version
+      },
         authCorbelHook,
         initReqParams,
         function bindRoute (req, res, next) {
@@ -202,7 +205,10 @@ function bindRoutes (server, routeObjects) {
         })
 
       // Support also v1.0 paths for the moment
-      server[item.restifyVerb]('/v1.0' + url,
+      server[item.restifyVerb]({
+        path: '/v1.0' + url,
+        version: item.version
+      },
         authCorbelHook,
         initReqParams,
         function bindRouteV1 (req, res, next) {

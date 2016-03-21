@@ -20,6 +20,7 @@ var tests = [
   require('./specs/phrases/deletePhrase.test.js'),
   require('./specs/phrases/unregisterPhrases.test.js'),
   require('./specs/phrases/invalidCorbelJsRequest.error.test.js'),
+  require('./specs/phrases/multipleVersions.test.js'),
 
   // snippets
   require('./specs/snippets/multipleSnippetsForPhrases.test.js'),
@@ -43,7 +44,7 @@ module.exports = function (serverPromise) {
   var server
 
   describe('setup', function () {
-    this.timeout(30000)
+    this.timeout(60000)
     before(function (done) {
       // Wait for app initialization
       serverPromise.then(function (res) {

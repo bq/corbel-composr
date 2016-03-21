@@ -8,6 +8,7 @@ src/config/development.json
 src/config/production.json
 src/config/qa.json
 src/config/staging.json
+src/config/test.json
 src/config/next.json
 test/fixtures/client/_clientAdmin.json
 test/fixtures/client/_clientDemo.json
