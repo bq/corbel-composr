@@ -45,7 +45,7 @@ function test (server) {
     })
 
     after(function (done) {
-      var promises = [domain + '!published!phrase-2.2.2', domain + '!notpublished!phrase-2.2.2'].map(function (id) {
+      var promises = [domain + '!published!phrase-2.2.2'].map(function (id) {
         return commonUtils.makeRequest(server, 'del', '/phrase/' + id, null, 204,
           ['Authorization'], [adminClientToken])
       })
@@ -54,7 +54,7 @@ function test (server) {
         .should.notify(done)
     })
 
-    it.only('allows to create a wellformed phrase', function (done) {
+    it('allows to create a wellformed phrase', function (done) {
       request(server.app)
         .put('/phrase')
         .set('Authorization', adminClientToken)

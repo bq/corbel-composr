@@ -39,7 +39,7 @@ function test (server) {
     })
 
     after(function (done) {
-      var promises = [domain + '!valid-1.1.1', domain + '!invalid-1.1.1']
+      var promises = [domain + '!valid-1.1.1']
         .map(function (snippetId) {
           return commonUtils.makeRequest(server, 'del', '/snippet/' + snippetId, null, 204,
             ['Authorization'], [adminClientToken])

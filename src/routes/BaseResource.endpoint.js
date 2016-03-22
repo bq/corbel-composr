@@ -57,15 +57,13 @@ ResourceEndpoint.prototype.delete = function (req, res) {
   this.checkPublishAvailability(driver)
     .then(function () {
       var item = that.getItemById(req.params.itemId)
-
       if (item && item.getDomain() === domain) {
-        that.deleteCall(req.params.itemId)
+        return that.deleteCall(req.params.itemId)
           .then(function () {
             logger.debug('item:deleted')
             res.send(204, 'deleted')
           })
           .catch(function (error) {
-            console.log('ERROR', error)
             res.send(error.status, new ComposrError('error:' + that.itemName + ':delete', error.message, error.status))
           })
       } else {
