@@ -4,29 +4,22 @@ var config = require('../lib/config')
 var engine = require('../lib/engine')
 var https = require('https')
 var packageJSON = require('../../package.json')
-var phraseUtils = require('../utils/phraseUtils')
 var _ = require('lodash')
 
 function checkServerStatus (req, res) {
-  var phrases = engine.composr.data.phrases
-
-  var domain = req.params.domain
-  if (domain) {
-    phrases = phrases.filter(function (item) {
-      return phraseUtils.extractDomainFromId(item.id) === domain
-    })
-  }
+  var domain = req.params.domain || null
+  var phrases = engine.composr.Phrase.getPhrases(domain)
 
   var version = req.params.version
   if (version) {
     phrases = phrases.filter(function (item) {
-      return item.id.split('!')[1] === version
+      return item.getVersion() === version
     })
   }
 
   var phrasesLoaded = phrases.length
   var domains = _.uniq(phrases.map(function (item) {
-    return phraseUtils.extractDomainFromId(item.id)
+    return item.getDomain()
   }))
 
   var serverStatus = {

@@ -1,5 +1,6 @@
 {
 	"url": "loginuser",
+	"version": "2.3.3",
 	"post": {
 		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var tokenObject;var corbelDriver = corbel.generateDriver({ iamToken : ''}); corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){tokenObject=e.data;corbelDriver=corbel.generateDriver({iamToken:tokenObject});return corbelDriver.iam.user(\"me\").get()}).then(function(e){res.send({tokenObject:tokenObject,user:e.data})})[\"catch\"](function(e){compoSR.run('global:parseError', { err : e, res : res});});",
 		"doc": {

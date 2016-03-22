@@ -9,17 +9,15 @@ function test (server) {
   describe('When headers are sent', function () {
     var phraseHeaderGet = {
       url: 'headers/:header',
+      version: '3.3.3',
       get: {
         code: 'res.status(200).send(req.get(req.params.header))',
         doc: {}
       }
     }
-    before(function (done) {
-      var phrases = [
-        phraseHeaderGet
-      ]
 
-      server.composr.Phrases.register('testDomainComposr', phrases)
+    before(function (done) {
+      server.composr.Phrase.register('testDomainComposr', phraseHeaderGet)
         .should.be.eventually.fulfilled.and.notify(done)
     })
 

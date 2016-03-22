@@ -1,4 +1,4 @@
-FROM node:4.3.0
+FROM node:5.8.0
 # Author / Maintainer
 MAINTAINER Composr Team <support-composr@bq.com >
 

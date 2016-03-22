@@ -9,12 +9,12 @@ var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
 var expect = chai.expect
 var sinon = require('sinon')
-var engine = require('../../../src/lib/engine.js')
+var engine = require('../../../src/lib/engine')
 
 chai.should()
 chai.use(chaiAsPromised)
 
-describe('Engine', function () {
+describe('Engine services checking', function () {
   this.timeout(10 * 1000)
 
   var baseUrl = config('corbel.driver.options').urlBase
@@ -30,7 +30,7 @@ describe('Engine', function () {
       options = {
         allowUnmocked: true
       }
-      engineAbsPath = path.resolve(__dirname + '../../../../src/lib/engine.js')
+      engineAbsPath = path.resolve(__dirname + '/../../../src/lib/engine.js')
     })
 
     beforeEach(function () {
@@ -45,7 +45,7 @@ describe('Engine', function () {
       delete require.cache[engineAbsPath]
     })
 
-    describe('Engine', function () {
+    describe('Engine initialization', function () {
       it('initialize engine on first time', function (done) {
         var stubOnComposrInit = mySandbox.stub(engine, 'initComposrCore')
         var stubInitServiceChecking = mySandbox.stub(engine, 'initServiceCheckingRequests')

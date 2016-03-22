@@ -24,7 +24,7 @@ if (config('bunyan.log') === true) {
   }, {
     level: 'trace',
     type: 'rotating-file',
-    period: '6h', // 6h rotation
+    period: '3d', // 3d rotation
     count: 3, // keep 3 back copies
     path: './logs/api.log'
   }]

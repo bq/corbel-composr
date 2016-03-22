@@ -136,6 +136,13 @@ module.exports = function (grunt) {
         tagMessage: 'v<%= version %>', // default: 'Version <%= version %>',
         tagName: 'v<%= version %>'
       }
+    },
+
+    todo: {
+      options: {},
+      src: [
+        'test/**/**', 'src/**/**'
+      ]
     }
 
   })
@@ -184,7 +191,8 @@ module.exports = function (grunt) {
   grunt.registerTask('test', [
     'standard:format',
     'madge',
-    'mochaTest:ci'
+    'mochaTest:ci',
+    'todo'
   ])
 
   grunt.registerTask('unit', [

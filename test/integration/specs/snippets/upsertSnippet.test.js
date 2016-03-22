@@ -6,59 +6,62 @@ var chai = require('chai')
 var expect = chai.expect
 var clientUtils = require('../../utils/client')
 var commonUtils = require('../../utils/commonUtils')
+var connection = require('../../../../src/lib/corbelConnection')
 
 function test (server) {
   describe('Upsert snippet', function () {
-    var codehash = 'var userModel = function(id){ this.id = id; }; exports(userModel);'
+    this.timeout(30000)
+
+    var code = 'var userModel = function(id){ this.id = id; }; exports(userModel);'
     var AdminClientData = clientUtils.getAdminClient()
     var adminClientToken
-    var snippetIds = []
+    var domain
+
     var validSnippet = {
-      id: 'testDomainComposr!valid',
-      codehash: server.composr.utils.encodeToBase64(codehash)
+      name: 'valid',
+      version: '1.1.1',
+      codehash: server.composr.utils.encodeToBase64(code)
     }
 
     var invalidSnippet = {
-      'id': 'testDomainComposr!invalid',
+      'name': 'invalid',
+      version: '1.1.1',
       codehash: server.composr.utils.encodeToBase64('var a = 3;')
     }
 
     before(function (done) {
-      this.timeout(30000)
       commonUtils.makeRequest(server, 'post', '/token', AdminClientData, 200)
         .then(function (response) {
           adminClientToken = response.body.data.accessToken
+          domain = connection.extractDomain(adminClientToken)
         })
         .should.notify(done)
     })
 
     after(function (done) {
-      this.timeout(30000)
-      var promises = snippetIds.map(function (snippet) {
-        return commonUtils.makeRequest(server, 'del', snippet, null, 204,
-          ['Authorization'], [adminClientToken])
-      })
+      var promises = [domain + '!valid-1.1.1']
+        .map(function (snippetId) {
+          return commonUtils.makeRequest(server, 'del', '/snippet/' + snippetId, null, 204,
+            ['Authorization'], [adminClientToken])
+        })
 
       Promise.all(promises)
         .should.notify(done)
     })
 
     it('allows to create a wellformed snippet', function (done) {
-      this.timeout(30000)
       request(server.app)
         .put('/snippet')
         .set('Authorization', adminClientToken)
         .send(validSnippet)
-        .expect(204)
+        .expect(200)
         .end(function (err, response) {
-          expect(response.statusCode).to.equals(204)
-          snippetIds.push('/snippet/' + validSnippet.id)
+          expect(response.statusCode).to.equals(200)
           done(err)
         })
     })
 
     it('fails creating a badformed snippet', function (done) {
-      this.timeout(30000)
       request(server.app)
         .put('/snippet')
         .set('Authorization', adminClientToken)

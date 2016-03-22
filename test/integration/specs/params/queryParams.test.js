@@ -11,7 +11,7 @@ chai.use(chaiAsPromised)
 function test (server) {
   describe('Query params', function () {
     var phrase = {
-      id: 'testdomain!queryparams',
+      version: '3.3.3',
       url: 'queryparams',
       get: {
         code: 'console.log(req.query); res.status(200).send(req.query);',
@@ -22,7 +22,7 @@ function test (server) {
     }
 
     before(function (done) {
-      server.composr.Phrases.register('testdomain', phrase)
+      server.composr.Phrase.register('testdomain', phrase)
         .should.be.fulfilled.notify(done)
     })
 

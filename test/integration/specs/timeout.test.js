@@ -9,6 +9,7 @@ function test (server) {
   describe('When a request to composr takes more than 10 seconds', function () {
     var phrasesToRegister = [{
       'url': 'timeout',
+      'version': '2.3.4',
       'get': {
         'code': 'var a = 3; while(true){ a = a + 3; };',
         'doc': {
@@ -18,7 +19,7 @@ function test (server) {
     }]
 
     before(function (done) {
-      server.composr.Phrases.register('testDomain', phrasesToRegister)
+      server.composr.Phrase.register('testDomain', phrasesToRegister)
         .then(function (results) {
           done()
         })
@@ -29,6 +30,7 @@ function test (server) {
 
       request(server.app)
         .get('/testDomain/timeout')
+        .set('accept-version', '<3.0.0')
         .expect(503)
         .end(function (error, response) {
           expect(response).to.be.an('object')

@@ -14,7 +14,7 @@
 
     "bootstrap.retrytimeout": 10000,
 
-    "phrases.timeout": 10000,
+    "phrases.timeout": 40000,
 
     "services.timeout": 5000,
     "services.retries": 30,

@@ -1,5 +1,6 @@
 {
     "url": "base64",
+    "version": "2.3.3",
     "get": {
         "codehash": "cmVzLnJlbmRlcignaW5kZXgnLCB7dGl0bGU6ICdoZWxsbyB3b3JsZCd9KTs=",
         "doc": {

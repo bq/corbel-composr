@@ -12,6 +12,16 @@ var addSegment = function (transactionId, segment) {
   if (!transactions.hasOwnProperty(transactionId)) {
     addTransaction(transactionId)
   }
+
+  if (segment.type.toLowerCase() === 'root') {
+    Object.keys(transactions).forEach(function (transaction) {
+      transactions[transaction].segments.forEach(function (seg) {
+        seg.endDate = segment.endDate
+        seg.time = segment.time
+      })
+    })
+  }
+
   transactions[transactionId].segments.push(segment)
 }
 

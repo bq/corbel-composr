@@ -1,5 +1,6 @@
 {
 	"url": "loginclient",
+	"version": "2.3.3",
 	"post": {
 		"code": "if(!req.body||!req.body.jwt)throw new ComposerError(\"error:jwt:undefined\",\"\",401);var corbelDriver = corbel.generateDriver({ iamToken : ''}); corbelDriver.iam.token().create({jwt:req.body.jwt}).then(function(e){res.send(e.data)})[\"catch\"](function(e){compoSR.run('global:parseError', { err : e, res : res});});",
 		"doc": {

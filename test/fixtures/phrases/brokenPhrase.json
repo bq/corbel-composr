@@ -1,5 +1,6 @@
 {
 	"url": "brokenphrase",
+	"version": "2.3.3",
 	"post": {
 		"code": "var corbelDriver=corbel.generateDriver({clientsId:req.body.clientId,clientSecreta:req.body.clientSecret,scopes:req.body.scopes});corbelDriver.iam.token().create().then(function(e){res.send(e)})['catch'](function(e){throw new ComposerError('unauthorized', e.data, 401);});",
 		"doc": {

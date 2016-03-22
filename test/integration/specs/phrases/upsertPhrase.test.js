@@ -6,15 +6,19 @@ var chai = require('chai')
 var expect = chai.expect
 var clientUtils = require('../../utils/client')
 var commonUtils = require('../../utils/commonUtils')
+var connection = require('../../../../src/lib/corbelConnection')
 
 function test (server) {
   describe('Upsert phrase', function () {
+    this.timeout(30000)
+
     var AdminClientData = clientUtils.getAdminClient()
     var adminClientToken
-    var phraseIds = []
+    var domain
 
     var phrase = {
       'url': 'published/phrase',
+      'version': '2.2.2',
       'get': {
         'code': 'res.status(200).send({ "hello": "World!"});',
         'doc': {
@@ -25,24 +29,24 @@ function test (server) {
 
     var invalidPhrase = {
       'url': 'notpublished/phrase',
+      'version': '2.2.2',
       'get': {
         'code': 'return res.status(200).send({ "hello": "World!"});'
       }
     }
 
     before(function (done) {
-      this.timeout(30000)
       commonUtils.makeRequest(server, 'post', '/token', AdminClientData, 200)
         .then(function (response) {
           adminClientToken = response.body.data.accessToken
+          domain = connection.extractDomain(adminClientToken)
         })
         .should.notify(done)
     })
 
     after(function (done) {
-      this.timeout(30000)
-      var promises = phraseIds.map(function (phrase) {
-        return commonUtils.makeRequest(server, 'del', phrase, null, 204,
+      var promises = [domain + '!published!phrase-2.2.2'].map(function (id) {
+        return commonUtils.makeRequest(server, 'del', '/phrase/' + id, null, 204,
           ['Authorization'], [adminClientToken])
       })
 
@@ -51,23 +55,20 @@ function test (server) {
     })
 
     it('allows to create a wellformed phrase', function (done) {
-      this.timeout(30000)
       request(server.app)
         .put('/phrase')
         .set('Authorization', adminClientToken)
         .send(phrase)
-        .expect(204)
+        .expect(200)
         .end(function (err, response) {
           expect(response.headers).to.exist
           var brokenPhraseLocation = response.headers.location
           expect(brokenPhraseLocation).to.exist
-          phraseIds.push('/phrase/' + phrase.url.replace('/', '!'))
           done(err)
         })
     })
 
     it('fails creating a badformed phrase', function (done) {
-      this.timeout(30000)
       request(server.app)
         .put('/phrase')
         .set('Authorization', adminClientToken)

@@ -49,26 +49,24 @@ function test (server) {
 
     var phrase = {
       url: 'docField/:id/:name',
-      id: 'testDomainComposr!docField!:id!:name',
+      version: '12.3.2',
       get: {
         code: 'res.status(200).send(req.params);',
         doc: doc
       }
     }
 
-    before(function () {
-      // todo: this initialization shouldnt be done
-      if (!server.composr.data.phrases) {
-        server.composr.data.phrases = []
-      }
-      server.composr.data.phrases.push(phrase)
+    before(function (done) {
+      server.composr.Phrase.register('mydomain:custom', phrase)
+        .should.be.fulfilled
+        .notify(done)
     })
 
     it('executes the phrase correctly', function (done) {
       this.timeout(30000)
 
       request(server.app)
-        .get('/doc/testDomainComposr')
+        .get('/doc/mydomain:custom')
         .expect(200)
         .end(function (err, response) {
           expect(response).to.be.an('object')
