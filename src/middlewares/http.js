@@ -39,13 +39,13 @@ module.exports = function (restify, server, logger) {
   server.pre(restify.CORS({
     origins: ['*'],
     credentials: true,
-    headers: ['X-Requested-With', 'Authorization', 'Deviceid']
+    headers: ['X-Requested-With', 'Authorization', 'Deviceid', 'x-booqs-client-type', 'x-booqs-client-version', 'x-booqs-app-version']
   }))
 
   function unknownMethodHandler (req, res) {
     if (req.method.toLowerCase() === 'options') {
       // added Origin & X-Requested-W$
-      var allowHeaders = ['Accept', 'Accept-Version', 'Content-Type', 'Api-Version', 'Origin', 'X-Requested-With', 'Authorization', 'Deviceid']
+      var allowHeaders = ['Accept', 'Accept-Version', 'Content-Type', 'Api-Version', 'Origin', 'X-Requested-With', 'Authorization', 'Deviceid', 'x-booqs-client-type', 'x-booqs-client-version', 'x-booqs-app-version']
 
       if (res.methods.indexOf('OPTIONS') === -1) {
         res.methods.push('OPTIONS')
