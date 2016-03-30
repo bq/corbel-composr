@@ -9,7 +9,9 @@ var Phrase = require('../../../../src/routes/phrase.js').Phrase
 
 chai.use(chaiAsPromised)
 
-describe('Phrase upsert, delete and get', function () {
+describe('BaseResoure upsert, delete and get', function () {
+  this.timeout(10000)
+
   var sandbox
   var stubGetAuthorization
   var stubGetDriver
@@ -19,28 +21,30 @@ describe('Phrase upsert, delete and get', function () {
   var stubEmitEvent
   var stubUpsertCall
   var stubDeleteCall
-  var stubGetCall
   var stubGetAllCall
 
   var req = {
     body: {
-      id: 'test',
-      url: ''
+      version: '1.2.3',
+      url: 'user/me'
     },
     params: {
-      phraseId: 'testPhrase'
+      itemId: 'testPhrase'
     }
   }
+
   var res = {
     status: 200,
     data: 'test finished'
   }
+
   var auth = {
     auth: 'testAuth'
   }
+
   var driver = 'driver'
   var domain = 'domain'
-  var fullId = 'domain!testPhrase'
+  var fullId = 'testPhrase'
   var textEvent = 'phrase:upsert'
 
   beforeEach(function () {
@@ -64,49 +68,11 @@ describe('Phrase upsert, delete and get', function () {
     stubEmitEvent = sandbox.stub(Phrase, 'emitEvent')
     stubUpsertCall = sandbox.stub(Phrase, 'upsertCall').returns(Promise.resolve(res))
     stubDeleteCall = sandbox.stub(Phrase, 'deleteCall').returns(Promise.resolve(res))
-    stubGetCall = sandbox.stub(Phrase, 'getCall').returns(Promise.resolve(res))
-    stubGetAllCall = sandbox.stub(Phrase, 'getAllCall').returns(Promise.resolve(res))
+    stubGetAllCall = sandbox.stub(Phrase, 'getAllItems').returns(Promise.resolve(res))
   })
 
   afterEach(function () {
     sandbox.restore()
-  })
-
-  it('getCorbelErrorBody is called with a string and returns a string', function (done) {
-    expect(Phrase.getCorbelErrorBody('test')).to.be.equal('test')
-    done()
-  })
-
-  it('getCorbelErrorBody is called with an object and returns a json parsed correctly', function (done) {
-    var dataObj = {
-      data: {
-        body: '{"error": "errorTest"}'
-      }
-    }
-
-    var parsedData = {
-      error: 'errorTest'
-    }
-
-    expect(Phrase.getCorbelErrorBody(dataObj)).to.be.deep.equal(parsedData)
-    done()
-  })
-
-  it('getCorbelErrorBody is called with an object and returns the same object', function () {
-    var dataObj = {
-      data: {
-        body: {
-          error: 'errorTest'
-        }
-      }
-    }
-
-    expect(Phrase.getCorbelErrorBody(dataObj)).to.be.equal(dataObj.data)
-  })
-
-  it('Phrase.getFullId returns complete id', function (done) {
-    expect(Phrase.getFullId(domain, req.body.id)).to.be.equals('domain!test')
-    done()
   })
 
   it('Phrase.upsert works correctly', function (done) {
@@ -126,7 +92,7 @@ describe('Phrase upsert, delete and get', function () {
         expect(stubEmitEvent.callCount).to.equals(1)
         expect(stubEmitEvent.calledWith(textEvent, domain, req.body.id)).to.equals(true)
         expect(stubUpsertCall.callCount).to.equals(1)
-        expect(stubUpsertCall.calledWith(req.body.id, req.body)).to.equals(true)
+        expect(stubUpsertCall.calledWith(domain, req.body)).to.equals(true)
 
         done()
       }
@@ -134,9 +100,17 @@ describe('Phrase upsert, delete and get', function () {
   })
 
   it('Phrase.delete works correctly', function (done) {
+    sandbox.stub(Phrase, 'getItemById', function () {
+      return {
+        getDomain: function () {
+          return domain
+        }
+      }
+    })
+
     Phrase.delete(req, {
       send: function (status) {
-        expect(status).to.be.equal(200)
+        expect(status).to.be.equal(204)
         expect(stubGetAuthorization.callCount).to.equals(1)
         expect(stubGetAuthorization.calledWith(req)).to.equals(true)
         expect(stubGetDriver.callCount).to.equals(1)
@@ -144,7 +118,7 @@ describe('Phrase upsert, delete and get', function () {
         expect(stubGetDomain.callCount).to.equals(1)
         expect(stubGetDomain.calledWith(auth)).to.equals(true)
         expect(stubDeleteCall.callCount).to.equals(1)
-        expect(stubDeleteCall.calledWith(driver, fullId)).to.equals(true)
+        expect(stubDeleteCall.calledWith(fullId)).to.equals(true)
 
         done()
       }
@@ -152,6 +126,16 @@ describe('Phrase upsert, delete and get', function () {
   })
 
   it('Phrase.get works correctly', function (done) {
+    var stubGetCall = sandbox.stub(Phrase, 'getItemById', function () {
+      return {
+        getDomain: function () {
+          return domain
+        },
+        getRawModel: () => {
+        }
+      }
+    })
+
     Phrase.get(req, {
       send: function (status) {
         expect(status).to.be.equal(200)
@@ -160,7 +144,7 @@ describe('Phrase upsert, delete and get', function () {
         expect(stubGetDomain.callCount).to.equals(1)
         expect(stubGetDomain.calledWith(auth)).to.equals(true)
         expect(stubGetCall.callCount).to.equals(1)
-        expect(stubGetCall.calledWith(domain, fullId)).to.equals(true)
+        expect(stubGetCall.calledWith(fullId)).to.equals(true)
 
         done()
       }

@@ -10,6 +10,7 @@ function test (server) {
   describe('When a request to composr has errors', function () {
     var errorPhrase401 = {
       url: 'error/401',
+      version: '4.4.4',
       get: {
         code: 'res.status(401).send("test")',
         doc: {}
@@ -18,6 +19,7 @@ function test (server) {
 
     var errorPhrase500 = {
       url: 'error/500',
+      version: '4.4.4',
       get: {
         code: 'throw( { error: "internal_server_error", errorDescription: "error 500 thrown"})',
         doc: {}
@@ -26,6 +28,7 @@ function test (server) {
 
     var errorWithText = {
       url: 'error/text',
+      version: '4.4.4',
       get: {
         code: 'throw("Error thrown")',
         doc: {}
@@ -34,6 +37,7 @@ function test (server) {
 
     var composrErrorPhrase = {
       url: 'error/composr/506',
+      version: '4.4.4',
       get: {
         code: 'var ComposrError = require("ComposrError"); throw new ComposrError("test", "errorDescription", 506)',
         doc: {}
@@ -48,7 +52,7 @@ function test (server) {
         composrErrorPhrase
       ]
 
-      server.composr.Phrases.register('testDomainComposr', phrases)
+      server.composr.Phrase.register('testDomainComposr', phrases)
         .should.be.eventually.fulfilled.and.notify(done)
     })
 

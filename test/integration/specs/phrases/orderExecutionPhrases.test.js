@@ -12,6 +12,7 @@ function test (server) {
   describe('Path params', function () {
     var phraseWithTwoParams = {
       url: 'user/:name/:surname',
+      version: '2.3.4',
       get: {
         code: 'res.status(200).send({ surname: req.params.surname, name : req.params.name });',
         doc: {}
@@ -20,6 +21,7 @@ function test (server) {
 
     var phraseWithOneParamAndOneConstant = {
       url: 'user/:name/surname',
+      version: '2.3.4',
       get: {
         code: 'res.status(200).send({ surname: "constant", name : req.params.name });',
         doc: {}
@@ -27,6 +29,7 @@ function test (server) {
     }
     var phraseWithOneParam = {
       url: 'user/:name',
+      version: '2.3.4',
       get: {
         code: 'res.status(201).send(req.params);',
         doc: {}
@@ -34,6 +37,7 @@ function test (server) {
     }
     var phraseWithOneConstant = {
       url: 'user/name',
+      version: '2.3.4',
       get: {
         code: 'res.status(200).send({ name: "constant"});',
         doc: {}
@@ -41,7 +45,7 @@ function test (server) {
     }
 
     before(function (done) {
-      server.composr.Phrases.register('testDomainComposr', [phraseWithOneConstant, phraseWithOneParam, phraseWithOneParamAndOneConstant, phraseWithTwoParams])
+      server.composr.Phrase.register('testDomainComposr', [phraseWithOneConstant, phraseWithOneParam, phraseWithOneParamAndOneConstant, phraseWithTwoParams])
         .should.be.eventually.fulfilled.and.notify(done)
     })
 

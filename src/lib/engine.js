@@ -216,8 +216,18 @@ var engine = {
    * @param  {[type]} app [description]
    * @return promise
    */
-  init: function (app) {
+  init: function (app, localMode) {
     var dfd = q.defer()
+
+    // Suscribe to log events
+    engine.suscribeToCoreEvents()
+
+    worker = new WorkerClass(engine)
+
+    if (localMode) {
+      engine.launchWithoutData(app, dfd)
+      return dfd.promise
+    }
 
     hub.on('corbel:ready', function () {
       engine.launchWithData(app, dfd)
@@ -227,11 +237,7 @@ var engine = {
       engine.launchWithoutData(app, dfd)
     })
 
-    // Suscribe to log events
-    engine.suscribeToCoreEvents()
-
     // Launch the worker
-    worker = new WorkerClass(engine)
     worker.init()
 
     if (config('rabbitmq.forceconnect')) {
@@ -299,5 +305,6 @@ var engine = {
 engine.initialized = false
 engine.phrasesCollection = 'composr:Phrase'
 engine.snippetsCollection = 'composr:Snippet'
+engine.virtualDomainsCollection = 'composr:VirtualDomain'
 engine.composr = composr
 module.exports = engine

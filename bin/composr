@@ -20,7 +20,7 @@ var version = require('../package.json').version
 var hub = require('../src/lib/hub')
 
 module.exports = new Promise(function (resolve, reject) {
-  require('../src/app')
+  require('../src/app')(process.env.NODE_ENV === 'test')
     .then(function (serverObjects) {
       var port = config('port')
 

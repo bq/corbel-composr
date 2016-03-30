@@ -12,6 +12,7 @@ function test (server) {
   describe('Path params', function () {
     var phrase = {
       url: 'pathparams/:id/:name',
+      version: '3.3.3',
       get: {
         code: 'res.status(200).send(req.params);',
         doc: {
@@ -21,7 +22,7 @@ function test (server) {
     }
 
     before(function (done) {
-      server.composr.Phrases.register('testDomainComposr', phrase)
+      server.composr.Phrase.register('testDomainComposr', phrase)
         .should.be.fulfilled.notify(done)
     })
 

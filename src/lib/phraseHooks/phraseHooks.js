@@ -1,5 +1,4 @@
 'use strict'
-var engine = require('../engine')
 var logger = require('../../utils/composrLogger')
 var _ = require('lodash')
 
@@ -31,16 +30,14 @@ var hooks = {
   }
 }
 
-module.exports.getHooks = function (phraseItem) {
-  var phrase = _.find(engine.composr.data.phrases, ['id', phraseItem.id])
-
-  if (phrase && phrase[phraseItem.verb] && phrase[phraseItem.verb].middlewares) {
-    var functions = _.map(phrase[phraseItem.verb].middlewares, function (hookId) {
+module.exports.getHooks = function (phraseModel, verb) {
+  if (phraseModel.getMiddlewares(verb).length > 0) {
+    var functions = _.map(phraseModel.getMiddlewares(verb), function (hookId) {
       if (hooks[hookId]) {
-        logger.info('Setting ' + hooks[hookId].description + ' for phrase:', phraseItem.id)
-        return hooks[hookId].hookFunction(phrase[phraseItem.verb].doc)
+        logger.info('Setting ' + hooks[hookId].description + ' for phrase:', phraseModel.getId())
+        return hooks[hookId].hookFunction(phraseModel.getDoc(verb))
       } else {
-        logger.warn('Hook ' + hookId + ' not found for phrase:', phraseItem.id)
+        logger.warn('Hook ' + hookId + ' not found for phrase:', phraseModel.getId())
         return null
       }
     })

@@ -45,6 +45,7 @@ module.exports = function (server) {
     corbelDriver.iam.token().create().then(function (response) {
       res.send(200, response)
     }).catch(function (error) {
+      console.log(error)
       var errorBody = getCorbelErrorBody(error)
       next(new ComposrError('error:token', errorBody, error.status))
     })
