@@ -33,6 +33,10 @@ function test (server) {
           return commonUtils.makeRequest(server, 'put', '/phrase', phrase, 200,
             ['Authorization'], [adminClientToken])
         })
+        .then(function () {
+          // Hijack the register in order not to depend on rabbit for travis
+          return server.composr.Phrase.register(domain, phrase)
+        })
         .should.notify(done)
     })
 

@@ -30,6 +30,10 @@ function test (server) {
           return commonUtils.makeRequest(server, 'put', '/snippet', validSnippet, 200,
             ['Authorization'], [adminClientToken])
         })
+        .then(function () {
+          // Hijack the register in order not to depend on rabbit for travis
+          return server.composr.Snippet.register(domain, validSnippet)
+        })
         .should.notify(done)
     })
 
