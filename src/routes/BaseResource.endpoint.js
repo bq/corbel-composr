@@ -33,6 +33,7 @@ ResourceEndpoint.prototype.upsert = function (req, res) {
     .then(function (itemSaved) {
       that.emitEvent(that.itemName + ':upsert', domain, itemSaved.id)
       res.setHeader('Location', that.itemName + '/' + itemSaved.id)
+      logger.info(that.itemName, 'created', itemSaved.id)
       res.send(200, itemSaved)
     })
     .catch(function (error) {
@@ -60,12 +61,14 @@ ResourceEndpoint.prototype.delete = function (req, res) {
       if (item && item.getDomain() === domain) {
         return that.deleteCall(req.params.itemId)
           .then(function () {
-            logger.debug('item:deleted')
+            logger.info('item:deleted', req.params.id)
             res.send(204, 'deleted')
           })
           .catch(function (error) {
             res.send(error.status, new ComposrError('error:' + that.itemName + ':delete', error.message, error.status))
           })
+      } else if (!item) {
+        throw new Error('Trying to delete a ' + that.itemName + ' that does not exist')
       } else {
         throw new Error('Unauthorized client, trying to delete a ' + that.itemName + ' of another domain')
       }

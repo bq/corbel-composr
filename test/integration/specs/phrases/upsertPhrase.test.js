@@ -62,9 +62,14 @@ function test (server) {
         .expect(200)
         .end(function (err, response) {
           expect(response.headers).to.exist
-          var brokenPhraseLocation = response.headers.location
-          expect(brokenPhraseLocation).to.exist
-          done(err)
+          var goodPhraseLocation = response.headers.location
+          expect(goodPhraseLocation).to.exist
+
+          // Hijack the register in order not to depend on rabbit for travis
+          server.composr.Phrase.register(domain, phrase)
+            .then(function () {
+              done(err)
+            })
         })
     })
 
