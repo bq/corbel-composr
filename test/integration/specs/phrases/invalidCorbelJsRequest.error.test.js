@@ -9,6 +9,7 @@ chai.use(chaiAsPromised)
 
 function test (server) {
   describe('CorbelJS fails', function () {
+    this.timeout(30000)
     var phraseErrRequest = {
       url: 'error/corbeldriver',
       version: '2.3.4',

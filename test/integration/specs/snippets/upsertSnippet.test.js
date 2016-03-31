@@ -57,7 +57,12 @@ function test (server) {
         .expect(200)
         .end(function (err, response) {
           expect(response.statusCode).to.equals(200)
-          done(err)
+
+          // Hijack the register in order not to depend on rabbit for travis
+          server.composr.Phrase.register(domain, validSnippet)
+            .then(function () {
+              done(err)
+            })
         })
     })
 
