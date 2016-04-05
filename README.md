@@ -42,6 +42,8 @@ Composr is responsible for **composing** **phrases** of code than can be reused 
 - Bunyan Access logs
 - Winston Logs (debug, info, warn, error)
 - Endpoint documentation
+- Plugable middlewares
+- Dynamic versioning support
 - RabbitMQ connection for endpoint updates
 - Status and Healthcheck endpoints
 - Keymetrics and Newrelic support
@@ -283,6 +285,31 @@ A simple way to achieve this is defining the phrase version in the url, like thi
 
 A phrase version should change only if the phrase contract is broken
 
+### Phrase Middlewares
+
+We offer a set of plugable add-ons that will automatically add functionality to your phrases. 
+These middlewares or hooks are executed before or after the code on your phrase. 
+You can specify them on the phrase's spec at a method level like this (order is important!):
+
+```
+{
+  "url": "resource",
+  "get": {
+    "middlewares": [
+      "auth"
+      "validate", 
+      "mock"
+    ],
+    "doc": {
+...
+}
+```
+  
+Among the available middlewares you can find:
+* 'corbel-auth-client': Automatic corbel authentication for clients
+* 'corbel-auth-user': Automatic corbel authentication for users. A new attribute 'userId' will be available on the phrase for a succeeding user token.
+* 'validate': Automatic validation of path params, query params and body based on documentations' schema
+* 'mock': Mocked responses based on schema or example from documentation 
 
 ### Reference
 

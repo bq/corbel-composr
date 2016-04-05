@@ -59,6 +59,7 @@
     "object-sizeof": "^1.0.8",
     "pm2": "^1.0.0",
     "pmx": "^0.6.0",
+    "proxyquire": "^1.7.4",
     "q": "^1.2.0",
     "raml-parser": "~0.8.10",
     "raml-validate": "^1.0.6",
