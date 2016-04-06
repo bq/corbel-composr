@@ -222,18 +222,11 @@ Composr autogenerates documentation when navigating to `http://localhost:3000/my
 See an example:
 ![git-changelog logo](doc/example-doc.png)
 
-### Reference
-
-* [composr-core](https://github.com/corbel-platform/composr-core)
-* [corbel-js](https://github.com/corbel-platform/corbel-js) API
-* [RAML](http://raml.org/) for phrase definition
-
-
-# Logs
+## Logs
 
 **Composr** is shipped with built-in **bunyan** and **winston** support.
 
-## Winston logs:
+### Winston logs:
 
 You can set `logFile` and `logLevel` in your config file.
 
@@ -243,7 +236,7 @@ Available log levels can be found at [winston's npm page](https://www.npmjs.com/
 - warn
 - error
 
-## Bunyan Logs:
+### Bunyan Logs:
 
 Bunyan logs are enabled by default. You can disable them by turning `bunyan.log` to `false` in your configuration.
 
@@ -304,25 +297,10 @@ npm install -g node-inspector
   ```
 
 
-## Postman Playground
-
-1. Get [postman](https://www.getpostman.com/)
-2. Import corbel-composr collection:
-
-  ```
-  https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/doc/postman/postman.json
-  ```
-3. Import evironment example:
-
-  ```
-  https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/doc/postman/environment.example.json
-  ```
-4. Import globals:
-
-  ```
-  https://raw.githubusercontent.com/corbel-platform/corbel-composr/master/doc/postman/globals.example.json
-  ```
-5. Enjoy!
-
-
 [corbel-link]: https://github.com/bq/corbel
+
+## Reference
+
+* [composr-core](https://github.com/corbel-platform/composr-core)
+* [corbel-js](https://github.com/corbel-platform/corbel-js) API
+* [RAML](http://raml.org/) for phrase definition
