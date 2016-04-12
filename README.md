@@ -1,4 +1,4 @@
-![composr logo =250x](doc/logo.png)
+<p align="center"><img align="center" src="doc/logo.png" width="200"></p>
 
 #Composr
 
