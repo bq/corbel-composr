@@ -1,4 +1,6 @@
-![composr logo](doc/logo.png)
+![composr logo =250x](doc/logo.png)
+
+#Composr
 
 [![Build Status](https://api.travis-ci.org/corbel-platform/corbel-composr.png?branch=master)](http://travis-ci.org/corbel-platform/corbel-composr)
 [![npm version](https://badge.fury.io/js/corbel-composr.svg)](http://badge.fury.io/js/corbel-composr)
