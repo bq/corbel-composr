@@ -61,6 +61,7 @@
     "pmx": "^0.6.0",
     "q": "^1.2.0",
     "raml-parser": "~0.8.10",
+    "raml-sanitize": "^1.1.2",
     "raml-validate": "^1.0.6",
     "raml2html": "~2.2.0",
     "response-time": "^2.3.0",
