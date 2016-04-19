@@ -1,5 +1,4 @@
 'use strict'
-/* globals describe it */
 
 var request = require('supertest')
 
