@@ -2,10 +2,10 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <title>corbel-composr by bq</title>
+    <title>corbel-composr by corbel-platform</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
@@ -13,290 +13,287 @@
     <section class="page-header">
       <h1 class="project-name">corbel-composr</h1>
       <h2 class="project-tagline">A corbel middleware based in nodeJS</h2>
-      <a href="https://github.com/bq/corbel-composer" class="btn">View on GitHub</a>
-      <a href="https://github.com/bq/corbel-composer/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/bq/corbel-composer/tarball/master" class="btn">Download .tar.gz</a>
+      <a href="https://github.com/corbel-platform/corbel-composr" class="btn">View on GitHub</a>
+      <a href="https://github.com/corbel-platform/corbel-composr/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/corbel-platform/corbel-composr/tarball/master" class="btn">Download .tar.gz</a>
     </section>
 
     <section class="main-content">
-      <h1>
-<a id="corbel-composer" class="anchor" href="#corbel-composer" aria-hidden="true"><span class="octicon octicon-link"></span></a>corbel composer</h1>
+      <p align="center"><img align="center" src="doc/logo.png" width="200"></p>
 
-<p><a href="http://travis-ci.org/bq/corbel-composer"><img src="https://api.travis-ci.org/bq/corbel-composer.png?branch=master" alt="Build Status"></a>
-<a href="http://badge.fury.io/js/corbel-composer"><img src="https://badge.fury.io/js/corbel-composer.svg" alt="npm version"></a>
-<a href="https://david-dm.org/bq/corbel-composer#info=dependencies&amp;view=table"><img src="https://david-dm.org/bq/corbel-composer/status.png" alt="Dependency status"></a>
-<a href="https://david-dm.org/bq/corbel-composer#info=devDependencies&amp;view=table"><img src="https://david-dm.org/bq/corbel-composer/dev-status.png" alt="Dev Dependency Status"></a>
-<a href="https://coveralls.io/r/bq/corbel-composer?branch=master"><img src="https://coveralls.io/repos/bq/corbel-composer/badge.svg?branch=master" alt="Coverage Status"></a></p>
+<h1>
+<a id="composr" class="anchor" href="#composr" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Composr</h1>
 
-<p>A corbel-composer is a middleware based in <a href="https://nodejs.org/api/">nodeJS</a> with <a href="http://expressjs.com/4x/api.html">express</a>, to offer developers to make his own specific application API bsed in <a href="https://github.com/bq/corbel-js">corbel-js</a></p>
+<p><a href="http://travis-ci.org/corbel-platform/corbel-composr"><img src="https://api.travis-ci.org/corbel-platform/corbel-composr.png?branch=master" alt="Build Status"></a>
+<a href="http://badge.fury.io/js/corbel-composr"><img src="https://badge.fury.io/js/corbel-composr.svg" alt="npm version"></a>
+<a href="https://david-dm.org/corbel-platform/corbel-composr#info=dependencies&amp;view=table"><img src="https://david-dm.org/corbel-platform/corbel-composr/status.png" alt="Dependency status"></a>
+<a href="https://david-dm.org/corbel-platform/corbel-composr#info=devDependencies&amp;view=table"><img src="https://david-dm.org/corbel-platform/corbel-composr/dev-status.png" alt="Dev Dependency Status"></a>
+<a href="https://coveralls.io/r/corbel-platform/corbel-composr?branch=master"><img src="https://coveralls.io/repos/corbel-platform/corbel-composr/badge.svg?branch=master" alt="Coverage Status"></a>
+<a href="http://standardjs.com/"><img src="https://img.shields.io/badge/code%20style-standard-brightgreen.svg" alt="js-standard-style"></a>
+<a href="https://codeclimate.com/github/corbel-platform/corbel-composr"><img src="https://codeclimate.com/github/corbel-platform/corbel-composr/badges/gpa.svg" alt="Code Climate"></a>
+<a href="https://codeclimate.com/github/corbel-platform/corbel-composr/coverage"><img src="https://codeclimate.com/github/corbel-platform/corbel-composr/badges/coverage.svg" alt="Test Coverage"></a></p>
+
+<p><a href="https://github.com/feross/standard"><img src="https://cdn.rawgit.com/feross/standard/master/badge.svg" alt="js-standard-style"></a></p>
 
 <h2>
-<a id="homepage" class="anchor" href="#homepage" aria-hidden="true"><span class="octicon octicon-link"></span></a><a href="http://opensource.bq.com/corbel-js/">Homepage</a>
+<a id="homepage" class="anchor" href="#homepage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><a href="http://opensource.bq.com/composr/">Homepage</a>
 </h2>
 
 <h2>
-<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overview</h2>
+<a id="overview" class="anchor" href="#overview" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Overview</h2>
 
-<p>[text]</p>
+<p>Composr is a <a href="https://nodejs.org/api/">nodeJS</a> framework for enabling dinamically created endpoints, it's original purpose is to serve as a middleware for the <a href="https://github.com/bq/corbel">Corbel - microservices generic backend - </a>, but it's capabilities are growing.</p>
 
-<h3>
-<a id="diagram" class="anchor" href="#diagram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Diagram</h3>
-
-<p>[image]</p>
+<p>It uses the <a href="https://github.com/bq/composr-core">composr-core</a> API for executing random pieces of code that the developers pushes to the Composr API.
+This random pieces of code, called <strong>Phrases</strong> or <strong>Snippets</strong> are model definitions for endpoints and reusable utilities. </p>
 
 <h2>
-<a id="quickstart" class="anchor" href="#quickstart" aria-hidden="true"><span class="octicon octicon-link"></span></a>QuickStart</h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>Built in PM2 configuration for cluster mode</li>
+<li>Bunyan Access logs</li>
+<li>Winston Logs (debug, info, warn, error)</li>
+<li>Autogenerated API documentation</li>
+<li>RabbitMQ communication for endpoints updates</li>
+<li>Status and Healthcheck endpoints</li>
+<li>Keymetrics and Newrelic integration</li>
+<li>Docker Ready!</li>
+<li>Dinamically enable or disable endpoints for your API</li>
+<li>Configurable middlewares for each endpoint
+
+<ul>
+<li>Mock: It mocks the response of the endpoint with an autogenerated object</li>
+<li>Validate: It validates the input object schema for POST/PUT requests</li>
+<li>Auth Middlewares: Ensures that the endpoint receives a Corbel Auth Token</li>
+<li>...</li>
+</ul>
+</li>
+<li>
+<a href="https://github.com/bq/corbel">Corbel</a> ready, thanks to <a href="https://github.com/bq/corbel-js">Corbel-js</a>
+</li>
+</ul>
+
+<h2>
+<a id="quickstart" class="anchor" href="#quickstart" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>QuickStart</h2>
 
 <ul>
 <li>
 <p>install</p>
 
-<pre><code>npm install -g bq/corbel-composer
+<pre><code>npm install -g corbel-platform/corbel-composr
 </code></pre>
 </li>
 <li>
 <p>run server</p>
 
-<pre><code>corbel-composer
+<pre><code>corbel-composr
 </code></pre>
 </li>
 </ul>
 
 <h2>
-<a id="postman-playground" class="anchor" href="#postman-playground" aria-hidden="true"><span class="octicon octicon-link"></span></a>Postman Playground</h2>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h2>
 
-<ol>
-<li>Get <a href="https://www.getpostman.com/">postman</a>
-</li>
-<li>
-<p>Import corbel-composer collection:</p>
+<p>You can send the following environment variables (or define a environment config file under <code>src/config/[ENV].json</code>).</p>
 
-<pre><code>https://raw.githubusercontent.com/bq/corbel-composer/master/doc/postman.json
-</code></pre>
-</li>
-<li>Enjoy!</li>
-</ol>
-
-<h2>
-<a id="phrase-model" class="anchor" href="#phrase-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Phrase Model</h2>
+<h3>
+<a id="default-config-file" class="anchor" href="#default-config-file" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Default config file</h3>
 
 <pre><code>{
-  "url": "phraseName",
-  "get": {
-    "code": "res.render('index', {title: 'hello world'});",
-    "description": "Phrase description",
-    "query": {
-      "param1": {
-        "type": "Number",
-        "description": "Param description",
-        "default": 0
-      }
+    "serverName" : "CompoSR",
+    "bodylimit" : "50mb",
+    "port": 3000,
+
+    "rabbitmq.host": "RABBIT_HOST",
+    "rabbitmq.port": "RABBIT_PORT",
+    "rabbitmq.username": "RABBIT_USERNAME",
+    "rabbitmq.password": "RABBIT_PASSWORD",
+    "rabbitmq.reconntimeout": 10000,
+    "rabbitmq.event": "class io.corbel.event.ResourceEvent",
+    "rabbitmq.forceconnect": false,
+    "rabbitmq.heartbeat" : 30,
+
+    "bootstrap.retrytimeout": 10000,
+
+    "phrases.timeout": 40000,
+
+    "services.timeout": 5000,
+    "services.retries": 30,
+    "services.time": 1000,
+
+    "corbel.composr.credentials": {
+        "clientId": "CLIENT_ID",
+        "clientSecret": "CLIENT_SECRET",
+        "scopes": "composr:comp:base"
     },
-    "responses": {
-      "200": {
-        "body": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "description": "A canonical song",
-              "properties": {
-                "title": {
-                  "type": "String"
-                },
-                "artist": {
-                  "type": "String"
-                }
-              },
-              "required": [
-                "title",
-                "artist"
-              ]
-            }
-          }
-        }
-      }
-    }
-  }
+
+    "corbel.driver.options": {
+        "urlBase": "https://{{module}}corbel-domain.io/"
+    },
+
+    "bunyan.log" : true,
+    "bunyan.syslog" : true,
+    "bunyan.stdout": false,
+    "bunyan.streamServer": false,
+
+    "composrLog.accessLog" : true,
+    "composrLog.accessLogFile" : "logs/access.log",
+    "composrLog.logLevel": "error",
+    "composrLog.logFile": "logs/composr.log",
+    "composrLog.syslog" : false,
+
+    "newrelic" : false,
+    "newrelic.name": "",
+    "newrelic.key": "",
+
+    "keymetrics": true
 }
+
+</code></pre>
+
+<p>Almost all of the vales in the configuration file can be overwriten by environment variables, this can be useful if you use <strong>Docker</strong>, <strong>Travis</strong> or any other tool that could send environment variables to configure your server. </p>
+
+<h3>
+<a id="environment-variables" class="anchor" href="#environment-variables" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Environment variables</h3>
+
+<pre><code>SERVER_NAME (Composr 2.0)
+PORT (3000)
+CREDENTIALS_CLIENT_ID
+CREDENTIALS_CLIENT_SECRET
+CREDENTIALS_SCOPES
+URL_BASE
+ACCESS_LOG =&gt; winston access log
+ACCESS_LOG_FILE =&gt; winston access log file
+LOG_LEVEL =&gt; winston log level
+LOG_FILE =&gt; winston log file
+BUNYAN_LOG(true) =&gt; Bunyan logs
+BUNYAN_SYSLOG(true) =&gt; Send bunyan stream to syslog (127.0.0.1:514)
+BUNYAN_STDOUT(false) =&gt; Bunyan output in terminal
+BUNYAN_STREAM_SERVER (null) =&gt; Composr Stream Server endpoint
+RABBITMQ_HOST
+RABBITMQ_PORT
+RABBITMQ_USERNAME
+RABBITMQ_PASSWORD
+RABBITMQ_FORCE_CONNECT =&gt; Only launch composr if rabbit is connected
+RABBITMQ_HEARTBEAT =&gt; Heartbeat for the rabbitmq connection
+SERVICES_TIMEOUT
+SERVIES_RETRIES
+SERVICES_TIME 
+KEYMETRICS (true) =&gt; Keymetrics active
+NRACTIVE =&gt; New relic active
+NRAPPNAME =&gt; New relic app name
+NRAPIKEY =&gt; New relic api key
 </code></pre>
 
 <h2>
-<a id="example-phrases" class="anchor" href="#example-phrases" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example Phrases</h2>
+<a id="creating-your-endpoints" class="anchor" href="#creating-your-endpoints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating your endpoints:</h2>
+
+<p><a href="https://github.com/corbel-platform/composr-core/wiki/Phrases">What are Phrases or Snippets?</a></p>
+
+<p>You can generate and publish your phrases and snippets by using <a href="https://github.com/corbel-platform/composr-cli">composr-cli</a>. <em>Currently under development</em></p>
 
 <h3>
-<a id="count-value-in-collections-query" class="anchor" href="#count-value-in-collections-query" aria-hidden="true"><span class="octicon octicon-link"></span></a>
-<code>count</code> value in collections query</h3>
+<a id="routing-endpoints" class="anchor" href="#routing-endpoints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Routing endpoints</h3>
 
-<div class="highlight highlight-json"><pre>{
-    <span class="pl-s"><span class="pl-pds">"</span>url<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>countExample<span class="pl-pds">"</span></span>,
-    <span class="pl-s"><span class="pl-pds">"</span>get<span class="pl-pds">"</span></span>: {
-        <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>CORBEL-JS_SNIPPET<span class="pl-pds">"</span></span>
-    }
-}</pre></div>
+<p>Corbel-Composr has a similar routing mechanism than restify. You can define urls by following this conventions:</p>
 
-<p>where <code>code</code> should be a string with this <a href="https://github.com/bq/corbel-js">corbel-js</a> snippet:</p>
+<ul>
+<li>
+<code>:param</code> : Url parameter</li>
+<li>
+<code>user</code> : Fixed path value</li>
+</ul>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-k">var</span> count;
-corbelDriver.resources.collection(<span class="pl-s"><span class="pl-pds">'</span>test:ComposrTest<span class="pl-pds">'</span></span>).get(<span class="pl-c1">undefined</span>, {
-    aggregation<span class="pl-k">:</span> {
-        $count<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>*<span class="pl-pds">'</span></span>
-    }
-}).then(<span class="pl-k">function</span>(<span class="pl-smi">response</span>) {
-    count <span class="pl-k">=</span> response.<span class="pl-c1">data</span>.count;
-    <span class="pl-k">return</span> corbelDriver.resources.collection(<span class="pl-s"><span class="pl-pds">'</span>test:ComposrTest<span class="pl-pds">'</span></span>).get();
-}).then(<span class="pl-k">function</span>(<span class="pl-smi">response</span>) {
-    res.<span class="pl-c1">send</span>({
-        data<span class="pl-k">:</span> response.<span class="pl-c1">data</span>,
-        <span class="pl-s"><span class="pl-pds">'</span>count<span class="pl-pds">'</span></span><span class="pl-k">:</span> count
-    });
-}).catch(<span class="pl-k">function</span>(<span class="pl-smi">error</span>) {
-    res.<span class="pl-c1">send</span>(error);
-});</pre></div>
+<p>Some examples</p>
 
-<h3>
-<a id="path--query-parameters" class="anchor" href="#path--query-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Path &amp; query parameters</h3>
+<ul>
+<li><code>user/:userId</code></li>
+<li><code>user/status/:parameter</code></li>
+<li><code>thing/one</code></li>
+</ul>
 
-<div class="highlight highlight-json"><pre>{
+<div class="highlight highlight-source-json"><pre>{
     <span class="pl-s"><span class="pl-pds">"</span>url<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>paramsExample/:pathparam<span class="pl-pds">"</span></span>,
     <span class="pl-s"><span class="pl-pds">"</span>get<span class="pl-pds">"</span></span>: {
         <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span>: <span class="pl-s"><span class="pl-pds">"</span>res.status(200).send('path param: ' + req.params.pathparam + ',  query param: ' + req.query.queryparam);<span class="pl-pds">"</span></span>
+    },
+    <span class="pl-s"><span class="pl-pds">"</span>post<span class="pl-pds">"</span></span>: {
+       <span class="pl-ii">/*...*/</span>
+    },
+    <span class="pl-s"><span class="pl-pds">"</span>put<span class="pl-pds">"</span></span>: {
+       <span class="pl-ii">/*...*/</span>
     }
 }</pre></div>
 
-<h2>
-<a id="reference" class="anchor" href="#reference" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reference</h2>
-
-<ul>
-<li>
-<a href="https://github.com/bq/corbel-js">corbel-js</a> API</li>
-<li><a href="http://expressjs.com/4x/api.html#req">Request object</a></li>
-<li><a href="http://expressjs.com/4x/api.html#res">Response object</a></li>
-<li>
-<a href="http://raml.org/">RAML</a> for phrase definition</li>
-</ul>
-
-<h2>
-<a id="api-design-best-practices" class="anchor" href="#api-design-best-practices" aria-hidden="true"><span class="octicon octicon-link"></span></a>API design best practices</h2>
-
 <h3>
-<a id="naming" class="anchor" href="#naming" aria-hidden="true"><span class="octicon octicon-link"></span></a>Naming</h3>
+<a id="versioning-your-endpoints" class="anchor" href="#versioning-your-endpoints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Versioning your endpoints</h3>
 
-<ul>
-<li>Use nouns not verbs</li>
-<li>Use plural nouns</li>
-</ul>
+<p>Composr can take care of multiple endpoints and multiple versions for each endpoint. It uses the semantic versioning for executing different code for each endpoint. </p>
 
-<table>
-<thead>
-<tr>
-<th>Resource</th>
-<th>GET (read)</th>
-<th>POST (create)</th>
-<th>PUT (update)</th>
-<th>DELETE</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>/cars</td>
-<td>Returns a list of cars</td>
-<td>Create a new ticket</td>
-<td>Bulk update of cars</td>
-<td>Delete all cars</td>
-</tr>
-<tr>
-<td>/cars/711</td>
-<td>Returns a specific car</td>
-<td>Method not allowed (405)</td>
-<td>Updates a specific ticket</td>
-<td>Deletes a specific ticket</td>
-</tr>
-<tr>
-<td>/purchase</td>
-<td>Get al purchases</td>
-<td>Create a new purchase</td>
-<td>Bulk update of purschases</td>
-<td>Delete all purchases</td>
-</tr>
-<tr>
-<td>/purchase/85</td>
-<td>Returns a purchase</td>
-<td>Method not allowed (405)</td>
-<td>Updates a specific purchase</td>
-<td>Delete all purchases</td>
-</tr>
-</tbody>
-</table>
-
-<p>Resource  GET
-read  POST
-create  PUT
-update  DELETE
-/cars Returns a list of cars  Create a new ticket Bulk update of cars Delete all cars
-/cars/711 Returns a specific car  Method not allowed (405)   Deletes a specific ticket</p>
-
-<h3>
-<a id="versioning-your-phrases" class="anchor" href="#versioning-your-phrases" aria-hidden="true"><span class="octicon octicon-link"></span></a>Versioning your phrases</h3>
-
-<p>A simple way to achieve this is definning the phrase version in the url, like this</p>
+<p>For example, if you published the following phrases to Composr:</p>
 
 <pre><code>{
-    "url": "v1/paramsExample/:pathparam",
+    "url": "user/:userId",
+    "version": "3.1.0",
+    "get": { ... }
+}
+
+{
+    "url": "user/:userId",
+    "version": "4.0.0",
     "get": { ... }
 }
 </code></pre>
 
-<p>A phrase version should change only if the phrase contract is broken</p>
+<p>Then you could request executing the <code>3.x</code> version by sending the <code>Accept-Version</code> header with a <code>~3</code> value, as seen in <a href="http://restify.com/">restify</a>.</p>
 
 <h3>
-<a id="reference-1" class="anchor" href="#reference-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reference</h3>
+<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Documentation</h3>
 
-<ul>
-<li><a href="http://apigee.com/about/resources/ebooks/web-api-design">APIgee</a></li>
-<li><a href="https://leanpub.com/introduccion_apis_rest">Principios de diseño de APIs REST</a></li>
-<li><a href="http://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#versioning">Best Practices for Designing a Pragmatic RESTful API</a></li>
-<li><a href="http://www.restapitutorial.com/resources.html">REST API Resoruces</a></li>
-</ul>
+<p>Composr autogenerates documentation when navigating to <code>http://localhost:3000/my:domain/doc</code>. The documentation is generated by fulfilling the example documents that <code>composr-cli</code> creates when generating a phrase model.</p>
+
+<p>See an example:
+<img src="doc/example-doc.png" alt="documentation example"></p>
 
 <h2>
-<a id="run-in-a-docker-container" class="anchor" href="#run-in-a-docker-container" aria-hidden="true"><span class="octicon octicon-link"></span></a>Run in a docker container</h2>
+<a id="logs" class="anchor" href="#logs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Logs</h2>
+
+<p><strong>Composr</strong> is shipped with built-in <strong>bunyan</strong> and <strong>winston</strong> support.</p>
+
+<h3>
+<a id="winston-logs" class="anchor" href="#winston-logs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Winston logs:</h3>
+
+<p>You can set <code>logFile</code> and <code>logLevel</code> in your config file.</p>
+
+<p>Available log levels can be found at <a href="https://www.npmjs.com/package/winston#logging-levels">winston's npm page</a>:</p>
 
 <ul>
-<li>clone repo</li>
-<li>
-<p>build image</p>
-
-<pre><code>docker build -t &lt;username&gt;/corbel-composer .
-</code></pre>
-</li>
-<li>
-<p>run container</p>
-
-<pre><code>docker run -d -p 3000:3000 --name="corbel-composer"  &lt;username&gt;/corbel-composer
-</code></pre>
-</li>
-<li>
-<p>start/stop container</p>
-
-<pre><code>docker start/stop corbel-composer
-</code></pre>
-</li>
+<li>debug</li>
+<li>info</li>
+<li>warn</li>
+<li>error</li>
 </ul>
 
+<h3>
+<a id="bunyan-logs" class="anchor" href="#bunyan-logs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bunyan Logs:</h3>
+
+<p>Bunyan logs are enabled by default. You can disable them by turning <code>bunyan.log</code> to <code>false</code> in your configuration.</p>
+
 <h2>
-<a id="tests" class="anchor" href="#tests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tests</h2>
+<a id="tests" class="anchor" href="#tests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tests</h2>
 
 <pre><code>npm test
 </code></pre>
 
-<h2>
-<a id="coverage" class="anchor" href="#coverage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Coverage</h2>
+<h3>
+<a id="coverage" class="anchor" href="#coverage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Coverage</h3>
 
-<pre><code>grunt test:coverage
+<pre><code>npm run coverage
 </code></pre>
 
-<h2>
-<a id="debug" class="anchor" href="#debug" aria-hidden="true"><span class="octicon octicon-link"></span></a>Debug</h2>
+<h3>
+<a id="debug" class="anchor" href="#debug" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Debug</h3>
 
 <p>Requires <a href="https://github.com/node-inspector/node-inspector">node-inspector</a></p>
 
@@ -307,7 +304,7 @@ update  DELETE
 <li>
 <p>Server</p>
 
-<pre><code>npm run debug
+<pre><code>npm run debug --myphrase.get
 </code></pre>
 </li>
 <li>
@@ -318,8 +315,44 @@ update  DELETE
 </li>
 </ul>
 
+<h2>
+<a id="run-in-a-docker-container" class="anchor" href="#run-in-a-docker-container" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Run in a docker container</h2>
+
+<ul>
+<li>clone repo</li>
+<li>
+<p>build image</p>
+
+<pre><code>docker build -t &lt;username&gt;/corbel-composr .
+</code></pre>
+</li>
+<li>
+<p>run container</p>
+
+<pre><code>docker run -d -p 3000:3000 --name="corbel-composr"  &lt;username&gt;/corbel-composr
+</code></pre>
+</li>
+<li>
+<p>start/stop container</p>
+
+<pre><code>docker start/stop corbel-composr
+</code></pre>
+</li>
+</ul>
+
+<h2>
+<a id="reference" class="anchor" href="#reference" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reference</h2>
+
+<ul>
+<li><a href="https://github.com/corbel-platform/composr-core">composr-core</a></li>
+<li>
+<a href="https://github.com/corbel-platform/corbel-js">corbel-js</a> API</li>
+<li>
+<a href="http://raml.org/">RAML</a> for phrase definition</li>
+</ul>
+
       <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/bq/corbel-composer">corbel-composr</a> is maintained by <a href="https://github.com/bq">bq</a>.</span>
+        <span class="site-footer-owner"><a href="https://github.com/corbel-platform/corbel-composr">corbel-composr</a> is maintained by <a href="https://github.com/corbel-platform">corbel-platform</a>.</span>
 
         <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
@@ -329,4 +362,3 @@ update  DELETE
   
   </body>
 </html>
-
