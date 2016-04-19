@@ -14,7 +14,7 @@
 <p align="center"><img  src="https://cdn.rawgit.com/feross/standard/master/badge.svg" width="150"></p>
 
 
-## [Homepage](http://opensource.bq.com/composr/)
+## [Homepage](http://corbel-platform.github.io/corbel-composr)
 
 ## Overview
 
