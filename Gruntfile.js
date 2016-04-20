@@ -191,11 +191,16 @@ module.exports = function (grunt) {
   grunt.registerTask('test', [
     'standard:format',
     'madge',
+    'mochaTest:unit',
     'mochaTest:ci',
     'todo'
   ])
 
   grunt.registerTask('unit', [
     'mochaTest:unit'
+  ])
+
+  grunt.registerTask('integration', [
+    'mochaTest:ci'
   ])
 }
