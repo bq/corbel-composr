@@ -1,6 +1,5 @@
 'use strict'
 
-
 var logger = require('../../../src/utils/logger.js')
 var config = require('../../../src/lib/config')
 var chai = require('chai')
