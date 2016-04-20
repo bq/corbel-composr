@@ -130,7 +130,7 @@ describe('Validate hook', function () {
         .then(function () {
           expect(next.calledOnce).to.be.true
           var error = next.args[0][0]
-          console.log('DEBUG', error)
+          //console.log('DEBUG', error)
           expect(error).to.exist
           expect(error.error).to.equal('error:schema:validation')
           expect(error.status).to.equals(500)
