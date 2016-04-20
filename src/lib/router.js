@@ -50,7 +50,8 @@ function executePhraseById (req, res, next, routeItem) {
     next: next,
     browser: true,
     timeout: config('phrases.timeout'),
-    server: 'restify'
+    server: 'restify',
+    userId: req.userId
   })
 
   hub.emit('phrase:execution:start', routeItem.domain, routeItem.id, routeItem.verb)
