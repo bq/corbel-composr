@@ -10,18 +10,21 @@ module.exports.authUser = function (methodDoc) {
     var authHeader = req.header('Authorization')
 
     if (!authHeader || !authHeader.replace('Bearer ', '')) {
-      throw new ComposrError('error:authorization:undefined', '', 401)
+      return next(new ComposrError('error:authorization:undefined', '', 401))
     }
 
-    var userId
     try {
       var jwtDecoded = corbel.jwt.decode(authHeader.replace('Bearer ', ''))
-      userId = jwtDecoded.userId
+      var userId = jwtDecoded.userId
+      if (userId) {
+        req.userId = userId
+        return next()
+      } else {
+        return next(new ComposrError('unauthorized_token', 'Only users can perform this action', 401))
+      }
     } catch (e) {
-      next(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400))
+      return next(new ComposrError('error:jwt:malformed', 'Your JWT is malformed', 400))
     }
-
-    userId ? next() : next(new ComposrError('unauthorized_token', 'Only users can perform this action', 401))
   }
 }
 
@@ -30,7 +33,7 @@ module.exports.authClient = function (methodDoc) {
     var authHeader = req.header('Authorization')
 
     if (!authHeader || !authHeader.replace('Bearer ', '')) {
-      throw new ComposrError('error:authorization:undefined', '', 401)
+      return next(new ComposrError('error:authorization:undefined', '', 401))
     }
 
     try {
