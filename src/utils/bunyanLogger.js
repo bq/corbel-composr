@@ -4,7 +4,6 @@
   Bunyan Logger
 **************************************/
 var bunyan = require('bunyan')
-var bsyslog = require('bunyan-syslog')
 var restify = require('restify')
 var config = require('../lib/config')
 var logStreamer = config('bunyan.streamServer')
@@ -36,7 +35,10 @@ if (config('bunyan.log') === true) {
     })
   }
 
-  if (config('bunyan.syslog') === true) {
+  if (config('bunyan.syslog') === true && false) {
+    //TODO: remove
+    var bsyslog = require('bunyan-syslog')
+    
     streams.push({
       level: 'debug',
       type: 'raw',
