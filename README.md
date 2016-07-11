@@ -74,10 +74,10 @@ If NODE_ENV is not set in the environment, a default value of `development` is u
     "port": 3000,
     
     "rabbitmq": {
-        "host": "RABBIT_HOST",
-        "port": "RABBIT_PORT",
-        "username": "RABBIT_USERNAME",
-        "password": "RABBIT_PASSWORD",
+        "host": "",
+        "port": "",
+        "username": "",
+        "password": "",
         "reconntimeout": 10000,
         "event": "class com.bq.corbel.event.ResourceEvent",
         "forceconnect": false,
@@ -133,6 +133,7 @@ If NODE_ENV is not set in the environment, a default value of `development` is u
         "timeout": 40000
     }
 }
+
 ```
 
 Almost all of the vales in the configuration file can be overwriten by environment variables, this can be useful if you use **Docker**, **Travis** or any other tool that could send environment variables to configure your server. 
