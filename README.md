@@ -61,9 +61,11 @@ This random pieces of code, called **Phrases** or **Snippets** are model definit
 
 ## Configuration
 
-You can send the following environment variables (or define a environment config file under `config/[ENV].json`). Composr uses the NPM [config](https://www.npmjs.com/package/config) module.
+One way of starting composr is using it as a command, `corbel-composr`.
 
-If NODE_ENV is not set in the environment, a default value of `development` is used.
+This will search for the default configuration under a `config` folder in the current directory. Composr uses the NPM [config](https://www.npmjs.com/package/config) module for the configuration. So it will basically search for a `development.json` file under the `config` folder.
+
+_If NODE_ENV is not set in the environment, a default value of `development` is used._
 
 ### Default config file
 
@@ -169,13 +171,20 @@ NRACTIVE => New relic active
 NRAPPNAME => New relic app name
 NRAPIKEY => New relic api key
 TIMEOUT=> Endpoint timeout
+LOCAL_MODE=>If set to "true" it skips loading the endpoints from a remote server and uses the local files
 ```
 
 ## Creating your endpoints:
 
 [What are Phrases or Snippets?](https://github.com/corbel-platform/composr-core/wiki/Phrases)
 
-You can generate and publish your phrases and snippets by using [composr-cli](https://github.com/corbel-platform/composr-cli). *Currently under development*
+You can generate and publish your phrases and snippets by using the [composr-cli](https://github.com/corbel-platform/composr-cli). *Currently under development*
+
+### Bootstraping a project:
+
+`composr init` will generate a basic structure for your Phrases project. 
+
+Once you bootstrapped some `phrases`, just run `corbel-composr` in the current folder and the server will be ready at the port `3000`.
 
 
 ### Routing endpoints
