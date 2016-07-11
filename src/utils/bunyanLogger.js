@@ -5,13 +5,13 @@
 **************************************/
 var bunyan = require('bunyan')
 var restify = require('restify')
-var config = require('../lib/config')
-var logStreamer = config('bunyan.streamServer')
+var config = require('config')
+var logStreamer = config.get('bunyan.streamServer')
 var folderMaker = require('./folderMaker')
 
 var logger = null
 
-if (config('bunyan.log') === true) {
+if (config.get('bunyan.log') === true) {
   folderMaker.makePath('./logs')
 
   var streams = [{
@@ -28,17 +28,17 @@ if (config('bunyan.log') === true) {
     path: './logs/api.log'
   }]
 
-  if (config('bunyan.stdout') === true) {
+  if (config.get('bunyan.stdout') === true) {
     streams.push({
       level: 'debug', // Loggin depth
       stream: process.stdout // log INFO and above to stdout
     })
   }
 
-  if (config('bunyan.syslog') === true && false) {
-    //TODO: remove
+  if (config.get('bunyan.syslog') === true && false) {
+    // TODO: remove
     var bsyslog = require('bunyan-syslog')
-    
+
     streams.push({
       level: 'debug',
       type: 'raw',
@@ -75,17 +75,17 @@ if (config('bunyan.log') === true) {
       }
       _server.log.streams[0] = bunyanStreamConfig
       ss(socket).emit('log-stream', socketLoggerStream, {
-        server: config('serverID')
+        server: config.get('serverID')
       })
     })*/
 
     /* ss(socket).emit('log-stream', socketLoggerStream, {
-      server: config('serverID')
+      server: config.get('serverID')
     })*/
   }
 
   logger = bunyan.createLogger({
-    name: config('serverName'), // Logs server name
+    name: config.get('serverName'), // Logs server name
     streams: streams,
     serializers: restify.bunyan.serializers
   })

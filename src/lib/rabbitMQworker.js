@@ -2,27 +2,31 @@
 
 var corbelConnection = require('./corbelConnection')
 var amqp = require('amqplib')
-var uuid = require('uuid')
-var ComposrError = require('./ComposrError')
-var config = require('./config')
+var config = require('config')
 var logger = require('../utils/composrLogger')
 var hub = require('./hub')
 var utils = require('../utils/phraseUtils')
 
-function Worker (engine) {
+function Worker (engine, serverID) {
   if (!this.isValidEngine(engine)) {
-    throw new ComposrError('error:worker:engine', 'invalid engine', 422)
+    throw new Error('error:worker:engine invalid engine')
   }
+
   this.engine = engine
-  this.connUrl = 'amqp://' + encodeURIComponent(config('rabbitmq.username')) + ':' +
-    encodeURIComponent(config('rabbitmq.password')) + '@' +
-    config('rabbitmq.host') + ':' + config('rabbitmq.port') + '?heartbeat=' +
-    config('rabbitmq.heartbeat')
+  this.connUrl = 'amqp://' + encodeURIComponent(config.get('rabbitmq.username')) + ':' +
+    encodeURIComponent(config.get('rabbitmq.password')) + '@' +
+    config.get('rabbitmq.host') + ':' + config.get('rabbitmq.port') + '?heartbeat=' +
+    config.get('rabbitmq.heartbeat')
 
-  logger.info('RabbitMQ heartbeat at', config('rabbitmq.heartbeat'))
+  logger.info('RabbitMQ heartbeat at', config.get('rabbitmq.heartbeat'))
 
-  this.workerID = uuid.v4()
+  this.workerID = serverID
   this.connectionStatus = false
+}
+
+Worker.prototype.canConnect = function () {
+  return config.get('rabbitmq.host') && config.get('rabbitmq.port') &&
+  config.get('rabbitmq.username') && config.get('rabbitmq.password')
 }
 
 Worker.prototype.isValidEngine = function (engine) {
@@ -30,6 +34,7 @@ Worker.prototype.isValidEngine = function (engine) {
   engine.hasOwnProperty('snippetsCollection') &&
   engine.hasOwnProperty('phrasesCollection'))
 }
+
 Worker.prototype.isPhrase = function (type) {
   return type === corbelConnection.PHRASES_COLLECTION
 }
@@ -111,13 +116,13 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action
 }
 
 Worker.prototype.doWork = function (ch, msg) {
-  if (msg.fields.routingKey === config('rabbitmq.event')) {
+  if (msg.fields.routingKey === config.get('rabbitmq.event')) {
     var message
     try {
       message = JSON.parse(msg.content.toString('utf8'))
     } catch (error) {
       // ch.nack(error, false, false)
-      throw new ComposrError('error:worker:message', 'Error parsing message: ' + error, 422)
+      throw new Error('error:worker:message Error parsing message: ' + error)
     }
     var type = message.type
     if (this.isPhrase(type) || this.isSnippet(type)) {
@@ -130,7 +135,7 @@ Worker.prototype.doWork = function (ch, msg) {
 
 Worker.prototype.createChannel = function (connection) {
   var that = this
-  var queue = config('serverName') + that.workerID
+  var queue = config.get('serverName') + that.workerID
   var channel
 
   return connection.createChannel()
@@ -193,7 +198,7 @@ Worker.prototype._connect = function () {
 }
 
 Worker.prototype.retryInit = function (waitTime) {
-  var time = waitTime | config('rabbitmq.reconntimeout')
+  var time = waitTime | config.get('rabbitmq.reconntimeout')
   var that = this
   return setTimeout(function () {
     that.init()

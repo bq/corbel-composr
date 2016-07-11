@@ -9,7 +9,7 @@ var srvConf = require('./lib/server')
 var server = restify.createServer(srvConf)
 require('./lib/router')(server)
 var engine = require('./lib/engine')
-var config = require('./lib/config')
+var config = require('config')
 var configChecker = require('./utils/envConfigChecker')
 var logger = require('./utils/composrLogger')
 var ComposrError = require('./lib/ComposrError')
@@ -17,8 +17,7 @@ var ComposrError = require('./lib/ComposrError')
 /* ************************************
   Configuration check
 **************************************/
-var env = process.env.NODE_ENV || 'development'
-configChecker.checkConfig(env)
+configChecker.checkConfig()
 
 /* ************************************
   Middlewares
@@ -83,6 +82,6 @@ process.on('uncaughtException', function (err) {
 // Trigger the static routes creation
 hub.emit('create:staticRoutes', server)
 
-module.exports = function (localMode) {
-  return engine.init(server, localMode)
+module.exports = function (localMode, serverID) {
+  return engine.init(server, localMode, serverID)
 }

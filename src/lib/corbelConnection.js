@@ -1,7 +1,7 @@
 'use strict'
 
 var corbel = require('corbel-js')
-var config = require('./config')
+var config = require('config')
 var _ = require('lodash')
 var ComposrError = require('./ComposrError')
 var logger = require('../utils/composrLogger')
@@ -9,8 +9,8 @@ var logger = require('../utils/composrLogger')
 var PHRASES_COLLECTION = 'composr:Phrase'
 var SNIPPETS_COLLECTION = 'composr:Snippet'
 
-var corbelConfig = config('corbel.driver.options')
-corbelConfig = _.extend(corbelConfig, config('corbel.composr.credentials'))
+var corbelConfig = config.get('corbel.options')
+corbelConfig = _.extend(corbelConfig, config.get('corbel.credentials'))
 
 var extractDomain = function (accessToken) {
   try {
@@ -31,7 +31,7 @@ var getTokenDriver = function (accessToken, emptyIfNotAuth) {
     }
 
     var corbelConfig = {
-      urlBase: config('corbel.driver.options').urlBase
+      urlBase: config.get('corbel.options.urlBase')
     }
 
     corbelConfig.iamToken = iamToken
@@ -40,7 +40,7 @@ var getTokenDriver = function (accessToken, emptyIfNotAuth) {
     return corbel.getDriver(corbelConfig)
   } else {
     return corbel.getDriver({
-      urlBase: config('corbel.driver.options').urlBase,
+      urlBase: config.get('corbel.options.urlBase'),
       iamToken: ''
     })
   }

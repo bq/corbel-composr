@@ -2,26 +2,20 @@
 
 var logger = require('./composrLogger')
 var _ = require('lodash')
-var config = require('../lib/config')
+var config = require('config')
 
 var variableNames = [
   'CREDENTIALS_CLIENT_ID',
   'CREDENTIALS_SCOPES',
   'CREDENTIALS_CLIENT_SECRET',
-  'URL_BASE',
-  'RABBITMQ_HOST',
-  'RABBITMQ_PORT',
-  'RABBITMQ_USERNAME',
-  'RABBITMQ_PASSWORD'
+  'URL_BASE'
 ]
 
 var mandatoryVariables = [
-  'rabbitmq.host',
-  'rabbitmq.port',
-  'rabbitmq.username',
-  'rabbitmq.password',
-  'corbel.composr.credentials',
-  'corbel.driver.options'
+  'corbel.credentials.clientId',
+  'corbel.credentials.clientSecret',
+  'corbel.credentials.scopes',
+  'corbel.options.urlBase'
 ]
 
 function isUndefinedConfigValue (val) {
@@ -40,19 +34,9 @@ function getMissingEnvVariables () {
   }))
 }
 
-function isDefaultValue (defaultValue, configValue) {
-  if (typeof (defaultValue) === 'object') {
-    return Object.keys(defaultValue).reduce(function (prev, next) {
-      return (defaultValue[next] === configValue[next]) && prev
-    }, true)
-  } else {
-    return defaultValue === configValue
-  }
-}
-
-function getEmptyMandatoryValues (defaultValues) {
+function getEmptyMandatoryValues () {
   return _.compact(mandatoryVariables.map(function (key) {
-    if (isDefaultValue(defaultValues[key], config(key))) {
+    if (!config.has(key) || !config.get(key)) {
       return key
     }
   }))
@@ -90,9 +74,7 @@ function checkConfig () {
     logMissingVariablesMessage(missingEnvVariables)
   }
 
-  var defaultValues = require('../config/config.json')
-
-  var notFilledMandatoryValues = getEmptyMandatoryValues(defaultValues)
+  var notFilledMandatoryValues = getEmptyMandatoryValues()
 
   if (notFilledMandatoryValues.length > 0) {
     logNotFilledValuesMessage(notFilledMandatoryValues)

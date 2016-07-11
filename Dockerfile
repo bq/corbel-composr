@@ -1,4 +1,4 @@
-FROM node:6.2.2
+FROM node:6.3.0
 # Author / Maintainer
 MAINTAINER Composr Team <support-composr@bq.com >
 
@@ -14,7 +14,7 @@ RUN apt-get update && \
  rm -rf /var/lib/apt/lists/*
 
 # Install dev dependencies
-RUN npm install; npm rebuild; npm install -g bunyan
+RUN npm install; npm install -g bunyan
 
 ENV PATH node_modules/pm2/bin:$PATH
 

@@ -1,6 +1,6 @@
 'use strict'
 
-var config = require('../lib/config')
+var config = require('config')
 var engine = require('../lib/engine')
 var https = require('https')
 var packageJSON = require('../../package.json')
@@ -23,7 +23,7 @@ function checkServerStatus (req, res) {
   }))
 
   var serverStatus = {
-    env: config('env'),
+    env: process.env.NODE_ENV || 'development',
     domains: domains,
     domain: req.params.domain,
     version: packageJSON.version,
@@ -35,7 +35,7 @@ function checkServerStatus (req, res) {
   }
 
   var modules = ['iam', 'resources', 'assets', 'evci']
-  var path = config('corbel.driver.options').urlBase
+  var path = config.get('corbel.options.urlBase')
 
   var promises = modules.map(function (module) {
     return new Promise(function (resolve) {

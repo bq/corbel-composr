@@ -2,7 +2,7 @@
 
 var corbel = require('corbel-js')
 var ComposrError = require('../lib/ComposrError')
-var config = require('../lib/config')
+var config = require('config')
 
 function getCorbelErrorBody (corbelErrResponse) {
   var errorBody = typeof (corbelErrResponse.data) !== 'undefined' && typeof (corbelErrResponse.data.body) === 'string' && corbelErrResponse.data.body.indexOf('{') !== -1 ? JSON.parse(corbelErrResponse.data.body) : corbelErrResponse
@@ -35,10 +35,12 @@ module.exports = function (server) {
   server.post('/token', function (req, res, next) {
     var data = req.body || {}
 
-    var corbelConfig = config('corbel.driver.options')
-    corbelConfig.clientId = data.clientId
-    corbelConfig.clientSecret = data.clientSecret
-    corbelConfig.scopes = data.scopes
+    var corbelConfig = {
+      urlBase: config.get('corbel.options.urlBase'),
+      clientId: data.clientId,
+      clientSecret: data.clientSecret,
+      scopes: data.scopes
+    }
 
     var corbelDriver = corbel.getDriver(corbelConfig)
 

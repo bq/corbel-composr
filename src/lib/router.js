@@ -2,7 +2,7 @@
 var hub = require('./hub')
 var engine = require('./engine')
 var logger = require('../utils/composrLogger')
-var config = require('./config')
+var config = require('config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
 var phraseHooks = require('./phraseHooks/phraseHooks')
 
@@ -49,7 +49,7 @@ function executePhraseById (req, res, next, routeItem) {
     res: res,
     next: next,
     browser: true,
-    timeout: config('phrases.timeout'),
+    timeout: config.get('execution.timeout'),
     server: 'restify',
     userId: req.userId
   })
@@ -95,7 +95,7 @@ function executePhraseById (req, res, next, routeItem) {
  * @return {Object} modified execution params
  */
 function executionMode (params) {
-  if (config('execution.vm')) {
+  if (config.get('execution.vm')) {
     params.browser = false
   }
 
@@ -107,7 +107,7 @@ function executionMode (params) {
  * @return {[type]} [description]
  */
 function enforceGC () {
-  if (config('execution.gc') && !!global.gc) {
+  if (config.get('execution.gc') && !!global.gc) {
     global.gc()
   }
 }

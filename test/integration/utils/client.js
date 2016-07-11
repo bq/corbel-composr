@@ -1,9 +1,9 @@
-var config = require('../../../src/lib/config')
+var fs = require('fs')
 
 function getAdminClient () {
   var clientData = {}
 
-  if (config('env') === 'development') {
+  if (fs.existsSync(__dirname + '/../../fixtures/client/_clientAdmin.json')) {
     clientData = require('../../fixtures/client/_clientAdmin.json')
   } else {
     clientData = require('../../fixtures/client/clientAdmin.json')
@@ -22,7 +22,7 @@ function getAdminClient () {
 function getDemoClient () {
   var clientData = {}
 
-  if (config('env') === 'development') {
+  if (fs.existsSync(__dirname + '/../../fixtures/client/_clientDemo.json')) {
     clientData = require('../../fixtures/client/_clientDemo.json')
   } else {
     clientData = require('../../fixtures/client/clientDemo.json')
@@ -41,7 +41,7 @@ function getDemoClient () {
 function getUser () {
   var userData = {}
 
-  if (config('env') === 'development') {
+  if (fs.existsSync(__dirname + '/../../fixtures/client/_userDemo.json')) {
     userData = require('../../fixtures/client/_userDemo.json')
   } else {
     userData = require('../../fixtures/client/userDemo.json')

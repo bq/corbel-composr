@@ -2,7 +2,7 @@
 /* globals before beforeEach afterEach describe it */
 
 var options = null
-var config = require('../../../src/lib/config')
+var config = require('config')
 var path = require('path')
 var nock = require('nock')
 var chai = require('chai')
@@ -17,9 +17,9 @@ chai.use(chaiAsPromised)
 describe('Engine services checking', function () {
   this.timeout(10 * 1000)
 
-  var baseUrl = config('corbel.driver.options').urlBase
-  var retries = config('services.retries')
-  var time = config('services.time')
+  var baseUrl = config.get('corbel.options.urlBase')
+  var retries = config.get('services.retries')
+  var time = config.get('services.time')
   var domain = baseUrl.substring(0, baseUrl.indexOf('{') - 1)
   var engineAbsPath = null
   var mySandbox = sinon.sandbox.create()
