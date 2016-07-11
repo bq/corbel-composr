@@ -86,7 +86,6 @@ If NODE_ENV is not set in the environment, a default value of `development` is u
 
     "bootstrap.retrytimeout": 10000,
 
-    
     "services": {
         "timeout": 5000,
         "retries": 30,
@@ -130,7 +129,8 @@ If NODE_ENV is not set in the environment, a default value of `development` is u
     "execution": {
         "vm": false,
         "gc": false,
-        "timeout": 40000
+        "timeout": 40000,
+        "local": false
     }
 }
 

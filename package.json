@@ -28,7 +28,7 @@
   },
   "scripts": {
     "test:debug": "node-debug $(which grunt) test",
-    "start": "node node_modules/pm2/bin/pm2 start bin/composr -i 0 --max-memory-restart 3G && npm run logs",
+    "start": "LOCAL_MODE=false node node_modules/pm2/bin/pm2 start bin/composr -i 0 --max-memory-restart 3G && npm run logs",
     "stop": "node node_modules/pm2/bin/pm2 stop composr",
     "restart": "node node_modules/pm2/bin/pm2 restart composr",
     "coverage": "istanbul cover node_modules/.bin/_mocha -- -R dot",

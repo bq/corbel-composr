@@ -53,6 +53,7 @@
     "execution": {
         "vm": "EXEC_WITH_VM",
         "gc": "ENFORCE_GC",
-        "timeout": "TIMEOUT"
+        "timeout": "TIMEOUT",
+        "local": "LOCAL_MODE"
     }
 }

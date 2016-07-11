@@ -16,7 +16,6 @@
 
     "bootstrap.retrytimeout": 10000,
 
-    
     "services": {
         "timeout": 5000,
         "retries": 30,
@@ -60,6 +59,7 @@
     "execution": {
         "vm": false,
         "gc": false,
-        "timeout": 40000
+        "timeout": 40000,
+        "local": false
     }
 }

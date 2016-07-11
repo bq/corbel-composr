@@ -223,7 +223,10 @@ var engine = {
       worker = new WorkerClass(engine, serverID)
 
       if (localMode) {
-        engine.launchWithoutData(app, {resolve, reject})
+        engine.launchWithoutData(app, {resolve, reject}, function () {
+          // engine.tryToFindLocalPhrases()
+          console.log('... I want to load phrases and snippets from the current directory')
+        })
         return
       }
 
@@ -232,7 +235,13 @@ var engine = {
       })
 
       hub.on('corbel:not:ready', function () {
-        engine.launchWithoutData(app, {resolve, reject})
+        // For some reason corbel wasnt up, so we wait until it is ready. but for the moment we start the server
+        engine.launchWithoutData(app, {resolve, reject}, function () {
+          var retries = config.get('services.retries')
+
+          logger.info('The server is launched, delaying the fetch data')
+          engine._waitUntilCorbelIsReadyAndFetchData(retries)
+        })
       })
 
       if (!worker.canConnect()) {
@@ -268,9 +277,7 @@ var engine = {
       .catch(promise.reject)
   },
 
-  launchWithoutData: function (app, promise) {
-    var retries = config.get('services.retries')
-
+  launchWithoutData: function (app, promise, cb) {
     engine.initComposrCore(engine.getComposrCoreCredentials(), false)
       .then(function () {
         promise.resolve({
@@ -279,8 +286,10 @@ var engine = {
           composr: engine.composr,
           initialized: engine.initialized
         })
-        logger.info('The server is launched, delaying the fetch data')
-        engine._waitUntilCorbelIsReadyAndFetchData(retries)
+
+        if (cb) {
+          cb()
+        }
       })
       .catch(promise.reject)
   },

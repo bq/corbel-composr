@@ -22,7 +22,7 @@ var uuid = require('uuid')
 var serverID = uuid.v1()
 
 module.exports = new Promise(function (resolve, reject) {
-  require('../src/app')(process.env.NODE_ENV === 'test', serverID)
+  require('../src/app')(config.get('execution.local'), serverID)
     .then(function (serverObjects) {
       var port = config.get('port')
 
