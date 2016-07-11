@@ -36,9 +36,9 @@ if (config.get('bunyan.log') === true) {
   }
 
   if (config.get('bunyan.syslog') === true && false) {
-    //TODO: remove
+    // TODO: remove
     var bsyslog = require('bunyan-syslog')
-    
+
     streams.push({
       level: 'debug',
       type: 'raw',

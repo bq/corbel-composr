@@ -1,7 +1,7 @@
 'use strict'
 
 var corbel = require('corbel-js')
-var config = require('config');
+var config = require('config')
 var _ = require('lodash')
 var ComposrError = require('./ComposrError')
 var logger = require('../utils/composrLogger')

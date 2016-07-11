@@ -24,9 +24,9 @@ function Worker (engine, serverID) {
   this.connectionStatus = false
 }
 
-Worker.prototype.canConnect = function(){
-  return config.get('rabbitmq.host') && config.get('rabbitmq.port') && 
-    config.get('rabbitmq.username') && config.get('rabbitmq.password')
+Worker.prototype.canConnect = function () {
+  return config.get('rabbitmq.host') && config.get('rabbitmq.port') &&
+  config.get('rabbitmq.username') && config.get('rabbitmq.password')
 }
 
 Worker.prototype.isValidEngine = function (engine) {

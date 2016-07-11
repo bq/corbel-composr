@@ -145,7 +145,7 @@ var engine = {
         clientSecret: config.get('corbel.credentials.clientSecret'),
         scopes: config.get('corbel.credentials.scopes')
       },
-      urlBase: config('corbel.options.urlBase')
+      urlBase: config.get('corbel.options.urlBase')
     }
   },
 
@@ -216,7 +216,7 @@ var engine = {
    * @return promise
    */
   init: function (app, localMode, serverID) {
-    return new Promise(function(resolve, reject){
+    return new Promise(function (resolve, reject) {
       // Suscribe to log events
       engine.suscribeToCoreEvents()
 
@@ -224,7 +224,7 @@ var engine = {
 
       if (localMode) {
         engine.launchWithoutData(app, {resolve, reject})
-        return 
+        return
       }
 
       hub.on('corbel:ready', function () {
@@ -235,9 +235,9 @@ var engine = {
         engine.launchWithoutData(app, {resolve, reject})
       })
 
-      if(!worker.canConnect()){
-        logger.info('>>> RabbitMQ worker will not be connected');
-      }else{
+      if (!worker.canConnect()) {
+        logger.info('>>> RabbitMQ worker will not be connected')
+      } else {
         worker.init()
       }
 
@@ -252,7 +252,7 @@ var engine = {
         logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
         engine._init()
       }
-    });
+    })
   },
 
   launchWithData: function (app, promise) {
