@@ -1,14 +1,14 @@
 /* ************************************
   Bunyan Logger
 **************************************/
-var config = require('./config')
+var config = require('config')
 var bunyanLogger = require('../utils/bunyanLogger')
 var restify = require('restify')
 var jsonFormatter = restify.formatters['application/json; q=0.4']
 var ComposrError = require('./ComposrError')
 
 var _server = {
-  name: config('serverName'),
+  name: config.get('serverName'),
   log: bunyanLogger,
 
   formatters: {

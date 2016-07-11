@@ -2,10 +2,9 @@
 
 var logger = require('../utils/composrLogger')
 var composr = require('composr-core')
-var q = require('q')
 var https = require('https')
 var hub = require('./hub')
-var config = require('./config')
+var config = require('config')
 var WorkerClass = require('./rabbitMQworker')
 var worker
 
@@ -117,7 +116,7 @@ var engine = {
    *************************************************************/
 
   initServiceCheckingRequests: function (modules, serviceCheckingRequestTimeout) {
-    var path = config('corbel.driver.options').urlBase
+    var path = config.get('corbel.options.urlBase')
 
     return modules.map(function (module) {
       var url
@@ -133,7 +132,7 @@ var engine = {
   // Recursivelly wait until all the corbel services are up
   _waitUntilCorbelModulesReady: function () {
     var modules = ['iam', 'resources', 'evci', 'assets']
-    var serviceCheckingRequestTimeout = config('services.timeout')
+    var serviceCheckingRequestTimeout = config.get('services.timeout')
     var promises = engine.initServiceCheckingRequests(modules, serviceCheckingRequestTimeout)
     return Promise.all(promises)
   },
@@ -142,11 +141,11 @@ var engine = {
   getComposrCoreCredentials: function () {
     return {
       credentials: {
-        clientId: config('corbel.composr.credentials').clientId,
-        clientSecret: config('corbel.composr.credentials').clientSecret,
-        scopes: config('corbel.composr.credentials').scopes
+        clientId: config.get('corbel.credentials.clientId'),
+        clientSecret: config.get('corbel.credentials.clientSecret'),
+        scopes: config.get('corbel.credentials.scopes')
       },
-      urlBase: config('corbel.driver.options').urlBase
+      urlBase: config('corbel.options.urlBase')
     }
   },
 
@@ -171,10 +170,10 @@ var engine = {
 
   waitUntilCorbelIsReady: function (time, retries) {
     if (!time) {
-      time = config('services.time')
+      time = config.get('services.time')
     }
     if (!retries) {
-      retries = config('services.retries')
+      retries = config.get('services.retries')
     }
 
     return new Promise(function (resolve, reject) {
@@ -216,43 +215,44 @@ var engine = {
    * @param  {[type]} app [description]
    * @return promise
    */
-  init: function (app, localMode) {
-    var dfd = q.defer()
+  init: function (app, localMode, serverID) {
+    return new Promise(function(resolve, reject){
+      // Suscribe to log events
+      engine.suscribeToCoreEvents()
 
-    // Suscribe to log events
-    engine.suscribeToCoreEvents()
+      worker = new WorkerClass(engine, serverID)
 
-    worker = new WorkerClass(engine)
+      if (localMode) {
+        engine.launchWithoutData(app, {resolve, reject})
+        return 
+      }
 
-    if (localMode) {
-      engine.launchWithoutData(app, dfd)
-      return dfd.promise
-    }
-
-    hub.on('corbel:ready', function () {
-      engine.launchWithData(app, dfd)
-    })
-
-    hub.on('corbel:not:ready', function () {
-      engine.launchWithoutData(app, dfd)
-    })
-
-    // Launch the worker
-    worker.init()
-
-    if (config('rabbitmq.forceconnect')) {
-      logger.info('>>> The server will start after RabbitMQ is connected')
-      logger.info('>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
-        'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
-      hub.once('load:worker', function () {
-        engine._init()
+      hub.on('corbel:ready', function () {
+        engine.launchWithData(app, {resolve, reject})
       })
-    } else {
-      logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
-      engine._init()
-    }
 
-    return dfd.promise
+      hub.on('corbel:not:ready', function () {
+        engine.launchWithoutData(app, {resolve, reject})
+      })
+
+      if(!worker.canConnect()){
+        logger.info('>>> RabbitMQ worker will not be connected');
+      }else{
+        worker.init()
+      }
+
+      if (config.get('rabbitmq.forceconnect') && worker.canConnect()) {
+        logger.info('>>> The server will start after RabbitMQ is connected')
+        logger.info('>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
+          'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
+        hub.once('load:worker', function () {
+          engine._init()
+        })
+      } else {
+        logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
+        engine._init()
+      }
+    });
   },
 
   launchWithData: function (app, promise) {
@@ -269,7 +269,7 @@ var engine = {
   },
 
   launchWithoutData: function (app, promise) {
-    var retries = config('services.retries')
+    var retries = config.get('services.retries')
 
     engine.initComposrCore(engine.getComposrCoreCredentials(), false)
       .then(function () {
@@ -286,7 +286,7 @@ var engine = {
   },
 
   _init: function () {
-    var retries = config('services.retries')
+    var retries = config.get('services.retries')
 
     engine.waitUntilCorbelIsReady(retries)
       .then(function () {

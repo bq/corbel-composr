@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-var config = require('../src/lib/config')
+var config = require('config')
 
-if (config('newrelic') === true) {
+if (config.get('newrelic.enabled') === true) {
   require('newrelic')
 }
 
-if (config('keymetrics') === true) {
+if (config.get('keymetrics') === true) {
   var pmx = require('pmx')
   // Log routes and latency.
   // You must do this BEFORE any require('http')
@@ -18,23 +18,27 @@ if (config('keymetrics') === true) {
 var logger = require('../src/utils/composrLogger')
 var version = require('../package.json').version
 var hub = require('../src/lib/hub')
+var uuid = require('uuid')
+var serverID = uuid.v1()
 
 module.exports = new Promise(function (resolve, reject) {
-  require('../src/app')(process.env.NODE_ENV === 'test')
+  require('../src/app')(process.env.NODE_ENV === 'test', serverID)
     .then(function (serverObjects) {
-      var port = config('port')
+      var port = config.get('port')
 
       var server = serverObjects.app.listen(port, function () {
         logger.info('CompoSR by BQ - listening on port ' + server.address().port)
+        logger.info('Server instance ID:', serverID)
 
-        logger.salute(config('serverName'), version, function () {
+        logger.salute(config.get('serverName'), version, function () {
           resolve(serverObjects)
           hub.emit('server:start')
         })
       })
     })
     .catch(function (err) {
-      console.log('ERROR launching ' + config('serverName') + ' application', err)
+      console.error('ERROR launching ' + config.get('serverName') + ' application', err)
+      logger.error('ERROR launching instance:', err)
       reject(err)
     })
 })

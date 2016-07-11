@@ -1,0 +1,65 @@
+{
+    "serverName" : "CompoSR",
+    "bodylimit" : "50mb",
+    "port": 3000,
+    
+    "rabbitmq": {
+        "host": "RABBIT_HOST",
+        "port": "RABBIT_PORT",
+        "username": "RABBIT_USERNAME",
+        "password": "RABBIT_PASSWORD",
+        "reconntimeout": 10000,
+        "event": "class com.bq.corbel.event.ResourceEvent",
+        "forceconnect": false,
+        "heartbeat" : 30
+    },
+
+    "bootstrap.retrytimeout": 10000,
+
+    
+    "services": {
+        "timeout": 5000,
+        "retries": 30,
+        "time": 1000
+    },
+
+    "corbel": {
+        "credentials": {
+            "clientId": "CLIENT_ID",
+            "clientSecret": "CLIENT_SECRET",
+            "scopes": "composr:comp:base"
+        },
+        "options": {
+            "urlBase": "https://{{module}}corbel-domain.io/"
+        }
+    },
+
+    "bunyan": {
+        "log" : true,
+        "syslog" : true,
+        "stdout": false,
+        "streamServer": false
+    },
+
+    "composrLog": {
+        "accessLog" : true,
+        "accessLogFile" : "logs/access.log",
+        "logLevel": "error",
+        "logFile": "logs/composr.log",
+        "syslog" : false
+    },
+
+    "newrelic": {
+        "enabled": false,
+        "name": "",
+        "key": ""
+    },
+
+    "keymetrics": true,
+
+    "execution": {
+        "vm": false,
+        "gc": false,
+        "timeout": 40000
+    }
+}

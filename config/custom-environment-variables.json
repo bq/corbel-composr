@@ -1,0 +1,58 @@
+{
+    "serverName" : "SERVER_NAME",
+    "bodylimit" : "50mb",
+    "port": "PORT",
+    
+    "rabbitmq": {
+        "host": "RABBITMQ_HOST",
+        "port": "RABBITMQ_PORT",
+        "username": "RABBITMQ_USERNAME",
+        "password": "RABBITMQ_PASSWORD",
+        "forceconnect": "RABBITMQ_FORCE_CONNECT"
+    },
+
+    "services": {
+        "timeout": "SERVICES_TIMEOUT",
+        "retries": "SERVICES_RETRIES",
+        "time": "SERVICES_TIME"
+    },
+
+    "corbel": {
+        "credentials": {
+            "clientId": "CREDENTIALS_CLIENT_ID",
+            "clientSecret": "CREDENTIALS_CLIENT_SECRET",
+            "scopes": "CREDENTIALS_SCOPES"
+        },
+        "options": {
+            "urlBase": "URL_BASE"
+        }
+    },
+
+    "bunyan": {
+        "log" : "BUNYAN_LOG",
+        "stdout": "BUNYAN_STDOUT",
+        "streamServer": "BUNYAN_STREAM_SERVER"
+    },
+
+    "composrLog": {
+        "accessLog" : "ACCESS_LOG",
+        "accessLogFile" : "ACCESS_LOG_FILE",
+        "logLevel": "LOG_LEVEL",
+        "logFile": "LOG_FILE",
+        "syslog" : "SYSLOG"
+    },
+
+    "newrelic": {
+        "enabled": "NRACTIVE",
+        "name": "NRAPPNAME",
+        "key": "NRAPIKEY"
+    },
+
+    "keymetrics": "KEYMETRICS",
+    
+    "execution": {
+        "vm": "EXEC_WITH_VM",
+        "gc": "ENFORCE_GC",
+        "timeout": "TIMEOUT"
+    }
+}

@@ -2,7 +2,7 @@
 var connection = require('../corbelConnection')
 var ComposrError = require('../ComposrError')
 var logger = require('../../utils/composrLogger')
-var config = require('../config')
+var config = require('config')
 var corbel = require('corbel-js')
 
 module.exports.authUser = function (methodDoc) {
@@ -57,7 +57,7 @@ module.exports.corbelDriverSetup = function (methodDoc) {
     var authorization = req.headers.authorization
 
     var corbelDriver = connection.getTokenDriver(authorization, true)
-    if (config('composrLog.logLevel') === 'debug') {
+    if (config.get('composrLog.logLevel') === 'debug') {
       corbelDriver.on('request', function () {
         logger.debug('>>> corbelDriver request: ', arguments)
       })

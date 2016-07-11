@@ -41,7 +41,7 @@ function notifyTransaction (transactionId) {
 }
 
 function initMetrics (config, logger) {
-  if (config('newrelic') === true) {
+  if (config.get('newrelic.enabled') === true) {
     newrelic = require('newrelic')
     logger.info('Initializing NewRelic events...')
     fProxy.proxifyFunction(newrelic, ['agent', '_transactionFinished'], function (cb, transaction) {

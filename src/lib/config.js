@@ -6,7 +6,7 @@ var uuid = require('uuid')
 var ComposrError = require('./ComposrError')
 
 function getDefaultConfig () {
-  return _.cloneDeep(require('../config/config.json'))
+  return _.cloneDeep(require('../../config/default.json'))
 }
 
 function getConfigFromFile (environment) {
@@ -14,9 +14,9 @@ function getConfigFromFile (environment) {
   var configuration = {}
 
   try {
-    var fstat = fs.statSync(__dirname + '/../config/' + environmentFileConfig)
+    var fstat = fs.statSync(__dirname + '/../../config/' + environmentFileConfig)
     if (fstat.isFile()) {
-      configuration = require('../config/' + environmentFileConfig)
+      configuration = require('../../config/' + environmentFileConfig)
     }
   } catch (e) {
     console.log('warn:config:' + environment + ':undefined')

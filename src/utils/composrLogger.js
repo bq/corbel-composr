@@ -3,9 +3,9 @@
 var winston = require('winston')
 var folderMaker = require('./folderMaker')
 var art = require('ascii-art')
-var config = require('../lib/config')
-var logLevel = config('composrLog.logLevel') ? config('composrLog.logLevel') : false
-var logFile = config('composrLog.logFile') ? config('composrLog.logFile') : false
+var config = require('config')
+var logLevel = config.get('composrLog.logLevel') ? config.get('composrLog.logLevel') : false
+var logFile = config.get('composrLog.logFile') ? config.get('composrLog.logFile') : false
 
 var logger
 
