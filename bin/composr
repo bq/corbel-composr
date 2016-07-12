@@ -21,7 +21,6 @@ var hub = require('../src/lib/hub')
 var uuid = require('uuid')
 var serverID = uuid.v1()
 
-
 module.exports = new Promise(function (resolve, reject) {
   require('../src/app')(config.get('execution.local'), serverID)
     .then(function (serverObjects) {

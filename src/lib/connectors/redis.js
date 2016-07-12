@@ -7,8 +7,8 @@ var client
 
 function checkState () {
   return new Promise(function (resolve, reject) {
-    if( !client ) {
-      init(function(err){
+    if (!client) {
+      init(function (err) {
         logger.error('Error connecting to REDIS', err)
         resolve(false)
       })
@@ -24,11 +24,11 @@ function checkState () {
   })
 }
 
-function init(cbError){
+function init (cbError) {
   client = redis
     .createClient(config.get('redis.port'), config.get('redis.host'), null)
-  
-  client.on('error', function(e){
+
+  client.on('error', function (e) {
     cbError(e)
   })
 }

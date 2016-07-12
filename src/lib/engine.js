@@ -2,6 +2,7 @@
 
 var logger = require('../utils/composrLogger')
 var composr = require('composr-core')
+var corbelConnection = require('./connectors/corbel')
 var https = require('https')
 var hub = require('./hub')
 var config = require('config')
@@ -168,44 +169,15 @@ var engine = {
     })
   },
 
-  waitUntilCorbelIsReady: function (time, retries) {
-    if (!time) {
-      time = config.get('services.time')
-    }
-    if (!retries) {
-      retries = config.get('services.retries')
-    }
-
-    return new Promise(function (resolve, reject) {
-      function launch (retries) {
-        if (!retries) {
-          return reject()
-        }
-        engine._waitUntilCorbelModulesReady()
-          .then(function () {
-            logger.info('All Services up and running!')
-            resolve()
-          })
-          .catch(function () {
-            logger.info('Retrying services check after', time * retries, 'milliseconds')
-            setTimeout(function () {
-              return launch(retries - 1)
-            }, time * retries)
-          })
-      }
-      launch(retries)
-    })
-  },
-
-  _waitUntilCorbelIsReadyAndFetchData: function (retries) {
-    engine.waitUntilCorbelIsReady(retries)
+  _waitUntilCorbelIsReadyAndFetchData: function () {
+    corbelConnection.waitUntilCorbelIsReady()
       .then(function () {
         logger.info('Data is available, fetching')
         engine.initComposrCore(engine.getComposrCoreCredentials(), true)
       })
       .catch(function () {
         // If the services were unavailable delay the retries and go on
-        logger.error('Services where unaccesible after ' + retries + ' retries')
+        logger.error('Services where unaccesible after ' + config.get('services.retries') + ' retries')
         engine._waitUntilCorbelIsReadyAndFetchData()
       })
   },
@@ -237,10 +209,8 @@ var engine = {
       hub.on('corbel:not:ready', function () {
         // For some reason corbel wasnt up, so we wait until it is ready. but for the moment we start the server
         engine.launchWithoutData(app, {resolve, reject}, function () {
-          var retries = config.get('services.retries')
-
           logger.info('The server is launched, delaying the fetch data')
-          engine._waitUntilCorbelIsReadyAndFetchData(retries)
+          engine._waitUntilCorbelIsReadyAndFetchData()
         })
       })
 
@@ -295,9 +265,7 @@ var engine = {
   },
 
   _init: function () {
-    var retries = config.get('services.retries')
-
-    engine.waitUntilCorbelIsReady(retries)
+    corbelConnection.waitUntilCorbelIsReady()
       .then(function () {
         hub.emit('corbel:ready')
       })

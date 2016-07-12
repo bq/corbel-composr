@@ -47,7 +47,7 @@ var getTokenDriver = function (accessToken, emptyIfNotAuth) {
   }
 }
 
-function checkState () {
+function checkState (timeout) {
   var modules = ['iam', 'resources', 'assets', 'evci']
   var path = config.get('corbel.options.urlBase')
 
@@ -59,7 +59,9 @@ function checkState () {
       var versionPath = path.replace(new RegExp('(.*/)[^/]+/?$'), '$1')
           .replace('{{module}}', module) + '/version'
 
-      https.get(versionPath, function (res) {
+      logger.info('Checking for external service', module, ': ', versionPath)
+
+      var request = https.get(versionPath, function (res) {
         result[module] = Math.floor(res.statusCode / 100) === 2
         resolve()
       })
@@ -67,6 +69,12 @@ function checkState () {
           result[module] = false
           resolve()
         })
+
+      if (timeout) {
+        setTimeout(function () {
+          request.abort()
+        }, timeout)
+      }
     })
   })
 
@@ -76,8 +84,55 @@ function checkState () {
     })
 }
 
+function waitUntilCorbelIsReady () {
+  var retries = config.get('services.retries')
+  var requestTimeout = config.get('services.timeout')
+
+  return _waitUntilCorbelModulesReady(retries, requestTimeout)
+}
+
+function bouncePromise (fn, time) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      fn().then(resolve)
+        .catch(reject)
+    }, time)
+  })
+}
+
+function _waitUntilCorbelModulesReady (retries, requestTimeout) {
+  var retryTime = config.get('services.time') * retries
+
+  if (!retries) {
+    logger.error(' :( - Connection to corbel can not be completed')
+    return Promise.reject()
+  }
+
+  return checkState(requestTimeout)
+    .then(function (results) {
+      var allRunning = Object.keys(results).reduce(function (prev, module) {
+        var isUp = results[module]
+        var state = isUp ? 'is UP' : 'is DOWN'
+        logger.info('>>> Module', module, state)
+
+        return prev && isUp
+      }, true)
+
+      if (allRunning) {
+        logger.info('All services up and running!')
+        return true
+      } else {
+        logger.info('Retrying services check after', retryTime, 'milliseconds')
+        return bouncePromise(function () {
+          return _waitUntilCorbelModulesReady(retries - 1, requestTimeout)
+        }, retryTime)
+      }
+    })
+}
+
 module.exports.SNIPPETS_COLLECTION = SNIPPETS_COLLECTION
 module.exports.PHRASES_COLLECTION = PHRASES_COLLECTION
 module.exports.extractDomain = extractDomain
 module.exports.getTokenDriver = getTokenDriver
 module.exports.checkState = checkState
+module.exports.waitUntilCorbelIsReady = waitUntilCorbelIsReady
