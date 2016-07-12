@@ -109,35 +109,6 @@ var engine = {
     return request
   },
 
-  /* ***********************************************************
-   * - Launches services checking requests
-   * @param  {Array} modules Services to check
-   * @param  {integer} serviceCheckingRequestTimeout Timeout before reject promise
-   * @return {Array} promises
-   *************************************************************/
-
-  initServiceCheckingRequests: function (modules, serviceCheckingRequestTimeout) {
-    var path = config.get('corbel.options.urlBase')
-
-    return modules.map(function (module) {
-      var url
-
-      logger.info('Checking for external service', module)
-      return new Promise(function (resolve, reject) {
-        url = path.replace('{{module}}', module).replace(/\/(v.+)\//, '/') + 'version'
-        engine.setUpRequest(url, module, resolve, reject, serviceCheckingRequestTimeout)
-      })
-    })
-  },
-
-  // Recursivelly wait until all the corbel services are up
-  _waitUntilCorbelModulesReady: function () {
-    var modules = ['iam', 'resources', 'evci', 'assets']
-    var serviceCheckingRequestTimeout = config.get('services.timeout')
-    var promises = engine.initServiceCheckingRequests(modules, serviceCheckingRequestTimeout)
-    return Promise.all(promises)
-  },
-
   // Returns the credentials for the composr-core initialization
   getComposrCoreCredentials: function () {
     return {
