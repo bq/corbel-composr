@@ -34,7 +34,7 @@ function checkServerStatus (req, res) {
     }
   }
 
-  var promises = [redisConnector.checkState, corbelConnector.checkState]
+  var promises = [redisConnector.checkState(), corbelConnector.checkState()]
 
   return Promise.all(promises)
     .then(function (results) {

@@ -30,7 +30,7 @@ var hooks = {
   },
   'cache': {
     description: 'A Redis cache hook',
-  // hookFunction: require('./redisCacheHook')
+    hookFunction: require('./redisCacheHook')
   }
 }
 

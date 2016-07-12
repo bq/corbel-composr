@@ -48,7 +48,6 @@ var getTokenDriver = function (accessToken, emptyIfNotAuth) {
 }
 
 function checkState () {
-  console.log('checking state')
   var modules = ['iam', 'resources', 'assets', 'evci']
   var path = config.get('corbel.options.urlBase')
 

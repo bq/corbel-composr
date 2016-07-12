@@ -216,7 +216,6 @@ var engine = {
    * @return promise
    */
   init: function (app, localMode, serverID) {
-    console.log('aaa')
     return new Promise(function (resolve, reject) {
       // Suscribe to log events
       engine.suscribeToCoreEvents()

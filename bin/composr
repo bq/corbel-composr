@@ -21,15 +21,11 @@ var hub = require('../src/lib/hub')
 var uuid = require('uuid')
 var serverID = uuid.v1()
 
-process.on('uncaughtException', function (err) {
-  console.log(err)
-})
 
 module.exports = new Promise(function (resolve, reject) {
   require('../src/app')(config.get('execution.local'), serverID)
     .then(function (serverObjects) {
       var port = config.get('port')
-      console.log('aaa')
 
       var server = serverObjects.app.listen(port, function () {
         logger.info('CompoSR by BQ - listening on port ' + server.address().port)

@@ -4,7 +4,7 @@ var engine = require('./engine')
 var logger = require('../utils/composrLogger')
 var config = require('config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
-var phraseHooks = require('./phraseHooks/phraseHooks')
+var phraseHooks = require('./phraseHooks')
 
 /* *
  * [analyzePhrase description]

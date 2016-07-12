@@ -4,7 +4,7 @@
 'use strict'
 
 var restify = require('restify')
-var hub = require('./lib/hub')
+var hub = require('./lib/hub') 
 var srvConf = require('./lib/server')
 var server = restify.createServer(srvConf)
 require('./lib/router')(server)
