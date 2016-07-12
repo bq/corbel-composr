@@ -136,3 +136,4 @@ module.exports.extractDomain = extractDomain
 module.exports.getTokenDriver = getTokenDriver
 module.exports.checkState = checkState
 module.exports.waitUntilCorbelIsReady = waitUntilCorbelIsReady
+module.exports._waitUntilCorbelModulesReady = _waitUntilCorbelModulesReady
