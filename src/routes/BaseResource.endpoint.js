@@ -1,6 +1,6 @@
 'use strict'
 var hub = require('../lib/hub')
-var connection = require('../lib/corbelConnection')
+var connection = require('../lib/connectors/corbel')
 var ComposrError = require('../lib/ComposrError')
 var logger = require('../utils/composrLogger')
 var auth = require('../lib/auth')

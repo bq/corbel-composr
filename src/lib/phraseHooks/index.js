@@ -27,6 +27,10 @@ var hooks = {
   'metrics': {
     description: 'Metrics hook',
     hookFunction: require('./metricsHook')
+  },
+  'cache': {
+    description: 'A Redis cache hook',
+  // hookFunction: require('./redisCacheHook')
   }
 }
 

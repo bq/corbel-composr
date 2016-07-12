@@ -6,7 +6,7 @@ var chai = require('chai')
 var expect = chai.expect
 var clientUtils = require('../../utils/client')
 var commonUtils = require('../../utils/commonUtils')
-var connection = require('../../../../src/lib/corbelConnection')
+var connection = require('../../../../src/lib/connectors/corbel')
 
 function test (server) {
   describe('Upsert phrase', function () {

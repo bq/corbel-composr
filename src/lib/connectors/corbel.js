@@ -3,8 +3,9 @@
 var corbel = require('corbel-js')
 var config = require('config')
 var _ = require('lodash')
-var ComposrError = require('./ComposrError')
-var logger = require('../utils/composrLogger')
+var ComposrError = require('../ComposrError')
+var logger = require('../../utils/composrLogger')
+var https = require('https')
 
 var PHRASES_COLLECTION = 'composr:Phrase'
 var SNIPPETS_COLLECTION = 'composr:Snippet'
@@ -46,7 +47,38 @@ var getTokenDriver = function (accessToken, emptyIfNotAuth) {
   }
 }
 
+function checkState () {
+  console.log('checking state')
+  var modules = ['iam', 'resources', 'assets', 'evci']
+  var path = config.get('corbel.options.urlBase')
+
+  var result = {}
+
+  var promises = modules.map(function (module) {
+    return new Promise(function (resolve) {
+      // Remove the version (v1.0) from the urlBase and add '/version'
+      var versionPath = path.replace(new RegExp('(.*/)[^/]+/?$'), '$1')
+          .replace('{{module}}', module) + '/version'
+
+      https.get(versionPath, function (res) {
+        result[module] = Math.floor(res.statusCode / 100) === 2
+        resolve()
+      })
+        .on('error', function () {
+          result[module] = false
+          resolve()
+        })
+    })
+  })
+
+  return Promise.all(promises)
+    .then(function () {
+      return result
+    })
+}
+
 module.exports.SNIPPETS_COLLECTION = SNIPPETS_COLLECTION
 module.exports.PHRASES_COLLECTION = PHRASES_COLLECTION
 module.exports.extractDomain = extractDomain
 module.exports.getTokenDriver = getTokenDriver
+module.exports.checkState = checkState

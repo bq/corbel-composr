@@ -1,6 +1,6 @@
 'use strict'
 
-var corbelConnection = require('./corbelConnection')
+var corbelConnection = require('./connectors/corbel')
 var amqp = require('amqplib')
 var config = require('config')
 var logger = require('../utils/composrLogger')

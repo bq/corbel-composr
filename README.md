@@ -353,3 +353,8 @@ npm install -g node-inspector
 * [composr-core](https://github.com/corbel-platform/composr-core)
 * [corbel-js](https://github.com/corbel-platform/corbel-js) API
 * [RAML](http://raml.org/) for phrase definition
+
+
+### TODO LIST
+
+- Separate the hooks in different modules. Allow enabling o disabling hoooks via server configuration.

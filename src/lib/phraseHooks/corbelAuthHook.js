@@ -1,5 +1,5 @@
 'use strict'
-var connection = require('../corbelConnection')
+var connection = require('../connectors/corbel')
 var ComposrError = require('../ComposrError')
 var logger = require('../../utils/composrLogger')
 var config = require('config')
