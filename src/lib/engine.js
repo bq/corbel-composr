@@ -166,6 +166,9 @@ var engine = {
       worker = new WorkerClass(engine, serverID)
 
       if (localMode) {
+        logger.info('>>> Launching server in local mode')
+        logger.info('        No RabbitMQ connection will be stablished')
+        logger.info('        It will not fetch endpoints from Corbel')
         engine.launchWithoutData(app, {resolve, reject}, function () {
           // engine.tryToFindLocalPhrases()
           console.log('... I want to load phrases and snippets from the current directory')
@@ -186,7 +189,7 @@ var engine = {
       })
 
       if (!worker.canConnect()) {
-        logger.info('>>> RabbitMQ worker will not be connected')
+        logger.info('>>> RabbitMQ worker will not be connectLed')
       } else {
         worker.init()
       }

@@ -1,6 +1,6 @@
 'use strict'
 
-var redis = require('node-redis')
+var redis = require('redis')
 var config = require('config')
 var logger = require('../../utils/composrLogger')
 var client
@@ -29,11 +29,33 @@ function init (cbError) {
     .createClient(config.get('redis.port'), config.get('redis.host'), null)
 
   client.on('error', function (e) {
+    client.quit()
+    client = null
     cbError(e)
   })
 }
 
+function set (key, value) {
+  client.set(key, value, redis.print)
+}
+
+function get (key) {
+  return new Promise(function (resolve, reject) {
+    client.get(key, function (err, val) {
+      if (err) {
+        return reject(err)
+      }
+      resolve(val) // Vall is null if the key is missing
+    })
+  })
+}
+
+function del () {
+}
+
 module.exports = {
-  client: client,
+  set: set,
+  get: get,
+  del: del,
   checkState: checkState
 }

@@ -18,7 +18,7 @@ function Worker (engine, serverID) {
     config.get('rabbitmq.host') + ':' + config.get('rabbitmq.port') + '?heartbeat=' +
     config.get('rabbitmq.heartbeat')
 
-  logger.info('RabbitMQ heartbeat at', config.get('rabbitmq.heartbeat'))
+  logger.debug('RabbitMQ heartbeat at', config.get('rabbitmq.heartbeat'))
 
   this.workerID = serverID
   this.connectionStatus = false

@@ -57,7 +57,7 @@ function checkState (timeout) {
     return new Promise(function (resolve) {
       // Remove the version (v1.0) from the urlBase and add '/version'
       var versionPath = path.replace(new RegExp('(.*/)[^/]+/?$'), '$1')
-          .replace('{{module}}', module) + '/version'
+          .replace('{{module}}', module) + 'version'
 
       logger.info('Checking for external service', module, ': ', versionPath)
 

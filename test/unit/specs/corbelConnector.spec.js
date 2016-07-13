@@ -3,7 +3,6 @@
 
 var options = null
 var config = require('config')
-var path = require('path')
 var nock = require('nock')
 var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
@@ -14,26 +13,22 @@ var corbelConnector = require('../../../src/lib/connectors/corbel')
 chai.should()
 chai.use(chaiAsPromised)
 
-describe('Engine services checking', function () {
+describe('Corbel Connector', function () {
   this.timeout(10 * 1000)
 
   var baseUrl = config.get('corbel.options.urlBase')
-  var retries = config.get('services.retries')
-  var time = config.get('services.time')
+  // var retries = config.get('services.retries')
+  // var time = config.get('services.time')
   var domain = baseUrl.substring(0, baseUrl.indexOf('{') - 1)
-  var engineAbsPath = null
   var mySandbox = sinon.sandbox.create()
-  var modules = ['iam', 'resources']
+  // var modules = ['iam', 'resources']
 
-  describe.only('Services checking', function () {
-    var mySandbox = sinon.sandbox.create()
+  afterEach(function () {
+    mySandbox.restore()
+  })
 
-    afterEach(function(){
-      mySandbox.restore()
-    })
-
-    it('Retries connection when one endpoint does not work on first time', function (done) {
-        
+  describe('Services checking', function () {
+    it.only('Ccon Retries connection when one endpoint does not work on first time', function (done) {
       var stubCheckStatus = mySandbox.stub(corbelConnector, 'checkState')
 
       var resultOk = {
@@ -47,23 +42,26 @@ describe('Engine services checking', function () {
         b: true,
         c: true
       }
+
       stubCheckStatus.onCall(0).returns(resultBad)
       stubCheckStatus.onCall(1).returns(resultBad)
       stubCheckStatus.onCall(2).returns(resultBad)
       stubCheckStatus.onCall(3).returns(resultBad)
       stubCheckStatus.returns(resultOk)
 
-      corbelConnector._waitUntilCorbelModulesReady(50, 3)
+      corbelConnector._waitUntilCorbelModulesReady(3, 50)
         .should.be.rejected
         .then(function () {
-          engine.waitUntilCorbelIsReady(50, 3)
+          corbelConnector._waitUntilCorbelModulesReady(3, 50)
             .should.be.fulfilled
         })
         .should.notify(done)
     })
 
-    describe('Service requests', function () {
-      it('when request timeout is fired promise should be rejected', function (done) {
+    describe('Check state', function () {
+      it('when request timeout is fired promise should mark some modules as failure', function (done) {
+        var time = 1000
+
         nock(domain, options)
           .get('/iam/version')
           .delayConnection(time)
@@ -72,9 +70,10 @@ describe('Engine services checking', function () {
           .delayConnection(time)
           .reply(200)
 
-        Promise.all(engine.initServiceCheckingRequests(modules, 0))
-          .should.be.rejected
-          .then(function () {
+        corbelConnector.checkState(200)
+          .should.be.fulfilled
+          .then(function (results) {
+            console.log(results)
             expect(nock.isDone()).to.be.true
             nock.cleanAll()
           })
@@ -88,9 +87,10 @@ describe('Engine services checking', function () {
           .get('/resources/version')
           .replyWithError('An awful error')
 
-        Promise.all(engine.initServiceCheckingRequests(modules, 0))
-          .should.be.rejected
-          .then(function () {
+        corbelConnector.checkState(200)
+          .should.be.fulfilled
+          .then(function (results) {
+            console.log(results)
             expect(nock.isDone()).to.be.true
             nock.cleanAll()
           })
@@ -104,9 +104,10 @@ describe('Engine services checking', function () {
           .get('/resources/version')
           .reply(200)
 
-        Promise.all(engine.initServiceCheckingRequests(modules, 5000))
+        corbelConnector.checkState(200)
           .should.be.fulfilled
-          .then(function () {
+          .then(function (results) {
+            console.log(results)
             expect(nock.isDone()).to.be.true
             nock.cleanAll()
           })
@@ -122,9 +123,10 @@ describe('Engine services checking', function () {
           .get('/resources/version')
           .reply(200, jsonResponse)
 
-        Promise.all(engine.initServiceCheckingRequests(modules, 5000))
+        corbelConnector.checkState(200)
           .should.be.fulfilled
-          .then(function () {
+          .then(function (results) {
+            console.log(results)
             expect(nock.isDone()).to.be.true
             nock.cleanAll()
           })
@@ -138,9 +140,10 @@ describe('Engine services checking', function () {
           .get('/resources/version')
           .reply(400)
 
-        Promise.all(engine.initServiceCheckingRequests(modules, 0))
+        corbelConnector.checkState(200)
           .should.be.rejected
-          .then(function () {
+          .then(function (results) {
+            console.log(results)
             expect(nock.isDone()).to.be.true
             nock.cleanAll()
           })
@@ -162,7 +165,7 @@ describe('Engine services checking', function () {
             'Content-Type': 'application/json'
           })
 
-        Promise.all(engine.initServiceCheckingRequests(modules, 0))
+        corbelConnector.checkState(200)
           .should.be.rejected
           .then(function () {
             expect(nock.isDone()).to.be.true
@@ -183,7 +186,7 @@ describe('Engine services checking', function () {
             'Content-Type': 'application/html'
           })
 
-        Promise.all(engine.initServiceCheckingRequests(modules, 0))
+        corbelConnector.checkState(200)
           .should.be.rejected
           .then(function () {
             expect(nock.isDone()).to.be.true
