@@ -2,7 +2,7 @@
 
 var cacheModule = require('../modules/cache')
 
-module.exports.cache = function (phraseModel) {
+module.exports.cache = function (phraseModel, verb) {
   return function (req, res, next) {
     var authHeader = req.header('Authorization')
 

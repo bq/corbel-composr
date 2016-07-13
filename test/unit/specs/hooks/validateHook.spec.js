@@ -102,7 +102,11 @@ describe('Validate hook', function () {
       var res = {}
       var next = sinon.spy()
 
-      return validateHook(doc)(req, res, next)
+      var model = {
+        getDoc: () => doc
+      }
+
+      return validateHook(model)(req, res, next)
         .then(function () {
           expect(next.calledOnce).to.be.true
           var error = next.args[0][0]
@@ -126,7 +130,11 @@ describe('Validate hook', function () {
       var res = {}
       var next = sinon.spy()
 
-      return validateHook(doc)(req, res, next)
+      var model = {
+        getDoc: () => doc
+      }
+
+      return validateHook(model)(req, res, next)
         .then(function () {
           expect(next.calledOnce).to.be.true
           var error = next.args[0][0]
@@ -148,8 +156,11 @@ describe('Validate hook', function () {
     }
     var res = {}
     var next = sinon.spy()
+    var model = {
+      getDoc: () => getMethodDoc
+    }
 
-    return validateHook(getMethodDoc)(req, res, next)
+    return validateHook(model)(req, res, next)
       .then(function () {
         expect(next.calledOnce).to.be.true
         var error = next.args[0][0]
@@ -167,7 +178,11 @@ describe('Validate hook', function () {
     var res = {}
     var next = sinon.spy()
 
-    return validateHook(getMethodDoc)(req, res, next)
+    var model = {
+      getDoc: () => getMethodDoc
+    }
+
+    return validateHook(model)(req, res, next)
       .then(function () {
         expect(next.calledOnce).to.be.true
         var error = next.args[0][0]
@@ -187,7 +202,11 @@ describe('Validate hook', function () {
     var res = {}
     var next = sinon.spy()
 
-    return validateHook(postMethodDoc)(req, res, next)
+    var model = {
+      getDoc: () => postMethodDoc
+    }
+
+    return validateHook(model)(req, res, next)
       .then(function () {
         expect(next.calledOnce).to.be.true
         var error = next.args[0][0]
@@ -204,7 +223,11 @@ describe('Validate hook', function () {
     var res = {}
     var next = sinon.spy()
 
-    return validateHook(postMethodDoc)(req, res, next)
+    var model = {
+      getDoc: () => postMethodDoc
+    }
+
+    return validateHook(model)(req, res, next)
       .then(function () {
         expect(next.calledOnce).to.be.true
         var error = next.args[0][0]

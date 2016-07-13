@@ -39,7 +39,7 @@ module.exports.getHooks = function (phraseModel, verb) {
     var functions = _.map(phraseModel.getMiddlewares(verb), function (hookId) {
       if (hooks[hookId]) {
         logger.info('Setting ' + hooks[hookId].description + ' for phrase:', phraseModel.getId())
-        return hooks[hookId].hookFunction(phraseModel.getDoc(verb))
+        return hooks[hookId].hookFunction(phraseModel, verb)
       } else {
         logger.warn('Hook ' + hookId + ' not found for phrase:', phraseModel.getId())
         return null

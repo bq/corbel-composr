@@ -40,38 +40,6 @@ describe('Rabbit worker', function () {
     sandbox.restore()
   })
 
-  it('an error is returned if Worker is instantiated with an invalid engine', function () {
-    var invalidEngine = {}
-    expect(function () {
-      return new WorkerClass(invalidEngine)
-    }).to.throw('error:worker:engine')
-  })
-
-  it('an error is returned if Worker is instantiated without engine', function () {
-    expect(function () {
-      return new WorkerClass()
-    }).to.throw('error:worker:engine')
-  })
-
-  it('isValidEngine returns true if its sended a valid engine', function () {
-    var validEngine = {
-      composr: '',
-      snippetsCollection: '',
-      phrasesCollection: ''
-    }
-
-    expect(WorkerClass.prototype.isValidEngine(validEngine)).to.be.equal(true)
-  })
-
-  it('isValidEngine returns false if its sended an invalid engine', function () {
-    var invalidEngine = {}
-    expect(WorkerClass.prototype.isValidEngine(invalidEngine)).to.be.equal(false)
-  })
-
-  it('isValidEngine returns false if its called without an engine', function () {
-    expect(WorkerClass.prototype.isValidEngine()).to.be.equal(false)
-  })
-
   it('isPhrase returns false if its sended an invalid type', function () {
     expect(WorkerClass.prototype.isPhrase('invalid')).to.be.equal(false)
   })

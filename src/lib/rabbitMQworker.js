@@ -8,10 +8,6 @@ var hub = require('./hub')
 var utils = require('../utils/phraseUtils')
 
 function Worker (engine, serverID) {
-  if (!this.isValidEngine(engine)) {
-    throw new Error('error:worker:engine invalid engine')
-  }
-
   this.engine = engine
   this.connUrl = 'amqp://' + encodeURIComponent(config.get('rabbitmq.username')) + ':' +
     encodeURIComponent(config.get('rabbitmq.password')) + '@' +
@@ -27,12 +23,6 @@ function Worker (engine, serverID) {
 Worker.prototype.canConnect = function () {
   return config.get('rabbitmq.host') && config.get('rabbitmq.port') &&
   config.get('rabbitmq.username') && config.get('rabbitmq.password')
-}
-
-Worker.prototype.isValidEngine = function (engine) {
-  return !(!engine) && (engine.hasOwnProperty('composr') &&
-  engine.hasOwnProperty('snippetsCollection') &&
-  engine.hasOwnProperty('phrasesCollection'))
 }
 
 Worker.prototype.isPhrase = function (type) {
@@ -205,7 +195,7 @@ Worker.prototype.retryInit = function (waitTime) {
   }, time)
 }
 
-Worker.prototype.init = function () {
+Worker.prototype.init = function (cb) {
   var conn
   var that = this
   logger.info('Creating RabbitMQ-worker with ID', that.workerID)
@@ -232,7 +222,9 @@ Worker.prototype.init = function () {
           that.connectionStatus = true
           logger.info('RabbitMQ-worker up, with ID', that.workerID)
           // emit loaded worker
-          hub.emit('load:worker')
+          if (cb) {
+            cb()
+          }
         })
         .catch(function (error) {
           logger.error('RabbitMQ-worker error creating channel', error, 'with ID', that.workerID)

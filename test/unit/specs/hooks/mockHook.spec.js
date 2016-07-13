@@ -37,7 +37,10 @@ describe('Mock hook', function () {
       {responses: {200: {body: {'application/json': {}}}}}]
 
     docs.forEach(function (doc) {
-      mockHook(doc)(req, res, next)
+      var model = {
+        getDoc: () => doc
+      }
+      mockHook(model)(req, res, next)
       expect(next.calledWith()).to.be.true
     })
   })
@@ -51,7 +54,11 @@ describe('Mock hook', function () {
 
     var methodDoc = docTemplate(400, null, {home: 'Freemen'})
 
-    mockHook(methodDoc)(req, res, next)
+    var model = {
+      getDoc: () => methodDoc
+    }
+
+    mockHook(model)(req, res, next)
 
     expect(next.calledWith()).to.be.true
   })
@@ -67,8 +74,12 @@ describe('Mock hook', function () {
     var example = {result: 30}
     var methodDoc = docTemplate(status, null, example)
 
+    var model = {
+      getDoc: () => methodDoc
+    }
+
     // Call
-    mockHook(methodDoc)(req, res, next)
+    mockHook(model)(req, res, next)
 
     // Assert
     expect(sendSpy.calledWith(status, example)).to.be.true
@@ -85,8 +96,12 @@ describe('Mock hook', function () {
     var example = {home: 'Atreides'}
     var methodDoc = docTemplate(status, null, example)
 
+    var model = {
+      getDoc: () => methodDoc
+    }
+
     // Call
-    mockHook(methodDoc)(req, res, next)
+    mockHook(model)(req, res, next)
 
     // Assert
     expect(sendSpy.calledWith(status, example)).to.be.true
@@ -116,8 +131,12 @@ describe('Mock hook', function () {
     }
     var methodDoc = docTemplate(status, schema, null)
 
+    var model = {
+      getDoc: () => methodDoc
+    }
+
     // Call
-    mockHook(methodDoc)(req, res, next)
+    mockHook(model)(req, res, next)
 
     // Assert
     expect(sendSpy.calledOnce).to.be.true

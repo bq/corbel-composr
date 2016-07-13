@@ -62,8 +62,17 @@ function checkState (timeout) {
       logger.info('Checking for external service', module, ': ', versionPath)
 
       var request = https.get(versionPath, function (res) {
-        result[module] = Math.floor(res.statusCode / 100) === 2
-        resolve()
+        var responseData = ''
+
+        res.on('data', function (chunk) {
+          responseData += chunk
+        })
+
+        res.on('end', function () {
+          var bodyContainsError = (responseData.indexOf('error') > -1 || responseData.indexOf('err') > -1)
+          result[module] = Math.floor(res.statusCode / 100) === 2 && !bodyContainsError
+          resolve()
+        })
       })
         .on('error', function () {
           result[module] = false
@@ -84,8 +93,8 @@ function checkState (timeout) {
     })
 }
 
-function waitUntilCorbelIsReady () {
-  var retries = config.get('services.retries')
+function waitUntilCorbelIsReady (maxServicesRetries) {
+  var retries = maxServicesRetries || config.get('services.retries')
   var requestTimeout = config.get('services.timeout')
 
   return _waitUntilCorbelModulesReady(retries, requestTimeout)

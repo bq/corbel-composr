@@ -3,13 +3,15 @@
 var logger = require('../utils/composrLogger')
 var composr = require('composr-core')
 var corbelConnection = require('./connectors/corbel')
-var https = require('https')
 var hub = require('./hub')
 var config = require('config')
 var WorkerClass = require('./rabbitMQworker')
 var worker
 
 var engine = {
+  initialized: false,
+  composr: composr,
+
   /* ***********************************************************
    * - Suscribes to the Composr-Core log events
    * @return nothing
@@ -39,74 +41,6 @@ var engine = {
     engine.composr.events.on('metrics', 'CorbelComposr', function (options) {
       hub.emit('metrics', options.domain, options.data)
     })
-  },
-
-  /* ***********************************************************
-   * - Deletes timeout handler
-   * - Resolves service checking request if response is sent from server
-   * - Rejects service checking request if 'error' evt or timeout while waiting for response
-   * @param  {Function} resolve Services to check
-   * @param  {Function} reject Timeout before reject promise
-   * @param  {String} module service currently checking
-   * @param  {Object} promiseTimeoutHandler Timeout handler
-   * @return nothing
-   *************************************************************/
-
-  resolveOrRejectServiceCheckingRequest: function (resolve, reject, request, module, promiseTimeoutHandler, rejectMessage, url) {
-    if (promiseTimeoutHandler) {
-      clearTimeout(promiseTimeoutHandler)
-    }
-    if (resolve) {
-      logger.info('External service', module, 'is UP', url)
-      resolve()
-    } else if (reject) {
-      rejectMessage = rejectMessage || ''
-      logger.error('External service', module, 'is DOWN', url)
-      reject(rejectMessage)
-    }
-  },
-
-  /* ***********************************************************
-   * - Initializes how a request is made
-   * @param  {String} url to send request
-   * @param  {Function} to execute when request is successfully replied
-   * @param  {Function} to execute when request is not replied
-   * @param  {Object} that holds a reference to request
-   * @param  {Function} reference to timeout for this request
-   * @param  {String} data that server sends
-   *************************************************************/
-
-  setUpRequest: function (url, module, resolve, reject, serviceCheckingRequestTimeout) {
-    var promiseTimeoutHandler
-    var request = https.get(url, function (res) {
-      var responseData = ''
-      res.on('data', function (chunk) {
-        responseData += chunk
-      })
-      res.on('end', function () {
-        if (engine.resolveOrRejectServiceCheckingRequest) {
-          var isValidResponse = (res.statusCode === 200)
-          var bodyContainsError = (responseData.indexOf('error') > -1 || responseData.indexOf('err') > -1)
-          if (isValidResponse && !bodyContainsError) {
-            engine.resolveOrRejectServiceCheckingRequest(resolve, null, request, module, promiseTimeoutHandler, null, url)
-          } else {
-            engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'JSON error', url)
-          }
-        }
-      })
-    })
-      .on('error', function (err) {
-        // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved
-        if (engine.resolveOrRejectServiceCheckingRequest) {
-          engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err, url)
-        }
-      })
-
-    promiseTimeoutHandler = setTimeout(function () {
-      request.abort()
-      engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired', url)
-    }, serviceCheckingRequestTimeout)
-    return request
   },
 
   // Returns the credentials for the composr-core initialization
@@ -158,7 +92,7 @@ var engine = {
    * @param  {[type]} app [description]
    * @return promise
    */
-  init: function (app, localMode, serverID) {
+  init: function (app, localMode, serverID, maxServicesRetries) {
     return new Promise(function (resolve, reject) {
       // Suscribe to log events
       engine.suscribeToCoreEvents()
@@ -176,11 +110,12 @@ var engine = {
         return
       }
 
-      hub.on('corbel:ready', function () {
+      // Mandatory pings that will trigger the execution of the server
+      hub.once('corbel:ready', function () {
         engine.launchWithData(app, {resolve, reject})
       })
 
-      hub.on('corbel:not:ready', function () {
+      hub.once('corbel:not:ready', function () {
         // For some reason corbel wasnt up, so we wait until it is ready. but for the moment we start the server
         engine.launchWithoutData(app, {resolve, reject}, function () {
           logger.info('The server is launched, delaying the fetch data')
@@ -188,24 +123,28 @@ var engine = {
         })
       })
 
-      if (!worker.canConnect()) {
-        logger.info('>>> RabbitMQ worker will not be connectLed')
-      } else {
-        worker.init()
-      }
-
+      // Make the necessary calls that will result in the 'corbel:ready' or 'corbel:not:ready' events
       if (config.get('rabbitmq.forceconnect') && worker.canConnect()) {
         logger.info('>>> The server will start after RabbitMQ is connected')
         logger.info('>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
           'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
-        hub.once('load:worker', function () {
-          engine._init()
-        })
+
+        engine.initWorker(worker, engine.pingCorbel)
       } else {
-        logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
-        engine._init()
+        if (!worker.canConnect()) {
+          logger.info('>>> RabbitMQ worker will not be connectLed')
+        } else {
+          logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
+          engine.initWorker(worker)
+        }
+
+        engine.pingCorbel(maxServicesRetries)
       }
     })
+  },
+
+  initWorker: function (worker, cb) {
+    worker.init(cb)
   },
 
   launchWithData: function (app, promise) {
@@ -238,8 +177,8 @@ var engine = {
       .catch(promise.reject)
   },
 
-  _init: function () {
-    corbelConnection.waitUntilCorbelIsReady()
+  pingCorbel: function (maxServicesRetries) {
+    corbelConnection.waitUntilCorbelIsReady(maxServicesRetries)
       .then(function () {
         hub.emit('corbel:ready')
       })
@@ -253,9 +192,4 @@ var engine = {
   }
 }
 
-engine.initialized = false
-engine.phrasesCollection = 'composr:Phrase'
-engine.snippetsCollection = 'composr:Snippet'
-engine.virtualDomainsCollection = 'composr:VirtualDomain'
-engine.composr = composr
 module.exports = engine

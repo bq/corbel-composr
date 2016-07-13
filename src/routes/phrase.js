@@ -2,9 +2,10 @@
 
 var BaseResource = require('./BaseResource.endpoint')
 var engine = require('../lib/engine')
+var corbelConnector = require('../lib/connectors/corbel')
 
 var Phrase = new BaseResource({
-  collection: engine.phrasesCollection,
+  collection: corbelConnector.PHRASES_COLLECTION,
   itemName: 'phrase',
   manager: engine.composr.Phrase
 })
