@@ -34,6 +34,15 @@ function analyzePhrase (acc) {
   }
 }
 
+function doCheckCache (routeItem, response, authorization) {
+  console.log(response.body, response.status)
+
+  if (routeItem.phrase.json[routeItem.verb].middlewares) {
+    console.log('has cache')
+    console.log(routeItem.phrase.json[routeItem.verb].middlewares)
+  }
+}
+
 /**
  * [executePhraseById description]
  * @param  {[type]}   req       [description]
@@ -60,6 +69,7 @@ function executePhraseById (req, res, next, routeItem) {
     .then(function (response) {
       enforceGC()
       hub.emit('phrase:execution:end', response.status, routeItem.domain, routeItem.id, routeItem.verb)
+      doCheckCache(routeItem, response, req.userId)
       return next()
     })
     .catch(function (err) {
@@ -134,7 +144,6 @@ function bindRoutes (server, routeObjects) {
   for (var i = routeObjects.length - 1; i >= 0; i--) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
-      var urlV1 = '/v1.0' + url
 
       // Mandatory hooks
       var corbelDriverSetupHook = phraseHooks.get('corbel-driver-setup')
@@ -157,23 +166,6 @@ function bindRoutes (server, routeObjects) {
       })
 
       server[item.restifyVerb].apply(server, args)
-
-      // Support also v1.0 paths for the moment
-      var argsV1 = [{
-        path: urlV1,
-        version: item.version
-      }]
-
-      if (hooks) {
-        argsV1 = argsV1.concat(hooks)
-      }
-      argsV1 = argsV1.concat(corbelDriverSetupHook)
-      argsV1 = argsV1.concat(metricsHook)
-      argsV1 = argsV1.concat(function bindRouteV1 (req, res, next) {
-        executePhraseById(req, res, next, item)
-      })
-
-      server[item.restifyVerb].apply(server, argsV1)
     })(routeObjects[i])
   }
 }

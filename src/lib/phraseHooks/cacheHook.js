@@ -2,7 +2,7 @@
 
 var cacheModule = require('../modules/cache')
 
-module.exports.cache = function (phraseModel, verb) {
+module.exports = function (phraseModel, verb) {
   return function (req, res, next) {
     var authHeader = req.header('Authorization')
 
@@ -10,10 +10,12 @@ module.exports.cache = function (phraseModel, verb) {
 
     var path = req.getHref()
 
-    if (!req.get('Ignore-Cache') && phraseModel.get('cache')) {
+    if (!req.header('Ignore-Cache') && phraseModel.json.cache && phraseModel.json.cache[verb]) {
+      console.log('GOING THROUG CACHE STUFF')
       cacheModule.get(path)
         .then(function (response) {
           if (response) {
+            console.log('FOUND RESPONSE,', response)
             res.send(parseInt(response.status, 10), JSON.parse(response.body))
           }
           return next()

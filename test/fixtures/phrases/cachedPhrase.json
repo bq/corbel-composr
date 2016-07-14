@@ -1,0 +1,30 @@
+{
+    "url": "cache",
+    "version": "2.3.3",
+    "get": {
+        "code": "res.status(200).send(Date.now())",
+        "cache": {
+            "type" : "user"
+        },
+        "middlewares": [
+          "cache"
+        ],
+        "doc": {
+            "description": "Phrase for testing purposes"
+        }
+    },
+    "post": {
+        "code": "res.status(200).send('OK')",
+        "cache": {
+            "invalidate" : [
+                "get-cache"
+            ]
+        },
+        "middlewares": [
+          "cache"
+        ],
+        "doc": {
+            "description": "Phrase for testing purposes"
+        }
+    }
+}

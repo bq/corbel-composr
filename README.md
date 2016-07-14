@@ -255,7 +255,7 @@ You can specify them on the phrase's spec at a method level like this (order is 
   "url": "resource",
   "get": {
     "middlewares": [
-      "auth"
+      "auth",
       "validate", 
       "mock"
     ],
@@ -270,6 +270,52 @@ Among the available middlewares you can find:
 - 'corbel-auth-user': Automatic corbel authentication for users. A new attribute 'userId' will be available on the phrase for a succeeding user token.
 - 'validate': Automatic validation of path params, query params and body based on documentations' schema
 - 'mock': Mocked responses based on schema or example from documentation 
+
+### Cache
+
+Composr instances are connected to a redis machine that serves as a dynamic cache system.
+
+In order to accomplish cache and cache invalidation, phrase models can define some rules:
+
+```
+{
+  "url": "resource",
+  "get": {
+    "middlewares": [
+      "cache"
+    ],
+    "cache": {
+      "type" : "user",
+      "ttl": "5m"
+    },
+    "doc": { ... }
+  }
+  "post": {
+    "middlewares": [
+      "cache"
+    ],
+    "cache": {
+      "invalidate": ["get-resource"]
+    },
+    "doc": {...}
+  }
+...
+}
+```
+
+The phrase model uses the `cache` middleware in the verbs `GET` and `POST`. In the `GET` method the cache will store in Redis a key for each user with a *time to live* of five minutes. 
+
+When a request is made to the `POST` method, the `cache` middleware will hit in, too, but in this case it will invalidate the `cache` of the `GET` method for the `resource` url.
+
+Cache can be used for:
+  - Client requests
+  - User requests
+
+The cache for client request is the most common type of cache, client requests are made with a `client token` (which refers normally to a public resource), or without token at all. 
+
+The cache for user requests should be used carefully because it will create a Redis key-value pair for each user. 
+
+Each cached endpoint can have a `ttl` (time to live) configured in 
 
 ## Logs
 
