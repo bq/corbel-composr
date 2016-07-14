@@ -401,6 +401,15 @@ npm install -g node-inspector
 * [RAML](http://raml.org/) for phrase definition
 
 
+## Other requirements
+
+A Redis instance, if you want to run it locally with docker:
+
+```
+sudo docker run --name some-redis -p 6379:6379 -d redis
+```
+
+
 ### TODO LIST
 
 - Separate the hooks in different modules. Allow enabling o disabling hoooks via server configuration.

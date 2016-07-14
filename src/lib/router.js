@@ -34,12 +34,17 @@ function analyzePhrase (acc) {
   }
 }
 
-function doCheckCache (routeItem, response, authorization) {
-  console.log(response.body, response.status)
-
-  if (routeItem.phrase.json[routeItem.verb].middlewares) {
-    console.log('has cache')
-    console.log(routeItem.phrase.json[routeItem.verb].middlewares)
+function doCheckCache (routeItem, response, path, authorization) {
+  if (routeItem.phrase.json[routeItem.verb].middlewares && routeItem.phrase.json[routeItem.verb].middlewares.indexOf('cache') !== -1) {
+    switch (routeItem.verb) {
+      case 'get':
+        console.log('SHOULD UPDATE CACHE', path, response)
+        hub.emit('cache-add', response, path, authorization)
+        break
+      default:
+        console.log('SHOULD CHECK IF DELETE CACHE')
+        hub.emit('cache-remove', path, authorization)
+    }
   }
 }
 
@@ -69,7 +74,7 @@ function executePhraseById (req, res, next, routeItem) {
     .then(function (response) {
       enforceGC()
       hub.emit('phrase:execution:end', response.status, routeItem.domain, routeItem.id, routeItem.verb)
-      doCheckCache(routeItem, response, req.userId)
+      doCheckCache(routeItem, response, req.getHref(), req.header('Authorization'))
       return next()
     })
     .catch(function (err) {
