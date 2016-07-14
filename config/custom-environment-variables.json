@@ -8,7 +8,10 @@
         "port": "RABBITMQ_PORT",
         "username": "RABBITMQ_USERNAME",
         "password": "RABBITMQ_PASSWORD",
-        "forceconnect": "RABBITMQ_FORCE_CONNECT"
+        "forceconnect":  {
+            "__name": "RABBITMQ_FORCE_CONNECT",
+            "__format": "boolean"
+        }
     },
 
     "services": {
@@ -29,31 +32,61 @@
     },
 
     "bunyan": {
-        "log" : "BUNYAN_LOG",
-        "stdout": "BUNYAN_STDOUT",
-        "streamServer": "BUNYAN_STREAM_SERVER"
+        "log" : {
+            "__name": "BUNYAN_LOG",
+            "__format": "boolean"
+        },
+        "stdout": {
+            "__name": "BUNYAN_STDOUT",
+            "__format": "boolean"
+        },
+        "streamServer": {
+            "__name": "BUNYAN_STREAM_SERVER",
+            "__format": "boolean"
+        }
     },
 
     "composrLog": {
-        "accessLog" : "ACCESS_LOG",
+        "accessLog" : {
+            "__name": "ACCESS_LOG",
+            "__format": "boolean"
+        },
         "accessLogFile" : "ACCESS_LOG_FILE",
         "logLevel": "LOG_LEVEL",
         "logFile": "LOG_FILE",
-        "syslog" : "SYSLOG"
+        "syslog" : {
+            "__name": "SYSLOG",
+            "__format": "boolean"
+        }
     },
 
     "newrelic": {
-        "enabled": "NRACTIVE",
+        "enabled": {
+            "__name": "NRACTIVE",
+            "__format": "boolean"
+        },
         "name": "NRAPPNAME",
         "key": "NRAPIKEY"
     },
 
-    "keymetrics": "KEYMETRICS",
+    "keymetrics": {
+        "__name": "KEYMETRICS",
+        "__format": "boolean"
+    },
     
     "execution": {
-        "vm": "EXEC_WITH_VM",
-        "gc": "ENFORCE_GC",
+        "vm": {
+            "__name": "EXEC_WITH_VM",
+            "__format": "boolean"
+        },
+        "gc":  {
+            "__name": "ENFORCE_GC",
+            "__format": "boolean"
+        },
         "timeout": "TIMEOUT",
-        "local": "LOCAL_MODE"
+        "local": {
+            "__name": "LOCAL_MODE",
+            "__format": "boolean"
+        }
     }
 }
