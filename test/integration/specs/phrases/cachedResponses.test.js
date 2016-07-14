@@ -31,6 +31,42 @@ function test (server) {
           done(err)
         })
     })
+
+    it('requesting again causes the cached response to come back', function (done) {
+      request(server.app)
+        .get('/cache:domain/cache')
+        .expect(200)
+        .end(function (err, response) {
+          expect(response.body).to.be.a('number')
+          previousDate = response.body
+          console.log(previousDate)
+          done(err)
+        })
+    })
+
+    it('calling post invalidates the cache', function (done) {
+      request(server.app)
+        .post('/cache:domain/cache')
+        .expect(200)
+        .end(function (err, response) {
+          expect(response.body).to.be.a('string')
+          previousDate = response.body
+          console.log(previousDate)
+          done(err)
+        })
+    })
+
+    it('once invalidated the result is new', function (done) {
+      request(server.app)
+        .get('/cache:domain/cache')
+        .expect(200)
+        .end(function (err, response) {
+          expect(response.body).to.be.a('number')
+          previousDate = response.body
+          console.log(previousDate)
+          done(err)
+        })
+    })
   })
 }
 

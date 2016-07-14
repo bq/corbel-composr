@@ -3,11 +3,12 @@
 var redisConnector = require('../connectors/redis')
 var logger = require('../../utils/composrLogger')
 
-function set (key, expires, value) {
-  redisConnector.set(key, {
-    expires: expires,
-    value: value
-  })
+function add (data, path, authorization) {
+  console.log('adding to cache', path)
+/* redisConnector.set(key, {
+  expires: expires,
+  value: value
+})*/
 }
 
 function get (key) {
@@ -35,13 +36,17 @@ function list () {
   // TODO
 }
 
+function remove (path, authorization) {
+  console.log('removing from cache', path)
+// redisConnector.del(key)
+}
+
 function invalidate (key) {
-  redisConnector.del(key)
 }
 
 module.exports = {
-  set: set,
   get: get,
   list: list,
-  invalidate: invalidate
+  add: add,
+  remove: remove
 }

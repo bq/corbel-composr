@@ -3,6 +3,7 @@
 var logger = require('../utils/composrLogger')
 var composr = require('composr-core')
 var corbelConnection = require('./connectors/corbel')
+var cache = require('./modules/cache')
 var hub = require('./hub')
 var config = require('config')
 var WorkerClass = require('./rabbitMQworker')
@@ -40,6 +41,19 @@ var engine = {
 
     engine.composr.events.on('metrics', 'CorbelComposr', function (options) {
       hub.emit('metrics', options.domain, options.data)
+    })
+  },
+
+  /* *********************************************************
+    Suscribe to cache module
+  ***********************************************************/
+  suscribeToCacheEvents: function () {
+    hub.on('cache-add', function (response, path, authorization) {
+      cache.add(response, path, authorization)
+    })
+
+    hub.on('cache-remove', function (path, authorization) {
+      cache.remove(path, authorization)
     })
   },
 
@@ -96,6 +110,7 @@ var engine = {
     return new Promise(function (resolve, reject) {
       // Suscribe to log events
       engine.suscribeToCoreEvents()
+      engine.suscribeToCacheEvents()
 
       worker = new WorkerClass(engine, serverID)
 
