@@ -48,13 +48,9 @@ var engine = {
     Suscribe to cache module
   ***********************************************************/
   suscribeToCacheEvents: function () {
-    hub.on('cache-add', function (response, path, authorization) {
-      cache.add(response, path, authorization)
-    })
+    hub.on('cache-add', cache.add)
 
-    hub.on('cache-remove', function (path, authorization) {
-      cache.remove(path, authorization)
-    })
+    hub.on('cache-remove', cache.remove)
   },
 
   // Returns the credentials for the composr-core initialization

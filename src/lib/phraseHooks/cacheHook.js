@@ -10,13 +10,14 @@ module.exports = function (phraseModel, verb) {
 
     var path = req.getHref()
 
-    if (!req.header('Ignore-Cache') && phraseModel.json.cache && phraseModel.json.cache[verb]) {
+    if (!req.header('Ignore-Cache') && phraseModel.json[verb].cache) {
       console.log('GOING THROUG CACHE STUFF')
-      cacheModule.get(path)
+      cacheModule.get(verb, path)
         .then(function (response) {
           if (response) {
             console.log('FOUND RESPONSE,', response)
             res.send(parseInt(response.status, 10), JSON.parse(response.body))
+            return
           }
           return next()
         })

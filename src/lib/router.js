@@ -39,7 +39,12 @@ function doCheckCache (routeItem, response, path, authorization) {
     switch (routeItem.verb) {
       case 'get':
         console.log('SHOULD UPDATE CACHE', path, response)
-        hub.emit('cache-add', response, path, authorization)
+        var cacheType = 'client'
+        var options = routeItem.phrase.json[routeItem.verb].cache
+        if (options && options.type) {
+          cacheType = options.type
+        }
+        hub.emit('cache-add', response, path, authorization, cacheType, routeItem.verb)
         break
       default:
         console.log('SHOULD CHECK IF DELETE CACHE')
