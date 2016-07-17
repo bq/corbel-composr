@@ -12,6 +12,8 @@ addons:
 env:
   global:
     - CXX=g++-4.8
+services:
+  - redis-server
 before_install: 
   - npm install -g npm
   - npm install -g istanbul
