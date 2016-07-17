@@ -59,7 +59,7 @@ function checkState (timeout) {
       var versionPath = path.replace(new RegExp('(.*/)[^/]+/?$'), '$1')
           .replace('{{module}}', module) + 'version'
 
-      logger.info('Checking for external service', module, ': ', versionPath)
+      logger.info('[Corbel-JS]', 'Checking for external service', module, ': ', versionPath)
 
       var request = https.get(versionPath, function (res) {
         var responseData = ''
@@ -113,7 +113,7 @@ function _waitUntilCorbelModulesReady (retries, requestTimeout) {
   var retryTime = config.get('services.time') * retries
 
   if (!retries) {
-    logger.error(' :( - Connection to corbel can not be completed')
+    logger.error('[Corbel-JS]', ' :( - Connection to corbel can not be completed')
     return Promise.reject()
   }
 
@@ -122,16 +122,16 @@ function _waitUntilCorbelModulesReady (retries, requestTimeout) {
       var allRunning = Object.keys(results).reduce(function (prev, module) {
         var isUp = results[module]
         var state = isUp ? 'is UP' : 'is DOWN'
-        logger.info('>>> Module', module, state)
+        logger.info('[Corbel-JS]', '>>> Module', module, state)
 
         return prev && isUp
       }, true)
 
       if (allRunning) {
-        logger.info('All services up and running!')
+        logger.info('[Corbel-JS]', 'All services up and running!')
         return true
       } else {
-        logger.info('Retrying services check after', retryTime, 'milliseconds')
+        logger.info('[Corbel-JS]', 'Retrying services check after', retryTime, 'milliseconds')
         return bouncePromise(function () {
           return _waitUntilCorbelModulesReady(retries - 1, requestTimeout)
         }, retryTime)

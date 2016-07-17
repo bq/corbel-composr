@@ -44,11 +44,11 @@ function doCheckCache (routeItem, response, path, authorization) {
 
     switch (routeItem.verb) {
       case 'get':
-        hub.emit('cache-add', path, routeItem.verb, authorization, response, cacheType)
+        hub.emit('cache-add', path, routeItem.verb, authorization, routeItem.phrase.getVersion(), response, cacheType)
         break
       default:
         // Another request deletes the 'get' path cache
-        hub.emit('cache-remove', path, 'get', authorization, cacheType)
+        hub.emit('cache-remove', path, 'get', authorization, routeItem.phrase.getVersion(), cacheType)
     }
   }
 }

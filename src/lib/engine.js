@@ -49,6 +49,10 @@ var engine = {
     Suscribe to cache module
   ***********************************************************/
   suscribeToCacheEvents: function () {
+    // TODO: temporal patch for not having duplicate events on tests
+    hub.removeAllListeners('cache-add')
+    hub.removeAllListeners('cache-remove')
+
     hub.on('cache-add', cache.add)
 
     hub.on('cache-remove', cache.remove)

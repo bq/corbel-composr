@@ -59,10 +59,13 @@ function get (key) {
       if (err) {
         return reject(err)
       }
-
+      client.keys(key, function (err, res) {
+        console.log('keys response', err, res)
+      })
       try {
         var res = val ? JSON.parse(val) : null
         val = res
+        console.log(val)
       } catch (e) {}
       resolve(val) // Vall is null if the key is missing
     })
@@ -74,7 +77,13 @@ function del (key) {
     init()
   }
 
-  client.del(key)
+  client.del(key, function () {
+    console.log('delete response', arguments)
+
+    client.keys(key, function (err, res) {
+      console.log('keys response', err, res)
+    })
+  })
 }
 
 module.exports = {

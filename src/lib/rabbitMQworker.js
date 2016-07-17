@@ -14,7 +14,7 @@ function Worker (engine, serverID) {
     config.get('rabbitmq.host') + ':' + config.get('rabbitmq.port') + '?heartbeat=' +
     config.get('rabbitmq.heartbeat')
 
-  logger.debug('RabbitMQ heartbeat at', config.get('rabbitmq.heartbeat'))
+  logger.debug('[RabbitMQ Eworker]', 'RabbitMQ heartbeat at', config.get('rabbitmq.heartbeat'))
 
   this.workerID = serverID
   this.connectionStatus = false
@@ -40,7 +40,7 @@ Worker.prototype.isSnippet = function (type) {
 Worker.prototype._addPhrase = function (domain, id) {
   return this.engine.composr.Phrase.load(id)
     .then(function (item) {
-      logger.debug('RabbitMQ-worker phrase fetched', item.id, 'registered', item.registered)
+      logger.debug('[RabbitMQ Eworker]', 'RabbitMQ-worker phrase fetched', item.id, 'registered', item.registered)
       return item.registered
     })
 }
@@ -52,7 +52,7 @@ Worker.prototype._addPhrase = function (domain, id) {
 Worker.prototype._addSnippet = function (domain, id) {
   return this.engine.composr.Snippet.load(id)
     .then(function (item) {
-      logger.debug('RabbitMQ-worker snippet fetched', item.id, 'registered', item.registered)
+      logger.debug('[RabbitMQ Eworker]', 'RabbitMQ-worker snippet fetched', item.id, 'registered', item.registered)
       return item.registered
     })
 }
@@ -75,7 +75,7 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action
   var domain = utils.extractDomainFromId(id)
   switch (action) {
     case 'DELETE':
-      logger.info('RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
+      logger.info('[RabbitMQ Eworker]', 'RabbitMQ-worker triggered DELETE event', id, 'domain:' + domain)
 
       if (itemIsPhrase) {
         this._removePhrase(domain, id)
@@ -86,22 +86,22 @@ Worker.prototype._doWorkWithPhraseOrSnippet = function (itemIsPhrase, id, action
 
     case 'CREATE':
     case 'UPDATE':
-      logger.info('RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
+      logger.info('[RabbitMQ Eworker]', 'RabbitMQ-worker triggered CREATE or UPDATE event', id, 'domain:' + domain)
 
       var promise = itemIsPhrase ? this._addPhrase(domain, id) : this._addSnippet(domain, id)
 
       promise
         .then(function (registered) {
-          logger.info('RabbitMQ-worker item registered', id, registered)
+          logger.info('[RabbitMQ Eworker]', 'RabbitMQ-worker item registered', id, registered)
         })
         .catch(function (err) {
-          logger.error('RabbitMQ-worker error: ', err.data.error, err.data.errorDescription, err.status)
+          logger.error('[RabbitMQ Eworker]', 'RabbitMQ-worker error: ', err.data.error, err.data.errorDescription, err.status)
         })
 
       break
 
     default:
-      logger.warn('RabbitMQ-worker error: wrong action ', action)
+      logger.warn('[RabbitMQ Eworker]', 'RabbitMQ-worker error: wrong action ', action)
   }
 }
 
@@ -117,7 +117,7 @@ Worker.prototype.doWork = function (ch, msg) {
     var type = message.type
     if (this.isPhrase(type) || this.isSnippet(type)) {
       var itemIsPhrase = this.isPhrase(type)
-      logger.info('RabbitMQ-worker ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
+      logger.info('[RabbitMQ Eworker]', 'RabbitMQ-worker ' + itemIsPhrase ? 'phrases' : 'snippet' + ' event:', message)
       this._doWorkWithPhraseOrSnippet(itemIsPhrase, message.resourceId, message.action)
     }
   }
@@ -177,7 +177,7 @@ Worker.prototype._closeConnection = function (connection, exitCode) {
   var that = this
   var code = exitCode | 1
   connection.close(function () {
-    logger.error('RabbitMQ-worker closing connection')
+    logger.error('[RabbitMQ Eworker]', 'RabbitMQ-worker closing connection')
     that.connectionStatus = false
     process.exit(code)
   })
@@ -198,19 +198,19 @@ Worker.prototype.retryInit = function (waitTime) {
 Worker.prototype.init = function (cb) {
   var conn
   var that = this
-  logger.info('Creating RabbitMQ-worker with ID', that.workerID)
+  logger.info('[RabbitMQ Eworker]', 'Creating RabbitMQ-worker with ID', that.workerID)
 
   that._connect()
     .then(function (connection) {
       // Bind connection errror
       connection.on('error', function (error) {
         hub.emit('rabbitmq:error', error)
-        logger.error('RabbitMQ-worker on uncaught error:', error)
+        logger.error('[RabbitMQ Eworker]', 'RabbitMQ-worker on uncaught error:', error)
         that.connectionStatus = false
       })
 
       connection.once('close', function (error) {
-        logger.error('RabbitMQ-worker on connection closed', error)
+        logger.error('[RabbitMQ Eworker]', 'RabbitMQ-worker on connection closed', error)
         that.connectionStatus = false
         that.retryInit(4000)
       })
@@ -220,14 +220,14 @@ Worker.prototype.init = function (cb) {
       that.createChannel(connection)
         .then(function () {
           that.connectionStatus = true
-          logger.info('RabbitMQ-worker up, with ID', that.workerID)
+          logger.info('[RabbitMQ Eworker]', 'RabbitMQ-worker up, with ID', that.workerID)
           // emit loaded worker
           if (cb) {
             cb()
           }
         })
         .catch(function (error) {
-          logger.error('RabbitMQ-worker error creating channel', error, 'with ID', that.workerID)
+          logger.error('[RabbitMQ Eworker]', 'RabbitMQ-worker error creating channel', error, 'with ID', that.workerID)
           if (conn) {
             that._closeConnection(conn)
           // @TODO: If cannot create channel, retry N times to create channel.
@@ -238,7 +238,7 @@ Worker.prototype.init = function (cb) {
         })
     })
     .then(null, function (err) {
-      logger.error('RabbitMQ-worker error connecting %s with ID : %s', err, that.workerID)
+      logger.error('[RabbitMQ Eworker]', 'RabbitMQ-worker error connecting %s with ID : %s', err, that.workerID)
       that.retryInit()
     })
 }
