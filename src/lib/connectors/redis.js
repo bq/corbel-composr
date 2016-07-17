@@ -69,7 +69,12 @@ function get (key) {
   })
 }
 
-function del () {
+function del (key) {
+  if (!client) {
+    init()
+  }
+
+  client.del(key)
 }
 
 module.exports = {

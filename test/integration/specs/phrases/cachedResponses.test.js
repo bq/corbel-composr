@@ -7,6 +7,8 @@ var phraseCache = require('../../../fixtures/phrases/cachedPhrase.json')
 
 function test (server) {
   describe('Cached phrase', function () {
+    this.timeout(20000)
+
     var previousDate
 
     before(function (done) {
@@ -16,7 +18,14 @@ function test (server) {
 
       server.composr.Phrase.register('cache:domain', phrases)
         .then(function (results) {
-          done()
+          request(server.app)
+            .post('/cache:domain/cache')
+            .expect(200)
+            .end(function (err, response) {
+              expect(response.body).to.be.a('string')
+              expect(response.body).to.equals('OK')
+              done(err)
+            })
         })
     })
 
@@ -27,7 +36,6 @@ function test (server) {
         .end(function (err, response) {
           expect(response.body).to.be.a('number')
           previousDate = response.body
-          console.log(previousDate)
           done(err)
         })
     })
@@ -38,8 +46,7 @@ function test (server) {
         .expect(200)
         .end(function (err, response) {
           expect(response.body).to.be.a('number')
-          previousDate = response.body
-          console.log(previousDate)
+          expect(response.body).to.equals(previousDate)
           done(err)
         })
     })
@@ -50,8 +57,7 @@ function test (server) {
         .expect(200)
         .end(function (err, response) {
           expect(response.body).to.be.a('string')
-          previousDate = response.body
-          console.log(previousDate)
+          expect(response.body).to.equals('OK')
           done(err)
         })
     })
@@ -62,8 +68,7 @@ function test (server) {
         .expect(200)
         .end(function (err, response) {
           expect(response.body).to.be.a('number')
-          previousDate = response.body
-          console.log(previousDate)
+          expect(response.body).to.not.equals(previousDate)
           done(err)
         })
     })

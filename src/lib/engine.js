@@ -6,7 +6,7 @@ var corbelConnection = require('./connectors/corbel')
 var cache = require('./modules/cache')
 var hub = require('./hub')
 var config = require('config')
-var composrBuild = require('../../node_modules/composr-cli/dist/build');
+var composrBuild = require('../../node_modules/composr-cli/dist/build')
 var WorkerClass = require('./rabbitMQworker')
 var worker
 
@@ -116,19 +116,24 @@ var engine = {
         logger.info('        No RabbitMQ connection will be stablished')
         logger.info('        It will not fetch endpoints from Corbel')
         engine.launchWithoutData(app, {resolve, reject}, function () {
-          // engine.tryToFindLocalPhrases()
+          // TODO: Move to a separate function
           logger.info('Trying to find phrases in the current directory')
           composrBuild({
-            version : '0.0.0'
-          }, function(err, items){
-             Promise.all([
+            version: '0.0.0'
+          }, function (err, items) {
+            if (err) {
+              logger.error('Error loading local data', err)
+              return
+            }
+
+            Promise.all([
               engine.composr.Phrase.register(global.domain || 'composr', items.phrases),
               engine.composr.Snippet.register(global.domain || 'composr', items.snippets)
             ])
-             .then(function(){
+              .then(function () {
                 logger.info('Loaded local phrases and snippets')
-             })
-          });
+              })
+          })
         })
         return
       }
