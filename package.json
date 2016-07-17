@@ -43,6 +43,7 @@
     "atob": "^2.0.0",
     "body-parser": "^1.12.0",
     "bunyan": "^1.5.1",
+    "composr-cli": "^0.5.2",
     "composr-core": "~2.2.0",
     "config": "^1.21.0",
     "connect-timeout": "^1.6.1",
