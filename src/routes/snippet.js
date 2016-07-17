@@ -2,9 +2,10 @@
 
 var BaseResource = require('./BaseResource.endpoint')
 var engine = require('../lib/engine')
+var corbelConnector = require('../lib/connectors/corbel')
 
 var Snippet = new BaseResource({
-  collection: engine.snippetsCollection,
+  collection: corbelConnector.SNIPPETS_COLLECTION,
   itemName: 'snippet',
   manager: engine.composr.Snippet
 })

@@ -16,9 +16,11 @@ function test (server) {
             'env',
             'domains',
             'version',
-            'statuses'
+            'statuses',
+            'corbel',
+            'redis'
           )
-          expect(response.body.statuses.phrasesLoaded).to.be.above(0)
+          expect(response.body.statuses.phrasesLoaded).to.be.a('number')
           done(error)
         })
     })
@@ -32,9 +34,11 @@ function test (server) {
             'env',
             'domains',
             'version',
-            'statuses'
+            'statuses',
+            'corbel',
+            'redis'
           )
-          expect(response.body.statuses.phrasesLoaded).to.be.above(0)
+          expect(response.body.statuses.phrasesLoaded).to.be.a('number')
           done(error)
         })
     })

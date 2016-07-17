@@ -2,13 +2,18 @@
 
 var logger = require('../utils/composrLogger')
 var composr = require('composr-core')
-var https = require('https')
+var corbelConnection = require('./connectors/corbel')
+var cache = require('./modules/cache')
 var hub = require('./hub')
 var config = require('config')
+var composrBuild = require('../../node_modules/composr-cli/dist/build')
 var WorkerClass = require('./rabbitMQworker')
 var worker
 
 var engine = {
+  initialized: false,
+  composr: composr,
+
   /* ***********************************************************
    * - Suscribes to the Composr-Core log events
    * @return nothing
@@ -40,101 +45,17 @@ var engine = {
     })
   },
 
-  /* ***********************************************************
-   * - Deletes timeout handler
-   * - Resolves service checking request if response is sent from server
-   * - Rejects service checking request if 'error' evt or timeout while waiting for response
-   * @param  {Function} resolve Services to check
-   * @param  {Function} reject Timeout before reject promise
-   * @param  {String} module service currently checking
-   * @param  {Object} promiseTimeoutHandler Timeout handler
-   * @return nothing
-   *************************************************************/
+  /* *********************************************************
+    Suscribe to cache module
+  ***********************************************************/
+  suscribeToCacheEvents: function () {
+    // TODO: temporal patch for not having duplicate events on tests
+    hub.removeAllListeners('cache-add')
+    hub.removeAllListeners('cache-remove')
 
-  resolveOrRejectServiceCheckingRequest: function (resolve, reject, request, module, promiseTimeoutHandler, rejectMessage, url) {
-    if (promiseTimeoutHandler) {
-      clearTimeout(promiseTimeoutHandler)
-    }
-    if (resolve) {
-      logger.info('External service', module, 'is UP', url)
-      resolve()
-    } else if (reject) {
-      rejectMessage = rejectMessage || ''
-      logger.error('External service', module, 'is DOWN', url)
-      reject(rejectMessage)
-    }
-  },
+    hub.on('cache-add', cache.add)
 
-  /* ***********************************************************
-   * - Initializes how a request is made
-   * @param  {String} url to send request
-   * @param  {Function} to execute when request is successfully replied
-   * @param  {Function} to execute when request is not replied
-   * @param  {Object} that holds a reference to request
-   * @param  {Function} reference to timeout for this request
-   * @param  {String} data that server sends
-   *************************************************************/
-
-  setUpRequest: function (url, module, resolve, reject, serviceCheckingRequestTimeout) {
-    var promiseTimeoutHandler
-    var request = https.get(url, function (res) {
-      var responseData = ''
-      res.on('data', function (chunk) {
-        responseData += chunk
-      })
-      res.on('end', function () {
-        if (engine.resolveOrRejectServiceCheckingRequest) {
-          var isValidResponse = (res.statusCode === 200)
-          var bodyContainsError = (responseData.indexOf('error') > -1 || responseData.indexOf('err') > -1)
-          if (isValidResponse && !bodyContainsError) {
-            engine.resolveOrRejectServiceCheckingRequest(resolve, null, request, module, promiseTimeoutHandler, null, url)
-          } else {
-            engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'JSON error', url)
-          }
-        }
-      })
-    })
-      .on('error', function (err) {
-        // resolveOrRejectServiceCheckingRequest === undefined -> Promises is already resolved
-        if (engine.resolveOrRejectServiceCheckingRequest) {
-          engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, err, url)
-        }
-      })
-
-    promiseTimeoutHandler = setTimeout(function () {
-      request.abort()
-      engine.resolveOrRejectServiceCheckingRequest(null, reject, request, module, promiseTimeoutHandler, 'Request timeout fired', url)
-    }, serviceCheckingRequestTimeout)
-    return request
-  },
-
-  /* ***********************************************************
-   * - Launches services checking requests
-   * @param  {Array} modules Services to check
-   * @param  {integer} serviceCheckingRequestTimeout Timeout before reject promise
-   * @return {Array} promises
-   *************************************************************/
-
-  initServiceCheckingRequests: function (modules, serviceCheckingRequestTimeout) {
-    var path = config.get('corbel.options.urlBase')
-
-    return modules.map(function (module) {
-      var url
-
-      logger.info('Checking for external service', module)
-      return new Promise(function (resolve, reject) {
-        url = path.replace('{{module}}', module).replace(/\/(v.+)\//, '/') + 'version'
-        engine.setUpRequest(url, module, resolve, reject, serviceCheckingRequestTimeout)
-      })
-    })
-  },
-
-  // Recursivelly wait until all the corbel services are up
-  _waitUntilCorbelModulesReady: function () {
-    var modules = ['iam', 'resources', 'evci', 'assets']
-    var serviceCheckingRequestTimeout = config.get('services.timeout')
-    var promises = engine.initServiceCheckingRequests(modules, serviceCheckingRequestTimeout)
-    return Promise.all(promises)
+    hub.on('cache-remove', cache.remove)
   },
 
   // Returns the credentials for the composr-core initialization
@@ -156,56 +77,27 @@ var engine = {
         .then(function () {
           engine.initialized = true
           var msg = fetchData ? 'Engine initialized with data! :)' : 'Engine initialized without data'
-          logger.info(msg)
+          logger.info('[Engine]', msg)
           resolve()
         })
         .catch(function (err) {
           engine.initialized = false
-          logger.error('ERROR launching composr, please check your credentials and network')
+          logger.error('[Engine]', 'ERROR launching composr, please check your credentials and network')
           logger.error(err)
           reject(err)
         })
     })
   },
 
-  waitUntilCorbelIsReady: function (time, retries) {
-    if (!time) {
-      time = config.get('services.time')
-    }
-    if (!retries) {
-      retries = config.get('services.retries')
-    }
-
-    return new Promise(function (resolve, reject) {
-      function launch (retries) {
-        if (!retries) {
-          return reject()
-        }
-        engine._waitUntilCorbelModulesReady()
-          .then(function () {
-            logger.info('All Services up and running!')
-            resolve()
-          })
-          .catch(function () {
-            logger.info('Retrying services check after', time * retries, 'milliseconds')
-            setTimeout(function () {
-              return launch(retries - 1)
-            }, time * retries)
-          })
-      }
-      launch(retries)
-    })
-  },
-
-  _waitUntilCorbelIsReadyAndFetchData: function (retries) {
-    engine.waitUntilCorbelIsReady(retries)
+  _waitUntilCorbelIsReadyAndFetchData: function () {
+    corbelConnection.waitUntilCorbelIsReady()
       .then(function () {
-        logger.info('Data is available, fetching')
+        logger.info('[Engine]', 'Data is available, fetching')
         engine.initComposrCore(engine.getComposrCoreCredentials(), true)
       })
       .catch(function () {
         // If the services were unavailable delay the retries and go on
-        logger.error('Services where unaccesible after ' + retries + ' retries')
+        logger.error('[Engine]', 'Services where unaccesible after ' + config.get('services.retries') + ' retries')
         engine._waitUntilCorbelIsReadyAndFetchData()
       })
   },
@@ -215,53 +107,76 @@ var engine = {
    * @param  {[type]} app [description]
    * @return promise
    */
-  init: function (app, localMode, serverID) {
+  init: function (app, localMode, serverID, maxServicesRetries) {
     return new Promise(function (resolve, reject) {
       // Suscribe to log events
       engine.suscribeToCoreEvents()
+      engine.suscribeToCacheEvents()
 
       worker = new WorkerClass(engine, serverID)
 
       if (localMode) {
+        logger.info('[Engine]', '>>> Launching server in local mode')
+        logger.info('[Engine]', '        No RabbitMQ connection will be stablished')
+        logger.info('[Engine]', '        It will not fetch endpoints from Corbel')
         engine.launchWithoutData(app, {resolve, reject}, function () {
-          // engine.tryToFindLocalPhrases()
-          console.log('... I want to load phrases and snippets from the current directory')
+          // TODO: Move to a separate function
+          logger.info('[Engine]', 'Trying to find phrases in the current directory')
+          composrBuild({
+            version: '0.0.0'
+          }, function (err, items) {
+            if (err) {
+              logger.error('[Engine]', 'Error loading local data', err)
+              return
+            }
+
+            Promise.all([
+              engine.composr.Phrase.register(global.domain || 'composr', items.phrases),
+              engine.composr.Snippet.register(global.domain || 'composr', items.snippets)
+            ])
+              .then(function () {
+                logger.info('[Engine]', 'Loaded local phrases and snippets')
+              })
+          })
         })
         return
       }
 
-      hub.on('corbel:ready', function () {
+      // Mandatory pings that will trigger the execution of the server
+      hub.once('corbel:ready', function () {
         engine.launchWithData(app, {resolve, reject})
       })
 
-      hub.on('corbel:not:ready', function () {
+      hub.once('corbel:not:ready', function () {
         // For some reason corbel wasnt up, so we wait until it is ready. but for the moment we start the server
         engine.launchWithoutData(app, {resolve, reject}, function () {
-          var retries = config.get('services.retries')
-
-          logger.info('The server is launched, delaying the fetch data')
-          engine._waitUntilCorbelIsReadyAndFetchData(retries)
+          logger.info('[Engine]', 'The server is launched, delaying the fetch data')
+          engine._waitUntilCorbelIsReadyAndFetchData()
         })
       })
 
-      if (!worker.canConnect()) {
-        logger.info('>>> RabbitMQ worker will not be connected')
-      } else {
-        worker.init()
-      }
-
+      // Make the necessary calls that will result in the 'corbel:ready' or 'corbel:not:ready' events
       if (config.get('rabbitmq.forceconnect') && worker.canConnect()) {
-        logger.info('>>> The server will start after RabbitMQ is connected')
-        logger.info('>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
+        logger.info('[Engine]', '>>> The server will start after RabbitMQ is connected')
+        logger.info('[Engine]', '>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
           'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
-        hub.once('load:worker', function () {
-          engine._init()
-        })
+
+        engine.initWorker(worker, engine.pingCorbel)
       } else {
-        logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
-        engine._init()
+        if (!worker.canConnect()) {
+          logger.info('[Engine]', '>>> RabbitMQ worker will not be connectLed')
+        } else {
+          logger.warn('[Engine]', '>>> The server will start even if RabbitMQ is NOT connected')
+          engine.initWorker(worker)
+        }
+
+        engine.pingCorbel(maxServicesRetries)
       }
     })
+  },
+
+  initWorker: function (worker, cb) {
+    worker.init(cb)
   },
 
   launchWithData: function (app, promise) {
@@ -294,10 +209,8 @@ var engine = {
       .catch(promise.reject)
   },
 
-  _init: function () {
-    var retries = config.get('services.retries')
-
-    engine.waitUntilCorbelIsReady(retries)
+  pingCorbel: function (maxServicesRetries) {
+    corbelConnection.waitUntilCorbelIsReady(maxServicesRetries)
       .then(function () {
         hub.emit('corbel:ready')
       })
@@ -311,9 +224,4 @@ var engine = {
   }
 }
 
-engine.initialized = false
-engine.phrasesCollection = 'composr:Phrase'
-engine.snippetsCollection = 'composr:Snippet'
-engine.virtualDomainsCollection = 'composr:VirtualDomain'
-engine.composr = composr
 module.exports = engine

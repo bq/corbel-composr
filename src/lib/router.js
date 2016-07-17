@@ -4,7 +4,7 @@ var engine = require('./engine')
 var logger = require('../utils/composrLogger')
 var config = require('config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
-var phraseHooks = require('./phraseHooks/phraseHooks')
+var phraseHooks = require('./phraseHooks')
 
 /* *
  * [analyzePhrase description]
@@ -34,6 +34,25 @@ function analyzePhrase (acc) {
   }
 }
 
+function doCheckCache (routeItem, response, path, authorization) {
+  if (routeItem.phrase.json[routeItem.verb].middlewares && routeItem.phrase.json[routeItem.verb].middlewares.indexOf('cache') !== -1) {
+    var cacheType = 'client'
+    var options = routeItem.phrase.json[routeItem.verb].cache
+    if (options && options.type) {
+      cacheType = options.type
+    }
+
+    switch (routeItem.verb) {
+      case 'get':
+        hub.emit('cache-add', path, routeItem.verb, authorization, routeItem.phrase.getVersion(), response, cacheType)
+        break
+      default:
+        // Another request deletes the 'get' path cache
+        hub.emit('cache-remove', path, 'get', authorization, routeItem.phrase.getVersion(), cacheType)
+    }
+  }
+}
+
 /**
  * [executePhraseById description]
  * @param  {[type]}   req       [description]
@@ -60,6 +79,7 @@ function executePhraseById (req, res, next, routeItem) {
     .then(function (response) {
       enforceGC()
       hub.emit('phrase:execution:end', response.status, routeItem.domain, routeItem.id, routeItem.verb)
+      doCheckCache(routeItem, response, req.getHref(), req.header('Authorization'))
       return next()
     })
     .catch(function (err) {
@@ -74,8 +94,8 @@ function executePhraseById (req, res, next, routeItem) {
         parsedErr.statusCode = parsedErr.status
       }
 
-      logger.debug(err)
-      logger.error('Failing executing Phrase', parsedErr.status, routeItem.domain, routeItem.id)
+      logger.debug('[Router]', err)
+      logger.error('[Router]', 'Failing executing Phrase', parsedErr.status, routeItem.domain, routeItem.id)
       // @TODO: log error in metrics
 
       hub.emit('phrase:execution:end', parsedErr.status, routeItem.domain, routeItem.id, routeItem.verb)
@@ -134,7 +154,6 @@ function bindRoutes (server, routeObjects) {
   for (var i = routeObjects.length - 1; i >= 0; i--) {
     (function (item) {
       var url = '/' + item.domain + '/' + item.path
-      var urlV1 = '/v1.0' + url
 
       // Mandatory hooks
       var corbelDriverSetupHook = phraseHooks.get('corbel-driver-setup')
@@ -157,23 +176,6 @@ function bindRoutes (server, routeObjects) {
       })
 
       server[item.restifyVerb].apply(server, args)
-
-      // Support also v1.0 paths for the moment
-      var argsV1 = [{
-        path: urlV1,
-        version: item.version
-      }]
-
-      if (hooks) {
-        argsV1 = argsV1.concat(hooks)
-      }
-      argsV1 = argsV1.concat(corbelDriverSetupHook)
-      argsV1 = argsV1.concat(metricsHook)
-      argsV1 = argsV1.concat(function bindRouteV1 (req, res, next) {
-        executePhraseById(req, res, next, item)
-      })
-
-      server[item.restifyVerb].apply(server, argsV1)
     })(routeObjects[i])
   }
 }
@@ -185,19 +187,19 @@ function bindRoutes (server, routeObjects) {
  * @return {[type]}        [description]
  */
 function listAllRoutes (server) {
-  logger.debug('GET paths:')
+  logger.debug('[Router]', 'GET paths:')
   server.router.routes.GET.forEach(
     function (value) {
       logger.info(value.spec.path)
     }
   )
-  logger.debug('PUT paths:')
+  logger.debug('[Router]', 'PUT paths:')
   server.router.routes.PUT.forEach(
     function (value) {
       logger.info(value.spec.path)
     }
   )
-  logger.debug('POST paths:')
+  logger.debug('[Router]', 'POST paths:')
   server.router.routes.POST.forEach(
     function (value) {
       logger.info(value.spec.path)
@@ -207,7 +209,7 @@ function listAllRoutes (server) {
 
 module.exports = function (server) {
   hub.on('create:routes', function (phrases) {
-    logger.debug('Creting or updating endpoints...')
+    logger.debug('[Router]', 'Creting or updating endpoints...')
 
     if (!Array.isArray(phrases)) {
       phrases = [phrases]
@@ -219,12 +221,12 @@ module.exports = function (server) {
   })
 
   hub.once('create:staticRoutes', function (server) {
-    logger.info('Creating static routes...')
+    logger.info('[Router]', 'Creating static routes...')
     require('../routes')(server)
   })
 
   hub.on('remove:route', function (url) {
-    logger.debug('=========== REMOVE ROUTE ===========', url)
+    logger.debug('[Router]', 'Remove route:', url)
     // Restify doesn't support removing routes on the fly, instead return a 404
     listAllRoutes()
   })

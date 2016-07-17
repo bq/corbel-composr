@@ -1,7 +1,7 @@
 'use strict'
 var hub = require('../hub')
 
-module.exports = function (methodDoc) {
+module.exports = function () {
   return function (req, res, next) {
     hub.emit('http:start', req.getId())
     req.corbelDriver.on('service:request:after', corbelDriverEventHookAfter(req))

@@ -22,13 +22,13 @@ configChecker.checkConfig()
 /* ************************************
   Middlewares
 **************************************/
-logger.info('Loading Middlewares...')
+logger.info('[App]', 'Loading Middlewares...')
 require('./middlewares')(restify, server, config, logger)
 
 /* ************************************
   Metrics
 **************************************/
-logger.info('Initializing metrics...')
+logger.info('[App]', 'Initializing metrics...')
 require('./metrics')(restify, server, config, logger)
 
 /* ************************************
@@ -42,7 +42,7 @@ server.on('NotFound', function (req, res, err, next) {
 })
 
 server.on('InternalServer', function (req, res, err, next) {
-  logger.warn('Error caught by router InternalServer')
+  logger.warn('[App]', 'Error caught by router InternalServer')
   err = new ComposrError('error:internal:server:error', err.message, 500)
   res.send(500, err)
   next() // Necesary for triggering request end
@@ -60,7 +60,7 @@ server.on('uncaughtException', function (req, res, route, err) {
   var status = err.statusCode || err.status || 500
   var body = err.body || err.data || err
 
-  logger.warn('Error caught by router uncaughtException')
+  logger.warn('[App]', 'Error caught by router uncaughtException')
   logger.error(status, body, route)
 
   res.send(status, body)
@@ -68,7 +68,7 @@ server.on('uncaughtException', function (req, res, route, err) {
 })
 
 process.on('uncaughtException', function (err) {
-  logger.warn('Error caught by uncaughtException')
+  logger.warn('[App]', 'Error caught by uncaughtException')
   logger.error(err)
   if (!err || err.message !== "Can't set headers after they are sent.") {
     process.exit(1)

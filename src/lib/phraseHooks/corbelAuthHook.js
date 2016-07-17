@@ -1,11 +1,12 @@
 'use strict'
-var connection = require('../corbelConnection')
+
+var connection = require('../connectors/corbel')
 var ComposrError = require('../ComposrError')
 var logger = require('../../utils/composrLogger')
 var config = require('config')
 var corbel = require('corbel-js')
 
-module.exports.authUser = function (methodDoc) {
+module.exports.authUser = function () {
   return function (req, res, next) {
     var authHeader = req.header('Authorization')
 
@@ -28,7 +29,7 @@ module.exports.authUser = function (methodDoc) {
   }
 }
 
-module.exports.authClient = function (methodDoc) {
+module.exports.authClient = function () {
   return function (req, res, next) {
     var authHeader = req.header('Authorization')
 
@@ -52,14 +53,14 @@ module.exports.authClient = function (methodDoc) {
  * @param  {Function} next [description]
  * @return {[type]}        [description]
  */
-module.exports.corbelDriverSetup = function (methodDoc) {
+module.exports.corbelDriverSetup = function () {
   return function (req, res, next) {
     var authorization = req.headers.authorization
 
     var corbelDriver = connection.getTokenDriver(authorization, true)
     if (config.get('composrLog.logLevel') === 'debug') {
       corbelDriver.on('request', function () {
-        logger.debug('>>> corbelDriver request: ', arguments)
+        logger.debug('[CorbelAuthHook]', '>>> corbelDriver request: ', arguments)
       })
     }
 

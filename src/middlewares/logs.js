@@ -19,5 +19,5 @@ module.exports = function (server, logger) {
     }, 'finished')
   })
 
-  logger.info(' - Logs Middlewares loaded')
+  logger.info('[Middlewares-Logs]', ' - Logs Middlewares loaded')
 }

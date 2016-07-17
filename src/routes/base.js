@@ -1,8 +1,8 @@
 'use strict'
 
-var config = require('config')
 var engine = require('../lib/engine')
-var https = require('https')
+var redisConnector = require('../lib/connectors/redis')
+var corbelConnector = require('../lib/connectors/corbel')
 var packageJSON = require('../../package.json')
 var _ = require('lodash')
 
@@ -34,28 +34,12 @@ function checkServerStatus (req, res) {
     }
   }
 
-  var modules = ['iam', 'resources', 'assets', 'evci']
-  var path = config.get('corbel.options.urlBase')
-
-  var promises = modules.map(function (module) {
-    return new Promise(function (resolve) {
-      // Remove the version (v1.0) from the urlBase and add '/version'
-      var versionPath = path.replace(new RegExp('(.*/)[^/]+/?$'), '$1')
-          .replace('{{module}}', module) + '/version'
-
-      https.get(versionPath, function (res) {
-        serverStatus.statuses[module] = Math.floor(res.statusCode / 100) === 2
-        resolve()
-      })
-        .on('error', function () {
-          serverStatus.statuses[module] = false
-          resolve()
-        })
-    })
-  })
+  var promises = [redisConnector.checkState(), corbelConnector.checkState()]
 
   return Promise.all(promises)
-    .then(function () {
+    .then(function (results) {
+      serverStatus.redis = results[0]
+      serverStatus.corbel = results[1]
       return serverStatus
     })
     .catch(function () {

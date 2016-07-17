@@ -85,5 +85,5 @@ module.exports = function (restify, server, logger) {
     mapParams: false
   }))
 
-  logger.info(' - HTTP Middlewares loaded')
+  logger.info('[Middlewares-HTTP]', ' - HTTP Middlewares loaded')
 }

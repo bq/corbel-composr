@@ -3,7 +3,9 @@
 var mocker = require('json-schema-faker')
 var _ = require('lodash')
 
-module.exports = function (methodDoc) {
+module.exports = function (phraseModel, verb) {
+  var methodDoc = phraseModel.getDoc(verb)
+
   return function (req, res, next) {
     if (methodDoc && methodDoc.responses) {
       // Use the header if present
