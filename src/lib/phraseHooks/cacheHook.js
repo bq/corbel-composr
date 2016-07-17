@@ -15,7 +15,7 @@ module.exports = function (phraseModel, verb) {
         .then(function (response) {
           if (response) {
             logger.debug('[Cache-Hook]', 'Found item, sending to client' )
-            console.log(response)
+            
             try{
               res.send(parseInt(response.status, 10), response.body)
             }catch(e){
