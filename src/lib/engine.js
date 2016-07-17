@@ -77,12 +77,12 @@ var engine = {
         .then(function () {
           engine.initialized = true
           var msg = fetchData ? 'Engine initialized with data! :)' : 'Engine initialized without data'
-          logger.info(msg)
+          logger.info('[Engine]', msg)
           resolve()
         })
         .catch(function (err) {
           engine.initialized = false
-          logger.error('ERROR launching composr, please check your credentials and network')
+          logger.error('[Engine]', 'ERROR launching composr, please check your credentials and network')
           logger.error(err)
           reject(err)
         })
@@ -92,12 +92,12 @@ var engine = {
   _waitUntilCorbelIsReadyAndFetchData: function () {
     corbelConnection.waitUntilCorbelIsReady()
       .then(function () {
-        logger.info('Data is available, fetching')
+        logger.info('[Engine]', 'Data is available, fetching')
         engine.initComposrCore(engine.getComposrCoreCredentials(), true)
       })
       .catch(function () {
         // If the services were unavailable delay the retries and go on
-        logger.error('Services where unaccesible after ' + config.get('services.retries') + ' retries')
+        logger.error('[Engine]', 'Services where unaccesible after ' + config.get('services.retries') + ' retries')
         engine._waitUntilCorbelIsReadyAndFetchData()
       })
   },
@@ -116,17 +116,17 @@ var engine = {
       worker = new WorkerClass(engine, serverID)
 
       if (localMode) {
-        logger.info('>>> Launching server in local mode')
-        logger.info('        No RabbitMQ connection will be stablished')
-        logger.info('        It will not fetch endpoints from Corbel')
+        logger.info('[Engine]', '>>> Launching server in local mode')
+        logger.info('[Engine]', '        No RabbitMQ connection will be stablished')
+        logger.info('[Engine]', '        It will not fetch endpoints from Corbel')
         engine.launchWithoutData(app, {resolve, reject}, function () {
           // TODO: Move to a separate function
-          logger.info('Trying to find phrases in the current directory')
+          logger.info('[Engine]', 'Trying to find phrases in the current directory')
           composrBuild({
             version: '0.0.0'
           }, function (err, items) {
             if (err) {
-              logger.error('Error loading local data', err)
+              logger.error('[Engine]', 'Error loading local data', err)
               return
             }
 
@@ -135,7 +135,7 @@ var engine = {
               engine.composr.Snippet.register(global.domain || 'composr', items.snippets)
             ])
               .then(function () {
-                logger.info('Loaded local phrases and snippets')
+                logger.info('[Engine]', 'Loaded local phrases and snippets')
               })
           })
         })
@@ -150,23 +150,23 @@ var engine = {
       hub.once('corbel:not:ready', function () {
         // For some reason corbel wasnt up, so we wait until it is ready. but for the moment we start the server
         engine.launchWithoutData(app, {resolve, reject}, function () {
-          logger.info('The server is launched, delaying the fetch data')
+          logger.info('[Engine]', 'The server is launched, delaying the fetch data')
           engine._waitUntilCorbelIsReadyAndFetchData()
         })
       })
 
       // Make the necessary calls that will result in the 'corbel:ready' or 'corbel:not:ready' events
       if (config.get('rabbitmq.forceconnect') && worker.canConnect()) {
-        logger.info('>>> The server will start after RabbitMQ is connected')
-        logger.info('>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
+        logger.info('[Engine]', '>>> The server will start after RabbitMQ is connected')
+        logger.info('[Engine]', '>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
           'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
 
         engine.initWorker(worker, engine.pingCorbel)
       } else {
         if (!worker.canConnect()) {
-          logger.info('>>> RabbitMQ worker will not be connectLed')
+          logger.info('[Engine]', '>>> RabbitMQ worker will not be connectLed')
         } else {
-          logger.warn('>>> The server will start even if RabbitMQ is NOT connected')
+          logger.warn('[Engine]', '>>> The server will start even if RabbitMQ is NOT connected')
           engine.initWorker(worker)
         }
 

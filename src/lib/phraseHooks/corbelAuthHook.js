@@ -60,7 +60,7 @@ module.exports.corbelDriverSetup = function () {
     var corbelDriver = connection.getTokenDriver(authorization, true)
     if (config.get('composrLog.logLevel') === 'debug') {
       corbelDriver.on('request', function () {
-        logger.debug('>>> corbelDriver request: ', arguments)
+        logger.debug('[CorbelAuthHook]', '>>> corbelDriver request: ', arguments)
       })
     }
 

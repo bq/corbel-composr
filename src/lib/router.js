@@ -94,8 +94,8 @@ function executePhraseById (req, res, next, routeItem) {
         parsedErr.statusCode = parsedErr.status
       }
 
-      logger.debug(err)
-      logger.error('Failing executing Phrase', parsedErr.status, routeItem.domain, routeItem.id)
+      logger.debug('[Router]', err)
+      logger.error('[Router]', 'Failing executing Phrase', parsedErr.status, routeItem.domain, routeItem.id)
       // @TODO: log error in metrics
 
       hub.emit('phrase:execution:end', parsedErr.status, routeItem.domain, routeItem.id, routeItem.verb)
@@ -187,19 +187,19 @@ function bindRoutes (server, routeObjects) {
  * @return {[type]}        [description]
  */
 function listAllRoutes (server) {
-  logger.debug('GET paths:')
+  logger.debug('[Router]', 'GET paths:')
   server.router.routes.GET.forEach(
     function (value) {
       logger.info(value.spec.path)
     }
   )
-  logger.debug('PUT paths:')
+  logger.debug('[Router]', 'PUT paths:')
   server.router.routes.PUT.forEach(
     function (value) {
       logger.info(value.spec.path)
     }
   )
-  logger.debug('POST paths:')
+  logger.debug('[Router]', 'POST paths:')
   server.router.routes.POST.forEach(
     function (value) {
       logger.info(value.spec.path)
@@ -209,7 +209,7 @@ function listAllRoutes (server) {
 
 module.exports = function (server) {
   hub.on('create:routes', function (phrases) {
-    logger.debug('Creting or updating endpoints...')
+    logger.debug('[Router]', 'Creting or updating endpoints...')
 
     if (!Array.isArray(phrases)) {
       phrases = [phrases]
@@ -221,12 +221,12 @@ module.exports = function (server) {
   })
 
   hub.once('create:staticRoutes', function (server) {
-    logger.info('Creating static routes...')
+    logger.info('[Router]', 'Creating static routes...')
     require('../routes')(server)
   })
 
   hub.on('remove:route', function (url) {
-    logger.debug('=========== REMOVE ROUTE ===========', url)
+    logger.debug('[Router]', 'Remove route:', url)
     // Restify doesn't support removing routes on the fly, instead return a 404
     listAllRoutes()
   })

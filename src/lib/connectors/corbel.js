@@ -18,7 +18,7 @@ var extractDomain = function (accessToken) {
     var decoded = corbel.jwt.decode(accessToken.replace('Bearer ', ''))
     return decoded.domainId
   } catch (e) {
-    logger.error('error:invalid:token', accessToken)
+    logger.error('[Corbel-JS]', 'error:invalid:token', accessToken)
     return null
   }
 }

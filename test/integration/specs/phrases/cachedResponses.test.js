@@ -4,12 +4,10 @@ var request = require('supertest')
 var chai = require('chai')
 var expect = chai.expect
 var phraseCache = require('../../../fixtures/phrases/cachedPhrase.json')
-var hub = require('../../../../src/lib/hub')
 
 function test (server) {
   describe('Cached phrase', function () {
     this.timeout(20000)
-    console.log(hub)
 
     var previousDate
 

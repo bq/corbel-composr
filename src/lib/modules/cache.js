@@ -28,7 +28,7 @@ function get (path, verb, authorization, version) {
   return redisConnector.get(key)
     .then(function (item) {
       if (item && item.expires > date) {
-        logger.debug('Item found', key, item.value.status)
+        logger.debug('[Cache]', 'Item found', key, item.value.status)
         return item.value
       } else if (item) {
         logger.debug('[Cache]', 'Item has expired with exp:', item.expires, 'current date:', date, key)

@@ -11,7 +11,7 @@ var hub = require('../lib/hub')
 
 function initMetrics (config, logger) {
   if (config.get('keymetrics') === true) {
-    logger.info('Initializing Keymetrics probes...')
+    logger.info('[Keymetrics]', 'Initializing Keymetrics probes...')
 
     var probe = pmx.probe()
 

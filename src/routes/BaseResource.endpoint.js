@@ -21,7 +21,7 @@ ResourceEndpoint.prototype.upsert = function (req, res) {
   var driver = this.getDriver(authorization)
   var domain = this.getDomain(authorization)
 
-  logger.debug('Request upsert:', this.itemName, authorization, item)
+  logger.debug('[Resource]', 'Request upsert:', this.itemName, authorization, item)
 
   this.checkPublishAvailability(driver)
     .then(function () {
@@ -37,7 +37,7 @@ ResourceEndpoint.prototype.upsert = function (req, res) {
       res.send(200, itemSaved)
     })
     .catch(function (error) {
-      logger.warn('SERVER', 'invalid:client:' + that.itemName + ':upsert', domain, authorization)
+      logger.warn('[Resource]', 'Creating resource', 'invalid:client:' + that.itemName + ':upsert', domain, authorization)
       res.send(error.status, error)
     })
 }
@@ -53,7 +53,7 @@ ResourceEndpoint.prototype.delete = function (req, res) {
   var driver = this.getDriver(authorization)
   var domain = this.getDomain(authorization)
 
-  logger.debug('Request delete:', this.itemName, req.params.itemId)
+  logger.debug('[Resource]', 'Request delete:', this.itemName, req.params.itemId)
 
   this.checkPublishAvailability(driver)
     .then(function () {
@@ -61,7 +61,7 @@ ResourceEndpoint.prototype.delete = function (req, res) {
       if (item && item.getDomain() === domain) {
         return that.deleteCall(req.params.itemId)
           .then(function () {
-            logger.info('item:deleted', req.params.id)
+            logger.info('[Resource]', 'item:deleted', req.params.id)
             res.send(204, 'deleted')
           })
           .catch(function (error) {
@@ -74,7 +74,7 @@ ResourceEndpoint.prototype.delete = function (req, res) {
       }
     })
     .catch(function (error) {
-      logger.warn('SERVER', 'invalid:client:' + that.itemName + ':delete', error)
+      logger.warn('[Resource]', 'Deleting resource, invalid:client:' + that.itemName + ':delete', error)
       res.send(401, new ComposrError('error:delete:' + that.itemName + '', 'Unauthorized client', 401))
     })
 }
@@ -91,7 +91,7 @@ ResourceEndpoint.prototype.get = function (req, res) {
     return
   }
 
-  logger.debug('Trying to get ' + this.itemName + ':', req.params.itemId)
+  logger.debug('[Resource]', 'Trying to get ' + this.itemName + ':', req.params.itemId)
 
   var item = this.getItemById(req.params.itemId)
 
@@ -155,7 +155,7 @@ ResourceEndpoint.prototype.validate = function (item) {
   return this.manager.validate(item)
     .catch(function (result) {
       var errors = result.errors
-      logger.warn('SERVER', 'invalid:' + that.itemName, item, result)
+      logger.warn('[Resource]', 'validation, invalid:' + that.itemName, item, result)
       throw new ComposrError('error:' + that.itemName + ':validation', 'Error validating ' + that.itemName + ': ' +
         JSON.stringify(errors, null, 2), 422)
     })
@@ -166,7 +166,7 @@ ResourceEndpoint.prototype.upsertCall = function (domain, item) {
   return this.manager
     .save(domain, item)
     .catch(function (error) {
-      logger.warn('SERVER', 'invalid:upsert:' + that.itemName, error)
+      logger.warn('[Resource]', 'invalid:upsert:' + that.itemName, error)
       throw error
     })
 }
@@ -176,7 +176,7 @@ ResourceEndpoint.prototype.deleteCall = function (id) {
   return this.manager
     .delete(id)
     .catch(function (error) {
-      logger.warn('SERVER', 'invalid:delete:' + that.itemName, error)
+      logger.warn('[Resource]', 'invalid:delete:' + that.itemName, error)
       throw error
     })
 }

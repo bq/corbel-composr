@@ -24,13 +24,14 @@ function checkState () {
 }
 
 function init (cbError) {
+  logger.info('[Redis client]', 'Creating a new client')
   client = redis
     .createClient(config.get('redis.port'), config.get('redis.host'), null)
 
   client.on('error', function (e) {
     client.quit()
     client = null
-    logger.error('Error connecting to REDIS', e)
+    logger.error('[Redis client]', 'Error connecting to REDIS', e)
     if (cbError) {
       cbError(e)
     }
@@ -59,13 +60,10 @@ function get (key) {
       if (err) {
         return reject(err)
       }
-      client.keys(key, function (err, res) {
-        console.log('keys response', err, res)
-      })
+
       try {
         var res = val ? JSON.parse(val) : null
         val = res
-        console.log(val)
       } catch (e) {}
       resolve(val) // Vall is null if the key is missing
     })
@@ -77,12 +75,12 @@ function del (key) {
     init()
   }
 
-  client.del(key, function () {
-    console.log('delete response', arguments)
-
-    client.keys(key, function (err, res) {
-      console.log('keys response', err, res)
-    })
+  client.del(key, function (err) {
+    if (err) {
+      logger.error('[Redis client]', 'Error deleting item', key, err)
+    } else {
+      logger.debug('[Redis client]', 'Item deleted', key)
+    }
   })
 }
 

@@ -38,10 +38,10 @@ module.exports.getHooks = function (phraseModel, verb) {
   if (phraseModel.getMiddlewares(verb).length > 0) {
     var functions = _.map(phraseModel.getMiddlewares(verb), function (hookId) {
       if (hooks[hookId]) {
-        logger.info('Setting ' + hooks[hookId].description + ' for phrase:', phraseModel.getId(), 'method', verb)
+        logger.info('[Hooks]', 'Setting ' + hooks[hookId].description + ' for phrase:', phraseModel.getId(), 'method', verb)
         return hooks[hookId].hookFunction(phraseModel, verb)
       } else {
-        logger.warn('Hook ' + hookId + ' not found for phrase:', phraseModel.getId())
+        logger.warn('[Hooks]', 'Hook ' + hookId + ' not found for phrase:', phraseModel.getId())
         return null
       }
     })
@@ -49,15 +49,11 @@ module.exports.getHooks = function (phraseModel, verb) {
   }
 }
 
-module.exports.getPostHooks = function (phraseModel, verb) {
-  // TODO
-}
-
 module.exports.get = function (hookId) {
   if (hooks[hookId]) {
     return hooks[hookId].hookFunction()
   } else {
-    logger.warn('Hook ' + hookId + ' not found')
+    logger.warn('[Hooks]', 'Hook ' + hookId + ' not found')
     return function (req, res, next) {
       next()
     }
