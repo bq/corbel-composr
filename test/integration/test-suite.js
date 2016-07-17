@@ -4,7 +4,7 @@ var tests = [
   // require('./specs/timeout.test.js'),
 
   // handlers
-  /* require('./specs/handlers/errorHandlers.test.js'),
+  require('./specs/handlers/errorHandlers.test.js'),
   require('./specs/handlers/notFoundHandler.test.js'),
   require('./specs/handlers/postExecutionHandler.test.js'),
 
@@ -20,8 +20,8 @@ var tests = [
   require('./specs/phrases/unregisterPhrases.test.js'),
   require('./specs/phrases/invalidCorbelJsRequest.error.test.js'),
   require('./specs/phrases/multipleVersions.test.js'),
-  require('./specs/phrases/mock.middleware.test.js'),*/
-  require('./specs/phrases/cachedResponses.test.js') /* ,
+  require('./specs/phrases/mock.middleware.test.js'),
+  require('./specs/phrases/cachedResponses.test.js'),
 
   // snippets
   require('./specs/snippets/multipleSnippetsForPhrases.test.js'),
@@ -38,7 +38,7 @@ var tests = [
   require('./specs/cache.test.js'),
   require('./specs/domainUserReturnsNotFound.test.js'),
   require('./specs/methodNotAllowed.test.js'),
-  require('./specs/status.endpoint.test.js')*/
+  require('./specs/status.endpoint.test.js')
 ]
 
 module.exports = function (serverPromise) {

@@ -14,9 +14,14 @@ module.exports = function (phraseModel, verb) {
       cacheModule.get(path, verb, authHeader, phraseModel.getVersion())
         .then(function (response) {
           if (response) {
-            logger.debug('[Cache-Hook]', 'Found item, sending to client')
-            res.send(parseInt(response.status, 10), JSON.parse(response.body))
-            return
+            logger.debug('[Cache-Hook]', 'Found item, sending to client' )
+            console.log(response)
+            try{
+              res.send(parseInt(response.status, 10), response.body)
+            }catch(e){
+              console.log(e)
+            }
+            return 
           }
           logger.debug('[Cache-Hook]', 'Not Found item... continuing')
           return next()
