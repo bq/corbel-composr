@@ -52,7 +52,7 @@ function logMissingVariablesMessage (variables) {
   logMessage += 'Looks that you have not configured these environment variables, ' +
     'if you are using a configuration file, you may ignore this warning \n'
 
-  logger.warn(logMessage)
+  logger.warn('[Config Checker]', logMessage)
 }
 
 function logNotFilledValuesMessage (variables) {
@@ -64,7 +64,7 @@ function logNotFilledValuesMessage (variables) {
 
   logMessage += 'This can lead to a configuration problem, please create a configuration file or pass the environment variables. \n'
 
-  logger.error(logMessage)
+  logger.error('[Config Checker]', logMessage)
 }
 
 function checkConfig () {
