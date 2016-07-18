@@ -295,7 +295,7 @@ In order to accomplish cache and cache invalidation, phrase models can define so
     ],
     "cache": {
       "type" : "user",
-      "ttl": "5m"
+      "duration": "5m"
     },
     "doc": { ... }
   }
@@ -324,7 +324,14 @@ The cache for client request is the most common type of cache, client requests a
 
 The cache for user requests should be used carefully because it will create a Redis key-value pair for each user. 
 
-Each cached endpoint can have a `ttl` (time to live) configured in 
+Each cached endpoint can have a `duration` (time to live), some examples of available values are:
+  - `1m` : 1 minute
+  - `100ms`: 100 miliseconds
+  - `2h 30mins`: 2 hours 30minutes
+  - `1d`: 1 day
+  - `1w`: 1 week
+
+_See [parse-duration](https://www.npmjs.com/package/parse-duration) for valid values_
 
 ## Logs
 

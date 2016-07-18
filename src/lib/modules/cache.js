@@ -18,7 +18,7 @@ function add (path, verb, authorization, version, data, options) {
   logger.debug('[Cache]', 'Adding item to cache', key, 'with a duration of: ', msDuration, '(ms)')
 
   redisConnector.set(key, {
-    duration: duration,
+    duration: msDuration,
     created: Date.now(),
     value: data
   })
@@ -31,7 +31,7 @@ function get (path, verb, authorization, version) {
 
   return redisConnector.get(key)
     .then(function (item) {
-      if (item && item.duration + item.created > date) {
+      if (item && (item.duration + item.created) > date) {
         logger.debug('[Cache]', 'Item found', key, item.value.status)
         return item.value
       } else if (item) {

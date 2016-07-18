@@ -19,7 +19,7 @@ function test (server) {
       server.composr.Phrase.register('cache:domain', phrases)
         .then(function (results) {
           request(server.app)
-            .post('/cache:domain/cache')
+            .post('/cache:domain/cache/test')
             .expect(200)
             .end(function (err, response) {
               expect(response.body).to.be.a('string')
@@ -31,7 +31,7 @@ function test (server) {
 
     it('returns an example response', function (done) {
       request(server.app)
-        .get('/cache:domain/cache')
+        .get('/cache:domain/cache/test')
         .expect(200)
         .end(function (err, response) {
           expect(response.body).to.be.a('number')
@@ -42,7 +42,7 @@ function test (server) {
 
     it('requesting again causes the cached response to come back', function (done) {
       request(server.app)
-        .get('/cache:domain/cache')
+        .get('/cache:domain/cache/test')
         .expect(200)
         .end(function (err, response) {
           expect(response.body).to.be.a('number')
@@ -53,7 +53,7 @@ function test (server) {
 
     it('calling post invalidates the cache', function (done) {
       request(server.app)
-        .post('/cache:domain/cache')
+        .post('/cache:domain/cache/test')
         .expect(200)
         .end(function (err, response) {
           expect(response.body).to.be.a('string')
@@ -64,7 +64,7 @@ function test (server) {
 
     it('once invalidated the result is new', function (done) {
       request(server.app)
-        .get('/cache:domain/cache')
+        .get('/cache:domain/cache/test')
         .expect(200)
         .end(function (err, response) {
           expect(response.body).to.be.a('number')
