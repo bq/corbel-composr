@@ -1,10 +1,11 @@
 {
-    "url": "cache",
+    "url": "cache/test",
     "version": "2.3.3",
     "get": {
         "code": "res.status(200).send(Date.now())",
         "cache": {
-            "type" : "user"
+            "type" : "user",
+            "duration": "1m"
         },
         "middlewares": [
           "cache"
@@ -17,7 +18,8 @@
         "code": "res.status(200).send('OK')",
         "cache": {
             "invalidate" : [
-                "get-cache"
+                "cache/test",
+                "user/me"
             ]
         },
         "middlewares": [

@@ -19,7 +19,7 @@ module.exports = function (phraseModel, verb) {
             try {
               res.send(parseInt(response.status, 10), response.body)
             } catch (e) {
-              console.log(e)
+              logger.error('[Cache-Hook]', 'Error sending response', e)
             }
             return
           }
