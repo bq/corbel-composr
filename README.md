@@ -178,7 +178,16 @@ LOCAL_MODE=>If set to "true" it skips loading the endpoints from a remote server
 
 [What are Phrases or Snippets?](https://github.com/corbel-platform/composr-core/wiki/Phrases)
 
-You can generate and publish your phrases and snippets by using the [composr-cli](https://github.com/corbel-platform/composr-cli). *Currently under development*
+You can generate and publish your phrases and snippets by using the [composr-cli](https://github.com/corbel-platform/composr-cli). 
+
+```
+npm install -g composr-cli
+```
+
+```
+composr -g
+```
+
 
 ### Bootstraping a project:
 
