@@ -35,6 +35,9 @@ function initMetrics (config, logger) {
       name: 'virtualdomains_updated'
     })
 
+    /* ******************************************* 
+      PHRASES METRICS 
+    **********************************************/
     hub.on('phrase:execution:start', function (domain, id, method) {
       // Metrics for number of phrases executed
       counterPhrasesExecuted.inc()
@@ -45,14 +48,6 @@ function initMetrics (config, logger) {
     hub.on('phrase:execution:end', function (status, domain, id, method) {
       // Metrics for number of phrases being executed
       counterPhrasesBeingExecuted.dec()
-    })
-
-    hub.on('http:status', function (status, url, method) {
-      pmx.emit('http:status', {
-        url: url,
-        status: status,
-        method: method
-      })
     })
 
     probe.metric({
@@ -79,9 +74,54 @@ function initMetrics (config, logger) {
       })
     })
 
+    //Emited inside phrases.
     hub.on('metrics', function (domain, options) {
       pmx.emit(domain, options)
     })
+
+    
+    /* ******************************************* 
+      HTTP METRICS
+    **********************************************/
+    hub.on('http:status', function (status, url, method) {
+      pmx.emit('http:status', {
+        url: url,
+        status: status,
+        method: method
+      })
+    })
+
+    hub.on('http:start', function (url, method) {
+      pmx.emit('http:start', {
+        url: url,
+        method: method
+      })
+    })
+
+    hub.on('http:end', function (req, res) {
+      pmx.emit('http:end', {
+        url: req.getHref(), 
+        method: req.method
+      })
+    })
+
+    hub.on('phrase:cache:hit', function (url) {
+      counterSnippetsUpdated.inc()
+      pmx.emit('phrase:cache:hit', {
+        url: url
+      })
+    })
+
+    hub.on('phrase:cache:miss', function (url) {
+      counterSnippetsUpdated.inc()
+      pmx.emit('phrase:cache:miss', {
+        url: url
+      })
+    })
+
+    /* ******************************************* 
+      CRUD ENDPOINTS METRICS 
+    **********************************************/
 
     hub.on('virtualdomain:upsert', function (domain, id) {
       counterVirtualDomainsUpdated.inc()
@@ -102,6 +142,22 @@ function initMetrics (config, logger) {
     hub.on('phrase:upsert', function (domain, id) {
       counterPhrasesUpdated.inc()
       pmx.emit('phrase:upsert', {
+        domain: domain,
+        id: id
+      })
+    })
+
+    hub.on('phrase:delete', function (domain, id) {
+      counterPhrasesUpdated.inc()
+      pmx.emit('phrase:delete', {
+        domain: domain,
+        id: id
+      })
+    })
+
+    hub.on('snippet:delete', function (domain, id) {
+      counterSnippetsUpdated.inc()
+      pmx.emit('snippet:delete', {
         domain: domain,
         id: id
       })
