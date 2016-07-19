@@ -4,7 +4,7 @@
   "version": "2.6.1",
   "build.version": "2.4.0",
   "build.date": "Mon, 4 Jan 2016 08:24:25 GMT",
-  "bin": "bin/launch.sh",
+  "bin": "bin/launch",
   "license": "unlicense",
   "keywords": "corbel nodejs middleware",
   "authors": [
