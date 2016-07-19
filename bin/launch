@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+
+if(process.env.PM2){
+  var pm2 = require('pm2')
+
+  pm2.connect(function(err) {
+    if (err) {
+      console.error(err);
+      process.exit(2);
+    }
+    
+    pm2.start({
+      script    : __dirname + '/composr.js'
+    }, function(err, apps) {
+      pm2.disconnect();   // Disconnect from PM2
+      if (err) throw err
+    });
+  });
+}else{
+  require('./composr')
+}

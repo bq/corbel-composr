@@ -36,19 +36,15 @@ function analyzePhrase (acc) {
 
 function doCheckCache (routeItem, response, path, authorization) {
   if (routeItem.phrase.json[routeItem.verb].middlewares && routeItem.phrase.json[routeItem.verb].middlewares.indexOf('cache') !== -1) {
-    var cacheType = 'client'
     var options = routeItem.phrase.json[routeItem.verb].cache
-    if (options && options.type) {
-      cacheType = options.type
-    }
 
     switch (routeItem.verb) {
       case 'get':
-        hub.emit('cache-add', path, routeItem.verb, authorization, routeItem.phrase.getVersion(), response, cacheType)
+        hub.emit('cache-add', path, routeItem.verb, authorization, routeItem.phrase.getVersion(), response, options)
         break
       default:
         // Another request deletes the 'get' path cache
-        hub.emit('cache-remove', path, 'get', authorization, routeItem.phrase.getVersion(), cacheType)
+        hub.emit('cache-remove', path, 'get', authorization, routeItem.phrase.getVersion(), options)
     }
   }
 }

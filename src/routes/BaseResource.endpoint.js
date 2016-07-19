@@ -61,7 +61,8 @@ ResourceEndpoint.prototype.delete = function (req, res) {
       if (item && item.getDomain() === domain) {
         return that.deleteCall(req.params.itemId)
           .then(function () {
-            logger.info('[Resource]', 'item:deleted', req.params.id)
+            that.emitEvent(that.itemName + ':delete', domain, req.params.itemId)
+            logger.info('[Resource]', 'item:deleted', req.params.itemId)
             res.send(204, 'deleted')
           })
           .catch(function (error) {

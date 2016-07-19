@@ -2,6 +2,7 @@
 
 var cacheModule = require('../modules/cache')
 var logger = require('../../utils/composrLogger')
+var hub = require('../hub')
 
 module.exports = function (phraseModel, verb) {
   return function (req, res, next) {
@@ -17,12 +18,15 @@ module.exports = function (phraseModel, verb) {
             logger.debug('[Cache-Hook]', 'Found item, sending to client')
 
             try {
+              hub.emit('phrase:cache:hit', path)
               res.send(parseInt(response.status, 10), response.body)
+              hub.emit('http:end', req, res)
             } catch (e) {
-              console.log(e)
+              logger.error('[Cache-Hook]', 'Error sending response', e)
             }
             return
           }
+          hub.emit('phrase:cache:miss', path)
           logger.debug('[Cache-Hook]', 'Not Found item... continuing')
           return next()
         })

@@ -25,8 +25,17 @@ function checkState () {
 
 function init (cbError) {
   logger.info('[Redis client]', 'Creating a new client')
+
+  var redisUrl = config.get('redis.host') + ':' + config.get('redis.port')
+
+  if(config.get('redis.user') && config.get('redis.password')){
+    redisUrl = config.get('redis.user') + ':' + config.get('redis.password') + '@' + redisUrl
+  }
+
+  redisUrl = '//' + redisUrl
+
   client = redis
-    .createClient(config.get('redis.port'), config.get('redis.host'), null)
+    .createClient(redisUrl)
 
   client.on('error', function (e) {
     client.quit()

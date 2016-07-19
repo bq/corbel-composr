@@ -105,7 +105,7 @@ function initMetrics (config, logger) {
       })
     })
 
-    hub.on('http:start', function (reqId) {
+    hub.on('http:start', function (path, method, reqId) {
       newrelic.setIgnoreTransaction(true)
       transactions.addTransaction(reqId)
     })
