@@ -105,6 +105,13 @@ _If NODE_ENV is not set in the environment, a default value of `development` is 
         }
     },
 
+    "redis": {
+        "host": "localhost",
+        "port": 6379,
+        "user": "",
+        "password": ""
+    },
+
     "bunyan": {
         "log" : true,
         "syslog" : true,
@@ -163,6 +170,10 @@ RABBITMQ_USERNAME
 RABBITMQ_PASSWORD
 RABBITMQ_FORCE_CONNECT => Only launch composr if rabbit is connected
 RABBITMQ_HEARTBEAT => Heartbeat for the rabbitmq connection
+REDIS_HOST
+REDIS_PORT
+REDIS_USER
+REDIS_PASSWORD
 SERVICES_TIMEOUT
 SERVIES_RETRIES
 SERVICES_TIME 

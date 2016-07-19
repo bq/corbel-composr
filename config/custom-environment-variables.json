@@ -28,6 +28,13 @@
         }
     },
 
+    "redis": {
+        "host": "REDIS_HOST",
+        "port": "REDIS_PORT",
+        "user": "REDIS_USER",
+        "password": "REDIS_PASSWORD"
+    },
+
     "bunyan": {
         "log" : "BUNYAN_LOG",
         "stdout": "BUNYAN_STDOUT",
