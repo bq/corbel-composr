@@ -20,6 +20,7 @@ module.exports = function (phraseModel, verb) {
             try {
               hub.emit('phrase:cache:hit', path)
               res.send(parseInt(response.status, 10), response.body)
+              hub.emit('http:end', req, res)
             } catch (e) {
               logger.error('[Cache-Hook]', 'Error sending response', e)
             }
