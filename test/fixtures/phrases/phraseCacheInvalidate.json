@@ -1,0 +1,18 @@
+{
+    "url": "cache/invalidateusercache",
+    "version": "2.3.3",
+    "post": {
+        "code": "res.status(200).send('OK')",
+        "cache": {
+            "invalidate" : [
+                "cache/user"
+            ]
+        },
+        "middlewares": [
+          "cache"
+        ],
+        "doc": {
+            "description": "Phrase for testing purposes"
+        }
+    }
+}

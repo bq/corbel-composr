@@ -1,0 +1,17 @@
+{
+    "url": "cache/user",
+    "version": "2.3.3",
+    "get": {
+        "code": "res.status(200).send(Date.now())",
+        "cache": {
+            "type" : "user",
+            "duration": "15s"
+        },
+        "middlewares": [
+          "cache"
+        ],
+        "doc": {
+            "description": "Phrase for testing purposes"
+        }
+    }
+}

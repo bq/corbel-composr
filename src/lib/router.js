@@ -44,7 +44,7 @@ function doCheckCache (routeItem, response, path, authorization) {
         break
       default:
         // Another request deletes the 'get' path cache
-        hub.emit('cache-remove', path, 'get', authorization, routeItem.phrase.getVersion(), options)
+        hub.emit('cache-remove', path, 'get', authorization, routeItem.phrase.getVersion(), routeItem.domain, options)
     }
   }
 }
