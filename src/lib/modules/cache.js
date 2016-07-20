@@ -43,6 +43,17 @@ function get (path, verb, authorization, version) {
 }
 
 function getKey (path, verb, authorization, version) {
+  var identifier = getIdentifier(authorization)
+
+  // Sanitize the path, so everyone starts with '/'
+  if (path.substr(0, 1) !== '/') {
+    path = '/' + path
+  }
+
+  return identifier + '-' + version + '-' + verb + '-' + path
+}
+
+function getIdentifier (authorization) {
   var identifier = 'no-token'
   var authorizationSanitized = authorization ? authorization.replace('Bearer ', '') : ''
 
@@ -59,17 +70,32 @@ function getKey (path, verb, authorization, version) {
     }
   }
 
-  return identifier + '-' + verb + '-' + path + '-' + version
+  return identifier
 }
 
-function remove (path, verb, authorization, version, options) {
+function remove (path, verb, authorization, version, domain, options) {
   var key = getKey(path, verb, authorization, version)
+
+  if (options && options.invalidate) {
+    options.invalidate.forEach(function (url) {
+      url = domain + '/' + url + '*'
+      // Adding the domain is mandatory since urls in the phrase model doesnt know about the domain
+      var keyWithPattern = getKey(url, verb, authorization, version)
+      invalidateWildcard(keyWithPattern)
+    })
+  }
+
   invalidate(key)
 }
 
 function invalidate (key) {
   logger.debug('[Cache]', 'removing from cache', key)
   redisConnector.del(key)
+}
+
+function invalidateWildcard (key) {
+  logger.debug('[Cache]', 'removing from cache wildcard', key)
+  redisConnector.delWildcard(key)
 }
 
 module.exports = {

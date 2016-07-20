@@ -21,6 +21,7 @@ var tests = [
   require('./specs/phrases/invalidCorbelJsRequest.error.test.js'),
   require('./specs/phrases/multipleVersions.test.js'),
   require('./specs/phrases/mock.middleware.test.js'),
+  require('./specs/phrases/cacheInvalidation.test.js'),
   require('./specs/phrases/cachedResponses.test.js'),
 
   // snippets

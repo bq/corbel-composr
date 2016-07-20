@@ -93,9 +93,26 @@ function del (key) {
   })
 }
 
+/**
+ * Removes all keys starting with a willcard
+ */
+function delWildcard (key, callback) {
+  if (!client) {
+    init()
+  }
+  client.keys(key, function (err, rows) {
+    for (var i = 0, j = rows.length; i < j; ++i) {
+      del(rows[i])
+    }
+
+    return callback(err)
+  })
+}
+
 module.exports = {
   set: set,
   get: get,
   del: del,
+  delWildcard: delWildcard,
   checkState: checkState
 }
