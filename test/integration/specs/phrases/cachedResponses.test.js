@@ -25,8 +25,8 @@ function test (server) {
             .end(function (err, response) {
               expect(response.body).to.be.a('string')
               expect(response.body).to.equals('OK')
-              setTimeout(function(){
-                done(err) //wait for the cache to flush
+              setTimeout(function () {
+                done(err) // wait for the cache to flush
               }, 1500)
             })
         })

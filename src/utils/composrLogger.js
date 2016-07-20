@@ -13,10 +13,10 @@ var logger
 if (logLevel) {
   // Default transports
   var transports = [
-    new(winston.transports.Console)({
+    new (winston.transports.Console)({
       level: logLevel,
       colorize: true,
-      timestamp: function() {
+      timestamp: function () {
         return moment().format('DD-MM-YYYY-HH:mm')
       }
     })
@@ -27,18 +27,18 @@ if (logLevel) {
     var logDirs = folderMaker.getPathFromFilePath(logFile)
     folderMaker.makePath(logDirs)
 
-    transports.push(new(winston.transports.File)({
+    transports.push(new (winston.transports.File)({
       name: 'error-file',
       filename: logFile,
       level: logLevel,
-      timestamp: function() {
+      timestamp: function () {
         return moment().format('DD-MM-YYYY-HH:mm')
       }
     }))
   }
 
   // Initialize logger
-  logger = new(winston.Logger)({
+  logger = new (winston.Logger)({
     transports: transports
   })
 }
@@ -47,25 +47,25 @@ if (logLevel) {
   Logger levels
   @todo: Prevent circular reference problem
 **/
-function error() {
+function error () {
   if (logLevel) {
     logger.log.apply(logger, ['error'].concat(Array.prototype.slice.call(arguments)))
   }
 }
 
-function info() {
+function info () {
   if (logLevel) {
     logger.log.apply(logger, ['info'].concat(Array.prototype.slice.call(arguments)))
   }
 }
 
-function warn() {
+function warn () {
   if (logLevel) {
     logger.log.apply(logger, ['warn'].concat(Array.prototype.slice.call(arguments)))
   }
 }
 
-function debug() {
+function debug () {
   if (logLevel) {
     try {
       logger.log.apply(logger, ['debug'].concat(Array.prototype.slice.call(arguments)))
@@ -75,15 +75,15 @@ function debug() {
   }
 }
 
-function fancy(text, cb) {
-  art.font(text, 'Basic', 'green', function(rendered) {
+function fancy (text, cb) {
+  art.font(text, 'Basic', 'green', function (rendered) {
     console.log(rendered)
     cb()
   })
 }
 
-function salute(serverName, version, cb) {
-  art.font(serverName, 'Doom', 'bright_green').font(version, 'Doom', 'bright_cyan', function(rendered) {
+function salute (serverName, version, cb) {
+  art.font(serverName, 'Doom', 'bright_green').font(version, 'Doom', 'bright_cyan', function (rendered) {
     console.log(rendered)
     cb()
   })

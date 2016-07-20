@@ -9,6 +9,8 @@ chai.use(chaiAsPromised)
 
 function test (server) {
   describe('Path params', function () {
+    this.timeout(10000)
+
     var phraseWithTwoParams = {
       url: 'user/:name/:surname',
       version: '2.3.4',

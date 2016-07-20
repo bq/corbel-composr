@@ -6,6 +6,8 @@ var expect = chai.expect
 
 function test (server) {
   describe('The status endpoint', function () {
+    this.timeout(10000)
+
     it('returns some check statuses in the status page', function (done) {
       request(server.app)
         .get('/status')

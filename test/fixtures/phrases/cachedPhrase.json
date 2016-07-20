@@ -17,10 +17,7 @@
     "post": {
         "code": "res.status(200).send('OK')",
         "cache": {
-            "invalidate" : [
-                "cache/test",
-                "user/me"
-            ]
+            
         },
         "middlewares": [
           "cache"
