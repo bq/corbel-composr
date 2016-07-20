@@ -6,7 +6,7 @@ var corbel = require('corbel-js')
 var expect = chai.expect
 var cacheModule = require('../../../../src/lib/modules/cache')
 
-describe.only('Cache module unit test', function () {
+describe('Cache module unit test', function () {
   var userAccessToken, clientAccessToken
 
   before(function () {
