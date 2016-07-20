@@ -7,10 +7,6 @@ var timeParser = require('parse-duration')
 var defaultDuration = '1m'
 
 function add (path, verb, authorization, version, data, options) {
-  if (authorization) {
-    var decoded = corbel.jwt.decode(authorization.replace('Bearer ', ''))
-    console.log(decoded)
-  }
   var key = getKey(path, verb, authorization, version)
   var duration = options.duration || defaultDuration
   var msDuration = timeParser(duration)
@@ -46,12 +42,24 @@ function get (path, verb, authorization, version) {
     })
 }
 
-function list () {
-  // TODO
-}
+function getKey (path, verb, authorization, version) {
+  var identifier = 'no-token'
+  var authorizationSanitized = authorization ? authorization.replace('Bearer ', '') : ''
 
-function getKey (path, verb, auth, version) {
-  return verb + '-' + path + '-' + version
+  if (authorizationSanitized) {
+    try {
+      var decoded = corbel.jwt.decode(authorizationSanitized)
+      if (decoded.userId) {
+        identifier = decoded.userId
+      } else if (decoded.clientId) {
+        identifier = decoded.clientId
+      }
+    } catch (e) {
+      logger.debug('[Cache]', 'Unable to parse authorization header', e)
+    }
+  }
+
+  return identifier + '-' + verb + '-' + path + '-' + version
 }
 
 function remove (path, verb, authorization, version, options) {
@@ -66,7 +74,7 @@ function invalidate (key) {
 
 module.exports = {
   get: get,
-  list: list,
   add: add,
-  remove: remove
+  remove: remove,
+  getKey: getKey
 }

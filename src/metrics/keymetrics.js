@@ -35,8 +35,8 @@ function initMetrics (config, logger) {
       name: 'virtualdomains_updated'
     })
 
-    /* ******************************************* 
-      PHRASES METRICS 
+    /* *******************************************
+      PHRASES METRICS
     **********************************************/
     hub.on('phrase:execution:start', function (domain, id, method) {
       // Metrics for number of phrases executed
@@ -74,13 +74,12 @@ function initMetrics (config, logger) {
       })
     })
 
-    //Emited inside phrases.
+    // Emited inside phrases.
     hub.on('metrics', function (domain, options) {
       pmx.emit(domain, options)
     })
 
-    
-    /* ******************************************* 
+    /* *******************************************
       HTTP METRICS
     **********************************************/
     hub.on('http:status', function (status, url, method) {
@@ -100,7 +99,7 @@ function initMetrics (config, logger) {
 
     hub.on('http:end', function (req, res) {
       pmx.emit('http:end', {
-        url: req.getHref(), 
+        url: req.getHref(),
         method: req.method
       })
     })
@@ -119,8 +118,8 @@ function initMetrics (config, logger) {
       })
     })
 
-    /* ******************************************* 
-      CRUD ENDPOINTS METRICS 
+    /* *******************************************
+      CRUD ENDPOINTS METRICS
     **********************************************/
 
     hub.on('virtualdomain:upsert', function (domain, id) {

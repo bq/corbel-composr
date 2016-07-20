@@ -40,8 +40,7 @@ var hooks = {
 }
 
 module.exports.getHooks = function (phraseModel, verb) {
-
-  var mandatoryAppliedHooks = mandatoryHooks.map(function(item){
+  var mandatoryAppliedHooks = mandatoryHooks.map(function (item) {
     logger.info('[Hooks]', 'Setting ' + item.description + ' for phrase:', phraseModel.getId(), 'method', verb)
     return item.hookFunction(phraseModel, verb)
   })
