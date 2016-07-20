@@ -28,7 +28,7 @@ function init (cbError) {
 
   var redisUrl = config.get('redis.host') + ':' + config.get('redis.port')
 
-  if(config.get('redis.user') && config.get('redis.password')){
+  if (config.get('redis.user') && config.get('redis.password')) {
     redisUrl = config.get('redis.user') + ':' + config.get('redis.password') + '@' + redisUrl
   }
 
