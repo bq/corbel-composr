@@ -121,7 +121,6 @@ function initMetrics (config, logger) {
     **********************************************/
 
     hub.on('virtualdomain:upsert', function (domain, id) {
-      console.log('WHYYY?', domain, id)
       counterVirtualDomainsUpdated.inc()
       pmx.emit('virtualdomain:upsert', {
         domain: domain,
