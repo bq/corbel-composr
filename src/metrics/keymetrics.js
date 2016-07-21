@@ -105,14 +105,12 @@ function initMetrics (config, logger) {
     })
 
     hub.on('phrase:cache:hit', function (url) {
-      counterSnippetsUpdated.inc()
       pmx.emit('phrase:cache:hit', {
         url: url
       })
     })
 
     hub.on('phrase:cache:miss', function (url) {
-      counterSnippetsUpdated.inc()
       pmx.emit('phrase:cache:miss', {
         url: url
       })
@@ -147,7 +145,6 @@ function initMetrics (config, logger) {
     })
 
     hub.on('phrase:delete', function (domain, id) {
-      counterPhrasesUpdated.inc()
       pmx.emit('phrase:delete', {
         domain: domain,
         id: id
@@ -155,7 +152,6 @@ function initMetrics (config, logger) {
     })
 
     hub.on('snippet:delete', function (domain, id) {
-      counterSnippetsUpdated.inc()
       pmx.emit('snippet:delete', {
         domain: domain,
         id: id
