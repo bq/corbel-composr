@@ -17,7 +17,7 @@ if (logLevel) {
       level: logLevel,
       colorize: true,
       timestamp: function () {
-        return moment().format('DD-MM-YYYY-HH:mm')
+        return moment().format('DD-MM-YYYY-HH:mm:ss')
       }
     })
   ]
@@ -32,7 +32,7 @@ if (logLevel) {
       filename: logFile,
       level: logLevel,
       timestamp: function () {
-        return moment().format('DD-MM-YYYY-HH:mm')
+        return moment().format('DD-MM-YYYY-HH:mm:ss')
       }
     }))
   }

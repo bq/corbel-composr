@@ -31,6 +31,7 @@ ResourceEndpoint.prototype.upsert = function (req, res) {
       return that.upsertCall(domain, item)
     })
     .then(function (itemSaved) {
+      console.log('WHYYY?')
       that.emitEvent(that.itemName + ':upsert', domain, itemSaved.id)
       res.setHeader('Location', that.itemName + '/' + itemSaved.id)
       logger.info(that.itemName, 'created', itemSaved.id)
