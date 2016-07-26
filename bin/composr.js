@@ -30,6 +30,11 @@ module.exports = new Promise(function (resolve, reject) {
         logger.info('CompoSR by BQ - listening on port ' + server.address().port)
         logger.info('Server instance ID:', serverID)
 
+        logger.info('>>> Execution information')
+        logger.info('    Endpoint timeout', config.get('execution.timeout'))
+        logger.info('    Use VM?', config.get('execution.vm'))
+        logger.info('    Enforce garbage collector?', config.get('execution.gc'))
+
         logger.salute(config.get('serverName'), version, function () {
           resolve(serverObjects)
           hub.emit('server:start')
