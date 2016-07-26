@@ -5,6 +5,7 @@ var logger = require('../utils/composrLogger')
 var config = require('config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
 var phraseHooks = require('./phraseHooks')
+var _ = require('lodash')
 
 /* *
  * [analyzePhrase description]
@@ -90,8 +91,8 @@ function executePhraseById (req, res, next, routeItem) {
         parsedErr.statusCode = parsedErr.status
       }
 
-      logger.debug('[Router]', err)
-      logger.error('[Router]', 'Failing executing Phrase', parsedErr.status, routeItem.domain, routeItem.id)
+      logger.debug('[Router]', _.pick(err, ['status', 'data']))
+      logger.error('[Router]', 'Failing executing Phrase', parsedErr.status, routeItem.domain, req.getHref())
       // @TODO: log error in metrics
 
       hub.emit('phrase:execution:end', parsedErr.status, routeItem.domain, routeItem.id, routeItem.verb)

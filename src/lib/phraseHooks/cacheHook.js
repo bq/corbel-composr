@@ -5,7 +5,7 @@ var logger = require('../../utils/composrLogger')
 var hub = require('../hub')
 
 module.exports = function (phraseModel, verb) {
-  return function (req, res, next) {
+  return function cacheHook(req, res, next) {
     var authHeader = req.header('Authorization')
     var path = req.getHref()
 
