@@ -23,6 +23,9 @@ Composr is a [nodeJS](https://nodejs.org/api/) opinionated server for executing 
 It uses the [composr-core](https://github.com/bq/composr-core) API for executing random pieces of code that the developers pushes to the Composr API.
 This random pieces of code, called **Phrases** or **Snippets** are model definitions for endpoints and reusable utilities. 
 
+### Why Composr?
+
+When working with a microservices backend lot of requests have to be grouped together in a "business logic" middleware, Composr serves this purpose. It also adds a bit of coolness.
 
 ## Features
 
