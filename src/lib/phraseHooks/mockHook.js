@@ -6,7 +6,7 @@ var _ = require('lodash')
 module.exports = function (phraseModel, verb) {
   var methodDoc = phraseModel.getDoc(verb)
 
-  return function (req, res, next) {
+  return function mockHock(req, res, next) {
     if (methodDoc && methodDoc.responses) {
       // Use the header if present
       var status = req.headers['Mock-Response-Status']
