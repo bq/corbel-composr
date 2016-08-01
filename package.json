@@ -17,10 +17,10 @@
     "Daniel García González <daniel.garcia@bq.com>",
     "Silkroad Team <silkroad-dev@bq.com>"
   ],
-  "homepage": "http://corbel-platform.github.io/corbel-composr",
+  "homepage": "http://bq.github.io/corbel-composr",
   "repository": {
     "type": "git",
-    "url": "git@github.com:corbel-platform/corbel-composr.git"
+    "url": "git@github.com:bq/corbel-composr.git"
   },
   "engines": {
     "node": "5.10.1",

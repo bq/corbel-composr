@@ -8,7 +8,7 @@ addons:
     packages:
       - g++-4.8
   code_climate:
-    repo_token: c965e66a6a4c8b80fa9ed3709ff79364a21e24c2c46e680e040a56ea820522d1
+    repo_token: ab301ba1fd0c821438fa5ee4011ea974a0f894c47781a056ccefb61d878de18e
 env:
   global:
     - CXX=g++-4.8
