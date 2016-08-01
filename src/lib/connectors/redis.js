@@ -32,6 +32,10 @@ function init (cbError) {
     redisUrl = config.get('redis.user') + ':' + config.get('redis.password') + '@' + redisUrl
   }
 
+  if (config.get('redis.db')) {
+    redisUrl = redisUrl + '/' + config.get('redis.db')
+  }
+
   redisUrl = '//' + redisUrl
 
   client = redis
