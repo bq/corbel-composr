@@ -7,7 +7,7 @@ var config = require('config')
 var corbel = require('corbel-js')
 
 module.exports.authUser = function () {
-  return function authUser(req, res, next) {
+  return function authUser (req, res, next) {
     var authHeader = req.header('Authorization')
 
     if (!authHeader || !authHeader.replace('Bearer ', '')) {
@@ -30,7 +30,7 @@ module.exports.authUser = function () {
 }
 
 module.exports.authClient = function () {
-  return function authClient(req, res, next) {
+  return function authClient (req, res, next) {
     var authHeader = req.header('Authorization')
 
     if (!authHeader || !authHeader.replace('Bearer ', '')) {
@@ -54,7 +54,7 @@ module.exports.authClient = function () {
  * @return {[type]}        [description]
  */
 module.exports.corbelDriverSetup = function () {
-  return function corbelDriverSetup(req, res, next) {
+  return function corbelDriverSetup (req, res, next) {
     var authorization = req.headers.authorization
 
     var corbelDriver = connection.getTokenDriver(authorization, true)

@@ -10,7 +10,9 @@ if(process.env.PM2){
     }
     
     pm2.start({
-      script    : __dirname + '/composr.js'
+      script    : __dirname + '/composr.js',
+      exec_mode : 'cluster',
+      instances : 1 
     }, function(err, apps) {
       pm2.disconnect();   // Disconnect from PM2
       if (err) throw err

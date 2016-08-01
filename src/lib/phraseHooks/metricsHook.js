@@ -2,7 +2,7 @@
 var hub = require('../hub')
 
 module.exports = function () {
-  return function corbelDriverEventHookAfter(req, res, next) {
+  return function corbelDriverEventHookAfter (req, res, next) {
     req.corbelDriver.on('service:request:after', bindRequestCallback(req))
     return next()
   }

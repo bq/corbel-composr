@@ -2,14 +2,14 @@
 
 #Composr
 
-[![Build Status](https://api.travis-ci.org/corbel-platform/corbel-composr.png?branch=master)](http://travis-ci.org/corbel-platform/corbel-composr)
+[![Build Status](https://api.travis-ci.org/bq/corbel-composr.png?branch=master)](http://travis-ci.org/corbel-platform/corbel-composr)
 [![npm version](https://badge.fury.io/js/corbel-composr.svg)](http://badge.fury.io/js/corbel-composr)
-[![Dependency status](https://david-dm.org/corbel-platform/corbel-composr/status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=dependencies&view=table)
-[![Dev Dependency Status](https://david-dm.org/corbel-platform/corbel-composr/dev-status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=devDependencies&view=table)
-[![Coverage Status](https://coveralls.io/repos/corbel-platform/corbel-composr/badge.svg?branch=master)](https://coveralls.io/r/corbel-platform/corbel-composr?branch=master)
+[![Dependency status](https://david-dm.org/bq/corbel-composr/status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=dependencies&view=table)
+[![Dev Dependency Status](https://david-dm.org/bq/corbel-composr/dev-status.png)](https://david-dm.org/corbel-platform/corbel-composr#info=devDependencies&view=table)
+[![Coverage Status](https://coveralls.io/repos/bq/corbel-composr/badge.svg?branch=master)](https://coveralls.io/r/corbel-platform/corbel-composr?branch=master)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
-[![Code Climate](https://codeclimate.com/github/corbel-platform/corbel-composr/badges/gpa.svg)](https://codeclimate.com/github/corbel-platform/corbel-composr)
-[![Test Coverage](https://codeclimate.com/github/corbel-platform/corbel-composr/badges/coverage.svg)](https://codeclimate.com/github/corbel-platform/corbel-composr/coverage)
+[![Code Climate](https://codeclimate.com/github/bq/corbel-composr/badges/gpa.svg)](https://codeclimate.com/github/corbel-platform/corbel-composr)
+[![Test Coverage](https://codeclimate.com/github/bq/corbel-composr/badges/coverage.svg)](https://codeclimate.com/github/corbel-platform/corbel-composr/coverage)
 
 <p align="center"><img  src="https://cdn.rawgit.com/feross/standard/master/badge.svg" width="150"></p>
 

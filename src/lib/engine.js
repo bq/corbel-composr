@@ -3,6 +3,7 @@
 var logger = require('../utils/composrLogger')
 var composr = require('composr-core')
 var corbelConnection = require('./connectors/corbel')
+var redisConnection = require('./connectors/redis')
 var cache = require('./modules/cache')
 var hub = require('./hub')
 var config = require('config')
@@ -12,6 +13,11 @@ var worker
 
 var engine = {
   initialized: false,
+  services: {
+    redis: false,
+    corbel: false,
+    rabbit: false
+  },
   composr: composr,
 
   /* ***********************************************************
@@ -71,7 +77,9 @@ var engine = {
   },
 
   // Inits the composr-core package
-  initComposrCore: function (credentials, fetchData) {
+  initComposrCore: function () {
+    var credentials = engine.getComposrCoreCredentials()
+    var fetchData = engine.services.corbel // If corbel is connected launch with data
     return new Promise(function (resolve, reject) {
       engine.composr.init(credentials, fetchData)
         .then(function () {
@@ -90,10 +98,12 @@ var engine = {
   },
 
   _waitUntilCorbelIsReadyAndFetchData: function () {
+    var self = this
     corbelConnection.waitUntilCorbelIsReady()
       .then(function () {
+        self.services.corbel = true
         logger.info('[Engine]', 'Data is available, fetching')
-        engine.initComposrCore(engine.getComposrCoreCredentials(), true)
+        engine.initComposrCore()
       })
       .catch(function () {
         // If the services were unavailable delay the retries and go on
@@ -113,65 +123,120 @@ var engine = {
       engine.suscribeToCoreEvents()
       engine.suscribeToCacheEvents()
 
-      worker = new WorkerClass(engine, serverID)
+      engine.checkServices()
+        .then(function () {
+          engine.outputSystemInfo(localMode)
 
-      if (localMode) {
-        logger.info('[Engine]', '>>> Launching server in local mode')
-        logger.info('[Engine]', '        No RabbitMQ connection will be stablished')
-        logger.info('[Engine]', '        It will not fetch endpoints from Corbel')
-        engine.launchWithoutData(app, {resolve, reject}, function () {
-          // TODO: Move to a separate function
-          logger.info('[Engine]', 'Trying to find phrases in the current directory')
-          composrBuild({
-            version: '0.0.0'
-          }, function (err, items) {
-            if (err) {
-              logger.error('[Engine]', 'Error loading local data', err)
-              return
+          if (localMode) {
+            engine.initLocalMode(app, {resolve, reject})
+            return
+          }
+
+          worker = new WorkerClass(engine, serverID)
+
+          // Mandatory pings that will trigger the execution of the server
+          hub.once('corbel:ready', function () {
+            engine.services.corbel = true
+            engine.launch(app, {resolve, reject})
+          })
+
+          hub.once('corbel:not:ready', function () {
+            engine.services.corbel = false
+            // For some reason corbel wasnt up, so we wait until it is ready. but for the moment we start the server
+            engine.launch(app, {resolve, reject}, function () {
+              logger.info('[Engine]', 'The server is launched, delaying the fetch data')
+              engine._waitUntilCorbelIsReadyAndFetchData()
+            })
+          })
+
+          // Make the necessary calls that will result in the 'corbel:ready' or 'corbel:not:ready' events
+          if (config.get('rabbitmq.forceconnect') && worker.canConnect()) {
+            logger.info('[Engine]', '>>> The server will start after RabbitMQ is connected')
+            logger.info('[Engine]', '>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
+              'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
+
+            engine.initWorker(worker, engine.waitUntilCorbelConnected)
+          } else {
+            if (!worker.canConnect()) {
+              logger.info('[Engine]', '>>> RabbitMQ worker will not be connectLed')
+            } else {
+              logger.warn('[Engine]', '>>> The server will start even if RabbitMQ is NOT connected')
+              engine.initWorker(worker)
             }
 
-            Promise.all([
-              engine.composr.Phrase.register(global.domain || 'composr', items.phrases),
-              engine.composr.Snippet.register(global.domain || 'composr', items.snippets)
-            ])
-              .then(function () {
-                logger.info('[Engine]', 'Loaded local phrases and snippets')
-              })
-          })
+            engine.waitUntilCorbelConnected(maxServicesRetries)
+          }
         })
-        return
-      }
+    })
+  },
 
-      // Mandatory pings that will trigger the execution of the server
-      hub.once('corbel:ready', function () {
-        engine.launchWithData(app, {resolve, reject})
+  outputSystemInfo: function (localMode) {
+    logger.info('[Engine]', '=========== System information ===========')
+
+    if (localMode) {
+      logger.info('[Engine]', '    >>> Launching server in local mode')
+      logger.info('[Engine]', '        No RabbitMQ connection will be stablished')
+      logger.info('[Engine]', '        It will not fetch endpoints from Corbel')
+    } else {
+      logger.info('[Engine]', '    >>> Launching server in remote mode')
+      logger.info('[Engine]', '        It will not search for endpoints in current folder')
+    }
+
+    logger.info('[Engine]', '    >>> Execution information')
+    logger.info('[Engine]', '        Endpoint timeout', config.get('execution.timeout'))
+    logger.info('[Engine]', '        Use VM?', config.get('execution.vm'))
+    logger.info('[Engine]', '        Enforce garbage collector?', config.get('execution.gc'))
+
+    logger.info('[Engine]', '    >>> Remote services')
+
+    if (engine.services.redis) {
+      logger.info('[Engine]', '       ✓ Redis Cache Connected')
+    } else {
+      logger.info('[Engine]', '       ✘ No Redis Cache')
+    }
+
+    if (engine.services.corbel) {
+      logger.info('[Engine]', '       ✓ Corbel Connected')
+    } else {
+      logger.info('[Engine]', '       ✘ Corbel Connected')
+    }
+  },
+
+  checkServices: function () {
+    var promises = [redisConnection.checkState(), corbelConnection.pingAll()]
+
+    return Promise.all(promises)
+      .then(function (results) {
+        engine.services.redis = results[0]
+        engine.services.corbel = results[1]
       })
+  },
 
-      hub.once('corbel:not:ready', function () {
-        // For some reason corbel wasnt up, so we wait until it is ready. but for the moment we start the server
-        engine.launchWithoutData(app, {resolve, reject}, function () {
-          logger.info('[Engine]', 'The server is launched, delaying the fetch data')
-          engine._waitUntilCorbelIsReadyAndFetchData()
-        })
-      })
+  /*
+    Local mode reads phrases from current directory and dont fetch data from corbel.
+    It does not connect to rabbit.
+   */
+  initLocalMode: function (app, promise) {
+    engine.services.corbel = false
 
-      // Make the necessary calls that will result in the 'corbel:ready' or 'corbel:not:ready' events
-      if (config.get('rabbitmq.forceconnect') && worker.canConnect()) {
-        logger.info('[Engine]', '>>> The server will start after RabbitMQ is connected')
-        logger.info('[Engine]', '>>> You can disable this behaviour by changing rabbitmq.forceconnect to false ' +
-          'in the configuration file or sending RABBITMQ_FORCE_CONNECT environment variable to false')
-
-        engine.initWorker(worker, engine.pingCorbel)
-      } else {
-        if (!worker.canConnect()) {
-          logger.info('[Engine]', '>>> RabbitMQ worker will not be connectLed')
-        } else {
-          logger.warn('[Engine]', '>>> The server will start even if RabbitMQ is NOT connected')
-          engine.initWorker(worker)
+    engine.launch(app, promise, function () {
+      logger.info('[Engine]', 'Trying to find phrases in the current directory')
+      composrBuild({
+        version: '0.0.0'
+      }, function (err, items) {
+        if (err) {
+          logger.error('[Engine]', 'Error loading local data', err)
+          return
         }
 
-        engine.pingCorbel(maxServicesRetries)
-      }
+        Promise.all([
+          engine.composr.Phrase.register(global.domain || 'composr', items.phrases),
+          engine.composr.Snippet.register(global.domain || 'composr', items.snippets)
+        ])
+          .then(function () {
+            logger.info('[Engine]', 'Loaded local phrases and snippets')
+          })
+      })
     })
   },
 
@@ -179,26 +244,13 @@ var engine = {
     worker.init(cb)
   },
 
-  launchWithData: function (app, promise) {
-    engine.initComposrCore(engine.getComposrCoreCredentials(), true)
+  launch: function (app, promise, cb) {
+    engine.initComposrCore()
       .then(function () {
         promise.resolve({
           app: app,
           composr: engine.composr,
           hub: hub,
-          initialized: engine.initialized
-        })
-      })
-      .catch(promise.reject)
-  },
-
-  launchWithoutData: function (app, promise, cb) {
-    engine.initComposrCore(engine.getComposrCoreCredentials(), false)
-      .then(function () {
-        promise.resolve({
-          app: app,
-          hub: hub,
-          composr: engine.composr,
           initialized: engine.initialized
         })
 
@@ -209,7 +261,7 @@ var engine = {
       .catch(promise.reject)
   },
 
-  pingCorbel: function (maxServicesRetries) {
+  waitUntilCorbelConnected: function (maxServicesRetries) {
     corbelConnection.waitUntilCorbelIsReady(maxServicesRetries)
       .then(function () {
         hub.emit('corbel:ready')

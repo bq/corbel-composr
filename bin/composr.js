@@ -22,18 +22,13 @@ var uuid = require('uuid')
 var serverID = uuid.v1()
 
 module.exports = new Promise(function (resolve, reject) {
-  require('../src/app')(config.get('execution.local'), serverID)
+  require('../src/app')(serverID)
     .then(function (serverObjects) {
       var port = config.get('port')
 
       var server = serverObjects.app.listen(port, function () {
         logger.info('CompoSR by BQ - listening on port ' + server.address().port)
         logger.info('Server instance ID:', serverID)
-
-        logger.info('>>> Execution information')
-        logger.info('    Endpoint timeout', config.get('execution.timeout'))
-        logger.info('    Use VM?', config.get('execution.vm'))
-        logger.info('    Enforce garbage collector?', config.get('execution.gc'))
 
         logger.salute(config.get('serverName'), version, function () {
           resolve(serverObjects)

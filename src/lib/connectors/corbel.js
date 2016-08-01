@@ -59,7 +59,7 @@ function checkState (timeout) {
       var versionPath = path.replace(new RegExp('(.*/)[^/]+/?$'), '$1')
           .replace('{{module}}', module) + 'version'
 
-      logger.info('[Corbel-JS]', 'Checking for external service', module, ': ', versionPath)
+      logger.debug('[Corbel-JS]', 'Checking for external service', module, ': ', versionPath)
 
       var request = https.get(versionPath, function (res) {
         var responseData = ''
@@ -93,6 +93,20 @@ function checkState (timeout) {
     })
 }
 
+function pingAll (requestTimeout) {
+  return checkState(requestTimeout)
+    .then(function (results) {
+      var allRunning = Object.keys(results).reduce(function (prev, module) {
+        var isUp = results[module]
+        var state = isUp ? 'is UP' : 'is DOWN'
+        logger.debug('[Corbel-JS]', '>>> Module', module, state)
+
+        return prev && isUp
+      }, true)
+      return allRunning
+    })
+}
+
 function waitUntilCorbelIsReady (maxServicesRetries) {
   var retries = maxServicesRetries || config.get('services.retries')
   var requestTimeout = config.get('services.timeout')
@@ -117,16 +131,8 @@ function _waitUntilCorbelModulesReady (retries, requestTimeout) {
     return Promise.reject()
   }
 
-  return checkState(requestTimeout)
-    .then(function (results) {
-      var allRunning = Object.keys(results).reduce(function (prev, module) {
-        var isUp = results[module]
-        var state = isUp ? 'is UP' : 'is DOWN'
-        logger.info('[Corbel-JS]', '>>> Module', module, state)
-
-        return prev && isUp
-      }, true)
-
+  return pingAll(requestTimeout)
+    .then(function (allRunning) {
       if (allRunning) {
         logger.info('[Corbel-JS]', 'All services up and running!')
         return true
@@ -144,5 +150,6 @@ module.exports.PHRASES_COLLECTION = PHRASES_COLLECTION
 module.exports.extractDomain = extractDomain
 module.exports.getTokenDriver = getTokenDriver
 module.exports.checkState = checkState
+module.exports.pingAll = pingAll
 module.exports.waitUntilCorbelIsReady = waitUntilCorbelIsReady
 module.exports._waitUntilCorbelModulesReady = _waitUntilCorbelModulesReady

@@ -11,7 +11,7 @@ var folderMaker = require('./folderMaker')
 
 var logger = null
 
-if (config.get('bunyan.log') === true) {
+if (config.get('bunyan.log')) {
   folderMaker.makePath('./logs')
 
   var streams = [{
@@ -28,14 +28,14 @@ if (config.get('bunyan.log') === true) {
     path: './logs/api.log'
   }]
 
-  if (config.get('bunyan.stdout') === true) {
+  if (config.get('bunyan.stdout')) {
     streams.push({
       level: 'debug', // Loggin depth
       stream: process.stdout // log INFO and above to stdout
     })
   }
 
-  if (config.get('bunyan.syslog') === true && false) {
+  if (config.get('bunyan.syslog') && false) {
     // TODO: remove
     var bsyslog = require('bunyan-syslog')
 
