@@ -31,7 +31,8 @@
         "host": "REDIS_HOST",
         "port": "REDIS_PORT",
         "user": "REDIS_USER",
-        "password": "REDIS_PASSWORD"
+        "password": "REDIS_PASSWORD",
+        "db": "REDIS_DB"
     },
 
     "bunyan": {
