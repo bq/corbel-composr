@@ -14,7 +14,7 @@ sanitizeRaml.TYPES[undefined] = function (value) {
 
 module.exports = function (phraseModel, verb) {
   var methodDoc = phraseModel.getDoc(verb)
-  return function validateHook(req, res, next) {
+  return function validateHook (req, res, next) {
     // TODO: We don't validate uriParameters for now, since they are outside the methodDoc
     return validateQueryParams(methodDoc.queryParameters, req.query)
       .then(function () {

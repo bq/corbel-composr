@@ -2,12 +2,14 @@
 // TODO: Only support for v4 schema!
 var mocker = require('json-schema-faker')
 var _ = require('lodash')
+var logger = require('../../utils/composrLogger')
 
 module.exports = function (phraseModel, verb) {
   var methodDoc = phraseModel.getDoc(verb)
 
-  return function mockHock(req, res, next) {
+  return function mockHock (req, res, next) {
     if (methodDoc && methodDoc.responses) {
+      logger.debug('[Mock Hook]', 'Mocking response')
       // Use the header if present
       var status = req.headers['Mock-Response-Status']
       if (!status) {

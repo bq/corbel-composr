@@ -42,7 +42,7 @@ describe('Engine tests', function () {
   })
 
   it('Resolves in local mode without data', function (done) {
-    var stub = sandbox.stub(engine, 'launchWithoutData', function (app, dfd) {
+    var stub = sandbox.stub(engine, 'launch', function (app, dfd) {
       dfd.resolve()
     })
 
@@ -50,6 +50,7 @@ describe('Engine tests', function () {
 
     engine.init(true, true, 'abc1')
       .then(function () {
+        expect(engine.services.corbel).to.equals(false)
         hub.removeAllListeners()
         expect(stub.callCount).to.equals(1)
         done()
@@ -57,9 +58,9 @@ describe('Engine tests', function () {
   })
 
   it('calls launchWithData if all the services are running', function (done) {
-    this.timeout(5000)
+    this.timeout(10000)
 
-    var stubLaunchWithData = sandbox.stub(engine, 'launchWithData', function (app, dfd) {
+    var stubLaunchWithData = sandbox.stub(engine, 'launch', function (app, dfd) {
       dfd.resolve()
     })
 
@@ -67,16 +68,22 @@ describe('Engine tests', function () {
 
     nock(servicesUrl)
       .get('/iam/version')
-      .reply(200)
+      .times(2)
+      .reply(204)
       .get('/assets/version')
+      .times(2)
       .reply(200)
       .get('/evci/version')
+      .times(2)
       .reply(200)
       .get('/resources/version')
+      .times(2)
       .reply(200)
 
     engine.init(true, false, 'abc2')
       .then(function () {
+        console.log(engine.services.corbel)
+        expect(engine.services.corbel).to.equals(true)
         expect(stubLaunchWithData.callCount).to.equals(1)
         expect(nock.isDone()).to.be.true
         done()
@@ -86,7 +93,7 @@ describe('Engine tests', function () {
   it('calls launchWithOutData if some service is not running', function (done) {
     this.timeout(10000)
 
-    var stubLaunchWithoutData = sandbox.stub(engine, 'launchWithoutData', function (app, dfd) {
+    var stubLaunchWithoutData = sandbox.stub(engine, 'launch', function (app, dfd) {
       dfd.resolve()
     })
 
@@ -96,16 +103,21 @@ describe('Engine tests', function () {
 
     nock(servicesUrl)
       .get('/iam/version')
+      .times(2)
       .reply(400)
       .get('/assets/version')
+      .times(2)
       .reply(400)
       .get('/evci/version')
+      .times(2)
       .reply(200)
       .get('/resources/version')
+      .times(2)
       .reply(200)
 
     engine.init(true, false, 'abcdfe', 2)
       .then(function () {
+        expect(engine.services.corbel).to.equals(false)
         expect(stubLaunchWithoutData.callCount).to.be.equals(1)
         nock.cleanAll()
         done()

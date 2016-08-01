@@ -1,6 +1,5 @@
 {
     "serverName" : "SERVER_NAME",
-    "bodylimit" : "50mb",
     "port": "PORT",
     
     "rabbitmq": {
@@ -8,10 +7,7 @@
         "port": "RABBITMQ_PORT",
         "username": "RABBITMQ_USERNAME",
         "password": "RABBITMQ_PASSWORD",
-        "forceconnect":  {
-            "__name": "RABBITMQ_FORCE_CONNECT",
-            "__format": "boolean"
-        }
+        "forceconnect": "RABBITMQ_FORCE_CONNECT"
     },
 
     "services": {
@@ -39,61 +35,30 @@
     },
 
     "bunyan": {
-        "log" : {
-            "__name": "BUNYAN_LOG",
-            "__format": "boolean"
-        },
-        "stdout": {
-            "__name": "BUNYAN_STDOUT",
-            "__format": "boolean"
-        },
-        "streamServer": {
-            "__name": "BUNYAN_STREAM_SERVER",
-            "__format": "boolean"
-        }
+        "log" : "BUNYAN_LOG",
+        "stdout": "BUNYAN_STDOUT",
+        "streamServer": "BUNYAN_STREAM_SERVER"
     },
 
     "composrLog": {
-        "accessLog" : {
-            "__name": "ACCESS_LOG",
-            "__format": "boolean"
-        },
+        "accessLog" : "ACCESS_LOG",
         "accessLogFile" : "ACCESS_LOG_FILE",
         "logLevel": "LOG_LEVEL",
         "logFile": "LOG_FILE",
-        "syslog" : {
-            "__name": "SYSLOG",
-            "__format": "boolean"
-        }
+        "syslog" : "SYSLOG"
     },
 
     "newrelic": {
-        "enabled": {
-            "__name": "NRACTIVE",
-            "__format": "boolean"
-        },
+        "enabled": "NRACTIVE",
         "name": "NRAPPNAME",
         "key": "NRAPIKEY"
     },
 
-    "keymetrics": {
-        "__name": "KEYMETRICS",
-        "__format": "boolean"
-    },
-    
+    "keymetrics":"KEYMETRICS",
     "execution": {
-        "vm": {
-            "__name": "EXEC_WITH_VM",
-            "__format": "boolean"
-        },
-        "gc":  {
-            "__name": "ENFORCE_GC",
-            "__format": "boolean"
-        },
+        "vm": "EXEC_WITH_VM",
+        "gc": "ENFORCE_GC",
         "timeout": "TIMEOUT",
-        "local": {
-            "__name": "LOCAL_MODE",
-            "__format": "boolean"
-        }
+        "local": "LOCAL_MODE"
     }
 }

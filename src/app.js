@@ -82,6 +82,7 @@ process.on('uncaughtException', function (err) {
 // Trigger the static routes creation
 hub.emit('create:staticRoutes', server)
 
-module.exports = function (localMode, serverID) {
+module.exports = function (serverID) {
+  var localMode = config.get('execution.local')
   return engine.init(server, localMode, serverID)
 }

@@ -24,7 +24,7 @@ function checkState () {
 }
 
 function init (cbError) {
-  logger.info('[Redis client]', 'Creating a new client')
+  logger.debug('[Redis client]', 'Creating a new client')
 
   var redisUrl = config.get('redis.host') + ':' + config.get('redis.port')
 
@@ -100,12 +100,15 @@ function delWildcard (key, callback) {
   if (!client) {
     init()
   }
+
   client.keys(key, function (err, rows) {
     for (var i = 0, j = rows.length; i < j; ++i) {
       del(rows[i])
     }
 
-    return callback(err)
+    if (callback) {
+      callback(err)
+    }
   })
 }
 
