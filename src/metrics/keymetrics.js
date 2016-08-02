@@ -4,13 +4,14 @@ var engine = require('../lib/engine')
 var sizeof = require('object-sizeof')
 var pmx = require('pmx')
 var hub = require('../lib/hub')
+var yn = require('yn')
 
 /* *********************************
   Keymetrics events
 **********************************/
 
 function initMetrics (config, logger) {
-  if (config.get('keymetrics')) {
+  if (yn(config.get('keymetrics'))) {
     logger.info('[Keymetrics]', 'Initializing Keymetrics probes...')
 
     var probe = pmx.probe()

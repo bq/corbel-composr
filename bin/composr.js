@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 var config = require('config')
+var yn = require('yn')
 
-if (config.get('newrelic.enabled') === true) {
+if (yn(config.get('newrelic.enabled')) === true) {
   require('newrelic')
 }
 
-if (config.get('keymetrics') === true) {
+if (yn(config.get('keymetrics')) === true) {
   var pmx = require('pmx')
   // Log routes and latency.
   // You must do this BEFORE any require('http')

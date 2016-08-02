@@ -2,6 +2,7 @@
 var hub = require('../lib/hub')
 var transactions = require('./transactions')
 var fProxy = require('../utils/proxify.js')
+var yn = require('yn')
 var newrelic
 /* *********************************
 Newrelic events
@@ -41,7 +42,7 @@ function notifyTransaction (transactionId) {
 }
 
 function initMetrics (config, logger) {
-  if (config.get('newrelic.enabled')) {
+  if (yn(config.get('newrelic.enabled'))) {
     newrelic = require('newrelic')
     logger.info('Initializing NewRelic events...')
     fProxy.proxifyFunction(newrelic, ['agent', '_transactionFinished'], function (cb, transaction) {

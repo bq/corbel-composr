@@ -6,6 +6,7 @@ var config = require('config')
 var allowedVerbs = ['get', 'put', 'post', 'delete']
 var phraseHooks = require('./phraseHooks')
 var _ = require('lodash')
+var yn = require('yn')
 
 /* *
  * [analyzePhrase description]
@@ -112,7 +113,7 @@ function executePhraseById (req, res, next, routeItem) {
  * @return {Object} modified execution params
  */
 function executionMode (params) {
-  if (config.get('execution.vm')) {
+  if (yn(config.get('execution.vm'))) {
     params.browser = false
   }
 
@@ -124,7 +125,7 @@ function executionMode (params) {
  * @return {[type]} [description]
  */
 function enforceGC () {
-  if (config.get('execution.gc') && !!global.gc) {
+  if (yn(config.get('execution.gc')) && !!global.gc) {
     global.gc()
   }
 }

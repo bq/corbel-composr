@@ -13,6 +13,7 @@ var config = require('config')
 var configChecker = require('./utils/envConfigChecker')
 var logger = require('./utils/composrLogger')
 var ComposrError = require('./lib/ComposrError')
+var yn = require('yn')
 
 /* ************************************
   Configuration check
@@ -84,5 +85,5 @@ hub.emit('create:staticRoutes', server)
 
 module.exports = function (serverID) {
   var localMode = config.get('execution.local')
-  return engine.init(server, localMode, serverID)
+  return engine.init(server, yn(localMode), serverID)
 }

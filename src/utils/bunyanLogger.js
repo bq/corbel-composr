@@ -8,10 +8,11 @@ var restify = require('restify')
 var config = require('config')
 var logStreamer = config.get('bunyan.streamServer')
 var folderMaker = require('./folderMaker')
+var yn = require('yn')
 
 var logger = null
 
-if (config.get('bunyan.log')) {
+if (yn(config.get('bunyan.log'))) {
   folderMaker.makePath('./logs')
 
   var streams = [{
@@ -28,7 +29,7 @@ if (config.get('bunyan.log')) {
     path: './logs/api.log'
   }]
 
-  if (config.get('bunyan.stdout')) {
+  if (yn(config.get('bunyan.stdout'))) {
     streams.push({
       level: 'debug', // Loggin depth
       stream: process.stdout // log INFO and above to stdout

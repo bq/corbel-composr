@@ -422,6 +422,8 @@ npm install -g node-inspector
   ```
 
 
+*[Public hub](https://hub.docker.com/r/corbelcomposr/composr/)*
+
 [corbel-link]: https://github.com/bq/corbel
 
 ## Reference
