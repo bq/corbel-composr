@@ -112,7 +112,8 @@ _If NODE_ENV is not set in the environment, a default value of `development` is 
         "host": "localhost",
         "port": 6379,
         "user": "",
-        "password": ""
+        "password": "",
+        "db": ""
     },
 
     "bunyan": {
@@ -145,7 +146,6 @@ _If NODE_ENV is not set in the environment, a default value of `development` is 
         "local": false
     }
 }
-
 ```
 
 Almost all of the vales in the configuration file can be overwriten by environment variables, this can be useful if you use **Docker**, **Travis** or any other tool that could send environment variables to configure your server. 
@@ -176,6 +176,7 @@ RABBITMQ_HEARTBEAT => Heartbeat for the rabbitmq connection
 REDIS_HOST
 REDIS_PORT
 REDIS_USER
+REDIS_DB => Optional, specify the redis db to use, useful when multiple instances running vs the same redis
 REDIS_PASSWORD
 SERVICES_TIMEOUT
 SERVIES_RETRIES

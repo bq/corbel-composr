@@ -42,9 +42,10 @@ function notifyTransaction (transactionId) {
 }
 
 function initMetrics (config, logger) {
+
   if (yn(config.get('newrelic.enabled'))) {
     newrelic = require('newrelic')
-    logger.info('Initializing NewRelic events...')
+    logger.info('[Metrics]', 'Initializing NewRelic events...')
     fProxy.proxifyFunction(newrelic, ['agent', '_transactionFinished'], function (cb, transaction) {
       if (transaction.partialName.indexOf('Custom') === -1) {
         transaction.forceIgnore = true
