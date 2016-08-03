@@ -203,7 +203,7 @@ var engine = {
   },
 
   checkServices: function () {
-    var promises = [redisConnection.checkState(), corbelConnection.pingAll()]
+    var promises = [redisConnection.checkState(), corbelConnection.pingAll(500)]
 
     return Promise.all(promises)
       .then(function (results) {
