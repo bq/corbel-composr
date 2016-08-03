@@ -319,7 +319,7 @@ In order to accomplish cache and cache invalidation, phrase models can define so
       "cache"
     ],
     "cache": {
-      "invalidate": ["get-resource"]
+      "invalidate": ["resource"]
     },
     "doc": {...}
   }
