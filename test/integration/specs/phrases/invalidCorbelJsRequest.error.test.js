@@ -13,7 +13,7 @@ function test (server) {
       url: 'error/corbeldriver',
       version: '2.3.4',
       get: {
-        code: 'corbelDriver.config.set("urlBase", "https://proxy-qa.bqws.io/v1.0/"); corbelDriver.resources.collection("test").get().then(function(response){ res.status(200).send(response.data); }).catch(function(err){ res.status(err.status).send( err.data);})',
+        code: 'corbelDriver.config.set("urlBase", "https://proxy-qa.bqws.io/v1.0/"); corbelDriver.resources.collection("test").get().then(function(response){ res.send(200, response.data); }).catch(function(err){ res.send(err.status, err.data);})',
         doc: {}
       }
     }

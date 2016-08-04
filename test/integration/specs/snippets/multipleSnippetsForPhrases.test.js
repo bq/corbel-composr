@@ -12,7 +12,7 @@ function test (server) {
     var basicSnippet = {
       name: 'basicSnippet',
       version: '3.3.3',
-      codehash: new Buffer('var thing = function(res){ res.status(201).send("test"); }; exports(thing);').toString('base64')
+      codehash: new Buffer('var thing = function(res){ res.send(200, "test"); }; exports(thing);').toString('base64')
     }
 
     var basicPhrase = {
@@ -27,13 +27,13 @@ function test (server) {
     var upperCaseSnippet = {
       name: 'upperCaseSnippet',
       version: '3.3.3',
-      codehash: new Buffer('var thing = function(res,param){res.status(200).send(param.toUpperCase()); }; exports(thing);').toString('base64')
+      codehash: new Buffer('var thing = function(res,param){res.send(200, param.toUpperCase()); }; exports(thing);').toString('base64')
     }
 
     var upperCaseSnippet_bugged = {
       name: 'upperCaseSnippet',
       version: '3.5.5',
-      codehash: new Buffer('var thing = function(res,param){res.status(200).send(param.toLowerCase()); }; exports(thing);').toString('base64')
+      codehash: new Buffer('var thing = function(res,param){res.send(200, param.toLowerCase()); }; exports(thing);').toString('base64')
     }
 
     var upperCasePhrase = {
@@ -88,7 +88,7 @@ function test (server) {
     it('a phrase should can use a basic snippet', function (done) {
       request(server.app)
         .get('/testDomainComposr/snippet-test')
-        .expect(201)
+        .expect(200)
         .end(function (err, response) {
           expect(response).to.be.an('object')
           expect(response.text).to.equals('"test"')

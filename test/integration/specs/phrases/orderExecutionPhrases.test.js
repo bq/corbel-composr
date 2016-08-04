@@ -15,7 +15,7 @@ function test (server) {
       url: 'user/:name/:surname',
       version: '2.3.4',
       get: {
-        code: 'res.status(200).send({ surname: req.params.surname, name : req.params.name });',
+        code: 'res.send(200, { surname: req.params.surname, name : req.params.name });',
         doc: {}
       }
     }
@@ -24,7 +24,7 @@ function test (server) {
       url: 'user/:name/surname',
       version: '2.3.4',
       get: {
-        code: 'res.status(200).send({ surname: "constant", name : req.params.name });',
+        code: 'res.send(200, { surname: "constant", name : req.params.name });',
         doc: {}
       }
     }
@@ -32,7 +32,7 @@ function test (server) {
       url: 'user/:name',
       version: '2.3.4',
       get: {
-        code: 'res.status(201).send(req.params);',
+        code: 'res.send(201, req.params);',
         doc: {}
       }
     }
@@ -40,7 +40,7 @@ function test (server) {
       url: 'user/name',
       version: '2.3.4',
       get: {
-        code: 'res.status(200).send({ name: "constant"});',
+        code: 'res.send(200, { name: "constant"});',
         doc: {}
       }
     }

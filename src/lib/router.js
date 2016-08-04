@@ -81,6 +81,7 @@ function executePhraseById (req, res, next, routeItem) {
       return next()
     })
     .catch(function (err) {
+      console.log('CATCHED ERR', err)
       if (err === 'phrase:cant:be:runned') {
         err = new engine.composr.ComposrError('endpoint:not:found', 'Endpoint not found', 404)
       }

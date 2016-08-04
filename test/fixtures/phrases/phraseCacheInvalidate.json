@@ -2,7 +2,7 @@
     "url": "cache/invalidateusercache",
     "version": "2.3.3",
     "post": {
-        "code": "res.status(200).send('OK')",
+        "code": "res.send(200, 'OK')",
         "cache": {
             "invalidate" : [
                 "cache/user"

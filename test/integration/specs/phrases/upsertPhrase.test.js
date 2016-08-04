@@ -20,7 +20,7 @@ function test (server) {
       'url': 'published/phrase',
       'version': '2.2.2',
       'get': {
-        'code': 'res.status(200).send({ "hello": "World!"});',
+        'code': 'res.send(200, { "hello": "World!"});',
         'doc': {
 
         }
@@ -31,7 +31,7 @@ function test (server) {
       'url': 'notpublished/phrase',
       'version': '2.2.2',
       'get': {
-        'code': 'return res.status(200).send({ "hello": "World!"});'
+        'code': 'return res.send(200, { "hello": "World!"});'
       }
     }
 

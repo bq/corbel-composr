@@ -14,7 +14,7 @@ function test (server) {
       url: 'unregister/:name/:surname',
       version: '3.3.3',
       get: {
-        code: 'res.status(200).send(req.params);',
+        code: 'res.send(200, req.params);',
         doc: {}
       }
     }
@@ -63,7 +63,7 @@ function test (server) {
       url: 'unregister/:name/:surname',
       version: '3.3.3',
       get: {
-        code: 'res.status(200).send(req.params);',
+        code: 'res.send(200, req.params);',
         doc: {}
       }
     }
@@ -72,7 +72,7 @@ function test (server) {
       url: 'unregister/:name',
       version: '3.3.3',
       get: {
-        code: 'res.status(200).send(req.params);',
+        code: 'res.send(200, req.params);',
         doc: {}
       }
     }

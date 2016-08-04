@@ -2,7 +2,7 @@
     "url": "cache/user",
     "version": "2.3.3",
     "get": {
-        "code": "res.status(200).send(Date.now())",
+        "code": "res.send(200, Date.now())",
         "cache": {
             "type" : "user",
             "duration": "15s"
