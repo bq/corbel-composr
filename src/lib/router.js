@@ -75,12 +75,19 @@ function executePhraseById (req, res, next, routeItem) {
   hub.emit('phrase:execution:start', routeItem.domain, routeItem.id, routeItem.verb)
 
   engine.composr.Phrase.runById(routeItem.id, routeItem.verb, params, function (err, response) {
+
+    enforceGC()
+    console.log(res.statusCode, response.status)
     if (!err) {
-      enforceGC()
-      hub.emit('phrase:execution:end', response.status, routeItem.domain, routeItem.id, routeItem.verb)
-      doCheckCache(routeItem, response, req.getHref(), req.header('Authorization'))
+      hub.emit('phrase:execution:end', res.statusCode, routeItem.domain, routeItem.id, routeItem.verb)
+
+      if(response.status.toString().indexOf('2') === 0){
+        doCheckCache(routeItem, response, req.getHref(), req.header('Authorization'))
+      }
+
       return next()
-    } else {
+    } else if(err) {
+      console.log(err)
       if (err === 'phrase:cant:be:runned') {
         err = new engine.composr.ComposrError('endpoint:not:found', 'Endpoint not found', 404)
       }
