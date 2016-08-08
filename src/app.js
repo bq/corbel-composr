@@ -43,7 +43,7 @@ server.on('NotFound', function (req, res, err, next) {
 })
 
 server.on('InternalServer', function (req, res, err, next) {
-  logger.warn('[App]', 'Error caught by router InternalServer')
+  logger.warn('[App]', 'Error caught by router InternalServer', req.path())
   err = new ComposrError('error:internal:server:error', err.message, 500)
   res.send(500, err)
   next() // Necesary for triggering request end
@@ -61,7 +61,7 @@ server.on('uncaughtException', function (req, res, route, err) {
   var status = err.statusCode || err.status || 500
   var body = err.body || err.data || err
 
-  logger.warn('[App]', 'Error caught by router uncaughtException')
+  logger.warn('[App]', 'Error caught by router uncaughtException', req.path())
   logger.error(status, body, route)
 
   res.send(status, body)
