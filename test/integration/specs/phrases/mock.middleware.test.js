@@ -25,7 +25,7 @@ function test (server) {
       url: 'mockedphrase',
       version: '1.1.1',
       get: {
-        code: 'res.status(200).send("this code wont be executed")',
+        code: 'res.send(200, "this code wont be executed")',
         middlewares: ['mock'],
         doc: {
           securedBy: [

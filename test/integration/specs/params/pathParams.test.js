@@ -13,7 +13,7 @@ function test (server) {
       url: 'pathparams/:id/:name',
       version: '3.3.3',
       get: {
-        code: 'res.status(200).send(req.params);',
+        code: 'res.send(200, req.params);',
         doc: {
 
         }

@@ -42,7 +42,6 @@ function notifyTransaction (transactionId) {
 }
 
 function initMetrics (config, logger) {
-
   if (yn(config.get('newrelic.enabled'))) {
     newrelic = require('newrelic')
     logger.info('[Metrics]', 'Initializing NewRelic events...')

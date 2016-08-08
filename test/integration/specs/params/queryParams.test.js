@@ -13,7 +13,7 @@ function test (server) {
       version: '3.3.3',
       url: 'queryparams',
       get: {
-        code: 'console.log(req.query); res.status(200).send(req.query);',
+        code: 'console.log(req.query); res.send(200, req.query);',
         doc: {
 
         }

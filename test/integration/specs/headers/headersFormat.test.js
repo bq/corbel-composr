@@ -10,7 +10,7 @@ function test (server) {
       url: 'headers/:header',
       version: '3.3.3',
       get: {
-        code: 'res.status(200).send(req.get(req.params.header))',
+        code: 'res.send(200, req.get(req.params.header))',
         doc: {}
       }
     }

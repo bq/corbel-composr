@@ -11,7 +11,7 @@ function test (server) {
       url: 'error/401',
       version: '4.4.4',
       get: {
-        code: 'res.status(401).send("test")',
+        code: 'res.send(401, "test")',
         doc: {}
       }
     }

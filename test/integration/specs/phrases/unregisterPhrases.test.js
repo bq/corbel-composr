@@ -14,7 +14,7 @@ function test (server) {
       url: 'unregister/:name/:surname',
       version: '3.3.3',
       get: {
-        code: 'res.status(200).send(req.params);',
+        code: 'console.log(req.params); res.send(200, req.params);',
         doc: {}
       }
     }
@@ -48,6 +48,7 @@ function test (server) {
               if (err) {
                 throw err
               }
+              console.log(response)
               expect(response).to.be.an('object')
               expect(response.status).to.equals(404)
               expect(response.body.error).to.equals('endpoint:not:found')
@@ -63,7 +64,7 @@ function test (server) {
       url: 'unregister/:name/:surname',
       version: '3.3.3',
       get: {
-        code: 'res.status(200).send(req.params);',
+        code: 'res.send(200, req.params);',
         doc: {}
       }
     }
@@ -72,7 +73,7 @@ function test (server) {
       url: 'unregister/:name',
       version: '3.3.3',
       get: {
-        code: 'res.status(200).send(req.params);',
+        code: 'res.send(200, req.params);',
         doc: {}
       }
     }

@@ -50,7 +50,7 @@ function test (server) {
       url: 'docField/:id/:name',
       version: '12.3.2',
       get: {
-        code: 'res.status(200).send(req.params);',
+        code: 'res.send(200, req.params);',
         doc: doc
       }
     }

@@ -14,13 +14,13 @@ function test (server) {
     var unregisterSnippet1 = {
       name: 'unregisterSnippet1',
       version: '1.2.2',
-      codehash: new Buffer('var thing = function(res){ res.status(201).send("test"); }; exports(thing);').toString('base64')
+      codehash: new Buffer('var thing = function(res){ res.send(201, "test"); }; exports(thing);').toString('base64')
     }
 
     var unregisterSnippet2 = {
       name: 'unregisterSnippet2',
       version: '1.2.2',
-      codehash: new Buffer('var thing = function(res,param){res.status(200).send(param.toUpperCase()); }; exports(thing);').toString('base64')
+      codehash: new Buffer('var thing = function(res,param){res.send(200, param.toUpperCase()); }; exports(thing);').toString('base64')
     }
 
     var basicPhrase = {

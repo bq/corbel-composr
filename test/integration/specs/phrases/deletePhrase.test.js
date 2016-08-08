@@ -17,7 +17,7 @@ function test (server) {
       'url': 'published/phrase',
       'version': '2.3.4',
       'get': {
-        'code': 'res.status(200).send({ "hello": "World!"});',
+        'code': 'res.send(200, { "hello": "World!"});',
         'doc': {
 
         }

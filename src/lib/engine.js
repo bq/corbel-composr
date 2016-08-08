@@ -66,14 +66,20 @@ var engine = {
 
   // Returns the credentials for the composr-core initialization
   getComposrCoreCredentials: function () {
-    return {
-      credentials: {
-        clientId: config.get('corbel.credentials.clientId'),
-        clientSecret: config.get('corbel.credentials.clientSecret'),
-        scopes: config.get('corbel.credentials.scopes')
-      },
-      urlBase: config.get('corbel.options.urlBase')
+    var configuration = {}
+    try {
+      configuration = {
+        credentials: {
+          clientId: config.get('corbel.credentials.clientId'),
+          clientSecret: config.get('corbel.credentials.clientSecret'),
+          scopes: config.get('corbel.credentials.scopes')
+        },
+        urlBase: config.get('corbel.options.urlBase')
+      }
+    } catch (e) {
+      console.log(e)
     }
+    return configuration
   },
 
   // Inits the composr-core package

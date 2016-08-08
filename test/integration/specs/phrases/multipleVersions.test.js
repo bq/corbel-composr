@@ -10,7 +10,7 @@ function test (server) {
       url: 'multiple/path',
       version: '1.1.1',
       get: {
-        code: 'res.status(200).send("me")',
+        code: 'res.send(200, "me")',
         doc: {}
       }
     }
@@ -19,7 +19,7 @@ function test (server) {
       url: 'multiple/path',
       version: '1.2.1',
       get: {
-        code: 'res.status(200).send("you")',
+        code: 'res.send(200, "you")',
         doc: {}
       }
     }
@@ -28,7 +28,7 @@ function test (server) {
       url: 'multiple/path',
       version: '2.1.1',
       get: {
-        code: 'res.status(200).send("him")',
+        code: 'res.send(200, "him")',
         doc: {}
       }
     }
@@ -37,7 +37,7 @@ function test (server) {
       url: 'multiple/path',
       version: '3.0.0',
       get: {
-        code: 'res.status(200).send("her")',
+        code: 'res.send(200, "her")',
         doc: {}
       }
     }
