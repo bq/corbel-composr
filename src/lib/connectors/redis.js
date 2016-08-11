@@ -133,6 +133,7 @@ function delWildcard (key, callback) {
 
 module.exports = {
   set: set,
+  setNx: setNx,
   get: get,
   del: del,
   delWildcard: delWildcard,
