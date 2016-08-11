@@ -66,7 +66,6 @@ ResourceEndpoint.prototype.delete = function (req, res) {
             res.send(204, 'deleted')
           })
           .catch(function (error) {
-            console.log(arguments)
             res.send(error.status, new ComposrError('error:' + that.itemName + ':delete', error.message, error.status))
           })
       } else if (!item) {

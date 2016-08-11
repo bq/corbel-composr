@@ -17,6 +17,15 @@ if (yn(config.get('bunyan.log'))) {
 
   var streams = [{
     level: 'error',
+    path: './logs/api-error.log' // log ERROR and above to a file
+  }, {
+    level: 'trace',
+    path: './logs/api.log'
+  }]
+
+
+  /*var streams = [{
+    level: 'error',
     type: 'rotating-file',
     period: '6h', // 6h rotation
     count: 3, // keep 3 back copies
@@ -27,7 +36,7 @@ if (yn(config.get('bunyan.log'))) {
     period: '3d', // 3d rotation
     count: 3, // keep 3 back copies
     path: './logs/api.log'
-  }]
+  }]*/
 
   if (yn(config.get('bunyan.stdout'))) {
     streams.push({
