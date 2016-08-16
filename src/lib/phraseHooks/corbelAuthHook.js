@@ -8,9 +8,10 @@ var corbel = require('corbel-js')
 var redisConnector = require('../connectors/redis')
 var timeParser = require('parse-duration')
 var yn = require('yn')
-// Days to seconds
+//Sign Request configuration
 var _duration = config.get('signRequests.duration')
 var _durationInMilliseconds = timeParser(_duration)
+var signRequestsActive = yn(config.get('signRequests.active'))
 
 /**
  * Auth user middleware
@@ -33,7 +34,7 @@ module.exports.authUser = function () {
         /**
          * Signing Composr API Requests
          */
-        if (yn(config.get('signRequests.active'))) {
+        if (signRequestsActive) {
           redisConnector.set(_key, token, _durationInMilliseconds)
         }
 
