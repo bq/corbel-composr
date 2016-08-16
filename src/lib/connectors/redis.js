@@ -51,7 +51,7 @@ function init (cbError) {
   })
 }
 
-function set (key, value, expire, nx) {
+function set (key, value, expireInMs, nx) {
   if (!client) {
     init()
   }
@@ -60,7 +60,7 @@ function set (key, value, expire, nx) {
     data = JSON.stringify(value)
   } catch (e) {}
 
-  (expire) ? client.set(key, data, 'ex', expire, redis.print) : client.set(key, data, redis.print)
+  (expireInMs) ? client.set(key, data, 'px', expireInMs, redis.print) : client.set(key, data, redis.print)
 }
 
 /*

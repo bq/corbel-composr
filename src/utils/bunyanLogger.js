@@ -23,8 +23,7 @@ if (yn(config.get('bunyan.log'))) {
     path: './logs/api.log'
   }]
 
-
-  /*var streams = [{
+  /* var streams = [{
     level: 'error',
     type: 'rotating-file',
     period: '6h', // 6h rotation

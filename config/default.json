@@ -73,6 +73,6 @@
 
     "signRequests" : {
       "active": true,
-      "durationInDays" : 7
+      "duration" : "7d"
     }
 }

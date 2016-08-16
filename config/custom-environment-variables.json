@@ -65,6 +65,6 @@
 
     "signRequests" : {
       "active": "SIGN_REQ_ACTIVE",
-      "durationInDays" : "SIGN_REQ_DURATION"
+      "duration" : "SIGN_REQ_DURATION"
     }
 }

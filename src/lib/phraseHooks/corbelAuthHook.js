@@ -6,24 +6,26 @@ var logger = require('../../utils/composrLogger')
 var config = require('config')
 var corbel = require('corbel-js')
 var redisConnector = require('../connectors/redis')
+var timeParser = require('parse-duration')
 var yn = require('yn')
 // Days to seconds
-var _duration = config.get('signRequests.durationInDays')
-var _durationInSeconds = (parseInt(_duration, 10) * 60 * 60 * 24)
+var _duration = config.get('signRequests.duration')
+var _durationInMilliseconds = timeParser(_duration)
 
 /**
  * Auth user middleware
  */
 module.exports.authUser = function () {
   return function authUser (req, res, next) {
-    var authHeader = req.header('Authorization')
+    var authHeader = req.header('Authorization') || ''
+    var token = authHeader.replace('Bearer ', '')
 
-    if (!authHeader || !authHeader.replace('Bearer ', '')) {
+    if (!token) {
       return next(new ComposrError('error:authorization:undefined', '', 401))
     }
 
     try {
-      var jwtDecoded = corbel.jwt.decode(authHeader.replace('Bearer ', ''))
+      var jwtDecoded = corbel.jwt.decode(token)
 
       if (jwtDecoded.userId) {
         req.userId = jwtDecoded.userId
@@ -32,7 +34,7 @@ module.exports.authUser = function () {
          * Signing Composr API Requests
          */
         if (yn(config.get('signRequests.active'))) {
-          redisConnector.set(_key, authHeader.replace('Bearer ', ''), _durationInSeconds)
+          redisConnector.set(_key, token, _durationInMilliseconds)
         }
 
         return next()
