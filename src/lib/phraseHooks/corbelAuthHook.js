@@ -8,7 +8,7 @@ var corbel = require('corbel-js')
 var redisConnector = require('../connectors/redis')
 var timeParser = require('parse-duration')
 var yn = require('yn')
-//Sign Request configuration
+// Sign Request configuration
 var _duration = config.get('signRequests.duration')
 var _durationInMilliseconds = timeParser(_duration)
 var signRequestsActive = yn(config.get('signRequests.active'))
