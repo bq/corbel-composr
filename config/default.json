@@ -2,7 +2,7 @@
     "serverName" : "CompoSR",
     "bodylimit" : "50mb",
     "port": 3000,
-    
+
     "rabbitmq": {
         "host": "",
         "port": "",
@@ -69,5 +69,10 @@
         "gc": false,
         "timeout": 40000,
         "local": false
+    },
+
+    "signRequests" : {
+      "active": true,
+      "duration" : "7d"
     }
 }

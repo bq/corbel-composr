@@ -5,20 +5,38 @@ var ComposrError = require('../ComposrError')
 var logger = require('../../utils/composrLogger')
 var config = require('config')
 var corbel = require('corbel-js')
+var redisConnector = require('../connectors/redis')
+var timeParser = require('parse-duration')
+var yn = require('yn')
+// Days to seconds
+var _duration = config.get('signRequests.duration')
+var _durationInMilliseconds = timeParser(_duration)
 
+/**
+ * Auth user middleware
+ */
 module.exports.authUser = function () {
   return function authUser (req, res, next) {
-    var authHeader = req.header('Authorization')
+    var authHeader = req.header('Authorization') || ''
+    var token = authHeader.replace('Bearer ', '')
 
-    if (!authHeader || !authHeader.replace('Bearer ', '')) {
+    if (!token) {
       return next(new ComposrError('error:authorization:undefined', '', 401))
     }
 
     try {
-      var jwtDecoded = corbel.jwt.decode(authHeader.replace('Bearer ', ''))
-      var userId = jwtDecoded.userId
-      if (userId) {
-        req.userId = userId
+      var jwtDecoded = corbel.jwt.decode(token)
+
+      if (jwtDecoded.userId) {
+        req.userId = jwtDecoded.userId
+        var _key = 'req_signature-' + jwtDecoded.userId
+        /**
+         * Signing Composr API Requests
+         */
+        if (yn(config.get('signRequests.active'))) {
+          redisConnector.set(_key, token, _durationInMilliseconds)
+        }
+
         return next()
       } else {
         return next(new ComposrError('unauthorized_token', 'Only users can perform this action', 401))
@@ -29,6 +47,9 @@ module.exports.authUser = function () {
   }
 }
 
+/**
+ * Auth client middleware
+ */
 module.exports.authClient = function () {
   return function authClient (req, res, next) {
     var authHeader = req.header('Authorization')

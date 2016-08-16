@@ -17,22 +17,18 @@ function add (path, verb, authorization, version, data, options) {
     duration: msDuration,
     created: Date.now(),
     value: data
-  })
+  }, msDuration)
 }
 
 function get (path, verb, authorization, version) {
-  var date = Date.now()
   var key = getKey(path, verb, authorization, version)
   logger.debug('[Cache]', 'Fetching item from cache', key)
 
   return redisConnector.get(key)
     .then(function (item) {
-      if (item && (item.duration + item.created) > date) {
+      if (item) {
         logger.debug('[Cache]', 'Item found', key, item.value.status)
         return item.value
-      } else if (item) {
-        logger.debug('[Cache]', 'Item has expired with duration:', item.duration, 'current date:', date, key)
-        invalidate(key)
       }
       return null
     })
