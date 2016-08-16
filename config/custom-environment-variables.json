@@ -1,7 +1,7 @@
 {
     "serverName" : "SERVER_NAME",
     "port": "PORT",
-    
+
     "rabbitmq": {
         "host": "RABBITMQ_HOST",
         "port": "RABBITMQ_PORT",
@@ -61,5 +61,10 @@
         "gc": "ENFORCE_GC",
         "timeout": "TIMEOUT",
         "local": "LOCAL_MODE"
+    },
+
+    "signRequests" : {
+      "active": "SIGN_REQ_ACTIVE",
+      "durationInDays" : "SIGN_REQ_DURATION"
     }
 }

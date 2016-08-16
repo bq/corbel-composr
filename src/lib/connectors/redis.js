@@ -51,7 +51,7 @@ function init (cbError) {
   })
 }
 
-function set (key, value) {
+function set (key, value, expire, nx) {
   if (!client) {
     init()
   }
@@ -60,7 +60,22 @@ function set (key, value) {
     data = JSON.stringify(value)
   } catch (e) {}
 
-  client.set(key, data, redis.print)
+  (expire) ? client.set(key, data, 'ex', expire, redis.print) : client.set(key, data, redis.print)
+}
+
+/*
+* Only set the key if (not) already set
+*/
+function setNx (key, value) {
+  if (!client) {
+    init()
+  }
+  var data = value
+  try {
+    data = JSON.stringify(value)
+  } catch (e) {}
+
+  client.set(key, data, 'nx', redis.print)
 }
 
 function get (key) {
@@ -118,6 +133,7 @@ function delWildcard (key, callback) {
 
 module.exports = {
   set: set,
+  setNx: setNx,
   get: get,
   del: del,
   delWildcard: delWildcard,
