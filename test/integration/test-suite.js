@@ -23,6 +23,7 @@ var tests = [
   require('./specs/phrases/mock.middleware.test.js'),
   require('./specs/phrases/cacheInvalidation.test.js'),
   require('./specs/phrases/cachedResponses.test.js'),
+  require('./specs/phrases/cacheTimeout.test.js'),
 
   // snippets
   require('./specs/snippets/multipleSnippetsForPhrases.test.js'),
