@@ -53,7 +53,7 @@ describe('Auth hook', function () {
         expect(next.calledOnce).to.be.true
         var error = next.args[0][0]
         expect(error).to.exist
-        expect(error.error).to.equal('error:authorization:undefined')
+        expect(error.error).to.equal('error:unauthorized')
       })
     })
 
@@ -66,7 +66,7 @@ describe('Auth hook', function () {
       expect(next.calledOnce).to.be.true
       var error = next.args[0][0]
       expect(error).to.exist
-      expect(error.error).to.equal('unauthorized_token')
+      expect(error.error).to.equal('unauthorized:token')
     })
 
     it('400 for malformed auth token', function () {
@@ -83,7 +83,7 @@ describe('Auth hook', function () {
         expect(next.calledOnce).to.be.true
         var error = next.args[0][0]
         expect(error).to.exist
-        expect(error.error).to.equal('error:jwt:malformed')
+        expect(error.error).to.equal('error:malformed:token')
       })
     })
   })
@@ -123,7 +123,7 @@ describe('Auth hook', function () {
         expect(next.calledOnce).to.be.true
         var error = next.args[0][0]
         expect(error).to.exist
-        expect(error.error).to.equal('error:authorization:undefined')
+        expect(error.error).to.equal('error:unauthorized')
       })
     })
 
@@ -141,7 +141,7 @@ describe('Auth hook', function () {
         expect(next.calledOnce).to.be.true
         var error = next.args[0][0]
         expect(error).to.exist
-        expect(error.error).to.equal('error:jwt:malformed')
+        expect(error.error).to.equal('error:malformed:token')
       })
     })
   })
