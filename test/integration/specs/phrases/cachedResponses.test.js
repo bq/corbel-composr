@@ -5,6 +5,22 @@ var corbel = require('corbel-js')
 var chai = require('chai')
 var expect = chai.expect
 var phraseCache = require('../../../fixtures/phrases/cachedPhrase.json')
+var clientCachePhrase = {
+  'url': 'cache/client',
+  'version': '2.3.3',
+  'get': {
+    'code': 'res.send(200, Date.now())',
+    'cache': {
+      'type': 'client'
+    },
+    'middlewares': [
+      'cache'
+    ],
+    'doc': {
+      'description': 'Phrase for testing purposes'
+    }
+  }
+}
 
 function test (server) {
   describe('Cached phrase', function () {
@@ -14,7 +30,8 @@ function test (server) {
 
     before(function (done) {
       var phrases = [
-        phraseCache
+        phraseCache,
+        clientCachePhrase
       ]
 
       server.composr.Phrase.register('cache:domain', phrases)
@@ -76,7 +93,7 @@ function test (server) {
         })
     })
 
-    describe('For different users and clients', function () {
+    describe('For different users and clients with user cache', function () {
       var userAccessToken, userAccessToken2, clientAccessToken
       var responseUser1, responseUser2, responseClient
 
@@ -173,6 +190,74 @@ function test (server) {
             expect(data).to.equals(responseClient)
             done()
           })
+      })
+    })
+
+    describe('For different users and clients with client cache', function () {
+      var userAccessToken, userAccessToken2, clientAccessToken
+      var responseUser1, responseUser2, responseClient
+
+      function requestCache (token) {
+        return new Promise(function (resolve, reject) {
+          request(server.app)
+            .get('/cache:domain/cache/client')
+            .set('Authorization', 'Bearer ' + token)
+            .end(function (err, response) {
+              if (err) {
+                reject(err)
+              } else {
+                resolve(response.body)
+              }
+            })
+        })
+      }
+
+      before(function (done) {
+        var optUser = {
+          iss: 1,
+          aud: 'a',
+          userId: 'user1'
+        }
+
+        var optUser2 = {
+          iss: 1,
+          aud: 'a',
+          userId: 'user2'
+        }
+
+        var optClient = {
+          iss: 1,
+          aud: 'a',
+          clientId: '54313'
+        }
+
+        userAccessToken = corbel.jwt.generate(optUser, 'asd')
+        userAccessToken2 = corbel.jwt.generate(optUser2, 'asd')
+        clientAccessToken = corbel.jwt.generate(optClient, 'asd')
+
+        var promise1 = requestCache(userAccessToken)
+          .then(function (response) {
+            responseUser1 = response
+          })
+
+        var promise2 = requestCache(userAccessToken2)
+          .then(function (response) {
+            responseUser2 = response
+          })
+
+        var promise3 = requestCache(clientAccessToken)
+          .then(function (response) {
+            responseClient = response
+          })
+
+        Promise.all([promise1, promise2, promise3])
+          .then(function () {
+            expect(responseUser1).to.equals(responseUser2)
+            expect(responseClient).to.equals(responseUser1)
+            expect(responseClient).to.equals(responseUser2)
+            done()
+          })
+          .catch(done)
       })
     })
   })

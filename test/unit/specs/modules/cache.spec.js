@@ -13,7 +13,8 @@ describe('Cache module unit test', function () {
     var optUser = {
       iss: 1,
       aud: 'a',
-      userId: 'abc'
+      userId: 'abc',
+      clientId: '54313'
     }
 
     var optClient = {
@@ -27,12 +28,17 @@ describe('Cache module unit test', function () {
   })
 
   it('Generates a good key for a user token', function () {
-    var key = cacheModule.getKey('/user/me?query=hi', 'get', userAccessToken, '0.0.0')
+    var key = cacheModule.getKey('/user/me?query=hi', 'get', userAccessToken, '0.0.0', 'user')
     expect(key).to.equals('abc-0.0.0-get-/user/me?query=hi')
   })
 
+  it('Generates a client key for a user token if cache type is client', function () {
+    var key = cacheModule.getKey('/user/me?query=hi', 'get', userAccessToken, '0.0.0', 'client')
+    expect(key).to.equals('54313-0.0.0-get-/user/me?query=hi')
+  })
+
   it('Generates a good key for a user token with Bearer', function () {
-    var key = cacheModule.getKey('/user/me?query=hi', 'get', 'Bearer ' + userAccessToken, '0.0.0')
+    var key = cacheModule.getKey('/user/me?query=hi', 'get', 'Bearer ' + userAccessToken, '0.0.0', 'user')
     expect(key).to.equals('abc-0.0.0-get-/user/me?query=hi')
   })
 

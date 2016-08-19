@@ -4,14 +4,18 @@ var redisConnector = require('../connectors/redis')
 var logger = require('../../utils/composrLogger')
 var corbel = require('corbel-js')
 var timeParser = require('parse-duration')
-var defaultDuration = '1m'
+
+var DEFAULT_CACHE_DURATION = '1m'
+var CLIENT_CACHE_TYPE = 'client'
+var USER_CACHE_TYPE = 'user'
 
 function add (path, verb, authorization, version, data, options) {
-  var key = getKey(path, verb, authorization, version)
-  var duration = options.duration || defaultDuration
+  var type = options.type || CLIENT_CACHE_TYPE
+  var key = getKey(path, verb, authorization, version, type)
+  var duration = options.duration || DEFAULT_CACHE_DURATION
   var msDuration = timeParser(duration)
 
-  logger.debug('[Cache]', 'Adding item to cache', key, 'with a duration of: ', msDuration, '(ms)')
+  logger.debug('[Cache]', 'Adding item to', type, 'cache', key, 'with a duration of: ', msDuration, '(ms)')
 
   redisConnector.set(key, {
     duration: msDuration,
@@ -20,8 +24,9 @@ function add (path, verb, authorization, version, data, options) {
   }, msDuration)
 }
 
-function get (path, verb, authorization, version) {
-  var key = getKey(path, verb, authorization, version)
+function get (path, verb, authorization, version, options) {
+  var type = options.type || CLIENT_CACHE_TYPE
+  var key = getKey(path, verb, authorization, version, type)
   logger.debug('[Cache]', 'Fetching item from cache', key)
 
   return redisConnector.get(key)
@@ -38,8 +43,8 @@ function get (path, verb, authorization, version) {
     })
 }
 
-function getKey (path, verb, authorization, version) {
-  var identifier = getIdentifier(authorization)
+function getKey (path, verb, authorization, version, type) {
+  var identifier = getIdentifier(authorization, type)
 
   // Sanitize the path, so everyone starts with '/'
   if (path.substr(0, 1) !== '/') {
@@ -49,14 +54,14 @@ function getKey (path, verb, authorization, version) {
   return identifier + '-' + version + '-' + verb + '-' + path
 }
 
-function getIdentifier (authorization) {
+function getIdentifier (authorization, type) {
   var identifier = 'no-token'
   var authorizationSanitized = authorization ? authorization.replace('Bearer ', '') : ''
 
   if (authorizationSanitized) {
     try {
       var decoded = corbel.jwt.decode(authorizationSanitized)
-      if (decoded.userId) {
+      if (decoded.userId && type === USER_CACHE_TYPE) {
         identifier = decoded.userId
       } else if (decoded.clientId) {
         identifier = decoded.clientId

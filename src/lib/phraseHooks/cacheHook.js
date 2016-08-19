@@ -14,7 +14,7 @@ module.exports = function (phraseModel, verb) {
       if (!req.header('Ignore-Cache') && phraseModel.json[verb].cache && verb === 'get') {
         logger.debug('[Cache-Hook]', 'Requesting to cache...')
 
-        cacheModule.get(path, verb, authHeader, phraseModel.getVersion())
+        cacheModule.get(path, verb, authHeader, phraseModel.getVersion(), phraseModel.json[verb].cache)
           .then(function (response) {
             if (response) {
               logger.debug('[Cache-Hook]', 'Found item, sending to client')
@@ -40,3 +40,20 @@ module.exports = function (phraseModel, verb) {
     return null
   }
 }
+
+/*
+
+function corbelDriverSetup (req, res, next) {
+  var authorization = req.headers.authorization
+
+  var corbelDriver = connection.getTokenDriver(authorization, true)
+  if (config.get('composrLog.logLevel') === 'debug') {
+    corbelDriver.on('request', function () {
+      logger.debug('[CorbelAuthHook]', '>>> corbelDriver request: ', arguments)
+    })
+  }
+
+  req.corbelDriver = corbelDriver
+
+  return next()
+}*/
