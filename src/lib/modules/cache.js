@@ -75,13 +75,14 @@ function getIdentifier (authorization, type) {
 }
 
 function remove (path, verb, authorization, version, domain, options) {
-  var key = getKey(path, verb, authorization, version)
+  var type = options.type || CLIENT_CACHE_TYPE
+  var key = getKey(path, verb, authorization, version, type)
 
   if (options && options.invalidate) {
     options.invalidate.forEach(function (url) {
       url = domain + '/' + url + '*'
       // Adding the domain is mandatory since urls in the phrase model doesnt know about the domain
-      var keyWithPattern = getKey(url, verb, authorization, version)
+      var keyWithPattern = getKey(url, verb, authorization, version, type)
       invalidateWildcard(keyWithPattern)
     })
   }
