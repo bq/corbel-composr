@@ -21,10 +21,14 @@ function checkServerStatus (req, res) {
   var domains = _.uniq(phrases.map(function (item) {
     return item.getDomain()
   }))
+  var versions = _.uniq(phrases.map(function (item) {
+    return item.getVersion()
+  }))
 
   var serverStatus = {
     env: process.env.NODE_ENV || 'development',
-    domains: domains,
+    phrase_domains: domains,
+    phrase_versions: versions,
     domain: req.params.domain,
     version: packageJSON.version,
     statuses: {
