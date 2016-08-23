@@ -216,13 +216,15 @@ function test (server) {
         var optUser = {
           iss: 1,
           aud: 'a',
-          userId: 'user1'
+          userId: 'user1',
+          clientId: '54313'
         }
 
         var optUser2 = {
           iss: 1,
           aud: 'a',
-          userId: 'user2'
+          userId: 'user2',
+          clientId: '54313'
         }
 
         var optClient = {
@@ -235,22 +237,25 @@ function test (server) {
         userAccessToken2 = corbel.jwt.generate(optUser2, 'asd')
         clientAccessToken = corbel.jwt.generate(optClient, 'asd')
 
-        var promise1 = requestCache(userAccessToken)
+        requestCache(userAccessToken)
           .then(function (response) {
             responseUser1 = response
+            done()
           })
+      })
 
-        var promise2 = requestCache(userAccessToken2)
+      it('Returns the same response for all of them', function (done) {
+        var promise1 = requestCache(userAccessToken2)
           .then(function (response) {
             responseUser2 = response
           })
 
-        var promise3 = requestCache(clientAccessToken)
+        var promise2 = requestCache(clientAccessToken)
           .then(function (response) {
             responseClient = response
           })
 
-        Promise.all([promise1, promise2, promise3])
+        Promise.all([promise1, promise2])
           .then(function () {
             expect(responseUser1).to.equals(responseUser2)
             expect(responseClient).to.equals(responseUser1)
