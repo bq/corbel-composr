@@ -51,15 +51,30 @@ function doCheckCache (routeItem, response, path, authorization) {
   }
 }
 
+/* function executePhraseOrGetCachedResponse (req, res, next, routeItem) {
+  var hasCacheMiddleware = routeItem.phrase.json[routeItem.verb].middlewares && routeItem.phrase.json[routeItem.verb].middlewares.indexOf('cache') !== -1
+
+// If not in cache,
+//  execute phrae
+//  add to cache
+//
+// If in cache
+//  return from cache
+//  if expiry is near
+//    execute phrase ONCE
+//    add to cache with new expiry
+//
+} */
+
 /**
- * [executePhraseById description]
+ * [executePhrase description]
  * @param  {[type]}   req       [description]
  * @param  {[type]}   res       [description]
  * @param  {Function} next      [description]
  * @param  {[type]}   routeItem [description]
  * @return {[type]}             [description]
  */
-function executePhraseById (req, res, next, routeItem) {
+function executePhrase (req, res, next, routeItem) {
   var params = executionMode({
     corbelDriver: req.corbelDriver,
     req: req,
@@ -176,7 +191,7 @@ function bindRoutes (server, routeObjects) {
       args = args.concat(corbelDriverSetupHook)
       args = args.concat(metricsHook)
       args = args.concat(function bindRoute (req, res, next) {
-        executePhraseById(req, res, next, item)
+        executePhrase(req, res, next, item)
       })
 
       server[item.restifyVerb].apply(server, args)

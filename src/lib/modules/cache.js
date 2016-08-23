@@ -6,16 +6,16 @@ var corbel = require('corbel-js')
 var timeParser = require('parse-duration')
 
 var DEFAULT_CACHE_DURATION = '1m'
-var CLIENT_CACHE_TYPE = 'client'
+// var CLIENT_CACHE_TYPE = 'client'
 var USER_CACHE_TYPE = 'user'
+var ANONYMOUS_CACHE_TYPE = 'anonymous'
 
 function add (path, verb, authorization, version, data, options) {
-  var type = options.type || CLIENT_CACHE_TYPE
-  var key = getKey(path, verb, authorization, version, type)
+  var key = getKey(path, verb, authorization, version, options.type)
   var duration = options.duration || DEFAULT_CACHE_DURATION
   var msDuration = timeParser(duration)
 
-  logger.debug('[Cache]', 'Adding item to', type, 'cache', key, 'with a duration of: ', msDuration, '(ms)')
+  logger.debug('[Cache]', 'Adding item to cache', key, 'with a duration of: ', msDuration, '(ms)')
 
   redisConnector.set(key, {
     duration: msDuration,
@@ -25,8 +25,7 @@ function add (path, verb, authorization, version, data, options) {
 }
 
 function get (path, verb, authorization, version, options) {
-  var type = options.type || CLIENT_CACHE_TYPE
-  var key = getKey(path, verb, authorization, version, type)
+  var key = getKey(path, verb, authorization, version, options.type)
   logger.debug('[Cache]', 'Fetching item from cache', key)
 
   return redisConnector.get(key)
@@ -54,11 +53,12 @@ function getKey (path, verb, authorization, version, type) {
   return identifier + '-' + version + '-' + verb + '-' + path
 }
 
-function getIdentifier (authorization, type) {
+function getIdentifier (authorization, maybeType) {
+  var type = maybeType || USER_CACHE_TYPE
   var identifier = 'no-token'
   var authorizationSanitized = authorization ? authorization.replace('Bearer ', '') : ''
 
-  if (authorizationSanitized) {
+  if (authorizationSanitized && type !== ANONYMOUS_CACHE_TYPE) {
     try {
       var decoded = corbel.jwt.decode(authorizationSanitized)
       if (decoded.userId && type === USER_CACHE_TYPE) {
@@ -75,13 +75,13 @@ function getIdentifier (authorization, type) {
 }
 
 function remove (path, verb, authorization, version, domain, options) {
-  var key = getKey(path, verb, authorization, version)
+  var key = getKey(path, verb, authorization, version, options.type)
 
   if (options && options.invalidate) {
     options.invalidate.forEach(function (url) {
       url = domain + '/' + url + '*'
       // Adding the domain is mandatory since urls in the phrase model doesnt know about the domain
-      var keyWithPattern = getKey(url, verb, authorization, version)
+      var keyWithPattern = getKey(url, verb, authorization, version, options.type)
       invalidateWildcard(keyWithPattern)
     })
   }
