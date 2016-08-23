@@ -16,7 +16,8 @@ function test (server) {
           expect(response.body).to.be.an('object')
           expect(response.body).to.include.keys(
             'env',
-            'domains',
+            'phrase_domains',
+            'phrase_versions',
             'version',
             'statuses',
             'corbel',
@@ -34,7 +35,8 @@ function test (server) {
           expect(response.body).to.be.an('object')
           expect(response.body).to.include.keys(
             'env',
-            'domains',
+            'phrase_domains',
+            'phrase_versions',
             'version',
             'statuses',
             'corbel',
