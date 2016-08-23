@@ -309,7 +309,7 @@ In order to accomplish cache and cache invalidation, phrase models can define so
       "cache"
     ],
     "cache": {
-      "type" : "user",
+      "type" : "client",
       "duration": "5m"
     },
     "doc": { ... }
@@ -334,6 +334,7 @@ When a request is made to the `POST` method, the `cache` middleware will hit in,
 Cache can be used for:
   - Client requests
   - User requests
+  - Anonymous requests
 
 The cache for client request is the most common type of cache, client requests are made with a `client token` (which refers normally to a public resource), or without token at all. 
 
@@ -347,6 +348,14 @@ Each cached endpoint can have a `duration` (time to live), some examples of avai
   - `1w`: 1 week
 
 _See [parse-duration](https://www.npmjs.com/package/parse-duration) for valid values_
+
+By default the cache system works with the level of security that the token has. That means that:
+- A user token in the request will create/invalidate a user cache entry
+- A client token in the request will create/invalidate a client cache entry
+- No token in the request will create/invalidate an anonymous cache entry
+
+If you want to change the cache levels you can "low" them as you need. For Ex: Setting `type: client` will force a client cache for users.
+
 
 ## Logs
 
