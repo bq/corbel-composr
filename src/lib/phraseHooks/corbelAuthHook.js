@@ -22,6 +22,7 @@ module.exports.authUser = function () {
     var token = authHeader.replace('Bearer ', '')
 
     if (!token) {
+      logger.debug('[CorbelAuthHook]', 'Missing token')
       return next(new ComposrError('error:unauthorized', 'Authorization missing', 401))
     }
 
@@ -35,14 +36,18 @@ module.exports.authUser = function () {
          * Signing Composr API Requests
          */
         if (signRequestsActive) {
+          logger.debug('[CorbelAuthHook]', 'Storing request in redis...')
           redisConnector.set(_key, token, _durationInMilliseconds)
         }
 
+        logger.debug('[CorbelAuthHook]', 'Valid user token, continuing...')
         return next()
       } else {
+        logger.debug('[CorbelAuthHook]', 'Not a user token')
         return next(new ComposrError('unauthorized:token', 'Only users can perform this action', 401))
       }
     } catch (e) {
+      logger.debug('[CorbelAuthHook]', 'Malformed user token')
       return next(new ComposrError('error:malformed:token', 'Your token is malformed', 400))
     }
   }
@@ -57,13 +62,16 @@ module.exports.authClient = function () {
     var token = authHeader.replace('Bearer ', '')
 
     if (!token) {
+      logger.debug('[CorbelAuthHook]', 'Missing token')
       return next(new ComposrError('error:unauthorized', 'Authorization missing', 401))
     }
 
     try {
       corbel.jwt.decode(token)
+      logger.debug('[CorbelAuthHook]', 'Valid client or user token, continuing...')
       return next()
     } catch (e) {
+      logger.debug('[CorbelAuthHook]', 'Malformed client token')
       return next(new ComposrError('error:malformed:token', 'Your token is malformed', 400))
     }
   }
