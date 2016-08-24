@@ -48,7 +48,6 @@ function test (server) {
               if (err) {
                 throw err
               }
-              console.log(response)
               expect(response).to.be.an('object')
               expect(response.status).to.equals(404)
               expect(response.body.error).to.equals('endpoint:not:found')

@@ -82,7 +82,6 @@ describe('Engine tests', function () {
 
     engine.init(true, false, 'abc2')
       .then(function () {
-        console.log(engine.services.corbel)
         expect(engine.services.corbel).to.equals(true)
         expect(stubLaunchWithData.callCount).to.equals(1)
         expect(nock.isDone()).to.be.true

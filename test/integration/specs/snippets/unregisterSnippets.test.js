@@ -107,7 +107,6 @@ function test (server) {
           .end(function (err, response) {
             expect(response.body).to.be.an('object')
             expect(response.body.error).to.equals('error:phrase:exception:unregister-snippet-test')
-            console.log(response.body)
             done(err)
           })
       })
