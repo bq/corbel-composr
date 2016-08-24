@@ -22,7 +22,7 @@ module.exports.authUser = function () {
     var token = authHeader.replace('Bearer ', '')
 
     if (!token) {
-      return next(new ComposrError('error:unauthorized', '', 401))
+      return next(new ComposrError('error:unauthorized', 'Authorization missing', 401))
     }
 
     try {
@@ -53,14 +53,15 @@ module.exports.authUser = function () {
  */
 module.exports.authClient = function () {
   return function authClient (req, res, next) {
-    var authHeader = req.header('Authorization')
+    var authHeader = req.header('Authorization') || ''
+    var token = authHeader.replace('Bearer ', '')
 
-    if (!authHeader || !authHeader.replace('Bearer ', '')) {
-      return next(new ComposrError('error:unauthorized', '', 401))
+    if (!token) {
+      return next(new ComposrError('error:unauthorized', 'Authorization missing', 401))
     }
 
     try {
-      corbel.jwt.decode(authHeader.replace('Bearer ', ''))
+      corbel.jwt.decode(token)
       return next()
     } catch (e) {
       return next(new ComposrError('error:malformed:token', 'Your token is malformed', 400))
