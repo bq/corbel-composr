@@ -4,28 +4,38 @@
 var chai = require('chai')
 var sinon = require('sinon')
 var expect = chai.expect
-var proxyquire = require('proxyquire')
+var corbel = require('corbel-js')
+var tokenVerifier = require('corbel-token-verifier')
 
-// We set up the SUT (authHook) with a mocked corbel instance
-var userId = '1111'
-var clientToken = 'clientAccessToken'
-var userToken = 'userAccessToken'
-
-var decodeStub = sinon.stub()
-decodeStub.withArgs(clientToken).returns({})
-decodeStub.withArgs(userToken).returns({userId: userId})
-decodeStub.throws(new Error())
-var corbelMock = {
-  jwt: {decode: decodeStub}
-}
-var authHook = proxyquire('../../../../src/lib/phraseHooks/corbelAuthHook', {'corbel-js': corbelMock})
+var userToken, clientToken
+var authHook = require('../../../../src/lib/phraseHooks/corbelAuthHook')
 
 describe('Auth hook', function () {
   var requestWith = function (authHeader) {
     var header = sinon.stub()
     header.withArgs('Authorization').returns(authHeader)
-    return {header: header}
+    return {header: header, tokenObject: tokenVerifier(authHeader)}
   }
+
+  var userId = '999-fff-!'
+
+  before(function () {
+    var optUser = {
+      iss: 1,
+      aud: 'a',
+      userId: userId,
+      clientId: '54313'
+    }
+
+    var optClient = {
+      iss: 1,
+      aud: 'a',
+      clientId: '54313'
+    }
+
+    userToken = corbel.jwt.generate(optUser, 'asd')
+    clientToken = corbel.jwt.generate(optClient, 'asd')
+  })
 
   describe('for user', function () {
     it('Successful user login', function () {
@@ -68,24 +78,6 @@ describe('Auth hook', function () {
       expect(error).to.exist
       expect(error.error).to.equal('unauthorized:token')
     })
-
-    it('400 for malformed auth token', function () {
-      var reqs = [
-        requestWith('Bearer'),
-        requestWith('Bearer aaaaaa')
-      ]
-
-      reqs.forEach(function (req) {
-        var res = {}
-        var next = sinon.spy()
-
-        authHook.authUser()(req, res, next)
-        expect(next.calledOnce).to.be.true
-        var error = next.args[0][0]
-        expect(error).to.exist
-        expect(error.error).to.equal('error:malformed:token')
-      })
-    })
   })
 
   describe('for client', function () {
@@ -124,24 +116,6 @@ describe('Auth hook', function () {
         var error = next.args[0][0]
         expect(error).to.exist
         expect(error.error).to.equal('error:unauthorized')
-      })
-    })
-
-    it('400 for malformed auth token', function () {
-      var reqs = [
-        requestWith('Bearer'),
-        requestWith('Bearer aaaaaa')
-      ]
-
-      reqs.forEach(function (req) {
-        var res = {}
-        var next = sinon.spy()
-
-        authHook.authClient()(req, res, next)
-        expect(next.calledOnce).to.be.true
-        var error = next.args[0][0]
-        expect(error).to.exist
-        expect(error.error).to.equal('error:malformed:token')
       })
     })
   })

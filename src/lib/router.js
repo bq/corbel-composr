@@ -36,17 +36,16 @@ function analyzePhrase (acc) {
   }
 }
 
-function doCheckCache (routeItem, response, path, authorization) {
+function doCheckCache (routeItem, response, path, tokenObject) {
   if (routeItem.phrase.json[routeItem.verb].middlewares && routeItem.phrase.json[routeItem.verb].middlewares.indexOf('cache') !== -1) {
     var options = routeItem.phrase.json[routeItem.verb].cache
-
     switch (routeItem.verb) {
       case 'get':
-        hub.emit('cache-add', path, routeItem.verb, authorization, routeItem.phrase.getVersion(), response, options)
+        hub.emit('cache-add', path, routeItem.verb, tokenObject, routeItem.phrase.getVersion(), response, options)
         break
       default:
         // Another request deletes the 'get' path cache
-        hub.emit('cache-remove', path, 'get', authorization, routeItem.phrase.getVersion(), routeItem.domain, options)
+        hub.emit('cache-remove', path, 'get', tokenObject, routeItem.phrase.getVersion(), routeItem.domain, options)
     }
   }
 }
@@ -96,7 +95,7 @@ function executePhrase (req, res, next, routeItem) {
       hub.emit('phrase:execution:end', res.statusCode, routeItem.domain, routeItem.id, routeItem.verb)
 
       if (response.status.toString().indexOf('2') === 0) {
-        doCheckCache(routeItem, response, req.getHref(), req.header('Authorization'))
+        doCheckCache(routeItem, response, req.getHref(), req.tokenObject)
       }
 
       return next()
