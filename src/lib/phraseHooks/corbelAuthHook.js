@@ -1,7 +1,7 @@
 'use strict'
 
 var connection = require('../connectors/corbel')
-var ComposrError = require('../ComposrError')
+var ComposrError = require('composr-core').ComposrError
 var logger = require('../../utils/composrLogger')
 var config = require('config')
 var redisConnector = require('../connectors/redis')

@@ -1,6 +1,6 @@
 'use strict'
 
-var ComposrError = require('./ComposrError')
+var ComposrError = require('composr-core').ComposrError
 
 var getAuth = function (req, res) {
   if (!req) {

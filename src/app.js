@@ -12,7 +12,7 @@ var engine = require('./lib/engine')
 var config = require('config')
 var configChecker = require('./utils/envConfigChecker')
 var logger = require('./utils/composrLogger')
-var ComposrError = require('./lib/ComposrError')
+var ComposrError = require('composr-core').ComposrError
 var yn = require('yn')
 
 /* ************************************
@@ -55,16 +55,17 @@ server.on('uncaughtException', function (req, res, route, err) {
     return (false)
   }
 
-  if (err instanceof ComposrError === false) {
-    err = new ComposrError('error:internal:server:error', err.message, err.status || err.statusCode || 500)
-  }
   var status = err.statusCode || err.status || 500
-  var body = err.body || err.data || err
+  var body = err.message || err.errorDescription || err.body || err.data || err
+
+  if (err instanceof ComposrError === false) {
+    err = new ComposrError('error:internal:server:error', body, status)
+  }
 
   logger.warn('[App]', 'Error caught by router uncaughtException', req.path())
   logger.error(status, body, route)
 
-  res.send(status, body)
+  res.send(status, err)
   hub.emit('http:end', req, res)
 })
 

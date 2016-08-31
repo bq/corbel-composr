@@ -1,7 +1,7 @@
 'use strict'
 var hub = require('../lib/hub')
 var connection = require('../lib/connectors/corbel')
-var ComposrError = require('../lib/ComposrError')
+var ComposrError = require('composr-core').ComposrError
 var logger = require('../utils/composrLogger')
 var auth = require('../lib/auth')
 

@@ -4,7 +4,7 @@ var corbel = require('corbel-js')
 var config = require('config')
 var _ = require('lodash')
 var tokenVerifier = require('corbel-token-verifier')
-var ComposrError = require('../ComposrError')
+var ComposrError = require('composr-core').ComposrError
 var logger = require('../../utils/composrLogger')
 var https = require('https')
 

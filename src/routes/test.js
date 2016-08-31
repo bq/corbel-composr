@@ -1,7 +1,7 @@
 'use strict'
 
 var corbel = require('corbel-js')
-var ComposrError = require('../lib/ComposrError')
+var ComposrError = require('composr-core').ComposrError
 var config = require('config')
 
 function getCorbelErrorBody (corbelErrResponse) {

@@ -1,6 +1,6 @@
 'use strict'
 
-var ComposrError = require('../ComposrError')
+var ComposrError = require('composr-core').ComposrError
 var logger = require('../../utils/composrLogger')
 var tokenVerifier = require('corbel-token-verifier')
 
