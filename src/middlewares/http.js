@@ -4,7 +4,7 @@
 
 'use strict'
 
-var ComposrError = require('../lib/ComposrError')
+var ComposrError = require('composr-core').ComposrError
 var hub = require('../lib/hub')
 
 module.exports = function (restify, server, logger) {

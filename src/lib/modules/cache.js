@@ -2,7 +2,6 @@
 
 var redisConnector = require('../connectors/redis')
 var logger = require('../../utils/composrLogger')
-var corbel = require('corbel-js')
 var timeParser = require('parse-duration')
 
 var DEFAULT_CACHE_DURATION = '1m'
@@ -53,22 +52,18 @@ function getKey (path, verb, authorization, version, type) {
   return identifier + '-' + version + '-' + verb + '-' + path
 }
 
-function getIdentifier (authorization, maybeType) {
+function getIdentifier (tokenObject, maybeType) {
   var type = maybeType || USER_CACHE_TYPE
   var identifier = 'no-token'
-  var authorizationSanitized = authorization ? authorization.replace('Bearer ', '') : ''
 
-  if (authorizationSanitized && type !== ANONYMOUS_CACHE_TYPE) {
-    try {
-      var decoded = corbel.jwt.decode(authorizationSanitized)
-      if (decoded.userId && type === USER_CACHE_TYPE) {
-        identifier = decoded.userId
-      } else if (decoded.clientId) {
-        identifier = decoded.clientId
-      }
-    } catch (e) {
-      logger.debug('[Cache]', 'Unable to parse authorization header', e)
+  if (tokenObject && type !== ANONYMOUS_CACHE_TYPE) {
+    if (tokenObject.isUser() && type === USER_CACHE_TYPE) {
+      identifier = tokenObject.getUserId()
+    } else if (tokenObject.getClientId()) {
+      identifier = tokenObject.getClientId()
     }
+  } else if (!tokenObject) {
+    logger.debug('[Cache]', 'Unable to parse authorization header')
   }
 
   return identifier

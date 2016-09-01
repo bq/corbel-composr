@@ -1,7 +1,7 @@
 'use strict'
 
 var engine = require('../lib/engine')
-var ComposrError = require('../lib/ComposrError')
+var ComposrError = require('composr-core').ComposrError
 
 module.exports = function (server) {
   server.get('/doc/:domain/', serveDocumentation)

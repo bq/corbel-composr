@@ -188,7 +188,7 @@ describe('Validate hook', function () {
         var error = next.args[0][0]
         expect(error).to.exist
         expect(error.error).to.equal('error:phrase:validation')
-        expect(error.body.errorDescription.length).to.equals(2)
+        expect(error.errorDescription.length).to.equals(2)
       })
   })
 
@@ -233,7 +233,7 @@ describe('Validate hook', function () {
         var error = next.args[0][0]
         expect(error).to.exist
         expect(error.error).to.equal('error:phrase:validation')
-        expect(error.body.errorDescription.length).to.equals(2)
+        expect(error.errorDescription.length).to.equals(2)
       })
   })
 })

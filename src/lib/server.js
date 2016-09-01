@@ -5,7 +5,7 @@ var config = require('config')
 var bunyanLogger = require('../utils/bunyanLogger')
 var restify = require('restify')
 var jsonFormatter = restify.formatters['application/json; q=0.4']
-var ComposrError = require('./ComposrError')
+var ComposrError = require('composr-core').ComposrError
 
 var _server = {
   name: config.get('serverName'),

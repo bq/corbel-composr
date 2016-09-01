@@ -3,7 +3,8 @@
 var corbel = require('corbel-js')
 var config = require('config')
 var _ = require('lodash')
-var ComposrError = require('../ComposrError')
+var tokenVerifier = require('corbel-token-verifier')
+var ComposrError = require('composr-core').ComposrError
 var logger = require('../../utils/composrLogger')
 var https = require('https')
 
@@ -14,10 +15,10 @@ var corbelConfig = config.get('corbel.options')
 corbelConfig = _.extend(corbelConfig, config.get('corbel.credentials'))
 
 var extractDomain = function (accessToken) {
-  try {
-    var decoded = corbel.jwt.decode(accessToken.replace('Bearer ', ''))
-    return decoded.domainId
-  } catch (e) {
+  var decoded = tokenVerifier(accessToken)
+  if (decoded) {
+    return decoded.getDomainId()
+  } else {
     logger.error('[Corbel-JS]', 'error:invalid:token', accessToken)
     return null
   }

@@ -1,7 +1,7 @@
 'use strict'
 
 var corbel = require('corbel-js')
-var ComposrError = require('../lib/ComposrError')
+var ComposrError = require('composr-core').ComposrError
 var config = require('config')
 
 function getCorbelErrorBody (corbelErrResponse) {
@@ -15,7 +15,7 @@ module.exports = function (server) {
   })
 
   server.get('/e2', function () {
-    throw new ComposrError('error:custom', '', 555)
+    throw new ComposrError('error:custom', 'Error body', 555)
   })
 
   server.post('/jwt', function (req, res) {

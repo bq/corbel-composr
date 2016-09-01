@@ -114,7 +114,7 @@ function test (server) {
             throw err
           }
           expect(response).to.be.an('object')
-          expect(response.body.error).to.be.equals('internal_server_error')
+          expect(response.body.error).to.be.equals('error:internal:server:error')
           expect(response.body.errorDescription).to.be.equals('error 500 thrown')
           expect(response.body.status).to.be.equals(500)
           expect(stubHttEndCb.callCount).to.equals(1)
@@ -133,7 +133,7 @@ function test (server) {
             throw err
           }
           expect(response).to.be.an('object')
-          expect(response.body.error).to.be.equals('error:phrase:exception:error/text')
+          expect(response.body.error).to.be.equals('error:internal:server:error')
           expect(response.body.errorDescription).to.be.deep.equals(errorDescription)
           expect(response.body.status).to.be.deep.equals(500)
           done()

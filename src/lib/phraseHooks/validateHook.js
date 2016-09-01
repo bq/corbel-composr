@@ -1,5 +1,5 @@
 'use strict'
-var ComposrError = require('../ComposrError')
+var ComposrError = require('composr-core').ComposrError
 // TODO: Maybe we can find better packages than these
 var validateRaml = require('raml-validate')()
 var sanitizeRaml = require('raml-sanitize')()

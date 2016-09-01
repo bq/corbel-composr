@@ -6,6 +6,9 @@ var _ = require('lodash')
 var mandatoryHooks = [{
   description: 'httpStartEvent hook',
   hookFunction: require('./httpStart')
+}, {
+  description: 'tokenObject hook',
+  hookFunction: require('./tokenObjectHook')
 }]
 
 var hooks = {

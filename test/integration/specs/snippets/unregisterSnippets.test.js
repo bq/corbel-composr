@@ -106,7 +106,7 @@ function test (server) {
           .expect(500)
           .end(function (err, response) {
             expect(response.body).to.be.an('object')
-            expect(response.body.error).to.equals('error:phrase:exception:unregister-snippet-test')
+            expect(response.body.error).to.equals('error:internal:server:error')
             done(err)
           })
       })
@@ -117,7 +117,7 @@ function test (server) {
           .expect(500)
           .end(function (err, response) {
             expect(response.body).to.be.an('object')
-            expect(response.body.error).to.equals('error:phrase:exception:unregister-snippet-test/:name')
+            expect(response.body.error).to.equals('error:internal:server:error')
             done(err)
           })
       })
