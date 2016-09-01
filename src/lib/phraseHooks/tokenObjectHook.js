@@ -10,6 +10,11 @@ var tokenVerifier = require('corbel-token-verifier')
 module.exports = function () {
   return function tokenObjectHook (req, res, next) {
     var authHeader = req.header('Authorization') || ''
+
+    if(!authHeader){
+      return next()
+    }
+    
     var tokenObject = tokenVerifier(authHeader)
 
     if (authHeader && !tokenObject) {
