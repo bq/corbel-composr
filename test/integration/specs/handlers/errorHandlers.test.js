@@ -149,8 +149,8 @@ function test (server) {
             throw err
           }
           expect(response).to.be.an('object')
-          expect(response.body.error).to.be.equals('error:internal:server:error')
-          expect(response.body.errorDescription).to.be.equals('test')
+          expect(response.body.error).to.be.equals('test')
+          expect(response.body.errorDescription).to.be.equals('errorDescription')
           expect(response.body.status).to.be.deep.equals(506)
           done()
         })

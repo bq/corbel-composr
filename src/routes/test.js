@@ -15,7 +15,7 @@ module.exports = function (server) {
   })
 
   server.get('/e2', function () {
-    throw new ComposrError('error:custom', '', 555)
+    throw new ComposrError('error:custom', 'Error body', 555)
   })
 
   server.post('/jwt', function (req, res) {

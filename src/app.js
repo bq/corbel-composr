@@ -54,7 +54,6 @@ server.on('uncaughtException', function (req, res, route, err) {
   if (res.headersSent) {
     return (false)
   }
-
   var status = err.statusCode || err.status || 500
   var body = err.message || err.errorDescription || err.body || err.data || err
 
