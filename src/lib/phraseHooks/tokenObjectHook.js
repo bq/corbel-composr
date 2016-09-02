@@ -11,10 +11,10 @@ module.exports = function () {
   return function tokenObjectHook (req, res, next) {
     var authHeader = req.header('Authorization') || ''
 
-    if(!authHeader){
+    if (!authHeader) {
       return next()
     }
-    
+
     var tokenObject = tokenVerifier(authHeader)
 
     if (authHeader && !tokenObject) {

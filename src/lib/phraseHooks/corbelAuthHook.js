@@ -21,7 +21,7 @@ module.exports.authUser = function () {
       logger.debug('[CorbelAuthHook]', 'Missing token')
       return next(new ComposrError('error:unauthorized', 'Authorization missing', 401))
     }
-
+    console.log(req.tokenObject)
     if (req.tokenObject.isUser()) {
       req.userId = req.tokenObject.getUserId()
       var _key = 'req_signature-' + req.tokenObject.getUserId()
