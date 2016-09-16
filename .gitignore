@@ -19,3 +19,4 @@ doc/jsdoc
 .idea
 *.swp
 .DS_Store
+.vscode
